@@ -1,0 +1,65 @@
+{
+  "_comment": "gui - general",
+  "schematica.gui.x": "X:",
+  "schematica.gui.y": "Y:",
+  "schematica.gui.z": "Z:",
+  "schematica.gui.done": "Valmis",
+
+  "_comment": "gui - general - load",
+  "schematica.gui.title": "Valitse kaavio tiedosto",
+  "schematica.gui.folderInfo": "(Sijoita kaavio tiedostot tänne)",
+  "schematica.gui.openFolder": "Avaa kaavion sijainti",
+  "schematica.gui.noschematic": "-- Ei kaaviota --",
+
+  "_comment": "gui - general - save",
+  "schematica.gui.point.red": "Punainen piste",
+  "schematica.gui.point.blue": "Sininen piste",
+  "schematica.gui.save": "Tallenna",
+  "schematica.gui.saveselection": "Tallenna valinta kaavana",
+
+  "_comment": "gui - general - control",
+  "schematica.gui.moveschematic": "Siirrä kaaviota",
+  "schematica.gui.materials": "Materiaalit",
+  "schematica.gui.printer": "Tulostin",
+  "schematica.gui.operations": "Toiminnot",
+  "schematica.gui.all": "KAIKKI",
+  "schematica.gui.layers": "Kerrokset",
+  "schematica.gui.hide": "Piilota",
+  "schematica.gui.show": "Näytä",
+  "schematica.gui.movehere": "Siirrä tänne",
+  "schematica.gui.flip": "Käännä",
+  "schematica.gui.rotate": "Pyöritä",
+  "schematica.gui.materialname": "Materiaali",
+  "schematica.gui.materialamount": "Määrä",
+
+  "_comment": "gui - config - categories",
+
+  "_comment": "gui - config - debug",
+
+  "_comment": "gui - config - render",
+
+  "_comment": "gui - config - printer",
+
+  "_comment": "gui - config - printer - swap slots",
+
+  "_comment": "gui - config - general",
+
+  "_comment": "gui - config - server",
+
+  "_comment": "keys",
+  "schematica.key.load": "Lataa kaava",
+  "schematica.key.save": "Tallenna kaava",
+  "schematica.key.control": "Käsittele kaavaa",
+
+  "_comment": "commands - save",
+
+  "_comment": "commands - list",
+
+  "_comment": "commands - remove",
+
+  "_comment": "commands - download",
+
+  "_comment": "commands - replace",
+
+  "_comment": "messages"
+}

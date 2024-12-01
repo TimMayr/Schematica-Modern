@@ -1,0 +1,65 @@
+{
+  "_comment": "gui - general",
+  "schematica.gui.x": "Х:",
+  "schematica.gui.y": "Y:",
+  "schematica.gui.z": "Z:",
+  "schematica.gui.done": "Готово",
+
+  "_comment": "gui - general - load",
+  "schematica.gui.title": "вибррати файл технологічної схеми",
+  "schematica.gui.folderInfo": "(збережені технологічні схеми)",
+  "schematica.gui.openFolder": "Відкрити папку з технологічними схемами",
+  "schematica.gui.noschematic": "-- немає технологічних схем --",
+
+  "_comment": "gui - general - save",
+  "schematica.gui.point.red": "Червона мітка",
+  "schematica.gui.point.blue": "Синя мітка",
+  "schematica.gui.save": "Зберегти",
+  "schematica.gui.saveselection": "Зберегти виділену технологічну схему",
+
+  "_comment": "gui - general - control",
+  "schematica.gui.moveschematic": "Перемістити технологічну схему",
+  "schematica.gui.materials": "Матеріали",
+  "schematica.gui.printer": "Принтер",
+  "schematica.gui.operations": "Операції",
+  "schematica.gui.all": "всі",
+  "schematica.gui.layers": "Шар",
+  "schematica.gui.hide": "сховати",
+  "schematica.gui.show": "показати",
+  "schematica.gui.movehere": "перемістити сюди",
+  "schematica.gui.flip": "відбити",
+  "schematica.gui.rotate": "Обернути",
+  "schematica.gui.materialname": "Матеріал",
+  "schematica.gui.materialamount": "кількість",
+
+  "_comment": "gui - config - categories",
+
+  "_comment": "gui - config - debug",
+
+  "_comment": "gui - config - render",
+
+  "_comment": "gui - config - printer",
+
+  "_comment": "gui - config - printer - swap slots",
+
+  "_comment": "gui - config - general",
+
+  "_comment": "gui - config - server",
+
+  "_comment": "keys",
+  "schematica.key.load": "завантажити технологічну схему",
+  "schematica.key.save": "Зберегти технологічну схему",
+  "schematica.key.control": "маніпулювати технологічною схемою схемою",
+
+  "_comment": "commands - save",
+
+  "_comment": "commands - list",
+
+  "_comment": "commands - remove",
+
+  "_comment": "commands - download",
+
+  "_comment": "commands - replace",
+
+  "_comment": "messages"
+}

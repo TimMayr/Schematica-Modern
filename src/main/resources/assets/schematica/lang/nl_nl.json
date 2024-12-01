@@ -1,0 +1,64 @@
+{
+  "_comment": "gui - general",
+  "schematica.gui.x": "X:",
+  "schematica.gui.y": "Y:",
+  "schematica.gui.z": "Z:",
+  "schematica.gui.done": "Klaar",
+
+  "_comment": "gui - general - load",
+  "schematica.gui.title": "Selecteer schematic bestand",
+  "schematica.gui.folderInfo": "(Plaats schematic bestanden hier)",
+  "schematica.gui.openFolder": "Open schematic map",
+  "schematica.gui.noschematic": "-- Geen schematic --",
+
+  "_comment": "gui - general - save",
+  "schematica.gui.point.red": "Rood punt",
+  "schematica.gui.point.blue": "Blauw punt",
+  "schematica.gui.save": "Opslaan",
+  "schematica.gui.saveselection": "Sla de selectie op als schematic",
+
+  "_comment": "gui - general - control",
+  "schematica.gui.moveschematic": "Verplaats schematic",
+  "schematica.gui.materials": "Materialen",
+  "schematica.gui.operations": "Handelingen",
+  "schematica.gui.all": "ALLE",
+  "schematica.gui.layers": "Lagen",
+  "schematica.gui.hide": "Verberg",
+  "schematica.gui.show": "Geef weer",
+  "schematica.gui.movehere": "Verplaats hiernaartoe",
+  "schematica.gui.flip": "Spiegelen",
+  "schematica.gui.rotate": "Roteer",
+  "schematica.gui.materialname": "Materiaal",
+  "schematica.gui.materialamount": "Hoeveelheid",
+
+  "_comment": "gui - config - categories",
+
+  "_comment": "gui - config - debug",
+
+  "_comment": "gui - config - render",
+
+  "_comment": "gui - config - printer",
+
+  "_comment": "gui - config - printer - swap slots",
+
+  "_comment": "gui - config - general",
+
+  "_comment": "gui - config - server",
+
+  "_comment": "keys",
+  "schematica.key.load": "Laad schematic",
+  "schematica.key.save": "Sla schematic op",
+  "schematica.key.control": "Bewerk schematic",
+
+  "_comment": "commands - save",
+
+  "_comment": "commands - list",
+
+  "_comment": "commands - remove",
+
+  "_comment": "commands - download",
+
+  "_comment": "commands - replace",
+
+  "_comment": "messages"
+}

@@ -1,0 +1,65 @@
+{
+  "_comment": "gui - general",
+  "schematica.gui.x": "X:",
+  "schematica.gui.y": "Y:",
+  "schematica.gui.z": "Z:",
+  "schematica.gui.done": "Tamam",
+
+  "_comment": "gui - general - load",
+  "schematica.gui.title": "Şematik dosyasını seçin",
+  "schematica.gui.folderInfo": "(Şematik dosyalarını buraya koyun)",
+  "schematica.gui.openFolder": "Şematik klasörünü aç",
+  "schematica.gui.noschematic": "--Şematik yok--",
+
+  "_comment": "gui - general - save",
+  "schematica.gui.point.red": "Kırmızı nokta",
+  "schematica.gui.point.blue": "Mavi nokta",
+  "schematica.gui.save": "Kaydet",
+  "schematica.gui.saveselection": "Seçimi şematik olarak kaydet",
+
+  "_comment": "gui - general - control",
+  "schematica.gui.moveschematic": "Şematik taşıma",
+  "schematica.gui.materials": "Malzemeler",
+  "schematica.gui.printer": "Yazıcı",
+  "schematica.gui.operations": "İşlemler",
+  "schematica.gui.all": "HEPSİ",
+  "schematica.gui.layers": "Katmanlar",
+  "schematica.gui.hide": "Gizle",
+  "schematica.gui.show": "Göster",
+  "schematica.gui.movehere": "Buraya Taşı",
+  "schematica.gui.flip": "Ters çevir",
+  "schematica.gui.rotate": "Döndür",
+  "schematica.gui.materialname": "Malzeme",
+  "schematica.gui.materialamount": "Miktar",
+
+  "_comment": "gui - config - categories",
+
+  "_comment": "gui - config - debug",
+
+  "_comment": "gui - config - render",
+
+  "_comment": "gui - config - printer",
+
+  "_comment": "gui - config - printer - swap slots",
+
+  "_comment": "gui - config - general",
+
+  "_comment": "gui - config - server",
+
+  "_comment": "keys",
+  "schematica.key.load": "Şematiki yükle",
+  "schematica.key.save": "Şematiki kaydet",
+  "schematica.key.control": "Şematiki işleyin",
+
+  "_comment": "commands - save",
+
+  "_comment": "commands - list",
+
+  "_comment": "commands - remove",
+
+  "_comment": "commands - download",
+
+  "_comment": "commands - replace",
+
+  "_comment": "messages"
+}

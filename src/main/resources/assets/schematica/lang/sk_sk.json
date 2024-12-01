@@ -1,0 +1,65 @@
+{
+  "_comment": "gui - general",
+  "schematica.gui.x": "X:",
+  "schematica.gui.y": "Y:",
+  "schematica.gui.z": "Z:",
+  "schematica.gui.done": "Hotovo",
+
+  "_comment": "gui - general - load",
+  "schematica.gui.title": "Vyberte schematický súbor",
+  "schematica.gui.folderInfo": "(Tu vložte schematické súbory)",
+  "schematica.gui.openFolder": "Otvoriť priečinok so schématami",
+  "schematica.gui.noschematic": "-- Žiadna schéma --",
+
+  "_comment": "gui - general - save",
+  "schematica.gui.point.red": "Červený bod",
+  "schematica.gui.point.blue": "Modrý bod",
+  "schematica.gui.save": "Uložiť",
+  "schematica.gui.saveselection": "Uložiť výber ako schému",
+
+  "_comment": "gui - general - control",
+  "schematica.gui.moveschematic": "Presunúť schému",
+  "schematica.gui.materials": "Materiály",
+  "schematica.gui.printer": "Tlačiareň",
+  "schematica.gui.operations": "Operácie",
+  "schematica.gui.all": "Všetko",
+  "schematica.gui.layers": "Vrstvy",
+  "schematica.gui.hide": "Skrýť",
+  "schematica.gui.show": "Zobraziť",
+  "schematica.gui.movehere": "Presunúť tu",
+  "schematica.gui.flip": "Prevrátiť",
+  "schematica.gui.rotate": "Otočiť",
+  "schematica.gui.materialname": "Materiál",
+  "schematica.gui.materialamount": "Množstvo",
+
+  "_comment": "gui - config - categories",
+
+  "_comment": "gui - config - debug",
+
+  "_comment": "gui - config - render",
+
+  "_comment": "gui - config - printer",
+
+  "_comment": "gui - config - printer - swap slots",
+
+  "_comment": "gui - config - general",
+
+  "_comment": "gui - config - server",
+
+  "_comment": "keys",
+  "schematica.key.load": "Načítať schému",
+  "schematica.key.save": "Uložiť schému",
+  "schematica.key.control": "Manipulovať so schémou",
+
+  "_comment": "commands - save",
+
+  "_comment": "commands - list",
+
+  "_comment": "commands - remove",
+
+  "_comment": "commands - download",
+
+  "_comment": "commands - replace",
+
+  "_comment": "messages"
+}

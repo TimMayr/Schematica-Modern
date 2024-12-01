@@ -1,97 +1,103 @@
 package com.github.lunatrius.schematica.command;
 
 import com.github.lunatrius.core.util.FileUtils;
-import com.github.lunatrius.schematica.Schematica;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
-import com.google.common.base.Charsets;
-import com.google.common.hash.Hashing;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.command.ICommandSource;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextComponentUtils;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
+import org.apache.commons.codec.digest.DigestUtils;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
-import java.util.Arrays;
+
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class CommandSchematicaRemove extends CommandSchematicaBase {
-    @Override
-    public String getName() {
-        return Names.Command.Remove.NAME;
-    }
+	public static void register(CommandDispatcher<CommandSource> dispatcher) {
+		dispatcher.register(Commands.literal(Names.Command.Remove.NAME)
+				.requires((source) -> source.hasPermissionLevel(0))
+				.then(Commands.argument("name", StringArgumentType.string())
+						.executes(CommandSchematicaRemove::showDeleteConfirmation)
+						.then(Commands.argument("hash", StringArgumentType.string())
+								.executes(CommandSchematicaRemove::delete))));
+	}
 
-    @Override
-    public String getUsage(final ICommandSender sender) {
-        return Names.Command.Remove.Message.USAGE;
-    }
+	private static int delete(CommandContext<CommandSource> context) throws CommandSyntaxException {
+		String name = StringArgumentType.getString(context, "name");
+		String actual = StringArgumentType.getString(context, "hash");
+		CommandSource sender = context.getSource();
+		ServerPlayerEntity player = sender.asPlayer();
 
-    @Override
-    public void execute(final MinecraftServer server, final ICommandSender sender, final String[] args) throws CommandException {
-        if (args.length < 1) {
-            throw new WrongUsageException(getUsage(sender));
-        }
+		final File file = getSchematicFile(player, name);
 
-        if (!(sender instanceof EntityPlayer)) {
-            throw new CommandException(Names.Command.Remove.Message.PLAYERS_ONLY);
-        }
+		if (actual.length() == 32) {
+			final String expected = DigestUtils.md5Hex(name);
+			if (actual.equals(expected)) {
+				if (file.delete()) {
+					sender.sendFeedback(
+							new TranslationTextComponent(Names.Command.Remove.Message.SCHEMATIC_REMOVED, name), true);
+				} else {
+					throw new CommandException(
+							new TranslationTextComponent(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND));
+				}
+			}
+		}
+		return 0;
+	}
 
-        final EntityPlayer player = (EntityPlayer) sender;
+	private static int showDeleteConfirmation(CommandContext<CommandSource> commandContext)
+			throws CommandSyntaxException {
+		CommandSource sender = commandContext.getSource();
+		ServerPlayerEntity player = sender.asPlayer();
+		String name = StringArgumentType.getString(commandContext, "name");
 
-        boolean delete = false;
-        String name = String.join(" ", args);
+		final File file = getSchematicFile(player, name);
 
-        if (args.length > 1) {
-            //check if the last parameter is a hash, which constitutes a confirmation.
-            final String potentialNameHash = args[args.length - 1];
-            if (potentialNameHash.length() == 32) {
-                //We probably have a match.
-                final String[] a = Arrays.copyOfRange(args, 0, args.length - 1);
-                //The name then should be everything except the last element
-                name = String.join(" ", a);
 
-                final String hash = Hashing.md5().hashString(name, Charsets.UTF_8).toString();
+		if (file.exists()) {
+			final String hash = DigestUtils.md5Hex(name);
+			final String confirmCommand = String.format("/%s %s %s", Names.Command.Remove.NAME, name, hash);
+			final ITextComponent chatComponent =
+					new TranslationTextComponent(Names.Command.Remove.Message.ARE_YOU_SURE_START, name);
+			chatComponent.appendSibling(withStyle(TextComponentUtils.wrapInSquareBrackets(
+							new TranslationTextComponent(Names.Command.Remove.Message.YES)), TextFormatting.RED,
+					confirmCommand));
 
-                if (potentialNameHash.equals(hash)) {
-                    delete = true;
-                }
-            }
-        }
+			sender.sendFeedback(chatComponent, true);
+			return 0;
+		} else {
+			throw new CommandException(new TranslationTextComponent(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND));
+		}
+	}
 
-        final File schematicDirectory = Schematica.proxy.getPlayerSchematicDirectory(player, true);
-        final File file = new File(schematicDirectory, name);
-        if (!FileUtils.contains(schematicDirectory, file)) {
-            Reference.logger.error("{} has tried to download the file {}", player.getName(), name);
-            throw new CommandException(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND);
-        }
+	private static File getSchematicFile(PlayerEntity player, String name) {
+		final File schematicDirectory = Reference.proxy.getPlayerSchematicDirectory(player, true);
+		final File file = new File(schematicDirectory, name);
 
-        if (file.exists()) {
-            if (delete) {
-                if (file.delete()) {
-                    sender.sendMessage(new TextComponentTranslation(Names.Command.Remove.Message.SCHEMATIC_REMOVED, name));
-                } else {
-                    throw new CommandException(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND);
-                }
-            } else {
-                final String hash = Hashing.md5().hashString(name, Charsets.UTF_8).toString();
-                final String confirmCommand = String.format("/%s %s %s", Names.Command.Remove.NAME, name, hash);
-                final ITextComponent chatComponent = new TextComponentTranslation(Names.Command.Remove.Message.ARE_YOU_SURE_START, name);
-                chatComponent.appendSibling(new TextComponentString(" ["));
-                chatComponent.appendSibling(withStyle(new TextComponentTranslation(Names.Command.Remove.Message.YES), TextFormatting.RED, confirmCommand));
-                chatComponent.appendSibling(new TextComponentString("]"));
+		if (!FileUtils.contains(schematicDirectory, file)) {
+			Reference.logger.error("{} has tried to download the file {}", player.getName(), name);
+			throw new CommandException(new TranslationTextComponent(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND));
+		}
 
-                sender.sendMessage(chatComponent);
-            }
-        } else {
-            throw new CommandException(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND);
-        }
-    }
+		return file;
+	}
+
+	@Override
+	public String getUsage(final ICommandSource sender) {
+		return Names.Command.Remove.Message.USAGE;
+	}
 }

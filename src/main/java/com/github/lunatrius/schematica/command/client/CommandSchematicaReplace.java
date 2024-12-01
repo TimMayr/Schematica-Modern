@@ -6,66 +6,61 @@ import com.github.lunatrius.schematica.command.CommandSchematicaBase;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
+import com.mojang.brigadier.CommandDispatcher;
 import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.pattern.BlockStateMatcher;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.pattern.BlockStateMatcher;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.command.ICommandSource;
+import net.minecraft.command.arguments.BlockStateArgument;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Collections;
-import java.util.List;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class CommandSchematicaReplace extends CommandSchematicaBase {
-    @Override
-    public String getName() {
-        return Names.Command.Replace.NAME;
-    }
 
-    @Override
-    public String getUsage(final ICommandSender sender) {
-        return Names.Command.Replace.Message.USAGE;
-    }
+	public static void register(CommandDispatcher<CommandSource> dispatcher) {
+		dispatcher.register(Commands.literal(Names.Command.Replace.NAME)
+				.then(Commands.argument("toReplace", BlockStateArgument.blockState())
+						.then(Commands.argument("with", BlockStateArgument.blockState()).executes((commandContext) -> {
+							CommandSource source = commandContext.getSource();
+							BlockState toReplace =
+									BlockStateArgument.getBlockState(commandContext, "toReplace").getState();
 
-    @Override
-    public List<String> getTabCompletions(final MinecraftServer server, final ICommandSender sender, final String[] args, @Nullable final BlockPos pos) {
-        if (args.length < 3) {
-            return getListOfStringsMatchingLastWord(args, Block.REGISTRY.getKeys());
-        }
+							BlockState with = BlockStateArgument.getBlockState(commandContext, "toReplace").getState();
 
-        return Collections.emptyList();
-    }
+							final SchematicWorld schematic = ClientProxy.schematic;
 
-    @Override
-    public void execute(final MinecraftServer server, final ICommandSender sender, final String[] args) throws CommandException {
-        final SchematicWorld schematic = ClientProxy.schematic;
-        if (schematic == null) {
-            throw new CommandException(Names.Command.Replace.Message.NO_SCHEMATIC);
-        }
+							if (schematic == null) {
+								throw new CommandException(
+										new TranslationTextComponent(Names.Command.Replace.Message.NO_SCHEMATIC));
+							}
 
-        if (args.length != 2) {
-            throw new CommandException(Names.Command.Replace.Message.USAGE);
-        }
+							try {
+								final BlockStateMatcher matcher = BlockStateMatcher.forBlock(toReplace.getBlock());
+								final BlockStateReplacer.BlockStateInfo properties =
+										BlockStateReplacer.fromBlockState(with);
+								final BlockStateReplacer replacer = BlockStateReplacer.forBlockState(with);
+								final int count = schematic.replaceBlock(matcher, replacer, properties.stateData);
 
-        try {
-            final BlockStateReplacer.BlockStateInfo patternInfo = BlockStateReplacer.fromString(args[0]);
-            final BlockStateMatcher matcher = BlockStateReplacer.getMatcher(patternInfo);
+								source.sendFeedback(
+										new TranslationTextComponent(Names.Command.Replace.Message.SUCCESS, count),
+										true);
+							} catch (final Exception e) {
+								Reference.logger.error("Something went wrong!", e);
+								throw new CommandException(new StringTextComponent(e.getMessage()));
+							}
+							return 0;
+						}))));
+	}
 
-            final BlockStateReplacer.BlockStateInfo replacementInfo = BlockStateReplacer.fromString(args[1]);
-            final BlockStateReplacer replacer = BlockStateReplacer.forBlockState(replacementInfo.block.getDefaultState());
-
-            final int count = schematic.replaceBlock(matcher, replacer, replacementInfo.stateData);
-
-            sender.sendMessage(new TextComponentTranslation(Names.Command.Replace.Message.SUCCESS, count));
-        } catch (final Exception e) {
-            Reference.logger.error("Something went wrong!", e);
-            throw new CommandException(e.getMessage());
-        }
-    }
+	@Override
+	public String getUsage(final ICommandSource sender) {
+		return Names.Command.Replace.Message.USAGE;
+	}
 }

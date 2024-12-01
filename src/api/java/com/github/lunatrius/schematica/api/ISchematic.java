@@ -1,10 +1,12 @@
 package com.github.lunatrius.schematica.api;
 
-import net.minecraft.block.state.IBlockState;
+import jdk.nashorn.internal.ir.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.common.extensions.IForgeBlockState;
 
 import java.util.List;
 
@@ -19,7 +21,7 @@ public interface ISchematic {
      * @return the block at the requested location.
      */
 
-    IBlockState getBlockState(BlockPos pos);
+    BlockState getBlockState(BlockPos pos);
 
     /**
      * Sets the block state at the given location. Attempting to set a block state outside of the schematic
@@ -29,7 +31,7 @@ public interface ISchematic {
      * @param blockState the block state to set
      * @return true if the block state was successfully set.
      */
-    boolean setBlockState(BlockPos pos, IBlockState blockState);
+    boolean setBlockState(BlockPos pos, IForgeBlockState blockState);
 
     /**
      * Gets the tile entity at the requested location. If no tile entity exists at that location, null will be returned.

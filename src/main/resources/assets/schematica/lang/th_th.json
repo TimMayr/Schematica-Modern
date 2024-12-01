@@ -1,0 +1,65 @@
+{
+  "_comment": "gui - general",
+  "schematica.gui.x": "X:",
+  "schematica.gui.y": "Y:",
+  "schematica.gui.z": "Z:",
+  "schematica.gui.done": "เสร็จสิ้น",
+
+  "_comment": "gui - general - load",
+  "schematica.gui.title": "เลือกไฟล์ Schematic ที่ต้องการ",
+  "schematica.gui.folderInfo": "(ให้วางไฟล์ .schematic ในโฟลเดอร์นี้)",
+  "schematica.gui.openFolder": "เปิดโฟลเดอร์ Schematic",
+  "schematica.gui.noschematic": "-- ไม่มี Schematic --",
+
+  "_comment": "gui - general - save",
+  "schematica.gui.point.red": "จุดแดง",
+  "schematica.gui.point.blue": "จุดน้ำเงิน",
+  "schematica.gui.save": "บันทึก",
+  "schematica.gui.saveselection": "บันทึกจุดที่เลือกไปยัง Schematic",
+
+  "_comment": "gui - general - control",
+  "schematica.gui.moveschematic": "ย้าย Schematic",
+  "schematica.gui.materials": "ส่วนประกอบ",
+  "schematica.gui.printer": "การปริ๊น",
+  "schematica.gui.operations": "การดำเนินงาน",
+  "schematica.gui.all": "ทั้งหมด",
+  "schematica.gui.layers": "เลเยอร์",
+  "schematica.gui.hide": "ซ่อน",
+  "schematica.gui.show": "แสดง",
+  "schematica.gui.movehere": "ย้ายมาตรงนี้",
+  "schematica.gui.flip": "พลิก",
+  "schematica.gui.rotate": "หมุน",
+  "schematica.gui.materialname": "ส่วนประกอบ",
+  "schematica.gui.materialamount": "จำนวน",
+
+  "_comment": "gui - config - categories",
+
+  "_comment": "gui - config - debug",
+
+  "_comment": "gui - config - render",
+
+  "_comment": "gui - config - printer",
+
+  "_comment": "gui - config - printer - swap slots",
+
+  "_comment": "gui - config - general",
+
+  "_comment": "gui - config - server",
+
+  "_comment": "keys",
+  "schematica.key.load": "เปิดไฟล์ Schematic",
+  "schematica.key.save": "บันทึกไฟล์ Schematic",
+  "schematica.key.control": "จัดการ Schematic",
+
+  "_comment": "commands - save",
+
+  "_comment": "commands - list",
+
+  "_comment": "commands - remove",
+
+  "_comment": "commands - download",
+
+  "_comment": "commands - replace",
+
+  "_comment": "messages"
+}

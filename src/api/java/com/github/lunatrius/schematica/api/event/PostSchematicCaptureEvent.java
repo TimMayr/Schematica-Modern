@@ -1,7 +1,7 @@
 package com.github.lunatrius.schematica.api.event;
 
 import com.github.lunatrius.schematica.api.ISchematic;
-import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.eventbus.api.Event;
 
 /**
  * This event is fired after an ISchematic has been created out of a part of the world.
@@ -9,12 +9,12 @@ import net.minecraftforge.fml.common.eventhandler.Event;
  * Register to this event using MinecraftForge.EVENT_BUS
  */
 public class PostSchematicCaptureEvent extends Event {
-    /**
-     * The schematic that was just generated.
-     */
-    public final ISchematic schematic;
+	/**
+	 * The schematic that was just generated.
+	 */
+	public final ISchematic schematic;
 
-    public PostSchematicCaptureEvent(final ISchematic schematic) {
-        this.schematic = schematic;
-    }
+	public PostSchematicCaptureEvent(final ISchematic schematic) {
+		this.schematic = schematic;
+	}
 }

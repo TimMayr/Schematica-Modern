@@ -1,0 +1,65 @@
+{
+  "_comment": "gui - general",
+  "schematica.gui.x": "X:",
+  "schematica.gui.y": "Y:",
+  "schematica.gui.z": "Z:",
+  "schematica.gui.done": "Plundered",
+
+  "_comment": "gui - general - load",
+  "schematica.gui.title": "Select ye Blueprint",
+  "schematica.gui.folderInfo": "Place ye blueprints here",
+  "schematica.gui.openFolder": "Open ye Blueprints",
+  "schematica.gui.noschematic": "No Blueprints here mate",
+
+  "_comment": "gui - general - save",
+  "schematica.gui.point.red": "Red dot",
+  "schematica.gui.point.blue": "Blue dot",
+  "schematica.gui.save": "Keep it safe",
+  "schematica.gui.saveselection": "Save it as a blueprint",
+
+  "_comment": "gui - general - control",
+  "schematica.gui.moveschematic": "Move yer blueprint",
+  "schematica.gui.materials": "Stuff",
+  "schematica.gui.printer": "Printing thing",
+  "schematica.gui.operations": "Plans",
+  "schematica.gui.all": "ALL",
+  "schematica.gui.layers": "Layers",
+  "schematica.gui.hide": "Make Tiny",
+  "schematica.gui.show": "Make it large",
+  "schematica.gui.movehere": "Bring the loot 'ere",
+  "schematica.gui.flip": "Flip",
+  "schematica.gui.rotate": "Fling it round",
+  "schematica.gui.materialname": "Stuff",
+  "schematica.gui.materialamount": "Number",
+
+  "_comment": "gui - config - categories",
+
+  "_comment": "gui - config - debug",
+
+  "_comment": "gui - config - render",
+
+  "_comment": "gui - config - printer",
+
+  "_comment": "gui - config - printer - swap slots",
+
+  "_comment": "gui - config - general",
+
+  "_comment": "gui - config - server",
+
+  "_comment": "keys",
+  "schematica.key.load": "Load yer blueprint",
+  "schematica.key.save": "Keep yer blueprint",
+  "schematica.key.control": "Change yer blueprint",
+
+  "_comment": "commands - save",
+
+  "_comment": "commands - list",
+
+  "_comment": "commands - remove",
+
+  "_comment": "commands - download",
+
+  "_comment": "commands - replace",
+
+  "_comment": "messages"
+}

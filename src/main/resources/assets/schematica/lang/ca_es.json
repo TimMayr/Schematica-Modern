@@ -1,0 +1,63 @@
+{
+  "_comment": "gui - general",
+  "schematica.gui.x": "X:",
+  "schematica.gui.y": "Y:",
+  "schematica.gui.z": "Z:",
+  "schematica.gui.done": "Fet",
+
+  "_comment": "gui - general - load",
+  "schematica.gui.title": "Seleccionar arxiu d'esquemes",
+  "schematica.gui.folderInfo": "(Posar l'arxiu d'esquemes aquí)",
+  "schematica.gui.openFolder": "Obrir carpeta d'esquemes",
+  "schematica.gui.noschematic": "-- Sense esquemes --",
+
+  "_comment": "gui - general - save",
+  "schematica.gui.point.red": "Punt Vermell",
+  "schematica.gui.point.blue": "Punt Blau",
+  "schematica.gui.save": "Guardar",
+  "schematica.gui.saveselection": "Guardar la selecció com un esquema",
+
+  "_comment": "gui - general - control",
+  "schematica.gui.moveschematic": "Moure esquema",
+  "schematica.gui.printer": "Imprimir",
+  "schematica.gui.operations": "Operacions",
+  "schematica.gui.all": "Tots",
+  "schematica.gui.layers": "Capes",
+  "schematica.gui.hide": "Ocultar",
+  "schematica.gui.show": "Mostrar",
+  "schematica.gui.movehere": "Moure aquí",
+  "schematica.gui.flip": "Voltejar",
+  "schematica.gui.rotate": "Gurar",
+  "schematica.gui.materialamount": "Quantitat",
+
+  "_comment": "gui - config - categories",
+
+  "_comment": "gui - config - debug",
+
+  "_comment": "gui - config - render",
+
+  "_comment": "gui - config - printer",
+
+  "_comment": "gui - config - printer - swap slots",
+
+  "_comment": "gui - config - general",
+
+  "_comment": "gui - config - server",
+
+  "_comment": "keys",
+  "schematica.key.load": "Carregar esquema",
+  "schematica.key.save": "Guardar esquema",
+  "schematica.key.control": "Manipular esquema",
+
+  "_comment": "commands - save",
+
+  "_comment": "commands - list",
+
+  "_comment": "commands - remove",
+
+  "_comment": "commands - download",
+
+  "_comment": "commands - replace",
+
+  "_comment": "messages"
+}

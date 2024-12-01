@@ -1,0 +1,65 @@
+{
+  "_comment": "gui - general",
+  "schematica.gui.x": "X:",
+  "schematica.gui.y": "Y:",
+  "schematica.gui.z": "Z:",
+  "schematica.gui.done": "Feito",
+
+  "_comment": "gui - general - load",
+  "schematica.gui.title": "Selecionar schematica",
+  "schematica.gui.folderInfo": "(Colocar schematcas aqui)",
+  "schematica.gui.openFolder": "Abrir pasta das schematicas",
+  "schematica.gui.noschematic": "-- Năo tens schematicas --",
+
+  "_comment": "gui - general - save",
+  "schematica.gui.point.red": "Ponto Vermelho",
+  "schematica.gui.point.blue": "Ponto Azul",
+  "schematica.gui.save": "Guardar",
+  "schematica.gui.saveselection": "Guardar selecçăo como uma schematica",
+
+  "_comment": "gui - general - control",
+  "schematica.gui.moveschematic": "Mover schematica",
+  "schematica.gui.materials": "Materiais",
+  "schematica.gui.printer": "Modo de construçăo automática",
+  "schematica.gui.operations": "Operaçőes",
+  "schematica.gui.all": "TODAS",
+  "schematica.gui.layers": "Camadas",
+  "schematica.gui.hide": "Esconder",
+  "schematica.gui.show": "Mostrar",
+  "schematica.gui.movehere": "Mover para aqui",
+  "schematica.gui.flip": "Virar",
+  "schematica.gui.rotate": "Rodar",
+  "schematica.gui.materialname": "Material",
+  "schematica.gui.materialamount": "Quantidade",
+
+  "_comment": "gui - config - categories",
+
+  "_comment": "gui - config - debug",
+
+  "_comment": "gui - config - render",
+
+  "_comment": "gui - config - printer",
+
+  "_comment": "gui - config - printer - swap slots",
+
+  "_comment": "gui - config - general",
+
+  "_comment": "gui - config - server",
+
+  "_comment": "keys",
+  "schematica.key.load": "Carregar schematica",
+  "schematica.key.save": "Guardar schematica",
+  "schematica.key.control": "Manipular schematica",
+
+  "_comment": "commands - save",
+
+  "_comment": "commands - list",
+
+  "_comment": "commands - remove",
+
+  "_comment": "commands - download",
+
+  "_comment": "commands - replace",
+
+  "_comment": "messages"
+}

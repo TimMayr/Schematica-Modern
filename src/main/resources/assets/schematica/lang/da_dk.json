@@ -1,0 +1,64 @@
+{
+  "_comment": "gui - general",
+  "schematica.gui.x": "X:",
+  "schematica.gui.y": "Y:",
+  "schematica.gui.z": "Z:",
+  "schematica.gui.done": "Færdig",
+
+  "_comment": "gui - general - load",
+  "schematica.gui.title": "Vælg schematic-fil",
+  "schematica.gui.folderInfo": "(Placér schematic-filer her)",
+  "schematica.gui.openFolder": "Åbn schematics mappe",
+  "schematica.gui.noschematic": "-- Ingen schematic --",
+
+  "_comment": "gui - general - save",
+  "schematica.gui.point.red": "Rødt punkt",
+  "schematica.gui.point.blue": "Blåt punkt",
+  "schematica.gui.save": "Gem",
+  "schematica.gui.saveselection": "Gem markeringen som en schematic",
+
+  "_comment": "gui - general - control",
+  "schematica.gui.moveschematic": "Flyt schematic",
+  "schematica.gui.materials": "Materialer",
+  "schematica.gui.operations": "Operationer",
+  "schematica.gui.all": "ALLE",
+  "schematica.gui.layers": "Lag",
+  "schematica.gui.hide": "Skjul",
+  "schematica.gui.show": "Vis",
+  "schematica.gui.movehere": "Flyt hertil",
+  "schematica.gui.flip": "Vend",
+  "schematica.gui.rotate": "Rotér",
+  "schematica.gui.materialname": "Materiale",
+  "schematica.gui.materialamount": "Antal",
+
+  "_comment": "gui - config - categories",
+
+  "_comment": "gui - config - debug",
+
+  "_comment": "gui - config - render",
+
+  "_comment": "gui - config - printer",
+
+  "_comment": "gui - config - printer - swap slots",
+
+  "_comment": "gui - config - general",
+
+  "_comment": "gui - config - server",
+
+  "_comment": "keys",
+  "schematica.key.load": "Åbn schematic",
+  "schematica.key.save": "Gem schematic",
+  "schematica.key.control": "Manipulér schematic",
+
+  "_comment": "commands - save",
+
+  "_comment": "commands - list",
+
+  "_comment": "commands - remove",
+
+  "_comment": "commands - download",
+
+  "_comment": "commands - replace",
+
+  "_comment": "messages"
+}

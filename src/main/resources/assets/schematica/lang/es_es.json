@@ -1,0 +1,64 @@
+{
+  "_comment": "gui - general",
+  "schematica.gui.x": "X:",
+  "schematica.gui.y": "Y:",
+  "schematica.gui.z": "Z:",
+  "schematica.gui.done": "Hecho",
+
+  "_comment": "gui - general - load",
+  "schematica.gui.title": "Seleccionar archivo de esquema",
+  "schematica.gui.folderInfo": "Pon aquí los esquemas",
+  "schematica.gui.openFolder": "Abrir carpeta de esquemas",
+  "schematica.gui.noschematic": "-- No hay esquemas --",
+
+  "_comment": "gui - general - save",
+  "schematica.gui.point.red": "Punto rojo",
+  "schematica.gui.point.blue": "Punto Azul",
+  "schematica.gui.save": "Guardar",
+  "schematica.gui.saveselection": "Guardar selección como esquema",
+
+  "_comment": "gui - general - control",
+  "schematica.gui.moveschematic": "Mover esquema",
+  "schematica.gui.materials": "Materiales",
+  "schematica.gui.printer": "Impresora",
+  "schematica.gui.operations": "Acciones",
+  "schematica.gui.all": "Todas",
+  "schematica.gui.layers": "Capas",
+  "schematica.gui.hide": "Esconder",
+  "schematica.gui.show": "Mostrar",
+  "schematica.gui.movehere": "Mover aquí",
+  "schematica.gui.flip": "Voltear",
+  "schematica.gui.rotate": "Girar",
+  "schematica.gui.materialamount": "Cantidad",
+
+  "_comment": "gui - config - categories",
+
+  "_comment": "gui - config - debug",
+
+  "_comment": "gui - config - render",
+
+  "_comment": "gui - config - printer",
+
+  "_comment": "gui - config - printer - swap slots",
+
+  "_comment": "gui - config - general",
+
+  "_comment": "gui - config - server",
+
+  "_comment": "keys",
+  "schematica.key.load": "Cargar esquema",
+  "schematica.key.save": "Guardar esquema",
+  "schematica.key.control": "Editar esquema",
+
+  "_comment": "commands - save",
+
+  "_comment": "commands - list",
+
+  "_comment": "commands - remove",
+
+  "_comment": "commands - download",
+
+  "_comment": "commands - replace",
+
+  "_comment": "messages"
+}

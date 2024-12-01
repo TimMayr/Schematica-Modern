@@ -1,0 +1,64 @@
+{
+  "_comment": "gui - general",
+  "schematica.gui.x": "X:",
+  "schematica.gui.y": "Y:",
+  "schematica.gui.z": "Z:",
+  "schematica.gui.done": "Gotowe",
+
+  "_comment": "gui - general - load",
+  "schematica.gui.title": "Wybierz plik schematu",
+  "schematica.gui.folderInfo": "(Tutaj wrzucaj schematy)",
+  "schematica.gui.openFolder": "Otworz folder z schematami",
+  "schematica.gui.noschematic": "-- Nie ma schematu --",
+
+  "_comment": "gui - general - save",
+  "schematica.gui.point.red": "Czerwony znacznik",
+  "schematica.gui.point.blue": "Niebieski znacznik",
+  "schematica.gui.save": "Zapisz",
+  "schematica.gui.saveselection": "Zapisz zaznaczenie jako schemat",
+
+  "_comment": "gui - general - control",
+  "schematica.gui.moveschematic": "Przenies schemat",
+  "schematica.gui.materials": "Materialy",
+  "schematica.gui.printer": "Drukarka",
+  "schematica.gui.operations": "Operacje",
+  "schematica.gui.all": "Wszystko",
+  "schematica.gui.layers": "Warstwy",
+  "schematica.gui.hide": "Schowaj",
+  "schematica.gui.show": "Pokarz",
+  "schematica.gui.movehere": "Przenies tutaj",
+  "schematica.gui.flip": "Odwroc",
+  "schematica.gui.rotate": "Obroc",
+  "schematica.gui.materialamount": "Ilosc",
+
+  "_comment": "gui - config - categories",
+
+  "_comment": "gui - config - debug",
+
+  "_comment": "gui - config - render",
+
+  "_comment": "gui - config - printer",
+
+  "_comment": "gui - config - printer - swap slots",
+
+  "_comment": "gui - config - general",
+
+  "_comment": "gui - config - server",
+
+  "_comment": "keys",
+  "schematica.key.load": "Ladowanie schematu",
+  "schematica.key.save": "Zapisywanie schematu",
+  "schematica.key.control": "Manipulacja schematem",
+
+  "_comment": "commands - save",
+
+  "_comment": "commands - list",
+
+  "_comment": "commands - remove",
+
+  "_comment": "commands - download",
+
+  "_comment": "commands - replace",
+
+  "_comment": "messages"
+}

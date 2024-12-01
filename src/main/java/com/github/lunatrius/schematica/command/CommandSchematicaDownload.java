@@ -1,7 +1,6 @@
 package com.github.lunatrius.schematica.command;
 
 import com.github.lunatrius.core.util.FileUtils;
-import com.github.lunatrius.schematica.Schematica;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.network.transfer.SchematicTransfer;
@@ -9,84 +8,88 @@ import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.WrongUsageException;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.command.ICommandSource;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.text.TranslationTextComponent;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class CommandSchematicaDownload extends CommandSchematicaBase {
-    private static final FileFilterSchematic FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
+	private static final FileFilterSchematic FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
 
-    @Override
-    public String getName() {
-        return Names.Command.Download.NAME;
-    }
+	public static void register(CommandDispatcher<CommandSource> dispatcher) {
+		dispatcher.register(Commands.literal(Names.Command.Download.NAME)
+				.then(Commands.argument("filename", StringArgumentType.string()).suggests(((context, builder) -> {
+					CommandSource source = context.getSource();
+					PlayerEntity player;
+					final String name = StringArgumentType.getString(context, "filename");
 
-    @Override
-    public String getUsage(final ICommandSender sender) {
-        return Names.Command.Download.Message.USAGE;
-    }
+					try {
+						player = source.asPlayer();
+					} catch (CommandSyntaxException e) {
+						return builder.buildFuture();
+					}
 
-    @Override
-    public List<String> getTabCompletions(final MinecraftServer server, final ICommandSender sender, final String[] args, final BlockPos pos) {
-        if (!(sender instanceof EntityPlayer)) {
-            return Collections.emptyList();
-        }
+					final File directory = Reference.proxy.getPlayerSchematicDirectory(player, true);
+					final File[] files = directory.listFiles(FILE_FILTER_SCHEMATIC);
 
-        final File directory = Schematica.proxy.getPlayerSchematicDirectory((EntityPlayer) sender, true);
-        final File[] files = directory.listFiles(FILE_FILTER_SCHEMATIC);
+					if (files != null) {
+						final List<String> filenames = new ArrayList<>();
 
-        if (files != null) {
-            final List<String> filenames = new ArrayList<String>();
+						for (final File file : files) {
+							filenames.add(file.getName());
+						}
 
-            for (final File file : files) {
-                filenames.add(file.getName());
-            }
+						filenames.stream().filter(s -> s.startsWith(name)).forEach(builder::suggest);
+						return builder.buildFuture();
+					}
 
-            return getListOfStringsMatchingLastWord(args, filenames);
-        }
+					return builder.buildFuture();
+				})).executes((commandContext) -> {
+					CommandSource source = commandContext.getSource();
+					ServerPlayerEntity player = source.asPlayer();
 
-        return Collections.emptyList();
-    }
+					final String filename = StringArgumentType.getString(commandContext, "filename");
+					final File directory = Reference.proxy.getPlayerSchematicDirectory(player, true);
 
-    @Override
-    public void execute(final MinecraftServer server, final ICommandSender sender, final String[] args) throws CommandException {
-        if (args.length < 1) {
-            throw new WrongUsageException(getUsage(sender));
-        }
+					if (!FileUtils.contains(directory, filename)) {
+						Reference.logger.error("{} has tried to download the file {}", player.getName(), filename);
+						throw new CommandException(
+								new TranslationTextComponent(Names.Command.Download.Message.DOWNLOAD_FAILED));
+					}
 
-        if (!(sender instanceof EntityPlayerMP)) {
-            throw new CommandException(Names.Command.Download.Message.PLAYERS_ONLY);
-        }
+					final ISchematic schematic = SchematicFormat.readFromFile(directory, filename);
 
-        final String filename = String.join(" ", args);
-        final EntityPlayerMP player = (EntityPlayerMP) sender;
-        final File directory = Schematica.proxy.getPlayerSchematicDirectory(player, true);
-        if (!FileUtils.contains(directory, filename)) {
-            Reference.logger.error("{} has tried to download the file {}", player.getName(), filename);
-            throw new CommandException(Names.Command.Download.Message.DOWNLOAD_FAILED);
-        }
+					if (schematic != null) {
+						DownloadHandler.INSTANCE.transferMap.put(player, new SchematicTransfer(schematic, filename));
+						source.sendFeedback(
+								new TranslationTextComponent(Names.Command.Download.Message.DOWNLOAD_STARTED,
+										filename),
+								true);
+					} else {
+						throw new CommandException(
+								new TranslationTextComponent(Names.Command.Download.Message.DOWNLOAD_FAILED));
+					}
 
-        final ISchematic schematic = SchematicFormat.readFromFile(directory, filename);
+					return 0;
+				})));
+	}
 
-        if (schematic != null) {
-            DownloadHandler.INSTANCE.transferMap.put(player, new SchematicTransfer(schematic, filename));
-            sender.sendMessage(new TextComponentTranslation(Names.Command.Download.Message.DOWNLOAD_STARTED, filename));
-        } else {
-            throw new CommandException(Names.Command.Download.Message.DOWNLOAD_FAILED);
-        }
-    }
+	@Override
+	public String getUsage(final ICommandSource sender) {
+		return Names.Command.Download.Message.USAGE;
+	}
 }
