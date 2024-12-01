@@ -3,7 +3,7 @@ package com.github.lunatrius.schematica.client.gui.load;
 import com.github.lunatrius.core.client.gui.GuiScreenBase;
 import com.github.lunatrius.schematica.Schematica;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
-import com.github.lunatrius.schematica.handler.ConfigurationHandler;
+import com.github.lunatrius.schematica.handler.SchematicaClientConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
@@ -37,7 +37,7 @@ public class GuiSchematicLoad extends GuiScreenBase {
     private final String strFolderInfo = I18n.format(Names.Gui.Load.FOLDER_INFO);
     private String strNoSchematic = I18n.format(Names.Gui.Load.NO_SCHEMATIC);
 
-    protected File currentDirectory = ConfigurationHandler.schematicDirectory;
+    protected File currentDirectory = SchematicaClientConfig.schematicDirectoryPath;
     protected final List<GuiSchematicEntry> schematicFiles = new ArrayList<GuiSchematicEntry>();
 
     public GuiSchematicLoad(final GuiScreen guiScreen) {
@@ -74,14 +74,14 @@ public class GuiSchematicLoad extends GuiScreenBase {
                 try {
                     final Class<?> c = Class.forName("java.awt.Desktop");
                     final Object m = c.getMethod("getDesktop").invoke(null);
-                    c.getMethod("browse", URI.class).invoke(m, ConfigurationHandler.schematicDirectory.toURI());
+                    c.getMethod("browse", URI.class).invoke(m, SchematicaClientConfig.schematicDirectoryPath.toURI());
                 } catch (final Throwable e) {
                     retry = true;
                 }
 
                 if (retry) {
                     Reference.logger.info("Opening via Sys class!");
-                    Sys.openURL("file://" + ConfigurationHandler.schematicDirectory.getAbsolutePath());
+                    Sys.openURL("file://" + SchematicaClientConfig.schematicDirectoryPath.getAbsolutePath());
                 }
             } else if (guiButton.id == this.btnDone.id) {
                 if (Schematica.proxy.isLoadEnabled) {
@@ -128,7 +128,8 @@ public class GuiSchematicLoad extends GuiScreenBase {
         this.schematicFiles.clear();
 
         try {
-            if (!this.currentDirectory.getCanonicalPath().equals(ConfigurationHandler.schematicDirectory.getCanonicalPath())) {
+            if (!this.currentDirectory.getCanonicalPath().equals(
+		            SchematicaClientConfig.schematicDirectoryPath.getCanonicalPath())) {
                 this.schematicFiles.add(new GuiSchematicEntry("..", Items.LAVA_BUCKET, 0, true));
             }
         } catch (final IOException e) {
@@ -173,7 +174,7 @@ public class GuiSchematicLoad extends GuiScreenBase {
         try {
             if (selectedIndex >= 0 && selectedIndex < this.schematicFiles.size()) {
                 final GuiSchematicEntry schematicEntry = this.schematicFiles.get(selectedIndex);
-                if (Schematica.proxy.loadSchematic(null, this.currentDirectory, schematicEntry.getName())) {
+                if (Reference.proxy.loadSchematic(null, this.currentDirectory, schematicEntry.getName())) {
                     final SchematicWorld schematic = ClientProxy.schematic;
                     if (schematic != null) {
                         ClientProxy.moveSchematicToPlayer(schematic);

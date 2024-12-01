@@ -15,7 +15,7 @@ import com.github.lunatrius.schematica.client.renderer.chunk.proxy.SchematicRend
 import com.github.lunatrius.schematica.client.renderer.chunk.proxy.SchematicRenderChunkVbo;
 import com.github.lunatrius.schematica.client.renderer.shader.ShaderProgram;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
-import com.github.lunatrius.schematica.handler.ConfigurationHandler;
+import com.github.lunatrius.schematica.handler.SchematicaClientConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -40,6 +40,7 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.profiler.Profiler;
@@ -182,7 +183,7 @@ public class RenderSchematic extends RenderGlobal {
     }
 
     @Override
-    public void setWorldAndLoadRenderers(@Nullable final WorldClient worldClient) {
+    public void setWorldAndLoadRenderers(@Nullable final ClientWorld worldClient) {
         if (worldClient instanceof SchematicWorld) {
             setWorldAndLoadRenderers((SchematicWorld) worldClient);
         } else {
@@ -269,15 +270,15 @@ public class RenderSchematic extends RenderGlobal {
 
         PLAYER_POSITION_OFFSET.set(ClientProxy.playerPosition).sub(this.world.position.x, this.world.position.y, this.world.position.z);
 
-        if (OpenGlHelper.shadersSupported && ConfigurationHandler.enableAlpha) {
+        if (OpenGlHelper.shadersSupported && SchematicaClientConfig.enableAlpha) {
             GL20.glUseProgram(SHADER_ALPHA.getProgram());
-            GL20.glUniform1f(GL20.glGetUniformLocation(SHADER_ALPHA.getProgram(), "alpha_multiplier"), ConfigurationHandler.alpha);
+            GL20.glUniform1f(GL20.glGetUniformLocation(SHADER_ALPHA.getProgram(), "alpha_multiplier"), SchematicaClientConfig.alpha);
         }
 
         final int fps = Math.max(Minecraft.getDebugFPS(), 30);
         renderWorld(partialTicks, System.nanoTime() + 1000000000 / fps);
 
-        if (OpenGlHelper.shadersSupported && ConfigurationHandler.enableAlpha) {
+        if (OpenGlHelper.shadersSupported && SchematicaClientConfig.enableAlpha) {
             GL20.glUseProgram(0);
         }
     }
@@ -290,7 +291,7 @@ public class RenderSchematic extends RenderGlobal {
 
         final GeometryTessellator tessellator = GeometryTessellator.getInstance();
         tessellator.setTranslation(-ClientProxy.playerPosition.x, -ClientProxy.playerPosition.y, -ClientProxy.playerPosition.z);
-        tessellator.setDelta(ConfigurationHandler.blockDelta);
+        tessellator.setDelta(SchematicaClientConfig.blockDelta);
 
         if (ClientProxy.isRenderingGuide) {
             tessellator.beginQuads();
@@ -416,7 +417,7 @@ public class RenderSchematic extends RenderGlobal {
             }
 
             this.displayListEntitiesDirty = true;
-            this.renderDistanceChunks = ConfigurationHandler.renderDistance;
+            this.renderDistanceChunks = SchematicaClientConfig.renderDistance;
             final boolean vbo = this.vboEnabled;
             this.vboEnabled = OpenGlHelper.useVbo();
 
@@ -539,7 +540,7 @@ public class RenderSchematic extends RenderGlobal {
 
     @Override
     public void setupTerrain(final Entity viewEntity, final double partialTicks, final ICamera camera, final int frameCount, final boolean playerSpectator) {
-        if (ConfigurationHandler.renderDistance != this.renderDistanceChunks || this.vboEnabled != OpenGlHelper.useVbo()) {
+        if (SchematicaClientConfig.renderDistance != this.renderDistanceChunks || this.vboEnabled != OpenGlHelper.useVbo()) {
             loadRenderers();
         }
 

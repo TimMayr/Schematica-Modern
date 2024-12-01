@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+//TODO: FIX THIS SHIT
 public class BlockStateHelper {
 	public static <T extends Comparable<T>> T getPropertyValue(final IForgeBlockState blockState, final String name) {
 		final IProperty<T> property = getProperty(blockState, name);

@@ -3,30 +3,29 @@ package com.github.lunatrius.schematica.network.message;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.network.transfer.SchematicTransfer;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-public class MessageDownloadBeginAck implements IMessage, IMessageHandler<MessageDownloadBeginAck, IMessage> {
-    @Override
-    public void fromBytes(final ByteBuf buf) {
-        // NOOP
-    }
+import java.util.function.Supplier;
 
-    @Override
-    public void toBytes(final ByteBuf buf) {
-        // NOOP
-    }
+public class MessageDownloadBeginAck {
+	public static void handle(MessageDownloadBeginAck msg, Supplier<NetworkEvent.Context> ctx) {
+		ctx.get().enqueueWork(() -> {
+			final PlayerEntity player = ctx.get().getSender();
+			final SchematicTransfer transfer = DownloadHandler.INSTANCE.transferMap.get(player);
 
-    @Override
-    public IMessage onMessage(final MessageDownloadBeginAck message, final MessageContext ctx) {
-        final EntityPlayerMP player = ctx.getServerHandler().player;
-        final SchematicTransfer transfer = DownloadHandler.INSTANCE.transferMap.get(player);
-        if (transfer != null) {
-            transfer.setState(SchematicTransfer.State.CHUNK_WAIT);
-        }
+			if (transfer != null) {
+				transfer.setState(SchematicTransfer.State.CHUNK_WAIT);
+			}
+		});
+		ctx.get().setPacketHandled(true);
+	}
 
-        return null;
-    }
+	public static MessageDownloadBeginAck decode(final ByteBuf buf) {
+		return new MessageDownloadBeginAck();
+	}
+
+	public static void encode(MessageDownloadBeginAck msg, final ByteBuf buf) {
+
+	}
 }

@@ -1,26 +1,34 @@
 package com.github.lunatrius.schematica.network;
 
-import com.github.lunatrius.schematica.network.message.MessageCapabilities;
-import com.github.lunatrius.schematica.network.message.MessageDownloadBegin;
-import com.github.lunatrius.schematica.network.message.MessageDownloadBeginAck;
-import com.github.lunatrius.schematica.network.message.MessageDownloadChunk;
-import com.github.lunatrius.schematica.network.message.MessageDownloadChunkAck;
-import com.github.lunatrius.schematica.network.message.MessageDownloadEnd;
+import com.github.lunatrius.schematica.network.message.*;
 import com.github.lunatrius.schematica.reference.Reference;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.network.simple.SimpleChannel;
 
 public class PacketHandler {
-    public static final SimpleNetworkWrapper INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(Reference.MODID);
+	private static final String PROTOCOL_VERSION = Integer.toString(1);
+	public static final SimpleChannel INSTANCE =
+			NetworkRegistry.ChannelBuilder.named(new ResourceLocation(Reference.MODID, "main_channel"))
+					.clientAcceptedVersions(PROTOCOL_VERSION::equals)
+					.serverAcceptedVersions(PROTOCOL_VERSION::equals)
+					.networkProtocolVersion(() -> PROTOCOL_VERSION)
+					.simpleChannel();
 
-    public static void init() {
-        INSTANCE.registerMessage(MessageCapabilities.class, MessageCapabilities.class, 0, Side.CLIENT);
-
-        INSTANCE.registerMessage(MessageDownloadBegin.class, MessageDownloadBegin.class, 1, Side.CLIENT);
-        INSTANCE.registerMessage(MessageDownloadBeginAck.class, MessageDownloadBeginAck.class, 2, Side.SERVER);
-        INSTANCE.registerMessage(MessageDownloadChunk.class, MessageDownloadChunk.class, 3, Side.CLIENT);
-        INSTANCE.registerMessage(MessageDownloadChunkAck.class, MessageDownloadChunkAck.class, 4, Side.SERVER);
-        INSTANCE.registerMessage(MessageDownloadEnd.class, MessageDownloadEnd.class, 5, Side.CLIENT);
-    }
+	@SuppressWarnings("UnusedAssignment")
+	public static void init() {
+		int disc = 0;
+		INSTANCE.registerMessage(disc++, MessageCapabilities.class, MessageCapabilities::encode,
+				MessageCapabilities::decode, MessageCapabilities::handle);
+		INSTANCE.registerMessage(disc++, MessageDownloadBegin.class, MessageDownloadBegin::encode,
+				MessageDownloadBegin::decode, MessageDownloadBegin::handle);
+		INSTANCE.registerMessage(disc++, MessageDownloadBeginAck.class, MessageDownloadBeginAck::encode,
+				MessageDownloadBeginAck::decode, MessageDownloadBeginAck::handle);
+		INSTANCE.registerMessage(disc++, MessageDownloadChunk.class, MessageDownloadChunk::encode,
+				MessageDownloadChunk::decode, MessageDownloadChunk::handle);
+		INSTANCE.registerMessage(disc++, MessageDownloadChunkAck.class, MessageDownloadChunkAck::encode,
+				MessageDownloadChunkAck::decode, MessageDownloadChunkAck::handle);
+		INSTANCE.registerMessage(disc++, MessageDownloadEnd.class, MessageDownloadEnd::encode,
+				MessageDownloadEnd::decode, MessageDownloadEnd::handle);
+	}
 }

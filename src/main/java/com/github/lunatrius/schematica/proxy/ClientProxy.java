@@ -6,256 +6,227 @@ import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.client.renderer.RenderSchematic;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
-import com.github.lunatrius.schematica.command.client.CommandSchematicaReplace;
-import com.github.lunatrius.schematica.handler.ConfigurationHandler;
-import com.github.lunatrius.schematica.handler.client.GuiHandler;
-import com.github.lunatrius.schematica.handler.client.InputHandler;
-import com.github.lunatrius.schematica.handler.client.OverlayHandler;
-import com.github.lunatrius.schematica.handler.client.RenderTickHandler;
-import com.github.lunatrius.schematica.handler.client.TickHandler;
-import com.github.lunatrius.schematica.handler.client.WorldHandler;
+import com.github.lunatrius.schematica.handler.SchematicaClientConfig;
+import com.github.lunatrius.schematica.handler.client.*;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraftforge.client.ClientCommandHandler;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.config.Property;
-import net.minecraftforge.fml.client.config.GuiConfigEntries;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import java.io.File;
 import java.io.IOException;
 
 public class ClientProxy extends CommonProxy {
-    public static boolean isRenderingGuide = false;
-    public static boolean isPendingReset = false;
+	public static final Vector3d playerPosition = new Vector3d();
+	public static final MBlockPos pointA = new MBlockPos();
+	public static final MBlockPos pointB = new MBlockPos();
+	public static final MBlockPos pointMin = new MBlockPos();
+	public static final MBlockPos pointMax = new MBlockPos();
+	private static final Minecraft MINECRAFT = Minecraft.getInstance();
+	public static boolean isRenderingGuide = false;
+	public static boolean isPendingReset = false;
+	public static Direction orientation = null;
+	public static int rotationRender = 0;
+	public static SchematicWorld schematic = null;
+	public static Direction axisFlip = Direction.UP;
+	public static Direction axisRotation = Direction.UP;
+	public static RayTraceResult objectMouseOver = null;
 
-    public static final Vector3d playerPosition = new Vector3d();
-    public static EnumFacing orientation = null;
-    public static int rotationRender = 0;
+	public static void setPlayerData(final PlayerEntity player, final float partialTicks) {
+		playerPosition.x = player.lastTickPosX + (player.getPosX() - player.lastTickPosX) * partialTicks;
+		playerPosition.y = player.lastTickPosY + (player.getPosY() - player.lastTickPosY) * partialTicks;
+		playerPosition.z = player.lastTickPosZ + (player.getPosZ() - player.lastTickPosZ) * partialTicks;
 
-    public static SchematicWorld schematic = null;
+		orientation = getOrientation(player);
 
-    public static final MBlockPos pointA = new MBlockPos();
-    public static final MBlockPos pointB = new MBlockPos();
-    public static final MBlockPos pointMin = new MBlockPos();
-    public static final MBlockPos pointMax = new MBlockPos();
+		rotationRender = MathHelper.floor(player.rotationYaw / 90) & 3;
+	}
 
-    public static EnumFacing axisFlip = EnumFacing.UP;
-    public static EnumFacing axisRotation = EnumFacing.UP;
+	private static Direction getOrientation(final PlayerEntity player) {
+		if (player.rotationPitch > 45) {
+			return Direction.DOWN;
+		} else if (player.rotationPitch < -45) {
+			return Direction.UP;
+		} else {
+			switch (MathHelper.floor(player.rotationYaw / 90.0 + 0.5) & 3) {
+				case 0:
+					return Direction.SOUTH;
+				case 1:
+					return Direction.WEST;
+				case 2:
+					return Direction.NORTH;
+				case 3:
+					return Direction.EAST;
+			}
+		}
 
-    public static RayTraceResult objectMouseOver = null;
+		return null;
+	}
 
-    private static final Minecraft MINECRAFT = Minecraft.getMinecraft();
+	public static void movePointToPlayer(final MBlockPos point) {
+		point.x = (int) Math.floor(playerPosition.x);
+		point.y = (int) Math.floor(playerPosition.y);
+		point.z = (int) Math.floor(playerPosition.z);
 
-    public static void setPlayerData(final EntityPlayer player, final float partialTicks) {
-        playerPosition.x = player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks;
-        playerPosition.y = player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks;
-        playerPosition.z = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks;
+		switch (rotationRender) {
+			case 0:
+				point.x -= 1;
+				point.z += 1;
+				break;
+			case 1:
+				point.x -= 1;
+				point.z -= 1;
+				break;
+			case 2:
+				point.x += 1;
+				point.z -= 1;
+				break;
+			case 3:
+				point.x += 1;
+				point.z += 1;
+				break;
+		}
+	}
 
-        orientation = getOrientation(player);
+	public static void moveSchematicToPlayer(final SchematicWorld schematic) {
+		if (schematic != null) {
+			final MBlockPos position = schematic.position;
+			position.x = (int) Math.floor(playerPosition.x);
+			position.y = (int) Math.floor(playerPosition.y);
+			position.z = (int) Math.floor(playerPosition.z);
 
-        rotationRender = MathHelper.floor(player.rotationYaw / 90) & 3;
-    }
+			switch (rotationRender) {
+				case 0:
+					position.x -= schematic.getWidth();
+					position.z += 1;
+					break;
+				case 1:
+					position.x -= schematic.getWidth();
+					position.z -= schematic.getLength();
+					break;
+				case 2:
+					position.x += 1;
+					position.z -= schematic.getLength();
+					break;
+				case 3:
+					position.x += 1;
+					position.z += 1;
+					break;
+			}
+		}
+	}
 
-    private static EnumFacing getOrientation(final EntityPlayer player) {
-        if (player.rotationPitch > 45) {
-            return EnumFacing.DOWN;
-        } else if (player.rotationPitch < -45) {
-            return EnumFacing.UP;
-        } else {
-            switch (MathHelper.floor(player.rotationYaw / 90.0 + 0.5) & 3) {
-            case 0:
-                return EnumFacing.SOUTH;
-            case 1:
-                return EnumFacing.WEST;
-            case 2:
-                return EnumFacing.NORTH;
-            case 3:
-                return EnumFacing.EAST;
-            }
-        }
+	@SubscribeEvent
+	public void preInit(final FMLClientSetupEvent event) {
+		this.createFolders();
+		SchematicaClientConfig.populateExtraAirBlocks();
+		SchematicaClientConfig.normalizeSchematicPath();
 
-        return null;
-    }
+		for (final KeyBinding keyBinding : InputHandler.KEY_BINDINGS) {
+			ClientRegistry.registerKeyBinding(keyBinding);
+		}
+	}
 
-    public static void updatePoints() {
-        pointMin.x = Math.min(pointA.x, pointB.x);
-        pointMin.y = Math.min(pointA.y, pointB.y);
-        pointMin.z = Math.min(pointA.z, pointB.z);
+	@SubscribeEvent
+	public void init(final FMLClientSetupEvent event) {
+		MinecraftForge.EVENT_BUS.register(InputHandler.INSTANCE);
+		MinecraftForge.EVENT_BUS.register(TickHandler.INSTANCE);
+		MinecraftForge.EVENT_BUS.register(RenderTickHandler.INSTANCE);
+		MinecraftForge.EVENT_BUS.register(RenderSchematic.INSTANCE);
+		MinecraftForge.EVENT_BUS.register(GuiHandler.INSTANCE);
+		MinecraftForge.EVENT_BUS.register(new OverlayHandler());
+		MinecraftForge.EVENT_BUS.register(new WorldHandler());
+	}
 
-        pointMax.x = Math.max(pointA.x, pointB.x);
-        pointMax.y = Math.max(pointA.y, pointB.y);
-        pointMax.z = Math.max(pointA.z, pointB.z);
-    }
+	@SubscribeEvent
+	public void postInit(final FMLClientSetupEvent event) {
+		resetSettings();
+	}
 
-    public static void movePointToPlayer(final MBlockPos point) {
-        point.x = (int) Math.floor(playerPosition.x);
-        point.y = (int) Math.floor(playerPosition.y);
-        point.z = (int) Math.floor(playerPosition.z);
+	@Override
+	public File getDataDirectory() {
+		final File file = MINECRAFT.gameDir;
+		try {
+			return file.getCanonicalFile();
+		} catch (final IOException e) {
+			Reference.logger.debug("Could not canonize path!", e);
+		}
+		return file;
+	}
 
-        switch (rotationRender) {
-        case 0:
-            point.x -= 1;
-            point.z += 1;
-            break;
-        case 1:
-            point.x -= 1;
-            point.z -= 1;
-            break;
-        case 2:
-            point.x += 1;
-            point.z -= 1;
-            break;
-        case 3:
-            point.x += 1;
-            point.z += 1;
-            break;
-        }
-    }
+	@Override
+	public void resetSettings() {
+		super.resetSettings();
 
-    public static void moveSchematicToPlayer(final SchematicWorld schematic) {
-        if (schematic != null) {
-            final MBlockPos position = schematic.position;
-            position.x = (int) Math.floor(playerPosition.x);
-            position.y = (int) Math.floor(playerPosition.y);
-            position.z = (int) Math.floor(playerPosition.z);
+		SchematicPrinter.INSTANCE.setEnabled(true);
+		unloadSchematic();
 
-            switch (rotationRender) {
-            case 0:
-                position.x -= schematic.getWidth();
-                position.z += 1;
-                break;
-            case 1:
-                position.x -= schematic.getWidth();
-                position.z -= schematic.getLength();
-                break;
-            case 2:
-                position.x += 1;
-                position.z -= schematic.getLength();
-                break;
-            case 3:
-                position.x += 1;
-                position.z += 1;
-                break;
-            }
-        }
-    }
+		isRenderingGuide = false;
 
-    @Override
-    public void preInit(final FMLPreInitializationEvent event) {
-        super.preInit(event);
+		playerPosition.set(0, 0, 0);
+		orientation = null;
+		rotationRender = 0;
 
-        final Property[] sliders = {
-                ConfigurationHandler.propAlpha,
-                ConfigurationHandler.propBlockDelta,
-                ConfigurationHandler.propRenderDistance,
-                ConfigurationHandler.propPlaceDelay,
-                ConfigurationHandler.propTimeout,
-                ConfigurationHandler.propPlaceDistance
-        };
-        for (final Property prop : sliders) {
-            prop.setConfigEntryClass(GuiConfigEntries.NumberSliderEntry.class);
-        }
+		pointA.set(0, 0, 0);
+		pointB.set(0, 0, 0);
+		updatePoints();
+	}
 
-        for (final KeyBinding keyBinding : InputHandler.KEY_BINDINGS) {
-            ClientRegistry.registerKeyBinding(keyBinding);
-        }
-    }
+	public static void updatePoints() {
+		pointMin.x = Math.min(pointA.x, pointB.x);
+		pointMin.y = Math.min(pointA.y, pointB.y);
+		pointMin.z = Math.min(pointA.z, pointB.z);
 
-    @Override
-    public void init(final FMLInitializationEvent event) {
-        super.init(event);
+		pointMax.x = Math.max(pointA.x, pointB.x);
+		pointMax.y = Math.max(pointA.y, pointB.y);
+		pointMax.z = Math.max(pointA.z, pointB.z);
+	}
 
-        MinecraftForge.EVENT_BUS.register(InputHandler.INSTANCE);
-        MinecraftForge.EVENT_BUS.register(TickHandler.INSTANCE);
-        MinecraftForge.EVENT_BUS.register(RenderTickHandler.INSTANCE);
-        MinecraftForge.EVENT_BUS.register(ConfigurationHandler.INSTANCE);
-        MinecraftForge.EVENT_BUS.register(RenderSchematic.INSTANCE);
-        MinecraftForge.EVENT_BUS.register(GuiHandler.INSTANCE);
-        MinecraftForge.EVENT_BUS.register(new OverlayHandler());
-        MinecraftForge.EVENT_BUS.register(new WorldHandler());
+	@Override
+	public void unloadSchematic() {
+		schematic = null;
+		RenderSchematic.INSTANCE.setWorldAndLoadRenderers(Minecraft.getInstance().world);
+		SchematicPrinter.INSTANCE.setSchematic(null);
+	}
 
-        ClientCommandHandler.instance.registerCommand(new CommandSchematicaReplace());
-    }
+	@OnlyIn(Dist.CLIENT)
+	@Override
+	public boolean loadSchematic(final PlayerEntity player, final File directory, final String filename) {
+		final ISchematic schematic = SchematicFormat.readFromFile(directory, filename);
+		if (schematic == null) {
+			return false;
+		}
 
-    @Override
-    public void postInit(final FMLPostInitializationEvent event) {
-        super.postInit(event);
+		final SchematicWorld world = new SchematicWorld(schematic);
 
-        resetSettings();
-    }
+		Reference.logger.debug("Loaded {} [w:{},h:{},l:{}]", filename, world.getWidth(), world.getHeight(),
+				world.getLength());
 
-    @Override
-    public File getDataDirectory() {
-        final File file = MINECRAFT.mcDataDir;
-        try {
-            return file.getCanonicalFile();
-        } catch (final IOException e) {
-            Reference.logger.debug("Could not canonize path!", e);
-        }
-        return file;
-    }
+		ClientProxy.schematic = world;
+		RenderSchematic.INSTANCE.setWorldAndLoadRenderers(world);
+		SchematicPrinter.INSTANCE.setSchematic(world);
+		world.isRendering = true;
 
-    @Override
-    public void resetSettings() {
-        super.resetSettings();
+		return true;
+	}
 
-        SchematicPrinter.INSTANCE.setEnabled(true);
-        unloadSchematic();
+	@Override
+	public boolean isPlayerQuotaExceeded(final PlayerEntity player) {
+		return false;
+	}
 
-        isRenderingGuide = false;
-
-        playerPosition.set(0, 0, 0);
-        orientation = null;
-        rotationRender = 0;
-
-        pointA.set(0, 0, 0);
-        pointB.set(0, 0, 0);
-        updatePoints();
-    }
-
-    @Override
-    public void unloadSchematic() {
-        schematic = null;
-        RenderSchematic.INSTANCE.setWorldAndLoadRenderers(null);
-        SchematicPrinter.INSTANCE.setSchematic(null);
-    }
-
-    @Override
-    public boolean loadSchematic(final EntityPlayer player, final File directory, final String filename) {
-        final ISchematic schematic = SchematicFormat.readFromFile(directory, filename);
-        if (schematic == null) {
-            return false;
-        }
-
-        final SchematicWorld world = new SchematicWorld(schematic);
-
-        Reference.logger.debug("Loaded {} [w:{},h:{},l:{}]", filename, world.getWidth(), world.getHeight(), world.getLength());
-
-        ClientProxy.schematic = world;
-        RenderSchematic.INSTANCE.setWorldAndLoadRenderers(world);
-        SchematicPrinter.INSTANCE.setSchematic(world);
-        world.isRendering = true;
-
-        return true;
-    }
-
-    @Override
-    public boolean isPlayerQuotaExceeded(final EntityPlayer player) {
-        return false;
-    }
-
-    @Override
-    public File getPlayerSchematicDirectory(final EntityPlayer player, final boolean privateDirectory) {
-        return ConfigurationHandler.schematicDirectory;
-    }
+	@Override
+	public File getPlayerSchematicDirectory(final PlayerEntity player, final boolean privateDirectory) {
+		return SchematicaClientConfig.schematicDirectory;
+	}
 }

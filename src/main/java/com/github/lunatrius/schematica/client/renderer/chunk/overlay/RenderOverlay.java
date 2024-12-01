@@ -4,7 +4,7 @@ import com.github.lunatrius.core.client.renderer.GeometryMasks;
 import com.github.lunatrius.core.client.renderer.GeometryTessellator;
 import com.github.lunatrius.schematica.client.renderer.chunk.CompiledOverlay;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
-import com.github.lunatrius.schematica.handler.ConfigurationHandler;
+import com.github.lunatrius.schematica.handler.SchematicaClientConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -90,7 +90,7 @@ public class RenderOverlay extends RenderChunk {
             final BlockRenderLayer layer = BlockRenderLayer.TRANSLUCENT;
             final BufferBuilder buffer = generator.getRegionRenderCacheBuilder().getWorldRendererByLayer(layer);
 
-            GeometryTessellator.setStaticDelta(ConfigurationHandler.blockDelta);
+            GeometryTessellator.setStaticDelta(SchematicaClientConfig.blockDelta);
 
             // Elements in this array may be null, indicating that nothing should be rendered (or out of bounds)
             // 18 elements to provide padding on both sides (this padding is not rendered).
@@ -120,11 +120,11 @@ public class RenderOverlay extends RenderChunk {
                 final Block mcBlock = mcBlockState.getBlock();
 
                 final boolean isSchAirBlock = schematic.isAirBlock(pos);
-                final boolean isMcAirBlock = mcWorld.isAirBlock(mcPos) || ConfigurationHandler.isExtraAirBlock(mcBlock);
+                final boolean isMcAirBlock = mcWorld.isAirBlock(mcPos) || SchematicaClientConfig.isExtraAirBlock(mcBlock);
 
-                if (ConfigurationHandler.highlightAir && !isMcAirBlock && isSchAirBlock) {
+                if (SchematicaClientConfig.highlightAir && !isMcAirBlock && isSchAirBlock) {
                     types[secX][secY][secZ] = BlockType.EXTRA_BLOCK;
-                } else if (ConfigurationHandler.highlight) {
+                } else if (SchematicaClientConfig.highlight) {
                     if (!isMcAirBlock) {
                         if (schBlock != mcBlock) {
                             types[secX][secY][secZ] = BlockType.WRONG_BLOCK;

@@ -5,9 +5,10 @@ import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.command.CommandSchematicaList;
 import com.github.lunatrius.schematica.command.CommandSchematicaRemove;
 import com.github.lunatrius.schematica.command.CommandSchematicaSave;
-import com.github.lunatrius.schematica.handler.ConfigurationHandler;
+import com.github.lunatrius.schematica.command.client.CommandSchematicaReplace;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.handler.QueueTickHandler;
+import com.github.lunatrius.schematica.handler.SchematicaClientConfig;
 import com.github.lunatrius.schematica.nbt.NBTConversionException;
 import com.github.lunatrius.schematica.nbt.NBTHelper;
 import com.github.lunatrius.schematica.network.PacketHandler;
@@ -56,13 +57,14 @@ public abstract class CommonProxy {
 		CommandSchematicaSave.register(dispatcher);
 		CommandSchematicaList.register(dispatcher);
 		CommandSchematicaRemove.register(dispatcher);
+		CommandSchematicaReplace.register(dispatcher);
 	}
 
 	public void createFolders() {
-		if (!ConfigurationHandler.schematicDirectory.exists()) {
-			if (!ConfigurationHandler.schematicDirectory.mkdirs()) {
+		if (!SchematicaClientConfig.schematicDirectory.exists()) {
+			if (!SchematicaClientConfig.schematicDirectory.mkdirs()) {
 				Reference.logger.warn("Could not create schematic directory [{}]!",
-						ConfigurationHandler.schematicDirectory.getAbsolutePath());
+						SchematicaClientConfig.schematicDirectory.getAbsolutePath());
 			}
 		}
 	}

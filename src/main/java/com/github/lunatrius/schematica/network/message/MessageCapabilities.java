@@ -1,50 +1,44 @@
 package com.github.lunatrius.schematica.network.message;
 
-import com.github.lunatrius.schematica.Schematica;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.reference.Reference;
 import io.netty.buffer.ByteBuf;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 
-public class MessageCapabilities implements IMessage, IMessageHandler<MessageCapabilities, IMessage> {
-    public boolean isPrinterEnabled;
-    public boolean isSaveEnabled;
-    public boolean isLoadEnabled;
+import java.util.function.Supplier;
 
-    public MessageCapabilities() {
-        this(false, false, false);
-    }
+public class MessageCapabilities {
+	public boolean isPrinterEnabled;
+	public boolean isSaveEnabled;
+	public boolean isLoadEnabled;
 
-    public MessageCapabilities(final boolean isPrinterEnabled, final boolean isSaveEnabled, final boolean isLoadEnabled) {
-        this.isPrinterEnabled = isPrinterEnabled;
-        this.isSaveEnabled = isSaveEnabled;
-        this.isLoadEnabled = isLoadEnabled;
-    }
+	public MessageCapabilities(final boolean isPrinterEnabled, final boolean isSaveEnabled,
+	                           final boolean isLoadEnabled) {
+		this.isPrinterEnabled = isPrinterEnabled;
+		this.isSaveEnabled = isSaveEnabled;
+		this.isLoadEnabled = isLoadEnabled;
+	}
 
-    @Override
-    public void fromBytes(final ByteBuf buf) {
-        this.isPrinterEnabled = buf.readBoolean();
-        this.isSaveEnabled = buf.readBoolean();
-        this.isLoadEnabled = buf.readBoolean();
-    }
+	public static MessageCapabilities decode(PacketBuffer buf) {
+		return new MessageCapabilities(buf.readBoolean(), buf.readBoolean(), buf.readBoolean());
+	}
 
-    @Override
-    public void toBytes(final ByteBuf buf) {
-        buf.writeBoolean(this.isPrinterEnabled);
-        buf.writeBoolean(this.isSaveEnabled);
-        buf.writeBoolean(this.isLoadEnabled);
-    }
+	public static void encode(MessageCapabilities msg, ByteBuf buf) {
+		buf.writeBoolean(msg.isPrinterEnabled);
+		buf.writeBoolean(msg.isSaveEnabled);
+		buf.writeBoolean(msg.isLoadEnabled);
+	}
 
-    @Override
-    public IMessage onMessage(final MessageCapabilities message, final MessageContext ctx) {
-        SchematicPrinter.INSTANCE.setEnabled(message.isPrinterEnabled);
-        Schematica.proxy.isSaveEnabled = message.isSaveEnabled;
-        Schematica.proxy.isLoadEnabled = message.isLoadEnabled;
+	public static void handle(MessageCapabilities msg, Supplier<NetworkEvent.Context> ctx) {
+		ctx.get().enqueueWork(() -> {
+			SchematicPrinter.INSTANCE.setEnabled(msg.isPrinterEnabled);
+			Reference.proxy.isSaveEnabled = msg.isSaveEnabled;
+			Reference.proxy.isLoadEnabled = msg.isLoadEnabled;
 
-        Reference.logger.info("Server capabilities{printer={}, save={}, load={}}", message.isPrinterEnabled, message.isSaveEnabled, message.isLoadEnabled);
-
-        return null;
-    }
+			Reference.logger.info("Server capabilities{printer={}, save={}, load={}}", msg.isPrinterEnabled,
+					msg.isSaveEnabled, msg.isLoadEnabled);
+		});
+		ctx.get().setPacketHandled(true);
+	}
 }

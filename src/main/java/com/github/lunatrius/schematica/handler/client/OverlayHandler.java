@@ -3,7 +3,7 @@ package com.github.lunatrius.schematica.handler.client;
 import com.github.lunatrius.schematica.block.state.BlockStateHelper;
 import com.github.lunatrius.schematica.client.renderer.RenderSchematic;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
-import com.github.lunatrius.schematica.handler.ConfigurationHandler;
+import com.github.lunatrius.schematica.handler.SchematicaClientConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -24,7 +24,7 @@ public class OverlayHandler {
 
     @SubscribeEvent
     public void onText(final RenderGameOverlayEvent.Text event) {
-        if (this.minecraft.gameSettings.showDebugInfo && ConfigurationHandler.showDebugInfo) {
+        if (this.minecraft.gameSettings.showDebugInfo && SchematicaClientConfig.showDebugInfo) {
             final SchematicWorld schematic = ClientProxy.schematic;
             if (schematic != null && schematic.isRendering) {
                 final ArrayList<String> left = event.getLeft();

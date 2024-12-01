@@ -3,7 +3,7 @@ package com.github.lunatrius.schematica.client.gui.save;
 import com.github.lunatrius.core.client.gui.GuiNumericField;
 import com.github.lunatrius.core.client.gui.GuiScreenBase;
 import com.github.lunatrius.schematica.Schematica;
-import com.github.lunatrius.schematica.handler.ConfigurationHandler;
+import com.github.lunatrius.schematica.handler.SchematicaClientConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;
@@ -174,12 +174,12 @@ public class GuiSchematicSave extends GuiScreenBase {
             } else if (guiButton.id == this.btnSave.id) {
                 final String path = this.tfFilename.getText() + SchematicFormat.getExtension(this.format);
                 if (ClientProxy.isRenderingGuide) {
-                    if (Schematica.proxy.saveSchematic(this.mc.player, ConfigurationHandler.schematicDirectory, path, this.mc.world, this.format, ClientProxy.pointMin, ClientProxy.pointMax)) {
+                    if (Schematica.proxy.saveSchematic(this.mc.player, SchematicaClientConfig.schematicDirectoryPath, path, this.mc.world, this.format, ClientProxy.pointMin, ClientProxy.pointMax)) {
                         this.filename = "";
                         this.tfFilename.setText(this.filename);
                     }
                 } else {
-                    SchematicFormat.writeToFileAndNotify(new File(ConfigurationHandler.schematicDirectory, path), this.format, ClientProxy.schematic.getSchematic(), this.mc.player);
+                    SchematicFormat.writeToFileAndNotify(new File(SchematicaClientConfig.schematicDirectoryPath, path), this.format, ClientProxy.schematic.getSchematic(), this.mc.player);
                 }
             }
         }

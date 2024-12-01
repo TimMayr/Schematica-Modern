@@ -1,6 +1,5 @@
 package com.github.lunatrius.schematica.api;
 
-import jdk.nashorn.internal.ir.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
