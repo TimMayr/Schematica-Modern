@@ -29,7 +29,7 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 						.then(Commands.argument("to", BlockPosArgument.blockPos())
 								.then(Commands.argument("name", StringArgumentType.string())
 										.then(Commands.argument("format", StringArgumentType.string())
-												.executes((commandContext) -> {
+										              .executes((commandContext) -> {
 													CommandSource source = commandContext.getSource();
 													PlayerEntity player = source.asPlayer();
 													BlockPos fromBlock =

@@ -5,6 +5,7 @@ import com.github.lunatrius.schematica.api.event.PostSchematicCaptureEvent;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.MinecraftForge;
@@ -126,7 +127,7 @@ public abstract class SchematicFormat {
      * @param schematic The schematic to write
      * @param player The player to notify
      */
-    public static void writeToFileAndNotify(final File file, @Nullable final String format, final ISchematic schematic, final EntityPlayer player) {
+    public static void writeToFileAndNotify(final File file, @Nullable final String format, final ISchematic schematic, PlayerEntity player) {
         final boolean success = writeToFile(file, format, schematic);
         final String message = success ? Names.Command.Save.Message.SAVE_SUCCESSFUL : Names.Command.Save.Message.SAVE_FAILED;
         player.sendMessage(new TextComponentTranslation(message, file.getName()));

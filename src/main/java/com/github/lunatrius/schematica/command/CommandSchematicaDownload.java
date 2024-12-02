@@ -32,7 +32,8 @@ public class CommandSchematicaDownload extends CommandSchematicaBase {
 
 	public static void register(CommandDispatcher<CommandSource> dispatcher) {
 		dispatcher.register(Commands.literal(Names.Command.Download.NAME)
-				.then(Commands.argument("filename", StringArgumentType.string()).suggests(((context, builder) -> {
+				.then(Commands.argument("filename", StringArgumentType.string())
+				              .suggests(((context, builder) -> {
 					CommandSource source = context.getSource();
 					PlayerEntity player;
 					final String name = StringArgumentType.getString(context, "filename");

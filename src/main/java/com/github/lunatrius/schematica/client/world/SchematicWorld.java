@@ -3,6 +3,7 @@ package com.github.lunatrius.schematica.client.world;
 import com.github.lunatrius.core.util.math.BlockPosHelper;
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.block.state.BlockStateHelper;
 import com.github.lunatrius.schematica.block.state.pattern.BlockStateReplacer;
 import com.github.lunatrius.schematica.client.world.chunk.SchematicChunkProvider;
 import com.github.lunatrius.schematica.reference.Names;
@@ -51,23 +52,27 @@ public class SchematicWorld extends ClientWorld {
 	private ISchematic schematic;
 
 	@SuppressWarnings("DataFlowIssue")
-	public SchematicWorld(final ISchematic schematic) {
-		super(Minecraft.getInstance().getConnection(), WORLD_SETTINGS, DimensionType.OVERWORLD, 8,
-				Minecraft.getInstance().getProfiler(), Minecraft.getInstance().worldRenderer);
+	public SchematicWorld(ISchematic schematic) {
+		super(Minecraft.getInstance().getConnection(),
+		      WORLD_SETTINGS,
+		      DimensionType.OVERWORLD,
+		      8,
+		      Minecraft.getInstance().getProfiler(),
+		      Minecraft.getInstance().worldRenderer);
 		this.schematic = schematic;
 
-		for (final TileEntity tileEntity : schematic.getTileEntities()) {
+		for (TileEntity tileEntity : schematic.getTileEntities()) {
 			initializeTileEntity(tileEntity);
 		}
 	}
 
-	public void initializeTileEntity(final TileEntity tileEntity) {
+	public void initializeTileEntity(TileEntity tileEntity) {
 		tileEntity.setWorldAndPos(this, tileEntity.getPos());
 		tileEntity.getBlockState().getBlock();
 		try {
 			tileEntity.remove();
 			tileEntity.validate();
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			Reference.logger.error("TileEntity validation for {} failed!", tileEntity.getClass(), e);
 		}
 	}
@@ -78,7 +83,7 @@ public class SchematicWorld extends ClientWorld {
 	}
 
 	@Override
-	public BlockState getBlockState(final BlockPos pos) {
+	public BlockState getBlockState(BlockPos pos) {
 		if (!this.layerMode.shouldUseLayer(this, pos.getY())) {
 			return Blocks.AIR.getDefaultState();
 		}
@@ -88,7 +93,7 @@ public class SchematicWorld extends ClientWorld {
 
 	@Override
 	@Nullable
-	public TileEntity getTileEntity(final BlockPos pos) {
+	public TileEntity getTileEntity(BlockPos pos) {
 		if (!this.layerMode.shouldUseLayer(this, pos.getY())) {
 			return null;
 		}
@@ -97,7 +102,7 @@ public class SchematicWorld extends ClientWorld {
 	}
 
 	@Override
-	public void setTileEntity(final BlockPos pos, @Nullable final TileEntity tileEntity) {
+	public void setTileEntity(BlockPos pos, @Nullable TileEntity tileEntity) {
 		if (tileEntity != null) {
 			this.schematic.setTileEntity(pos, tileEntity);
 			initializeTileEntity(tileEntity);
@@ -105,7 +110,7 @@ public class SchematicWorld extends ClientWorld {
 	}
 
 	@Override
-	public void removeTileEntity(final BlockPos pos) {
+	public void removeTileEntity(BlockPos pos) {
 		this.schematic.removeTileEntity(pos);
 	}
 
@@ -116,12 +121,13 @@ public class SchematicWorld extends ClientWorld {
 	protected void calculateInitialWeather() {}
 
 	@Override
-	public void setSpawnPoint(final BlockPos pos) {}
+	public void setSpawnPoint(BlockPos pos) {}
 
-	public boolean isBlockNormalCube(final BlockPos pos, final boolean _default) {
+	public boolean isBlockNormalCube(BlockPos pos, boolean _default) {
 		Chunk chunk = getChunkAt(pos);
-		return getBlockState(pos).isNormalCube(
-				Objects.requireNonNull(getWorld().getBlockReader(chunk.getPos().x, chunk.getPos().z)), pos);
+		return getBlockState(pos).isNormalCube(Objects.requireNonNull(getWorld().getBlockReader(chunk.getPos().x,
+		                                                                                        chunk.getPos().z)),
+		                                       pos);
 	}
 
 	@Override
@@ -141,27 +147,27 @@ public class SchematicWorld extends ClientWorld {
 	}
 
 	@Override
-	public Biome getBiome(final BlockPos pos) {
+	public Biome getBiome(BlockPos pos) {
 		return Biomes.JUNGLE;
 	}
 
 	@Override
-	public boolean isAirBlock(final BlockPos pos) {
-		final IForgeBlockState blockState = getBlockState(pos);
+	public boolean isAirBlock(BlockPos pos) {
+		IForgeBlockState blockState = getBlockState(pos);
 		return blockState.getBlockState().getBlock().isAir(blockState.getBlockState(), this, pos);
 	}
 
 	@Override
 	@Nullable
-	public Entity getEntityByID(final int id) {
+	public Entity getEntityByID(int id) {
 		return null;
 	}
 
-	public boolean isSideSolid(final BlockPos pos, final Direction side) {
+	public boolean isSideSolid(BlockPos pos, Direction side) {
 		return isSideSolid(pos, side, false);
 	}
 
-	public boolean isSideSolid(final BlockPos pos, final Direction side, final boolean _default) {
+	public boolean isSideSolid(BlockPos pos, Direction side, boolean _default) {
 		return getBlockState(pos).isSolidSide(this, pos, side);
 	}
 
@@ -169,7 +175,7 @@ public class SchematicWorld extends ClientWorld {
 		return this.schematic;
 	}
 
-	public void setSchematic(final ISchematic schematic) {
+	public void setSchematic(ISchematic schematic) {
 		this.schematic = schematic;
 	}
 
@@ -177,7 +183,7 @@ public class SchematicWorld extends ClientWorld {
 		return this.schematic.getIcon();
 	}
 
-	public void setIcon(final ItemStack icon) {
+	public void setIcon(ItemStack icon) {
 		this.schematic.setIcon(icon);
 	}
 
@@ -203,13 +209,11 @@ public class SchematicWorld extends ClientWorld {
 	}
 
 	@SuppressWarnings({"rawtypes"})
-	public <T extends Comparable<T>> int replaceBlock(final BlockStateMatcher matcher,
-	                                                  final BlockStateReplacer replacer,
-	                                                  final Map<IProperty, Comparable> properties) {
+	public int replaceBlock(BlockStateMatcher matcher, BlockStateReplacer replacer) {
 		int count = 0;
 
-		for (final MBlockPos pos : BlockPosHelper.getAllInBox(0, 0, 0, getWidth(), getHeight(), getLength())) {
-			final BlockState blockState = this.schematic.getBlockState(pos);
+		for (MBlockPos pos : BlockPosHelper.getAllInBox(0, 0, 0, getWidth(), getHeight(), getLength())) {
+			BlockState blockState = this.schematic.getBlockState(pos);
 
 			// TODO: add support for tile entities?
 			if (blockState.getBlock().hasTileEntity(blockState)) {
@@ -217,7 +221,8 @@ public class SchematicWorld extends ClientWorld {
 			}
 
 			if (matcher.test(blockState)) {
-				final BlockState replacement = replacer.getReplacement(blockState, properties);
+				Map<IProperty, Comparable> properties = BlockStateHelper.getProperties(blockState);
+				BlockState replacement = replacer.getReplacement(blockState, properties);
 
 				// TODO: add support for tile entities?
 				if (replacement.getBlock().hasTileEntity(replacement)) {
@@ -234,10 +239,10 @@ public class SchematicWorld extends ClientWorld {
 		return count;
 	}
 
-	public boolean isInside(final BlockPos pos) {
-		final int x = pos.getX();
-		final int y = pos.getY();
-		final int z = pos.getZ();
+	public boolean isInside(BlockPos pos) {
+		int x = pos.getX();
+		int y = pos.getY();
+		int z = pos.getZ();
 
 		return !(x < 0 || y < 0 || z < 0 || x >= getWidth() || y >= getHeight() || z >= getLength());
 	}
@@ -245,19 +250,19 @@ public class SchematicWorld extends ClientWorld {
 	public enum LayerMode {
 		ALL(Names.Gui.Control.MODE_ALL) {
 			@Override
-			public boolean shouldUseLayer(final SchematicWorld world, final int layer) {
+			public boolean shouldUseLayer(SchematicWorld world, int layer) {
 				return true;
 			}
 		},
 		SINGLE_LAYER(Names.Gui.Control.MODE_LAYERS) {
 			@Override
-			public boolean shouldUseLayer(final SchematicWorld world, final int layer) {
+			public boolean shouldUseLayer(SchematicWorld world, int layer) {
 				return layer == world.renderingLayer;
 			}
 		},
 		ALL_BELOW(Names.Gui.Control.MODE_BELOW) {
 			@Override
-			public boolean shouldUseLayer(final SchematicWorld world, final int layer) {
+			public boolean shouldUseLayer(SchematicWorld world, int layer) {
 				return layer <= world.renderingLayer;
 			}
 		};
@@ -268,7 +273,7 @@ public class SchematicWorld extends ClientWorld {
 			this.name = name;
 		}
 
-		public static LayerMode next(final LayerMode mode) {
+		public static LayerMode next(LayerMode mode) {
 			LayerMode[] values = values();
 			return values[(mode.ordinal() + 1) % values.length];
 		}

@@ -17,7 +17,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.item.ItemBucket;
@@ -89,7 +91,7 @@ public class SchematicPrinter {
         this.syncBlacklist.clear();
     }
 
-    public boolean print(final WorldClient world, final EntityPlayerSP player) {
+    public boolean print(final ClientWorld world, final ClientPlayerEntity player) {
         final double dX = ClientProxy.playerPosition.x - this.schematic.position.x;
         final double dY = ClientProxy.playerPosition.y - this.schematic.position.y;
         final double dZ = ClientProxy.playerPosition.z - this.schematic.position.z;

@@ -1,10 +1,10 @@
 package com.github.lunatrius.schematica.client.printer.registry;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.block.BlockState;
+import net.minecraft.util.Direction;
 
 import java.util.List;
 
 public interface IValidBlockFacing {
-    List<EnumFacing> getValidBlockFacings(List<EnumFacing> solidSides, IBlockState blockState);
+	List<Direction> getValidBlockFacings(List<Direction> solidSides, BlockState blockState);
 }

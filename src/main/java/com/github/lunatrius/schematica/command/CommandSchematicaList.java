@@ -29,7 +29,8 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 
 	public static void register(CommandDispatcher<CommandSource> dispatcher) {
 		dispatcher.register(Commands.literal(Names.Command.List.NAME)
-				.then(Commands.argument("page", IntegerArgumentType.integer(1)).executes((commandContext) -> {
+				.then(Commands.argument("page", IntegerArgumentType.integer(1))
+				              .executes((commandContext) -> {
 					CommandSource source = commandContext.getSource();
 					ServerPlayerEntity player = source.asPlayer();
 					int page = IntegerArgumentType.getInteger(commandContext, "page");

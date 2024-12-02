@@ -7,25 +7,31 @@ import java.util.Comparator;
 import java.util.List;
 
 public enum ItemStackSortType {
-	NAME_ASC("name", "↑",
-			(final BlockList.WrappedItemStack wrappedItemStackA, final BlockList.WrappedItemStack wrappedItemStackB) -> {
-				final String nameA = wrappedItemStackA.getItemStackDisplayName();
-				final String nameB = wrappedItemStackB.getItemStackDisplayName();
+	NAME_ASC("name",
+	         "↑",
+	         (final BlockList.WrappedItemStack wrappedItemStackA, final BlockList.WrappedItemStack wrappedItemStackB) -> {
+		         final String nameA = wrappedItemStackA.getItemStackDisplayName();
+		         final String nameB = wrappedItemStackB.getItemStackDisplayName();
 
-				return nameA.compareTo(nameB);
-			}),
-	NAME_DESC("name", "↓",
-			(final BlockList.WrappedItemStack wrappedItemStackA, final BlockList.WrappedItemStack wrappedItemStackB) -> {
-				final String nameA = wrappedItemStackA.getItemStackDisplayName();
-				final String nameB = wrappedItemStackB.getItemStackDisplayName();
+		         return nameA.compareTo(nameB);
+	         }),
+	NAME_DESC("name",
+	          "↓",
+	          (final BlockList.WrappedItemStack wrappedItemStackA, final BlockList.WrappedItemStack wrappedItemStackB) -> {
+		          final String nameA = wrappedItemStackA.getItemStackDisplayName();
+		          final String nameB = wrappedItemStackB.getItemStackDisplayName();
 
-				return nameB.compareTo(nameA);
-			}),
-	SIZE_ASC("amount", "↑",
-			Comparator.comparingInt((BlockList.WrappedItemStack wrappedItemStackA) -> wrappedItemStackA.total)),
-	SIZE_DESC("amount", "↓",
-			(final BlockList.WrappedItemStack wrappedItemStackA, final BlockList.WrappedItemStack wrappedItemStackB) ->
-					wrappedItemStackB.total - wrappedItemStackA.total);
+		          return nameB.compareTo(nameA);
+	          }),
+	SIZE_ASC("amount",
+	         "↑",
+	         Comparator.comparingInt((BlockList.WrappedItemStack wrappedItemStackA) -> wrappedItemStackA.total)),
+	SIZE_DESC("amount",
+	          "↓",
+	          (final BlockList.WrappedItemStack wrappedItemStackA,
+	           final BlockList.WrappedItemStack wrappedItemStackB) ->
+			          wrappedItemStackB.total
+					          - wrappedItemStackA.total);
 
 	public final String label;
 	public final String glyph;

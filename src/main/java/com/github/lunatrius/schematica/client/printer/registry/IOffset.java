@@ -1,7 +1,7 @@
 package com.github.lunatrius.schematica.client.printer.registry;
 
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
 
 public interface IOffset {
-    float getOffset(IBlockState blockState);
+	float getOffset(BlockState blockState);
 }

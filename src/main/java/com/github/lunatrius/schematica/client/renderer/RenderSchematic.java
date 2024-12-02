@@ -54,6 +54,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.relauncher.Side;
@@ -71,11 +73,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-@SideOnly(Side.CLIENT)
+@OnlyIn(Dist.CLIENT)
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class RenderSchematic extends RenderGlobal {
-    public static final RenderSchematic INSTANCE = new RenderSchematic(Minecraft.getMinecraft());
+    public static final RenderSchematic INSTANCE = new RenderSchematic(Minecraft.getInstance());
 
     public static final int RENDER_DISTANCE = 32;
     public static final int CHUNKS_XZ = (RENDER_DISTANCE + 1) * 2;

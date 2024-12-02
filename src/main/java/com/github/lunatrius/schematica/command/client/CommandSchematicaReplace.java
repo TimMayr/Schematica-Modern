@@ -43,10 +43,8 @@ public class CommandSchematicaReplace extends CommandSchematicaBase {
 
 							try {
 								final BlockStateMatcher matcher = BlockStateMatcher.forBlock(toReplace.getBlock());
-								final BlockStateReplacer.BlockStateInfo properties =
-										BlockStateReplacer.fromBlockState(with);
 								final BlockStateReplacer replacer = BlockStateReplacer.forBlockState(with);
-								final int count = schematic.replaceBlock(matcher, replacer, properties.stateData);
+								final int count = schematic.replaceBlock(matcher, replacer);
 
 								source.sendFeedback(
 										new TranslationTextComponent(Names.Command.Replace.Message.SUCCESS, count),

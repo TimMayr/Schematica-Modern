@@ -4,34 +4,28 @@ import com.github.lunatrius.schematica.Schematica;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.handler.SchematicaClientConfig;
+import com.github.lunatrius.schematica.handler.SchematicaConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.EntityPlayerSP;
-import net.minecraft.client.multiplayer.WorldClient;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
-import net.minecraftforge.fml.common.network.FMLNetworkEvent;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.world.ClientWorld;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
+@Mod.EventBusSubscriber
 public class TickHandler {
     public static final TickHandler INSTANCE = new TickHandler();
 
-    private final Minecraft minecraft = Minecraft.getMinecraft();
+    private final Minecraft minecraft = Minecraft.getInstance();
 
     private int ticks = -1;
 
     private TickHandler() {}
 
     @SubscribeEvent
-    public void onClientConnect(final FMLNetworkEvent.ClientConnectedToServerEvent event) {
-        /* TODO: is this still needed?
-        Reference.logger.info("Scheduling client settings reset.");
-        ClientProxy.isPendingReset = true;
-        */
-    }
-
-    @SubscribeEvent
-    public void onClientDisconnect(final FMLNetworkEvent.ClientDisconnectionFromServerEvent event) {
+    public void onClientDisconnect(final FMLNetworkEvent event) {
         Reference.logger.info("Scheduling client settings reset.");
         ClientProxy.isPendingReset = true;
     }
@@ -42,28 +36,28 @@ public class TickHandler {
             return;
         }
 
-        this.minecraft.mcProfiler.startSection("schematica");
-        final WorldClient world = this.minecraft.world;
-        final EntityPlayerSP player = this.minecraft.player;
+        this.minecraft.getProfiler().startSection("schematica");
+        final ClientWorld world = this.minecraft.world;
+        final ClientPlayerEntity player = this.minecraft.player;
         final SchematicWorld schematic = ClientProxy.schematic;
         if (world != null && player != null && schematic != null && schematic.isRendering) {
-            this.minecraft.mcProfiler.startSection("printer");
+            this.minecraft.getProfiler().startSection("printer");
             final SchematicPrinter printer = SchematicPrinter.INSTANCE;
             if (printer.isEnabled() && printer.isPrinting() && this.ticks-- < 0) {
-                this.ticks = SchematicaClientConfig.placeDelay;
+                this.ticks = SchematicaConfig.SERVER.placeDelay.get();
 
                 printer.print(world, player);
             }
 
-            this.minecraft.mcProfiler.endSection();
+            this.minecraft.getProfiler().endSection();
         }
 
         if (ClientProxy.isPendingReset) {
-            Schematica.proxy.resetSettings();
+            Reference.proxy.resetSettings();
             ClientProxy.isPendingReset = false;
             Reference.logger.info("Client settings have been reset.");
         }
 
-        this.minecraft.mcProfiler.endSection();
+        this.minecraft.getProfiler().endSection();
     }
 }

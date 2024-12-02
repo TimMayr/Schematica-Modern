@@ -9,26 +9,12 @@ import net.minecraft.util.text.event.ClickEvent;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.ArrayList;
-import java.util.List;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public abstract class CommandSchematicaBase {
-	public static List<String> getListOfStringsMatchingLastWord(String[] args, List<String> possibilities) {
-		String lastWord = args[args.length - 1];
-		List<String> matches = new ArrayList<>();
-
-		for (String possibility : possibilities) {
-			if (possibility.startsWith(lastWord)) {
-				matches.add(possibility);
-			}
-		}
-
-		return matches;
-	}
-
-	protected static <T extends ITextComponent> T withStyle(final T component, final TextFormatting formatting,
+	protected static <T extends ITextComponent> T withStyle(final T component,
+	                                                        final TextFormatting formatting,
 	                                                        @Nullable final String command) {
 		final Style style = new Style();
 		style.setColor(formatting);
