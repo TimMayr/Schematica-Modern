@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -25,7 +26,7 @@ public class TickHandler {
     private TickHandler() {}
 
     @SubscribeEvent
-    public void onClientDisconnect(final FMLNetworkEvent event) {
+    public void onClientDisconnect(final PlayerEvent.PlayerLoggedOutEvent event) {
         Reference.logger.info("Scheduling client settings reset.");
         ClientProxy.isPendingReset = true;
     }
