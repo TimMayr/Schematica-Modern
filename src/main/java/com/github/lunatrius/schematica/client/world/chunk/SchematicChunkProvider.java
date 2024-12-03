@@ -24,7 +24,7 @@ public class SchematicChunkProvider extends ClientChunkProvider {
 	private final Chunk emptyChunk;
 	private final Map<Long, ChunkSchematic> chunks = new ConcurrentHashMap<>();
 
-	public SchematicChunkProvider(final SchematicWorld world) {
+	public SchematicChunkProvider(SchematicWorld world) {
 		super(world, 8);
 		this.world = world;
 		this.emptyChunk = new EmptyChunk(world, new ChunkPos(0, 0)) {
@@ -36,12 +36,12 @@ public class SchematicChunkProvider extends ClientChunkProvider {
 	}
 
 	@Override
-	public Chunk getChunkWithoutLoading(final int x, final int z) {
+	public Chunk getChunkWithoutLoading(int x, int z) {
 		if (!chunkExists(x, z)) {
 			return this.emptyChunk;
 		}
 
-		final long key = ChunkPos.asLong(x, z);
+		long key = ChunkPos.asLong(x, z);
 
 		ChunkSchematic chunk = this.chunks.get(key);
 		if (chunk == null) {
@@ -54,7 +54,7 @@ public class SchematicChunkProvider extends ClientChunkProvider {
 	}
 
 	@Override
-	public boolean chunkExists(final int x, final int z) {
+	public boolean chunkExists(int x, int z) {
 		return x >= 0 && z >= 0 && x < this.world.getWidth() && z < this.world.getLength();
 	}
 

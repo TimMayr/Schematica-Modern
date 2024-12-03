@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
 
 public class SchematicStructure extends SchematicFormat {
 	@Override
-	public ISchematic readFromNBT(final CompoundNBT tagCompound) {
-		final ItemStack icon = SchematicUtil.getIconFromNBT(tagCompound);
+	public ISchematic readFromNBT(CompoundNBT tagCompound) {
+		ItemStack icon = SchematicUtil.getIconFromNBT(tagCompound);
 
-		final Template template = new Template();
+		Template template = new Template();
 		template.read(tagCompound);
 
-		final Schematic schematic =
+		Schematic schematic =
 				new Schematic(icon, template.getSize().getX(), template.getSize().getY(), template.getSize().getZ(),
 				              template.getAuthor());
 
@@ -39,11 +39,11 @@ public class SchematicStructure extends SchematicFormat {
 						block.nbt.putInt("y", block.pos.getY());
 						block.nbt.putInt("z", block.pos.getZ());
 
-						final TileEntity tileEntity = NBTHelper.readTileEntityFromCompound(block.nbt);
+						TileEntity tileEntity = NBTHelper.readTileEntityFromCompound(block.nbt);
 						if (tileEntity != null) {
 							schematic.setTileEntity(block.pos, tileEntity);
 						}
-					} catch (final Exception e) {
+					} catch (Exception e) {
 						Reference.logger.error("TileEntity failed to load properly!", e);
 					}
 				}
@@ -59,7 +59,7 @@ public class SchematicStructure extends SchematicFormat {
 
 
 	@Override
-	public boolean writeToNBT(final CompoundNBT tagCompound, final ISchematic schematic) {
+	public boolean writeToNBT(CompoundNBT tagCompound, ISchematic schematic) {
 		Template template = new Template();
 		template.size = new BlockPos(schematic.getWidth(), schematic.getHeight(), schematic.getLength());
 
@@ -69,8 +69,8 @@ public class SchematicStructure extends SchematicFormat {
 		// NOTE: Can't use MutableBlockPos here because we're keeping a reference to it in BlockInfo
 		for (BlockPos pos : BlockPos.getAllInBox(BlockPos.ZERO, template.size.add(-1, -1, -1))
 		                            .collect(Collectors.toList())) {
-			final TileEntity tileEntity = schematic.getTileEntity(pos);
-			final CompoundNBT compound;
+			TileEntity tileEntity = schematic.getTileEntity(pos);
+			CompoundNBT compound;
 			if (tileEntity != null) {
 				compound = NBTHelper.writeTileEntityToCompound(tileEntity);
 				// Tile entities in structures don't store these coords
@@ -103,7 +103,7 @@ public class SchematicStructure extends SchematicFormat {
 				// }
 
 				template.entities.add(new Template.EntityInfo(vec3d, blockpos, CompoundNBT));
-			} catch (final Throwable t) {
+			} catch (Throwable t) {
 				Reference.logger.error("Entity {} failed to save, skipping!", entity, t);
 			}
 		}

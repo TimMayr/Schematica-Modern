@@ -39,8 +39,7 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 		                                          .suggests(((context, builder) -> {
 			                                          CommandSource source = context.getSource();
 			                                          PlayerEntity player;
-			                                          final String name =
-					                                          StringArgumentType.getString(context, "filename");
+			                                          String name = StringArgumentType.getString(context, "filename");
 
 			                                          try {
 				                                          player = source.asPlayer();
@@ -48,15 +47,15 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 				                                          return builder.buildFuture();
 			                                          }
 
-			                                          final File directory =
+			                                          File directory =
 					                                          Reference.proxy.getPlayerSchematicDirectory(player,
 					                                                                                      true);
-			                                          final File[] files = directory.listFiles(FILE_FILTER_SCHEMATIC);
+			                                          File[] files = directory.listFiles(FILE_FILTER_SCHEMATIC);
 
 			                                          if (files != null) {
-				                                          final List<String> filenames = new ArrayList<>();
+				                                          List<String> filenames = new ArrayList<>();
 
-				                                          for (final File file : files) {
+				                                          for (File file : files) {
 					                                          filenames.add(file.getName());
 				                                          }
 
@@ -79,10 +78,10 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 		CommandSource sender = context.getSource();
 		ServerPlayerEntity player = sender.asPlayer();
 
-		final File file = getSchematicFile(player, name);
+		File file = getSchematicFile(player, name);
 
 		if (actual.length() == 32) {
-			final String expected = DigestUtils.md5Hex(name);
+			String expected = DigestUtils.md5Hex(name);
 			if (actual.equals(expected)) {
 				if (file.delete()) {
 					sender.sendFeedback(
@@ -102,13 +101,13 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 		ServerPlayerEntity player = sender.asPlayer();
 		String name = StringArgumentType.getString(commandContext, "name");
 
-		final File file = getSchematicFile(player, name);
+		File file = getSchematicFile(player, name);
 
 
 		if (file.exists()) {
-			final String hash = DigestUtils.md5Hex(name);
-			final String confirmCommand = String.format("/%s %s %s", Names.Command.Remove.NAME, name, hash);
-			final ITextComponent chatComponent =
+			String hash = DigestUtils.md5Hex(name);
+			String confirmCommand = String.format("/%s %s %s", Names.Command.Remove.NAME, name, hash);
+			ITextComponent chatComponent =
 					new TranslationTextComponent(Names.Command.Remove.Message.ARE_YOU_SURE_START, name);
 			chatComponent.appendSibling(withStyle(TextComponentUtils.wrapInSquareBrackets(
 					                                      new TranslationTextComponent(Names.Command.Remove.Message.YES)), TextFormatting.RED,
@@ -122,8 +121,8 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 	}
 
 	private static File getSchematicFile(PlayerEntity player, String name) {
-		final File schematicDirectory = Reference.proxy.getPlayerSchematicDirectory(player, true);
-		final File file = new File(schematicDirectory, name);
+		File schematicDirectory = Reference.proxy.getPlayerSchematicDirectory(player, true);
+		File file = new File(schematicDirectory, name);
 
 		if (!FileUtils.contains(schematicDirectory, file)) {
 			Reference.logger.error("{} has tried to download the file {}", player.getName(), name);
@@ -134,7 +133,7 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 	}
 
 	@Override
-	public String getUsage(final ICommandSource sender) {
+	public String getUsage(ICommandSource sender) {
 		return Names.Command.Remove.Message.USAGE;
 	}
 }

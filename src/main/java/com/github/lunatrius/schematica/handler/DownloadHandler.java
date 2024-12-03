@@ -26,7 +26,7 @@ public class DownloadHandler {
 	private DownloadHandler() {}
 
 	@SubscribeEvent
-	public void onServerTick(final TickEvent.ServerTickEvent event) {
+	public void onServerTick(TickEvent.ServerTickEvent event) {
 		if (event.phase == TickEvent.Phase.START) {
 			return;
 		}
@@ -39,8 +39,8 @@ public class DownloadHandler {
 			return;
 		}
 
-		final ServerPlayerEntity player = this.transferMap.keySet().iterator().next();
-		final SchematicTransfer transfer = this.transferMap.remove(player);
+		ServerPlayerEntity player = this.transferMap.keySet().iterator().next();
+		SchematicTransfer transfer = this.transferMap.remove(player);
 
 		if (transfer == null) {
 			return;
@@ -70,24 +70,24 @@ public class DownloadHandler {
 		this.transferMap.put(player, transfer);
 	}
 
-	private void sendBegin(final ServerPlayerEntity player, final SchematicTransfer transfer) {
+	private void sendBegin(ServerPlayerEntity player, SchematicTransfer transfer) {
 		transfer.setState(SchematicTransfer.State.BEGIN);
 
-		final MessageDownloadBegin message = new MessageDownloadBegin(transfer.schematic);
+		MessageDownloadBegin message = new MessageDownloadBegin(transfer.schematic);
 		PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), message);
 	}
 
-	private void sendChunk(final ServerPlayerEntity player, final SchematicTransfer transfer) {
+	private void sendChunk(ServerPlayerEntity player, SchematicTransfer transfer) {
 		transfer.setState(SchematicTransfer.State.CHUNK);
 
 		Reference.logger.trace("Sending chunk {},{},{}", transfer.baseX, transfer.baseY, transfer.baseZ);
-		final MessageDownloadChunk message =
+		MessageDownloadChunk message =
 				new MessageDownloadChunk(transfer.schematic, transfer.baseX, transfer.baseY, transfer.baseZ);
 		PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), message);
 	}
 
-	private void sendEnd(final ServerPlayerEntity player, final SchematicTransfer transfer) {
-		final MessageDownloadEnd message = new MessageDownloadEnd(transfer.name);
+	private void sendEnd(ServerPlayerEntity player, SchematicTransfer transfer) {
+		MessageDownloadEnd message = new MessageDownloadEnd(transfer.name);
 		PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), message);
 	}
 }

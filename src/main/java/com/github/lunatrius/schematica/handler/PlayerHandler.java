@@ -17,20 +17,21 @@ public class PlayerHandler {
 	private PlayerHandler() {}
 
 	@SubscribeEvent
-	public void onPlayerLoggedIn(final PlayerEvent.PlayerLoggedInEvent event) {
+	public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
 		if (event.getPlayer() instanceof PlayerEntity) {
 			try {
 				PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) event.getPlayer()),
-						new MessageCapabilities(SchematicaConfig.SERVER.printerEnabled.get(),
-								SchematicaConfig.SERVER.saveEnabled.get(), SchematicaConfig.SERVER.loadEnabled.get()));
-			} catch (final Exception ex) {
+				                            new MessageCapabilities(SchematicaConfig.SERVER.printerEnabled.get(),
+				                                                    SchematicaConfig.SERVER.saveEnabled.get(),
+				                                                    SchematicaConfig.SERVER.loadEnabled.get()));
+			} catch (Exception ex) {
 				Reference.logger.error("Failed to send capabilities!", ex);
 			}
 		}
 	}
 
 	@SubscribeEvent
-	public void onPlayerLoggedOut(final PlayerEvent.PlayerLoggedOutEvent event) {
+	public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
 		if (event.getPlayer() instanceof PlayerEntity) {
 			DownloadHandler.INSTANCE.transferMap.remove(event.getPlayer());
 		}

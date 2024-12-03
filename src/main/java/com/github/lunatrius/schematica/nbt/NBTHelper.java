@@ -15,35 +15,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NBTHelper {
-	public static List<TileEntity> readTileEntitiesFromCompound(final CompoundNBT compound) {
+	public static List<TileEntity> readTileEntitiesFromCompound(CompoundNBT compound) {
 		return readTileEntitiesFromCompound(compound, new ArrayList<>());
 	}
 
-	public static List<TileEntity> readTileEntitiesFromCompound(final CompoundNBT compound,
-	                                                            final List<TileEntity> tileEntities) {
-		final ListNBT tagList = compound.getList(Names.NBT.TILE_ENTITIES, Constants.NBT.TAG_COMPOUND);
+	public static List<TileEntity> readTileEntitiesFromCompound(CompoundNBT compound, List<TileEntity> tileEntities) {
+		ListNBT tagList = compound.getList(Names.NBT.TILE_ENTITIES, Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < tagList.size(); i++) {
-			final CompoundNBT tileEntityCompound = tagList.getCompound(i);
-			final TileEntity tileEntity = readTileEntityFromCompound(tileEntityCompound);
+			CompoundNBT tileEntityCompound = tagList.getCompound(i);
+			TileEntity tileEntity = readTileEntityFromCompound(tileEntityCompound);
 			tileEntities.add(tileEntity);
 		}
 
 		return tileEntities;
 	}
 
-	public static TileEntity readTileEntityFromCompound(final CompoundNBT tileEntityCompound) {
+	public static TileEntity readTileEntityFromCompound(CompoundNBT tileEntityCompound) {
 		return TileEntity.create(tileEntityCompound);
 	}
 
-	public static CompoundNBT writeTileEntitiesToCompound(final List<TileEntity> tileEntities) {
+	public static CompoundNBT writeTileEntitiesToCompound(List<TileEntity> tileEntities) {
 		return writeTileEntitiesToCompound(tileEntities, new CompoundNBT());
 	}
 
-	public static CompoundNBT writeTileEntitiesToCompound(final List<TileEntity> tileEntities,
-	                                                      final CompoundNBT compound) {
-		final ListNBT tagList = new ListNBT();
-		for (final TileEntity tileEntity : tileEntities) {
-			final CompoundNBT tileEntityCompound = writeTileEntityToCompound(tileEntity);
+	public static CompoundNBT writeTileEntitiesToCompound(List<TileEntity> tileEntities, CompoundNBT compound) {
+		ListNBT tagList = new ListNBT();
+		for (TileEntity tileEntity : tileEntities) {
+			CompoundNBT tileEntityCompound = writeTileEntityToCompound(tileEntity);
 			tagList.add(tileEntityCompound);
 		}
 
@@ -52,22 +50,21 @@ public class NBTHelper {
 		return compound;
 	}
 
-	public static CompoundNBT writeTileEntityToCompound(final TileEntity tileEntity) {
-		final CompoundNBT tileEntityCompound = new CompoundNBT();
+	public static CompoundNBT writeTileEntityToCompound(TileEntity tileEntity) {
+		CompoundNBT tileEntityCompound = new CompoundNBT();
 		tileEntity.write(tileEntityCompound);
 		return tileEntityCompound;
 	}
 
-	public static List<Entity> readEntitiesFromCompound(final CompoundNBT compound) {
+	public static List<Entity> readEntitiesFromCompound(CompoundNBT compound) {
 		return readEntitiesFromCompound(compound, null, new ArrayList<>());
 	}
 
-	public static List<Entity> readEntitiesFromCompound(final CompoundNBT compound, final World world,
-	                                                    final List<Entity> entities) {
-		final ListNBT tagList = compound.getList(Names.NBT.ENTITIES, Constants.NBT.TAG_COMPOUND);
+	public static List<Entity> readEntitiesFromCompound(CompoundNBT compound, World world, List<Entity> entities) {
+		ListNBT tagList = compound.getList(Names.NBT.ENTITIES, Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < tagList.size(); i++) {
-			final CompoundNBT entityCompound = tagList.getCompound(i);
-			final Entity entity = readEntityFromCompound(entityCompound, world);
+			CompoundNBT entityCompound = tagList.getCompound(i);
+			Entity entity = readEntityFromCompound(entityCompound, world);
 			if (entity != null) {
 				entities.add(entity);
 			}
@@ -76,26 +73,26 @@ public class NBTHelper {
 		return entities;
 	}
 
-	public static Entity readEntityFromCompound(final CompoundNBT nbtTagCompound, final World world) {
+	public static Entity readEntityFromCompound(CompoundNBT nbtTagCompound, World world) {
 		return EntityType.loadEntityUnchecked(nbtTagCompound, world).orElse(null);
 	}
 
-	public static List<Entity> readEntitiesFromCompound(final CompoundNBT compound, final World world) {
+	public static List<Entity> readEntitiesFromCompound(CompoundNBT compound, World world) {
 		return readEntitiesFromCompound(compound, world, new ArrayList<>());
 	}
 
-	public static List<Entity> readEntitiesFromCompound(final CompoundNBT compound, final List<Entity> entities) {
+	public static List<Entity> readEntitiesFromCompound(CompoundNBT compound, List<Entity> entities) {
 		return readEntitiesFromCompound(compound, null, entities);
 	}
 
-	public static CompoundNBT writeEntitiesToCompound(final List<Entity> entities) {
+	public static CompoundNBT writeEntitiesToCompound(List<Entity> entities) {
 		return writeEntitiesToCompound(entities, new CompoundNBT());
 	}
 
-	public static CompoundNBT writeEntitiesToCompound(final List<Entity> entities, final CompoundNBT compound) {
-		final ListNBT tagList = new ListNBT();
-		for (final Entity entity : entities) {
-			final CompoundNBT entityCompound = new CompoundNBT();
+	public static CompoundNBT writeEntitiesToCompound(List<Entity> entities, CompoundNBT compound) {
+		ListNBT tagList = new ListNBT();
+		for (Entity entity : entities) {
+			CompoundNBT entityCompound = new CompoundNBT();
 			entity.writeUnlessPassenger(entityCompound);
 			tagList.add(entityCompound);
 		}
@@ -105,57 +102,57 @@ public class NBTHelper {
 		return compound;
 	}
 
-	public static TileEntity reloadTileEntity(final TileEntity tileEntity) throws NBTConversionException {
+	public static TileEntity reloadTileEntity(TileEntity tileEntity) throws NBTConversionException {
 		return reloadTileEntity(tileEntity, 0, 0, 0);
 	}
 
-	public static TileEntity reloadTileEntity(TileEntity tileEntity, final int offsetX, final int offsetY,
-	                                          final int offsetZ) throws NBTConversionException {
+	public static TileEntity reloadTileEntity(TileEntity tileEntity, int offsetX, int offsetY, int offsetZ)
+			throws NBTConversionException {
 		if (tileEntity == null) {
 			return null;
 		}
 
 		try {
-			final CompoundNBT tileEntityCompound = writeTileEntityToCompound(tileEntity);
+			CompoundNBT tileEntityCompound = writeTileEntityToCompound(tileEntity);
 			tileEntity = readTileEntityFromCompound(tileEntityCompound);
-			final BlockPos pos = tileEntity.getPos();
+			BlockPos pos = tileEntity.getPos();
 			tileEntity.setPos(pos.add(-offsetX, -offsetY, -offsetZ));
-		} catch (final Throwable t) {
+		} catch (Throwable t) {
 			throw new NBTConversionException(tileEntity, t);
 		}
 
 		return tileEntity;
 	}
 
-	public static Entity reloadEntity(final Entity entity) throws NBTConversionException {
+	public static Entity reloadEntity(Entity entity) throws NBTConversionException {
 		return reloadEntity(entity, 0, 0, 0);
 	}
 
-	public static Entity reloadEntity(Entity entity, final int offsetX, final int offsetY, final int offsetZ)
+	public static Entity reloadEntity(Entity entity, int offsetX, int offsetY, int offsetZ)
 			throws NBTConversionException {
 		if (entity == null) {
 			return null;
 		}
 
 		try {
-			final CompoundNBT entityCompound = writeEntityToCompound(entity);
+			CompoundNBT entityCompound = writeEntityToCompound(entity);
 			if (entityCompound != null) {
 				entity = readEntityFromCompound(entityCompound, WorldDummy.instance());
 
 				if (entity != null) {
 					entity.setPosition(entity.getPosX() - offsetX, entity.getPosY() - offsetY,
-							entity.getPosZ() - offsetZ);
+					                   entity.getPosZ() - offsetZ);
 				}
 			}
-		} catch (final Throwable t) {
+		} catch (Throwable t) {
 			throw new NBTConversionException(entity, t);
 		}
 
 		return entity;
 	}
 
-	public static CompoundNBT writeEntityToCompound(final Entity entity) {
-		final CompoundNBT entityCompound = new CompoundNBT();
+	public static CompoundNBT writeEntityToCompound(Entity entity) {
+		CompoundNBT entityCompound = new CompoundNBT();
 		if (entity.writeUnlessPassenger(entityCompound)) {
 			return entityCompound;
 		}

@@ -10,26 +10,27 @@ import net.minecraft.world.ChunkCache;
 import net.minecraft.world.World;
 
 public class SchematicRenderCache extends ChunkCache {
-    private final Minecraft minecraft = Minecraft.getMinecraft();
+	private final Minecraft minecraft = Minecraft.getMinecraft();
 
-    public SchematicRenderCache(final World world, final BlockPos from, final BlockPos to, final int subtract) {
-        super(world, from, to, subtract);
-    }
+	public SchematicRenderCache(World world, BlockPos from, BlockPos to, int subtract) {
+		super(world, from, to, subtract);
+	}
 
-    @Override
-    public IBlockState getBlockState(final BlockPos pos) {
-        final BlockPos schPos = ClientProxy.schematic.position;
-        if (schPos == null) {
-            return Blocks.AIR.getDefaultState();
-        }
+	@Override
+	public IBlockState getBlockState(BlockPos pos) {
+		BlockPos schPos = ClientProxy.schematic.position;
+		if (schPos == null) {
+			return Blocks.AIR.getDefaultState();
+		}
 
-        final BlockPos realPos = pos.add(schPos);
-        final World world = this.minecraft.world;
+		BlockPos realPos = pos.add(schPos);
+		World world = this.minecraft.world;
 
-        if (world == null || !world.isAirBlock(realPos) && !SchematicaClientConfig.isExtraAirBlock(world.getBlockState(realPos).getBlock())) {
-            return Blocks.AIR.getDefaultState();
-        }
+		if (world == null || !world.isAirBlock(realPos) && !SchematicaClientConfig.isExtraAirBlock(
+				world.getBlockState(realPos).getBlock())) {
+			return Blocks.AIR.getDefaultState();
+		}
 
-        return super.getBlockState(pos);
-    }
+		return super.getBlockState(pos);
+	}
 }

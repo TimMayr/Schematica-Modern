@@ -18,9 +18,9 @@ public class BlockStateReplacer {
 	}
 
 	public static BlockStateMatcher getMatcher(BlockState blockState) {
-		final BlockStateMatcher matcher = BlockStateMatcher.forBlock(blockState.getBlock());
+		BlockStateMatcher matcher = BlockStateMatcher.forBlock(blockState.getBlock());
 
-		for (final IProperty<?> property : blockState.getProperties()) {
+		for (IProperty<?> property : blockState.getProperties()) {
 			matcher.where(property, input -> input != null && input.equals(property));
 		}
 

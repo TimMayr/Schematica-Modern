@@ -4,27 +4,27 @@ import net.minecraft.client.renderer.chunk.CompiledChunk;
 import net.minecraft.util.BlockRenderLayer;
 
 public class CompiledOverlay extends CompiledChunk {
-    @Override
-    public void setLayerStarted(final BlockRenderLayer layer) {
-        if (layer == BlockRenderLayer.TRANSLUCENT) {
-            super.setLayerStarted(layer);
-        }
-    }
+	@Override
+	public void setLayerStarted(BlockRenderLayer layer) {
+		if (layer == BlockRenderLayer.TRANSLUCENT) {
+			super.setLayerStarted(layer);
+		}
+	}
 
-    @Override
-    public void setLayerUsed(final BlockRenderLayer layer) {
-        if (layer == BlockRenderLayer.TRANSLUCENT) {
-            super.setLayerUsed(layer);
-        }
-    }
+	@Override
+	public void setLayerUsed(BlockRenderLayer layer) {
+		if (layer == BlockRenderLayer.TRANSLUCENT) {
+			super.setLayerUsed(layer);
+		}
+	}
 
-    @Override
-    public boolean isLayerStarted(final BlockRenderLayer layer) {
-        return layer == BlockRenderLayer.TRANSLUCENT && super.isLayerStarted(layer);
-    }
+	@Override
+	public boolean isLayerStarted(BlockRenderLayer layer) {
+		return layer == BlockRenderLayer.TRANSLUCENT && super.isLayerStarted(layer);
+	}
 
-    @Override
-    public boolean isLayerEmpty(final BlockRenderLayer layer) {
-        return layer == BlockRenderLayer.TRANSLUCENT && super.isLayerEmpty(layer);
-    }
+	@Override
+	public boolean isLayerEmpty(BlockRenderLayer layer) {
+		return layer == BlockRenderLayer.TRANSLUCENT && super.isLayerEmpty(layer);
+	}
 }

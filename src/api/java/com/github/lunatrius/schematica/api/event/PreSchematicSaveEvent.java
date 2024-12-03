@@ -2,7 +2,6 @@ package com.github.lunatrius.schematica.api.event;
 
 import com.github.lunatrius.schematica.api.ISchematic;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -14,22 +13,22 @@ import java.util.Map;
  * Register to this event using MinecraftForge.EVENT_BUS
  */
 public class PreSchematicSaveEvent extends Event {
+	private final Map<String, Block> mappings;
 	/**
 	 * The schematic that will be saved.
 	 */
-	public final ISchematic schematic;
+	public ISchematic schematic;
 	/**
 	 * The Extended Metadata tag compound provides a facility to add custom metadata to the schematic.
 	 */
-	public final CompoundNBT extendedMetadata;
-	private final Map<String, Block> mappings;
+	public CompoundNBT extendedMetadata;
 
 	@Deprecated
-	public PreSchematicSaveEvent(final Map<String, Block> mappings) {
+	public PreSchematicSaveEvent(Map<String, Block> mappings) {
 		this(null, mappings);
 	}
 
-	public PreSchematicSaveEvent(final ISchematic schematic, final Map<String, Block> mappings) {
+	public PreSchematicSaveEvent(ISchematic schematic, Map<String, Block> mappings) {
 		this.schematic = schematic;
 		this.mappings = mappings;
 		this.extendedMetadata = new CompoundNBT();
@@ -52,8 +51,9 @@ public class PreSchematicSaveEvent extends Event {
 	 * @return true if a mapping was replaced.
 	 *
 	 * @throws DuplicateMappingException
+	 * 		If the mapping already exists
 	 */
-	public boolean replaceMapping(final String oldName, final String newName) throws DuplicateMappingException {
+	public boolean replaceMapping(String oldName, String newName) throws DuplicateMappingException {
 		if (this.mappings.containsKey(newName)) {
 			throw new DuplicateMappingException(String.format(
 					"Could not replace block type %s, the block type %s already exists in the " + "schematic.",
@@ -61,7 +61,7 @@ public class PreSchematicSaveEvent extends Event {
 					newName));
 		}
 
-		final Block id = this.mappings.get(oldName);
+		Block id = this.mappings.get(oldName);
 		if (id != null) {
 			this.mappings.remove(oldName);
 			this.mappings.put(newName, id);

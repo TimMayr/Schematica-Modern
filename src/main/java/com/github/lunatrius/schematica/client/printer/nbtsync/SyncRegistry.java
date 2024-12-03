@@ -6,25 +6,25 @@ import net.minecraft.init.Blocks;
 import java.util.HashMap;
 
 public class SyncRegistry {
-    public static final SyncRegistry INSTANCE = new SyncRegistry();
+	public static final SyncRegistry INSTANCE = new SyncRegistry();
 
-    private HashMap<Block, NBTSync> map = new HashMap<Block, NBTSync>();
+	static {
+		INSTANCE.register(Blocks.COMMAND_BLOCK, new NBTSyncCommandBlock());
+		INSTANCE.register(Blocks.STANDING_SIGN, new NBTSyncSign());
+		INSTANCE.register(Blocks.WALL_SIGN, new NBTSyncSign());
+	}
 
-    public void register(final Block block, final NBTSync handler) {
-        if (block == null || handler == null) {
-            return;
-        }
+	private final HashMap<Block, NBTSync> map = new HashMap<Block, NBTSync>();
 
-        this.map.put(block, handler);
-    }
+	public void register(Block block, NBTSync handler) {
+		if (block == null || handler == null) {
+			return;
+		}
 
-    public NBTSync getHandler(final Block block) {
-        return this.map.get(block);
-    }
+		this.map.put(block, handler);
+	}
 
-    static {
-        INSTANCE.register(Blocks.COMMAND_BLOCK, new NBTSyncCommandBlock());
-        INSTANCE.register(Blocks.STANDING_SIGN, new NBTSyncSign());
-        INSTANCE.register(Blocks.WALL_SIGN, new NBTSyncSign());
-    }
+	public NBTSync getHandler(Block block) {
+		return this.map.get(block);
+	}
 }

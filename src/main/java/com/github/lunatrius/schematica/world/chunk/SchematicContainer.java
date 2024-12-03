@@ -33,10 +33,8 @@ public class SchematicContainer {
 	public int curChunkZ;
 	public int processedChunks;
 
-	public SchematicContainer(final ISchematic schematic, final PlayerEntity player, final World world,
-	                          final File file,
-	                          @Nullable final String format, final int minX, final int maxX, final int minY,
-	                          final int maxY, final int minZ, final int maxZ) {
+	public SchematicContainer(ISchematic schematic, PlayerEntity player, World world, File file,
+	                          @Nullable String format, int minX, int maxX, int minY, int maxY, int minZ, int maxZ) {
 		this.schematic = schematic;
 		this.player = player;
 		this.world = world;
@@ -67,9 +65,9 @@ public class SchematicContainer {
 		}
 
 		Reference.logger.debug("Copying chunk at [{},{}] into {}", this.curChunkX, this.curChunkZ,
-				this.file.getName());
+		                       this.file.getName());
 		Reference.proxy.copyChunkToSchematic(this.schematic, this.world, this.curChunkX, this.curChunkZ, this.minX,
-				this.maxX, this.minY, this.maxY, this.minZ, this.maxZ);
+		                                     this.maxX, this.minY, this.maxY, this.minZ, this.maxZ);
 
 		this.processedChunks++;
 		this.curChunkX++;

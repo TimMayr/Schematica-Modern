@@ -10,12 +10,12 @@ import java.util.Locale;
 public class FileFilterSchematic implements FileFilter {
 	private final boolean directory;
 
-	public FileFilterSchematic(final boolean dir) {
+	public FileFilterSchematic(boolean dir) {
 		this.directory = dir;
 	}
 
 	@Override
-	public boolean accept(final File file) {
+	public boolean accept(File file) {
 		if (this.directory) {
 			return file.isDirectory();
 		}

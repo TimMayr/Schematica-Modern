@@ -21,25 +21,26 @@ import java.util.zip.GZIPOutputStream;
 public abstract class SchematicFormat {
 	// LinkedHashMap to ensure defined iteration order
 	public static final Map<String, SchematicFormat> FORMATS = new LinkedHashMap<>();
-	public static String FORMAT_DEFAULT;
+	public static final String FORMAT_DEFAULT;
 
 	static {
 		FORMATS.put(Names.NBT.FORMAT_ALPHA, new SchematicAlpha());
+		//noinspection StaticInitializerReferencesSubClass
 		FORMATS.put(Names.NBT.FORMAT_STRUCTURE, new SchematicStructure());
 
 		FORMAT_DEFAULT = Names.NBT.FORMAT_ALPHA;
 	}
 
-	public static ISchematic readFromFile(final File directory, final String filename) {
+	public static ISchematic readFromFile(File directory, String filename) {
 		return readFromFile(new File(directory, filename));
 	}
 
-	public static ISchematic readFromFile(final File file) {
+	public static ISchematic readFromFile(File file) {
 		try {
-			final CompoundNBT tagCompound = SchematicUtil.readTagCompoundFromFile(file);
-			final SchematicFormat schematicFormat;
+			CompoundNBT tagCompound = SchematicUtil.readTagCompoundFromFile(file);
+			SchematicFormat schematicFormat;
 			if (tagCompound.hasUniqueId(Names.NBT.MATERIALS)) {
-				final String format = tagCompound.getString(Names.NBT.MATERIALS);
+				String format = tagCompound.getString(Names.NBT.MATERIALS);
 				schematicFormat = FORMATS.get(format);
 
 				if (schematicFormat == null) {
@@ -50,7 +51,7 @@ public abstract class SchematicFormat {
 			}
 
 			return schematicFormat.readFromNBT(tagCompound);
-		} catch (final Exception ex) {
+		} catch (Exception ex) {
 			Reference.logger.error("Failed to read schematic!", ex);
 		}
 
@@ -73,8 +74,7 @@ public abstract class SchematicFormat {
 	 *
 	 * @return True if successful
 	 */
-	public static boolean writeToFile(final File directory, final String filename, @Nullable final String format,
-	                                  final ISchematic schematic) {
+	public static boolean writeToFile(File directory, String filename, @Nullable String format, ISchematic schematic) {
 		return writeToFile(new File(directory, filename), format, schematic);
 	}
 
@@ -90,7 +90,7 @@ public abstract class SchematicFormat {
 	 *
 	 * @return True if successful
 	 */
-	public static boolean writeToFile(final File file, @Nullable String format, final ISchematic schematic) {
+	public static boolean writeToFile(File file, @Nullable String format, ISchematic schematic) {
 		try {
 			if (format == null) {
 				format = FORMAT_DEFAULT;
@@ -100,10 +100,10 @@ public abstract class SchematicFormat {
 				throw new UnsupportedFormatException(format);
 			}
 
-			final PostSchematicCaptureEvent event = new PostSchematicCaptureEvent(schematic);
+			PostSchematicCaptureEvent event = new PostSchematicCaptureEvent(schematic);
 			MinecraftForge.EVENT_BUS.post(event);
 
-			final CompoundNBT tagCompound = new CompoundNBT();
+			CompoundNBT tagCompound = new CompoundNBT();
 
 			FORMATS.get(format).writeToNBT(tagCompound, schematic);
 
@@ -113,7 +113,7 @@ public abstract class SchematicFormat {
 			}
 
 			return true;
-		} catch (final Exception ex) {
+		} catch (Exception ex) {
 			Reference.logger.error("Failed to write schematic!", ex);
 		}
 
@@ -134,11 +134,10 @@ public abstract class SchematicFormat {
 	 * @param player
 	 * 		The player to notify
 	 */
-	public static void writeToFileAndNotify(final File file, @Nullable final String format, final ISchematic schematic,
+	public static void writeToFileAndNotify(File file, @Nullable String format, ISchematic schematic,
 	                                        PlayerEntity player) {
-		final boolean success = writeToFile(file, format, schematic);
-		final String message =
-				success ? Names.Command.Save.Message.SAVE_SUCCESSFUL : Names.Command.Save.Message.SAVE_FAILED;
+		boolean success = writeToFile(file, format, schematic);
+		String message = success ? Names.Command.Save.Message.SAVE_SUCCESSFUL : Names.Command.Save.Message.SAVE_FAILED;
 		player.sendMessage(new TranslationTextComponent(message, file.getName()));
 	}
 
@@ -151,7 +150,7 @@ public abstract class SchematicFormat {
 	 * @param format
 	 * 		The format.
 	 */
-	public static String getFormatName(final String format) {
+	public static String getFormatName(String format) {
 		if (!FORMATS.containsKey(format)) {
 			Reference.logger.warn("No format with id {}; returning invalid for name", format,
 			                      new UnsupportedFormatException(format).fillInStackTrace());

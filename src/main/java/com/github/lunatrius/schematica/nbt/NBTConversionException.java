@@ -4,15 +4,15 @@ import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 
 public class NBTConversionException extends Exception {
-    public NBTConversionException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
+	public NBTConversionException(String message, Throwable cause) {
+		super(message, cause);
+	}
 
-    public NBTConversionException(final TileEntity tileEntity, final Throwable cause) {
-        super(String.valueOf(tileEntity), cause);
-    }
+	public NBTConversionException(TileEntity tileEntity, Throwable cause) {
+		super(String.valueOf(tileEntity), cause);
+	}
 
-    public NBTConversionException(final Entity entity, final Throwable cause) {
-        super(String.valueOf(entity), cause);
-    }
+	public NBTConversionException(Entity entity, Throwable cause) {
+		super(String.valueOf(entity), cause);
+	}
 }

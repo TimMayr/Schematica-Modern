@@ -27,8 +27,6 @@ import org.lwjgl.glfw.GLFW;
 
 @Mod.EventBusSubscriber
 public class InputHandler {
-	public static final InputHandler INSTANCE = new InputHandler();
-
 	private static final KeyBinding KEY_BINDING_LOAD =
 			new KeyBinding(Names.Keys.LOAD, GLFW.GLFW_KEY_KP_DIVIDE, Names.Keys.CATEGORY);
 	private static final KeyBinding KEY_BINDING_SAVE =
@@ -47,13 +45,10 @@ public class InputHandler {
 			new KeyBinding(Names.Keys.PRINTER_TOGGLE, GLFW.GLFW_KEY_UNKNOWN, Names.Keys.CATEGORY);
 	private static final KeyBinding KEY_BINDING_MOVE_HERE =
 			new KeyBinding(Names.Keys.MOVE_HERE, GLFW.GLFW_KEY_UNKNOWN, Names.Keys.CATEGORY);
-	private static final KeyBinding KEY_BINDING_PICK_BLOCK = new KeyBinding(Names.Keys.PICK_BLOCK,
-	                                                                        KeyConflictContext.IN_GAME,
-	                                                                        KeyModifier.SHIFT,
-	                                                                        InputMappings.Type.KEYSYM,
-	                                                                        -98,
-	                                                                        Names.Keys.CATEGORY);
-
+	private static final KeyBinding KEY_BINDING_PICK_BLOCK =
+			new KeyBinding(Names.Keys.PICK_BLOCK, KeyConflictContext.IN_GAME, KeyModifier.SHIFT,
+			               InputMappings.Type.KEYSYM, -98, Names.Keys.CATEGORY);
+	public static final InputHandler INSTANCE = new InputHandler();
 	public static final KeyBinding[] KEY_BINDINGS = new KeyBinding[] {KEY_BINDING_LOAD,
 	                                                                  KEY_BINDING_SAVE,
 	                                                                  KEY_BINDING_CONTROL,
@@ -70,7 +65,7 @@ public class InputHandler {
 	private InputHandler() {}
 
 	@SubscribeEvent
-	public void onKeyInput(final InputEvent event) {
+	public void onKeyInput(InputEvent event) {
 		if (this.minecraft.currentScreen == null) {
 			if (KEY_BINDING_LOAD.isPressed()) {
 				this.minecraft.displayGuiScreen(new GuiSchematicLoad(this.minecraft.currentScreen));
@@ -85,7 +80,7 @@ public class InputHandler {
 			}
 
 			if (KEY_BINDING_LAYER_INC.isPressed()) {
-				final SchematicWorld schematic = ClientProxy.schematic;
+				SchematicWorld schematic = ClientProxy.schematic;
 				if (schematic != null && schematic.layerMode != LayerMode.ALL) {
 					schematic.renderingLayer =
 							MathHelper.clamp(schematic.renderingLayer + 1, 0, schematic.getHeight() - 1);
@@ -94,7 +89,7 @@ public class InputHandler {
 			}
 
 			if (KEY_BINDING_LAYER_DEC.isPressed()) {
-				final SchematicWorld schematic = ClientProxy.schematic;
+				SchematicWorld schematic = ClientProxy.schematic;
 				if (schematic != null && schematic.layerMode != LayerMode.ALL) {
 					schematic.renderingLayer =
 							MathHelper.clamp(schematic.renderingLayer - 1, 0, schematic.getHeight() - 1);
@@ -103,7 +98,7 @@ public class InputHandler {
 			}
 
 			if (KEY_BINDING_LAYER_TOGGLE.isPressed()) {
-				final SchematicWorld schematic = ClientProxy.schematic;
+				SchematicWorld schematic = ClientProxy.schematic;
 				if (schematic != null) {
 					schematic.layerMode = LayerMode.next(schematic.layerMode);
 					RenderSchematic.INSTANCE.refresh();
@@ -111,7 +106,7 @@ public class InputHandler {
 			}
 
 			if (KEY_BINDING_RENDER_TOGGLE.isPressed()) {
-				final SchematicWorld schematic = ClientProxy.schematic;
+				SchematicWorld schematic = ClientProxy.schematic;
 				if (schematic != null) {
 					schematic.isRendering = !schematic.isRendering;
 					RenderSchematic.INSTANCE.refresh();
@@ -120,7 +115,7 @@ public class InputHandler {
 
 			if (KEY_BINDING_PRINTER_TOGGLE.isPressed()) {
 				if (ClientProxy.schematic != null) {
-					final boolean printing = SchematicPrinter.INSTANCE.togglePrinting();
+					boolean printing = SchematicPrinter.INSTANCE.togglePrinting();
 					if (this.minecraft.player != null) {
 						this.minecraft.player.sendMessage(new TranslationTextComponent(Names.Messages.TOGGLE_PRINTER,
 						                                                               I18n.format(printing
@@ -131,7 +126,7 @@ public class InputHandler {
 			}
 
 			if (KEY_BINDING_MOVE_HERE.isPressed()) {
-				final SchematicWorld schematic = ClientProxy.schematic;
+				SchematicWorld schematic = ClientProxy.schematic;
 				if (schematic != null) {
 					ClientProxy.moveSchematicToPlayer(schematic);
 					RenderSchematic.INSTANCE.refresh();
@@ -139,7 +134,7 @@ public class InputHandler {
 			}
 
 			if (KEY_BINDING_PICK_BLOCK.isPressed()) {
-				final SchematicWorld schematic = ClientProxy.schematic;
+				SchematicWorld schematic = ClientProxy.schematic;
 				if (schematic != null && schematic.isRendering) {
 					pickBlock(schematic, ClientProxy.objectMouseOver);
 				}
@@ -147,7 +142,7 @@ public class InputHandler {
 		}
 	}
 
-	private boolean pickBlock(final SchematicWorld schematic, final RayTraceResult objectMouseOver) {
+	private boolean pickBlock(SchematicWorld schematic, RayTraceResult objectMouseOver) {
 		// Minecraft.func_147112_ai
 		if (objectMouseOver == null) {
 			return false;
@@ -157,16 +152,16 @@ public class InputHandler {
 			return false;
 		}
 
-		final ClientPlayerEntity player = this.minecraft.player;
+		ClientPlayerEntity player = this.minecraft.player;
 		if (player != null && !ForgeHooks.onPickBlock(objectMouseOver, player, schematic)) {
 			return true;
 		}
 
 		if (player != null && player.isCreative()) {
-			final int slot = player.inventory.mainInventory.size() - 10 + player.inventory.currentItem;
+			int slot = player.inventory.mainInventory.size() - 10 + player.inventory.currentItem;
 			if (this.minecraft.playerController != null) {
-				this.minecraft.playerController.sendSlotPacket(player.inventory.getStackInSlot(player.inventory.currentItem),
-				                                               slot);
+				this.minecraft.playerController.sendSlotPacket(
+						player.inventory.getStackInSlot(player.inventory.currentItem), slot);
 			}
 			return true;
 		}

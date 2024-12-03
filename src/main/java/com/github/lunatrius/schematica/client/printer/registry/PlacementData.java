@@ -22,7 +22,7 @@ public class PlacementData {
 		this(null, null);
 	}
 
-	public PlacementData(final IValidPlayerFacing validPlayerFacing, final IValidBlockFacing validBlockFacing) {
+	public PlacementData(IValidPlayerFacing validPlayerFacing, IValidBlockFacing validBlockFacing) {
 		this.validPlayerFacing = validPlayerFacing;
 		this.validBlockFacing = validBlockFacing;
 		this.offsetX = null;
@@ -30,35 +30,35 @@ public class PlacementData {
 		this.offsetZ = null;
 	}
 
-	public PlacementData(final IValidPlayerFacing validPlayerFacing) {
+	public PlacementData(IValidPlayerFacing validPlayerFacing) {
 		this(validPlayerFacing, null);
 	}
 
-	public PlacementData(final IValidBlockFacing validBlockFacing) {
+	public PlacementData(IValidBlockFacing validBlockFacing) {
 		this(null, validBlockFacing);
 	}
 
-	public PlacementData setOffsetX(final IOffset offset) {
+	public PlacementData setOffsetX(IOffset offset) {
 		this.offsetX = offset;
 		return this;
 	}
 
-	public PlacementData setOffsetY(final IOffset offset) {
+	public PlacementData setOffsetY(IOffset offset) {
 		this.offsetY = offset;
 		return this;
 	}
 
-	public PlacementData setOffsetZ(final IOffset offset) {
+	public PlacementData setOffsetZ(IOffset offset) {
 		this.offsetZ = offset;
 		return this;
 	}
 
-	public PlacementData setExtraClick(final IExtraClick extraClick) {
+	public PlacementData setExtraClick(IExtraClick extraClick) {
 		this.extraClick = extraClick;
 		return this;
 	}
 
-	public float getOffsetX(final BlockState blockState) {
+	public float getOffsetX(BlockState blockState) {
 		if (this.offsetX != null) {
 			return this.offsetX.getOffset(blockState);
 		}
@@ -66,7 +66,7 @@ public class PlacementData {
 		return 0.5f;
 	}
 
-	public float getOffsetY(final BlockState blockState) {
+	public float getOffsetY(BlockState blockState) {
 		if (this.offsetY != null) {
 			return this.offsetY.getOffset(blockState);
 		}
@@ -74,7 +74,7 @@ public class PlacementData {
 		return 0.5f;
 	}
 
-	public float getOffsetZ(final BlockState blockState) {
+	public float getOffsetZ(BlockState blockState) {
 		if (this.offsetZ != null) {
 			return this.offsetZ.getOffset(blockState);
 		}
@@ -82,7 +82,7 @@ public class PlacementData {
 		return 0.5f;
 	}
 
-	public int getExtraClicks(final BlockState blockState) {
+	public int getExtraClicks(BlockState blockState) {
 		if (this.extraClick != null) {
 			return this.extraClick.getExtraClicks(blockState);
 		}
@@ -90,22 +90,19 @@ public class PlacementData {
 		return 0;
 	}
 
-	public boolean isValidPlayerFacing(final BlockState blockState,
-	                                   final PlayerEntity player,
-	                                   final BlockPos pos,
-	                                   final World world) {
+	public boolean isValidPlayerFacing(BlockState blockState, PlayerEntity player, BlockPos pos, World world) {
 		return this.validPlayerFacing == null || this.validPlayerFacing.isValid(blockState, player, pos, world);
 	}
 
-	public List<Direction> getValidBlockFacings(final List<Direction> solidSides, final BlockState blockState) {
-		final List<Direction> list = this.validBlockFacing != null
-		                             ? this.validBlockFacing.getValidBlockFacings(solidSides, blockState)
-		                             : new ArrayList<>(solidSides);
+	public List<Direction> getValidBlockFacings(List<Direction> solidSides, BlockState blockState) {
+		List<Direction> list = this.validBlockFacing != null
+		                       ? this.validBlockFacing.getValidBlockFacings(solidSides, blockState)
+		                       : new ArrayList<>(solidSides);
 
-		for (final Iterator<Direction> iterator = list.iterator(); iterator.hasNext(); ) {
-			final Direction facing = iterator.next();
+		for (Iterator<Direction> iterator = list.iterator(); iterator.hasNext(); ) {
+			Direction facing = iterator.next();
 			if (this.offsetY != null) {
-				final float offset = this.offsetY.getOffset(blockState);
+				float offset = this.offsetY.getOffset(blockState);
 				if (offset < 0.5 && facing == Direction.UP) {
 					iterator.remove();
 				} else if (offset > 0.5 && facing == Direction.DOWN) {

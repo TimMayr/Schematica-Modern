@@ -23,19 +23,19 @@ public class QueueTickHandler {
 	private QueueTickHandler() {}
 
 	@SubscribeEvent
-	public void onClientTick(final TickEvent.ClientTickEvent event) {
+	public void onClientTick(TickEvent.ClientTickEvent event) {
 		if (event.phase == TickEvent.Phase.START) {
 			return;
 		}
 
 		// TODO: find a better way... maybe?
 		try {
-			final ClientPlayerEntity player = Minecraft.getInstance().player;
+			ClientPlayerEntity player = Minecraft.getInstance().player;
 			if (player != null && player.connection != null && !player.connection.getNetworkManager()
 			                                                                     .isLocalChannel()) {
 				processQueue();
 			}
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			Reference.logger.error("Something went wrong...", e);
 		}
 	}
@@ -45,16 +45,15 @@ public class QueueTickHandler {
 			return;
 		}
 
-		final SchematicContainer container = this.queue.poll();
+		SchematicContainer container = this.queue.poll();
 		if (container == null) {
 			return;
 		}
 
 		if (container.hasNext()) {
 			if (container.isFirst()) {
-				final TranslationTextComponent component =
-						new TranslationTextComponent(Names.Command.Save.Message.SAVE_STARTED,
-						                             container.chunkCount,
+				TranslationTextComponent component =
+						new TranslationTextComponent(Names.Command.Save.Message.SAVE_STARTED, container.chunkCount,
 						                             container.file.getName());
 				container.player.sendMessage(component);
 			}
@@ -65,15 +64,13 @@ public class QueueTickHandler {
 		if (container.hasNext()) {
 			this.queue.offer(container);
 		} else {
-			SchematicFormat.writeToFileAndNotify(container.file,
-			                                     container.format,
-			                                     container.schematic,
+			SchematicFormat.writeToFileAndNotify(container.file, container.format, container.schematic,
 			                                     container.player);
 		}
 	}
 
 	@SubscribeEvent
-	public void onServerTick(final TickEvent.ServerTickEvent event) {
+	public void onServerTick(TickEvent.ServerTickEvent event) {
 		if (event.phase == TickEvent.Phase.START) {
 			return;
 		}
@@ -81,7 +78,7 @@ public class QueueTickHandler {
 		processQueue();
 	}
 
-	public void queueSchematic(final SchematicContainer container) {
+	public void queueSchematic(SchematicContainer container) {
 		this.queue.offer(container);
 	}
 }

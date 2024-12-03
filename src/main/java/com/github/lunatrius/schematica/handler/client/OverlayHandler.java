@@ -25,31 +25,31 @@ public class OverlayHandler {
 	private final Minecraft minecraft = Minecraft.getInstance();
 
 	@SubscribeEvent
-	public void onText(final RenderGameOverlayEvent.Text event) {
+	public void onText(RenderGameOverlayEvent.Text event) {
 		if (this.minecraft.gameSettings.showDebugInfo && SchematicaConfig.CLIENT.showDebugInfo.get()) {
-			final SchematicWorld schematic = ClientProxy.schematic;
+			SchematicWorld schematic = ClientProxy.schematic;
 			if (schematic != null && schematic.isRendering) {
-				final ArrayList<String> left = event.getLeft();
-				final ArrayList<String> right = event.getRight();
+				ArrayList<String> left = event.getLeft();
+				ArrayList<String> right = event.getRight();
 
 				left.add("");
 				left.add(SCHEMATICA_PREFIX + schematic.getDebugDimensions());
 				left.add(SCHEMATICA_PREFIX + RenderSchematic.INSTANCE.getDebugInfoTileEntities());
 				left.add(SCHEMATICA_PREFIX + RenderSchematic.INSTANCE.getDebugInfoRenders());
 
-				final RayTraceResult rtr = ClientProxy.objectMouseOver;
+				RayTraceResult rtr = ClientProxy.objectMouseOver;
 				if (rtr != null && rtr.getType() == RayTraceResult.Type.BLOCK) {
-					final BlockPos pos = new BlockPos(rtr.getHitVec());
-					final BlockState blockState = schematic.getBlockState(pos);
+					BlockPos pos = new BlockPos(rtr.getHitVec());
+					BlockState blockState = schematic.getBlockState(pos);
 
 					right.add("");
 					right.add(ForgeRegistries.BLOCKS.getKey(blockState.getBlock()) + SCHEMATICA_SUFFIX);
 
-					for (final String formattedProperty : BlockStateHelper.getFormattedProperties(blockState)) {
+					for (String formattedProperty : BlockStateHelper.getFormattedProperties(blockState)) {
 						right.add(formattedProperty + SCHEMATICA_SUFFIX);
 					}
 
-					final BlockPos offsetPos = pos.add(schematic.position);
+					BlockPos offsetPos = pos.add(schematic.position);
 					String lookMessage = getLookMessage(pos, offsetPos);
 
 					left.add(SCHEMATICA_PREFIX + lookMessage);
@@ -59,16 +59,12 @@ public class OverlayHandler {
 	}
 
 	private String getLookMessage(BlockPos pos, BlockPos offsetPos) {
-		String lookMessage = String.format("Looking at: %d %d %d (%d %d %d)",
-		                                   pos.getX(),
-		                                   pos.getY(),
-		                                   pos.getZ(),
-		                                   offsetPos.getX(),
-		                                   offsetPos.getY(),
-		                                   offsetPos.getZ());
+		String lookMessage =
+				String.format("Looking at: %d %d %d (%d %d %d)", pos.getX(), pos.getY(), pos.getZ(), offsetPos.getX(),
+				              offsetPos.getY(), offsetPos.getZ());
 		if (this.minecraft.objectMouseOver != null
 				&& this.minecraft.objectMouseOver.getType() == RayTraceResult.Type.BLOCK) {
-			final BlockPos origPos = new BlockPos(this.minecraft.objectMouseOver.getHitVec());
+			BlockPos origPos = new BlockPos(this.minecraft.objectMouseOver.getHitVec());
 			if (offsetPos.equals(origPos)) {
 				lookMessage += " (matches)";
 			}

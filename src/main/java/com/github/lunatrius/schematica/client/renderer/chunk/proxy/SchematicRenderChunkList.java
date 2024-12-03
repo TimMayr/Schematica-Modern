@@ -20,39 +20,42 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class SchematicRenderChunkList extends ListedRenderChunk {
-    public SchematicRenderChunkList(final World world, final RenderGlobal renderGlobal, final BlockPos pos, final int index) {
-        super(world, renderGlobal, index);
-    }
+	public SchematicRenderChunkList(World world, RenderGlobal renderGlobal, BlockPos pos, int index) {
+		super(world, renderGlobal, index);
+	}
 
-    @Override
-    public void rebuildChunk(final float x, final float y, final float z, final ChunkCompileTaskGenerator generator) {
-        generator.getLock().lock();
+	@Override
+	public void rebuildChunk(float x, float y, float z, ChunkCompileTaskGenerator generator) {
+		generator.getLock().lock();
 
-        try {
-            if (generator.getStatus() == ChunkCompileTaskGenerator.Status.COMPILING) {
-                final BlockPos from = getPosition();
-                final SchematicWorld schematic = (SchematicWorld) this.world;
+		try {
+			if (generator.getStatus() == ChunkCompileTaskGenerator.Status.COMPILING) {
+				BlockPos from = getPosition();
+				SchematicWorld schematic = (SchematicWorld) this.world;
 
-                if (from.getX() < 0 || from.getZ() < 0 || from.getX() >= schematic.getWidth() || from.getZ() >= schematic.getLength()) {
-                    final SetVisibility visibility = new SetVisibility();
-                    visibility.setAllVisible(true);
+				if (from.getX() < 0
+						|| from.getZ() < 0
+						|| from.getX() >= schematic.getWidth()
+						|| from.getZ() >= schematic.getLength()) {
+					SetVisibility visibility = new SetVisibility();
+					visibility.setAllVisible(true);
 
-                    final CompiledChunk dummy = new CompiledChunk();
-                    dummy.setVisibility(visibility);
+					CompiledChunk dummy = new CompiledChunk();
+					dummy.setVisibility(visibility);
 
-                    generator.setCompiledChunk(dummy);
-                    return;
-                }
-            }
-        } finally {
-            generator.getLock().unlock();
-        }
+					generator.setCompiledChunk(dummy);
+					return;
+				}
+			}
+		} ly {
+			generator.getLock().unlock();
+		}
 
-        super.rebuildChunk(x, y, z, generator);
-    }
+		super.rebuildChunk(x, y, z, generator);
+	}
 
-    @Override
-    protected ChunkCache createRegionRenderCache(final World world, final BlockPos from, final BlockPos to, final int subtract) {
-        return new SchematicRenderCache(world, from, to, subtract);
-    }
+	@Override
+	protected ChunkCache createRegionRenderCache(World world, BlockPos from, BlockPos to, int subtract) {
+		return new SchematicRenderCache(world, from, to, subtract);
+	}
 }

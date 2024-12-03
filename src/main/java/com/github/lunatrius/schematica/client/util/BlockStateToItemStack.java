@@ -12,18 +12,19 @@ import net.minecraft.util.math.RayTraceResult;
 
 @MethodsReturnNonnullByDefault
 public class BlockStateToItemStack {
-    public static ItemStack getItemStack(final IBlockState blockState, final RayTraceResult rayTraceResult, final SchematicWorld world, final BlockPos pos, final EntityPlayer player) {
-        final Block block = blockState.getBlock();
+	public static ItemStack getItemStack(IBlockState blockState, RayTraceResult rayTraceResult, SchematicWorld world,
+	                                     BlockPos pos, EntityPlayer player) {
+		Block block = blockState.getBlock();
 
-        try {
-            final ItemStack itemStack = block.getPickBlock(blockState, rayTraceResult, world, pos, player);
-            if (!itemStack.isEmpty()) {
-                return itemStack;
-            }
-        } catch (final Exception e) {
-            Reference.logger.debug("Could not get the pick block for: {}", blockState, e);
-        }
+		try {
+			ItemStack itemStack = block.getPickBlock(blockState, rayTraceResult, world, pos, player);
+			if (!itemStack.isEmpty()) {
+				return itemStack;
+			}
+		} catch (Exception e) {
+			Reference.logger.debug("Could not get the pick block for: {}", blockState, e);
+		}
 
-        return ItemStack.EMPTY;
-    }
+		return ItemStack.EMPTY;
+	}
 }

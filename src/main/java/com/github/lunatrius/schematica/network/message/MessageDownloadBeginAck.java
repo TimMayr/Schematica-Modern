@@ -9,10 +9,10 @@ import net.minecraftforge.fml.network.NetworkEvent;
 import java.util.function.Supplier;
 
 public class MessageDownloadBeginAck {
-	public static void handle(MessageDownloadBeginAck msg, Supplier<NetworkEvent.Context> ctx) {
+	public static void handle(MessageDownloadBeginAck ignoredMsg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
-			final PlayerEntity player = ctx.get().getSender();
-			final SchematicTransfer transfer = DownloadHandler.INSTANCE.transferMap.get(player);
+			PlayerEntity player = ctx.get().getSender();
+			SchematicTransfer transfer = DownloadHandler.INSTANCE.transferMap.get(player);
 
 			if (transfer != null) {
 				transfer.setState(SchematicTransfer.State.CHUNK_WAIT);
@@ -21,11 +21,11 @@ public class MessageDownloadBeginAck {
 		ctx.get().setPacketHandled(true);
 	}
 
-	public static MessageDownloadBeginAck decode(final ByteBuf buf) {
+	public static MessageDownloadBeginAck decode(ByteBuf ignoredBuf) {
 		return new MessageDownloadBeginAck();
 	}
 
-	public static void encode(MessageDownloadBeginAck msg, final ByteBuf buf) {
+	public static void encode(MessageDownloadBeginAck ignoredMsg, ByteBuf ignoredBuf) {
 
 	}
 }

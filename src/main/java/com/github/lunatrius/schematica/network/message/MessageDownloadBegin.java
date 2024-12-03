@@ -11,12 +11,12 @@ import net.minecraftforge.fml.network.NetworkEvent;
 import java.util.function.Supplier;
 
 public class MessageDownloadBegin {
-	public ItemStack icon;
-	public int width;
-	public int height;
-	public int length;
+	public final ItemStack icon;
+	public final int width;
+	public final int height;
+	public final int length;
 
-	public MessageDownloadBegin(final ISchematic schematic) {
+	public MessageDownloadBegin(ISchematic schematic) {
 		this.icon = schematic.getIcon();
 		this.width = schematic.getWidth();
 		this.height = schematic.getHeight();

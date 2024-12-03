@@ -25,16 +25,16 @@ import java.util.List;
 public class GuiSchematicLoad extends ScreenBase {
 	private static final FileFilterSchematic FILE_FILTER_FOLDER = new FileFilterSchematic(true);
 	private static final FileFilterSchematic FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
-	protected final List<GuiSchematicEntry> schematicFiles = new ArrayList<>();
 	private final String strTitle = I18n.format(Names.Gui.Load.TITLE);
 	private final String strFolderInfo = I18n.format(Names.Gui.Load.FOLDER_INFO);
 	private final String strNoSchematic = I18n.format(Names.Gui.Load.NO_SCHEMATIC);
+	protected final List<GuiSchematicEntry> schematicFiles = new ArrayList<>();
 	protected File currentDirectory = SchematicaClientConfig.schematicDirectory;
 	private GuiSchematicLoadSlot guiSchematicLoadSlot;
 	private Button btnOpenDir = null;
 	private Button btnDone = null;
 
-	public GuiSchematicLoad(final net.minecraft.client.gui.screen.Screen Screen) {
+	public GuiSchematicLoad(net.minecraft.client.gui.screen.Screen Screen) {
 		super(Screen);
 	}
 
@@ -42,12 +42,9 @@ public class GuiSchematicLoad extends ScreenBase {
 	public void init() {
 		int id = 0;
 
-		this.btnOpenDir = new Button(this.width / 2 - 154,
-		                             this.height - 36,
-		                             150,
-		                             20,
-		                             I18n.format(Names.Gui.Load.OPEN_FOLDER),
-		                             (event) -> {});
+		this.btnOpenDir =
+				new Button(this.width / 2 - 154, this.height - 36, 150, 20, I18n.format(Names.Gui.Load.OPEN_FOLDER),
+				           (event) -> {});
 		this.buttons.add(this.btnOpenDir);
 
 		this.btnDone =
@@ -70,40 +67,39 @@ public class GuiSchematicLoad extends ScreenBase {
 			                          .equals(SchematicaClientConfig.schematicDirectory.getCanonicalPath())) {
 				this.schematicFiles.add(new GuiSchematicEntry("..", Items.LAVA_BUCKET, 0, true));
 			}
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			Reference.logger.error("Failed to add GuiSchematicEntry!", e);
 		}
 
-		final File[] filesFolders = this.currentDirectory.listFiles(FILE_FILTER_FOLDER);
+		File[] filesFolders = this.currentDirectory.listFiles(FILE_FILTER_FOLDER);
 		if (filesFolders == null) {
 			Reference.logger.error("listFiles returned null (directory: {})!", this.currentDirectory);
 		} else {
-			Arrays.sort(filesFolders, (final File a, final File b) -> a.getName().compareToIgnoreCase(b.getName()));
-			for (final File file : filesFolders) {
+			Arrays.sort(filesFolders, (File a, File b) -> a.getName().compareToIgnoreCase(b.getName()));
+			for (File file : filesFolders) {
 				if (file == null) {
 					continue;
 				}
 
 				name = file.getName();
 
-				final File[] files = file.listFiles();
+				File[] files = file.listFiles();
 				item = (files == null || files.length == 0) ? Items.BUCKET : Items.WATER_BUCKET;
 
 				this.schematicFiles.add(new GuiSchematicEntry(name, item, 0, file.isDirectory()));
 			}
 		}
 
-		final File[] filesSchematics = this.currentDirectory.listFiles(FILE_FILTER_SCHEMATIC);
+		File[] filesSchematics = this.currentDirectory.listFiles(FILE_FILTER_SCHEMATIC);
 		if (filesSchematics == null || filesSchematics.length == 0) {
 			this.schematicFiles.add(new GuiSchematicEntry(this.strNoSchematic, Blocks.DIRT, 0, false));
 		} else {
-			Arrays.sort(filesSchematics, (final File a, final File b) -> a.getName().compareToIgnoreCase(b.getName()));
-			for (final File file : filesSchematics) {
+			Arrays.sort(filesSchematics, (File a, File b) -> a.getName().compareToIgnoreCase(b.getName()));
+			for (File file : filesSchematics) {
 				name = file.getName();
 
-				this.schematicFiles.add(new GuiSchematicEntry(name,
-				                                              SchematicUtil.getIconFromFile(file),
-				                                              file.isDirectory()));
+				this.schematicFiles.add(
+						new GuiSchematicEntry(name, SchematicUtil.getIconFromFile(file), file.isDirectory()));
 			}
 		}
 	}
@@ -115,16 +111,16 @@ public class GuiSchematicLoad extends ScreenBase {
 	}
 
 	@Override
-	protected void actionPerformed(final Button Button) {
+	protected void actionPerformed(Button Button) {
 		if (Button.enabled) {
 			if (Button.id == this.btnOpenDir.id) {
 				boolean retry = false;
 
 				try {
-					final Class<?> c = Class.forName("java.awt.Desktop");
-					final Object m = c.getMethod("getDesktop").invoke(null);
+					Class<?> c = Class.forName("java.awt.Desktop");
+					Object m = c.getMethod("getDesktop").invoke(null);
 					c.getMethod("browse", URI.class).invoke(m, SchematicaClientConfig.schematicDirectoryPath.toURI());
-				} catch (final Throwable e) {
+				} catch (Throwable e) {
 					retry = true;
 				}
 
@@ -144,25 +140,25 @@ public class GuiSchematicLoad extends ScreenBase {
 	}
 
 	private void loadSchematic() {
-		final int selectedIndex = this.guiSchematicLoadSlot.selectedIndex;
+		int selectedIndex = this.guiSchematicLoadSlot.selectedIndex;
 
 		try {
 			if (selectedIndex >= 0 && selectedIndex < this.schematicFiles.size()) {
-				final GuiSchematicEntry schematicEntry = this.schematicFiles.get(selectedIndex);
+				GuiSchematicEntry schematicEntry = this.schematicFiles.get(selectedIndex);
 				if (Reference.proxy.loadSchematic(null, this.currentDirectory, schematicEntry.getName())) {
-					final SchematicWorld schematic = ClientProxy.schematic;
+					SchematicWorld schematic = ClientProxy.schematic;
 					if (schematic != null) {
 						ClientProxy.moveSchematicToPlayer(schematic);
 					}
 				}
 			}
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			Reference.logger.error("Failed to load schematic!", e);
 		}
 	}
 
 	@Override
-	public void drawScreen(final int x, final int y, final float partialTicks) {
+	public void drawScreen(int x, int y, float partialTicks) {
 		this.guiSchematicLoadSlot.drawScreen(x, y, partialTicks);
 
 		drawCenteredString(this.fontRenderer, this.strTitle, this.width / 2, 4, 0x00FFFFFF);
@@ -176,12 +172,12 @@ public class GuiSchematicLoad extends ScreenBase {
 		// loadSchematic();
 	}
 
-	protected void changeDirectory(final String directory) {
+	protected void changeDirectory(String directory) {
 		this.currentDirectory = new File(this.currentDirectory, directory);
 
 		try {
 			this.currentDirectory = this.currentDirectory.getCanonicalFile();
-		} catch (final IOException ioe) {
+		} catch (IOException ioe) {
 			Reference.logger.error("Failed to canonize directory!", ioe);
 		}
 

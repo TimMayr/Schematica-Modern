@@ -11,28 +11,28 @@ import net.minecraftforge.fml.client.IModGuiFactory;
 import java.util.Set;
 
 public class GuiFactory implements IModGuiFactory {
-    @Override
-    public void initialize(final Minecraft minecraftInstance) {
-    }
+	@Override
+	public void initialize(Minecraft minecraftInstance) {
+	}
 
-    @Override
-    public boolean hasConfigGui() {
-        return true;
-    }
+	@Override
+	public boolean hasConfigGui() {
+		return true;
+	}
 
-    @Override
-    public GuiScreen createConfigGui(GuiScreen parentScreen) {
-        return new GuiModConfig(parentScreen);
-    }
+	@Override
+	public GuiScreen createConfigGui(GuiScreen parentScreen) {
+		return new GuiModConfig(parentScreen);
+	}
 
-    @Override
-    public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() {
-        return null;
-    }
+	@Override
+	public Set<RuntimeOptionCategoryElement> runtimeGuiCategories() {
+		return null;
+	}
 
-    public static class GuiModConfig extends GuiConfigComplex {
-        public GuiModConfig(final GuiScreen guiScreen) {
-            super(guiScreen, Reference.MODID, SchematicaClientConfig.configuration, Names.Config.LANG_PREFIX);
-        }
-    }
+	public static class GuiModConfig extends GuiConfigComplex {
+		public GuiModConfig(GuiScreen guiScreen) {
+			super(guiScreen, Reference.MODID, SchematicaClientConfig.configuration, Names.Config.LANG_PREFIX);
+		}
+	}
 }

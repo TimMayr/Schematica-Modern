@@ -13,9 +13,9 @@ import java.io.File;
 import java.util.function.Supplier;
 
 public class MessageDownloadEnd {
-	public String name;
+	public final String name;
 
-	public MessageDownloadEnd(final String name) {
+	public MessageDownloadEnd(String name) {
 		this.name = name;
 	}
 
@@ -29,8 +29,8 @@ public class MessageDownloadEnd {
 
 	public static void handle(MessageDownloadEnd msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
-			final File directory = Reference.proxy.getPlayerSchematicDirectory(null, true);
-			final boolean success =
+			File directory = Reference.proxy.getPlayerSchematicDirectory(null, true);
+			boolean success =
 					SchematicFormat.writeToFile(directory, msg.name, null, DownloadHandler.INSTANCE.schematic);
 
 			if (success) {

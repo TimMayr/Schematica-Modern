@@ -11,27 +11,27 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class NBTSyncCommandBlock extends NBTSync {
-    @Override
-    public boolean execute(final EntityPlayer player, final World schematic, final BlockPos pos, final World mcWorld, final BlockPos mcPos) {
-        final TileEntity tileEntity = schematic.getTileEntity(pos);
-        final TileEntity mcTileEntity = mcWorld.getTileEntity(mcPos);
+	@Override
+	public boolean execute(EntityPlayer player, World schematic, BlockPos pos, World mcWorld, BlockPos mcPos) {
+		TileEntity tileEntity = schematic.getTileEntity(pos);
+		TileEntity mcTileEntity = mcWorld.getTileEntity(mcPos);
 
-        if (tileEntity instanceof TileEntityCommandBlock && mcTileEntity instanceof TileEntityCommandBlock) {
-            final CommandBlockBaseLogic commandBlockLogic = ((TileEntityCommandBlock) tileEntity).getCommandBlockLogic();
-            final CommandBlockBaseLogic mcCommandBlockLogic = ((TileEntityCommandBlock) mcTileEntity).getCommandBlockLogic();
+		if (tileEntity instanceof TileEntityCommandBlock && mcTileEntity instanceof TileEntityCommandBlock) {
+			CommandBlockBaseLogic commandBlockLogic = ((TileEntityCommandBlock) tileEntity).getCommandBlockLogic();
+			CommandBlockBaseLogic mcCommandBlockLogic = ((TileEntityCommandBlock) mcTileEntity).getCommandBlockLogic();
 
-            if (!commandBlockLogic.getCommand().equals(mcCommandBlockLogic.getCommand())) {
-                final PacketBuffer packetBuffer = new PacketBuffer(Unpooled.buffer());
+			if (!commandBlockLogic.getCommand().equals(mcCommandBlockLogic.getCommand())) {
+				PacketBuffer packetBuffer = new PacketBuffer(Unpooled.buffer());
 
-                packetBuffer.writeByte(mcCommandBlockLogic.getCommandBlockType());
-                mcCommandBlockLogic.fillInInfo(packetBuffer);
-                packetBuffer.writeString(commandBlockLogic.getCommand());
-                packetBuffer.writeBoolean(mcCommandBlockLogic.shouldTrackOutput());
+				packetBuffer.writeByte(mcCommandBlockLogic.getCommandBlockType());
+				mcCommandBlockLogic.fillInInfo(packetBuffer);
+				packetBuffer.writeString(commandBlockLogic.getCommand());
+				packetBuffer.writeBoolean(mcCommandBlockLogic.shouldTrackOutput());
 
-                return sendPacket(new CPacketCustomPayload("MC|AdvCdm", packetBuffer));
-            }
-        }
+				return sendPacket(new CPacketCustomPayload("MC|AdvCdm", packetBuffer));
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 }

@@ -11,20 +11,20 @@ import net.minecraft.world.World;
 import java.util.Arrays;
 
 public class NBTSyncSign extends NBTSync {
-    @Override
-    public boolean execute(final EntityPlayer player, final World schematic, final BlockPos pos, final World mcWorld, final BlockPos mcPos) {
-        final TileEntity tileEntity = schematic.getTileEntity(pos);
-        final TileEntity mcTileEntity = mcWorld.getTileEntity(mcPos);
+	@Override
+	public boolean execute(EntityPlayer player, World schematic, BlockPos pos, World mcWorld, BlockPos mcPos) {
+		TileEntity tileEntity = schematic.getTileEntity(pos);
+		TileEntity mcTileEntity = mcWorld.getTileEntity(mcPos);
 
-        if (tileEntity instanceof TileEntitySign && mcTileEntity instanceof TileEntitySign) {
-            final ITextComponent[] signText = ((TileEntitySign) tileEntity).signText;
-            final ITextComponent[] mcSignText = ((TileEntitySign) mcTileEntity).signText;
+		if (tileEntity instanceof TileEntitySign && mcTileEntity instanceof TileEntitySign) {
+			ITextComponent[] signText = ((TileEntitySign) tileEntity).signText;
+			ITextComponent[] mcSignText = ((TileEntitySign) mcTileEntity).signText;
 
-            if (!Arrays.equals(signText, mcSignText)) {
-                return sendPacket(new CPacketUpdateSign(mcPos, signText));
-            }
-        }
+			if (!Arrays.equals(signText, mcSignText)) {
+				return sendPacket(new CPacketUpdateSign(mcPos, signText));
+			}
+		}
 
-        return false;
-    }
+		return false;
+	}
 }

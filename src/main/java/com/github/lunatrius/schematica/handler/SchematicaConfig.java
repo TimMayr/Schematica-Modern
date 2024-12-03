@@ -12,14 +12,14 @@ public class SchematicaConfig {
 	public static final SchematicaClientConfig CLIENT;
 
 	static {
-		final Pair<SchematicaServerConfig, ForgeConfigSpec> specPair =
+		Pair<SchematicaServerConfig, ForgeConfigSpec> specPair =
 				new ForgeConfigSpec.Builder().configure(SchematicaServerConfig::new);
 		serverSpec = specPair.getRight();
 		SERVER = specPair.getLeft();
 	}
 
 	static {
-		final Pair<SchematicaClientConfig, ForgeConfigSpec> specPair =
+		Pair<SchematicaClientConfig, ForgeConfigSpec> specPair =
 				new ForgeConfigSpec.Builder().configure(SchematicaClientConfig::new);
 		clientSpec = specPair.getRight();
 		CLIENT = specPair.getLeft();

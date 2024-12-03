@@ -13,10 +13,9 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public abstract class CommandSchematicaBase {
-	protected static <T extends ITextComponent> T withStyle(final T component,
-	                                                        final TextFormatting formatting,
-	                                                        @Nullable final String command) {
-		final Style style = new Style();
+	protected static <T extends ITextComponent> T withStyle(T component, TextFormatting formatting,
+	                                                        @Nullable String command) {
+		Style style = new Style();
 		style.setColor(formatting);
 
 		if (command != null) {
@@ -28,5 +27,5 @@ public abstract class CommandSchematicaBase {
 		return component;
 	}
 
-	public abstract String getUsage(final ICommandSource sender);
+	public abstract String getUsage(ICommandSource sender);
 }

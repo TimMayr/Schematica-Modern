@@ -45,20 +45,16 @@ public class SchematicWorld extends ClientWorld {
 	private static final WorldSettings WORLD_SETTINGS =
 			new WorldSettings(0, GameType.CREATIVE, false, false, WorldType.FLAT);
 	public final MBlockPos position = new MBlockPos();
-	protected final AbstractChunkProvider chunkProvider = new SchematicChunkProvider(this);
 	public boolean isRendering = false;
 	public LayerMode layerMode = LayerMode.ALL;
 	public int renderingLayer = 0;
+	protected AbstractChunkProvider chunkProvider = new SchematicChunkProvider(this);
 	private ISchematic schematic;
 
 	@SuppressWarnings("DataFlowIssue")
 	public SchematicWorld(ISchematic schematic) {
-		super(Minecraft.getInstance().getConnection(),
-		      WORLD_SETTINGS,
-		      DimensionType.OVERWORLD,
-		      8,
-		      Minecraft.getInstance().getProfiler(),
-		      Minecraft.getInstance().worldRenderer);
+		super(Minecraft.getInstance().getConnection(), WORLD_SETTINGS, DimensionType.OVERWORLD, 8,
+		      Minecraft.getInstance().getProfiler(), Minecraft.getInstance().worldRenderer);
 		this.schematic = schematic;
 
 		for (TileEntity tileEntity : schematic.getTileEntities()) {
@@ -125,9 +121,8 @@ public class SchematicWorld extends ClientWorld {
 
 	public boolean isBlockNormalCube(BlockPos pos, boolean _default) {
 		Chunk chunk = getChunkAt(pos);
-		return getBlockState(pos).isNormalCube(Objects.requireNonNull(getWorld().getBlockReader(chunk.getPos().x,
-		                                                                                        chunk.getPos().z)),
-		                                       pos);
+		return getBlockState(pos).isNormalCube(
+				Objects.requireNonNull(getWorld().getBlockReader(chunk.getPos().x, chunk.getPos().z)), pos);
 	}
 
 	@Override

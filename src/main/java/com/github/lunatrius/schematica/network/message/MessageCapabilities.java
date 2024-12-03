@@ -9,12 +9,11 @@ import net.minecraftforge.fml.network.NetworkEvent;
 import java.util.function.Supplier;
 
 public class MessageCapabilities {
-	public boolean isPrinterEnabled;
-	public boolean isSaveEnabled;
-	public boolean isLoadEnabled;
+	public final boolean isPrinterEnabled;
+	public final boolean isSaveEnabled;
+	public final boolean isLoadEnabled;
 
-	public MessageCapabilities(final boolean isPrinterEnabled, final boolean isSaveEnabled,
-	                           final boolean isLoadEnabled) {
+	public MessageCapabilities(boolean isPrinterEnabled, boolean isSaveEnabled, boolean isLoadEnabled) {
 		this.isPrinterEnabled = isPrinterEnabled;
 		this.isSaveEnabled = isSaveEnabled;
 		this.isLoadEnabled = isLoadEnabled;
@@ -37,7 +36,7 @@ public class MessageCapabilities {
 			Reference.proxy.isLoadEnabled = msg.isLoadEnabled;
 
 			Reference.logger.info("Server capabilities{printer={}, save={}, load={}}", msg.isPrinterEnabled,
-					msg.isSaveEnabled, msg.isLoadEnabled);
+			                      msg.isSaveEnabled, msg.isLoadEnabled);
 		});
 		ctx.get().setPacketHandled(true);
 	}

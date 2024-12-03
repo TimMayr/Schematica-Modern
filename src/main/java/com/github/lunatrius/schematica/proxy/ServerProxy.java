@@ -21,12 +21,12 @@ public class ServerProxy extends CommonProxy {
 	private WeakReference<MinecraftServer> serverWeakReference = null;
 
 	@SubscribeEvent
-	public void init(final FMLClientSetupEvent event) {
+	public void init(FMLClientSetupEvent event) {
 		MinecraftForge.EVENT_BUS.register(PlayerHandler.INSTANCE);
 	}
 
 	@SubscribeEvent
-	public void serverStarting(final FMLServerStartingEvent event) {
+	public void serverStarting(FMLServerStartingEvent event) {
 		super.serverStarting(event);
 		CommandSchematicaDownload.register(event.getCommandDispatcher());
 		this.serverWeakReference = new WeakReference<>(event.getServer());
@@ -34,23 +34,23 @@ public class ServerProxy extends CommonProxy {
 
 	@Override
 	public File getDataDirectory() {
-		final MinecraftServer server = this.serverWeakReference != null ? this.serverWeakReference.get() : null;
-		final File file = server != null ? server.getFile(".") : new File(".");
+		MinecraftServer server = this.serverWeakReference != null ? this.serverWeakReference.get() : null;
+		File file = server != null ? server.getFile(".") : new File(".");
 		try {
 			return file.getCanonicalFile();
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			Reference.logger.warn("Could not canonize path!", e);
 		}
 		return file;
 	}
 
 	@Override
-	public boolean loadSchematic(final PlayerEntity player, final File directory, final String filename) {
+	public boolean loadSchematic(PlayerEntity player, File directory, String filename) {
 		return false;
 	}
 
 	@Override
-	public boolean isPlayerQuotaExceeded(final PlayerEntity player) {
+	public boolean isPlayerQuotaExceeded(PlayerEntity player) {
 		int spaceUsed = 0;
 
 		//Space used by private directory
@@ -63,7 +63,7 @@ public class ServerProxy extends CommonProxy {
 		return ((spaceUsed / 1024) > SchematicaConfig.SERVER.playerQuotaKilobytes.get());
 	}
 
-	private int getSpaceUsedByDirectory(final File directory) {
+	private int getSpaceUsedByDirectory(File directory) {
 		int spaceUsed = 0;
 		//If we don't have a player directory yet, then they haven't uploaded any files yet.
 		if (directory == null || !directory.exists()) {
@@ -74,18 +74,17 @@ public class ServerProxy extends CommonProxy {
 		if (files == null) {
 			files = new File[0];
 		}
-		for (final File path : files) {
+		for (File path : files) {
 			spaceUsed += (int) path.length();
 		}
 		return spaceUsed;
 	}
 
 	@Override
-	public File getPlayerSchematicDirectory(final PlayerEntity player, final boolean privateDirectory) {
-		final UUID playerId = player.getUniqueID();
+	public File getPlayerSchematicDirectory(PlayerEntity player, boolean privateDirectory) {
+		UUID playerId = player.getUniqueID();
 
-		final File playerDir =
-				new File(SchematicaClientConfig.schematicDirectory.getAbsolutePath(), playerId.toString());
+		File playerDir = new File(SchematicaClientConfig.schematicDirectory.getAbsolutePath(), playerId.toString());
 		if (privateDirectory) {
 			return new File(playerDir, "private");
 		} else {

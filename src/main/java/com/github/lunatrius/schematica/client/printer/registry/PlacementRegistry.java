@@ -31,79 +31,79 @@ public class PlacementRegistry {
 		this.blockPlacementMap.clear();
 		this.itemPlacementMap.clear();
 
-		final IValidPlayerFacing playerFacingEntity =
-				(final BlockState blockState, final PlayerEntity player, final BlockPos pos, final World world) -> {
-					final Direction facing = blockState.get(BlockStateProperties.FACING);
+		IValidPlayerFacing playerFacingEntity =
+				(BlockState blockState, PlayerEntity player, BlockPos pos, World world) -> {
+					Direction facing = blockState.get(BlockStateProperties.FACING);
 					return facing == player.getHorizontalFacing();
 				};
 
-		final IValidPlayerFacing playerFacingEntityOpposite =
-				(final BlockState blockState, final PlayerEntity player, final BlockPos pos, final World world) -> {
-					final Direction facing = blockState.get(BlockStateProperties.FACING);
+		IValidPlayerFacing playerFacingEntityOpposite =
+				(BlockState blockState, PlayerEntity player, BlockPos pos, World world) -> {
+					Direction facing = blockState.get(BlockStateProperties.FACING);
 					return facing == player.getHorizontalFacing().getOpposite();
 				};
 
-		final IValidPlayerFacing playerFacingPiston =
-				(final BlockState blockState, final PlayerEntity player, final BlockPos pos, final World world) -> {
-					final Direction facing = blockState.get(BlockStateProperties.FACING);
+		IValidPlayerFacing playerFacingPiston =
+				(BlockState blockState, PlayerEntity player, BlockPos pos, World world) -> {
+					Direction facing = blockState.get(BlockStateProperties.FACING);
 					return facing == Direction.getFacingFromVector((float) player.getPosX() - pos.getX(),
 					                                               (float) player.getPosY() - pos.getY(),
 					                                               (float) player.getPosZ() - pos.getZ());
 				};
 
-		final IValidPlayerFacing playerFacingObserver =
-				(final BlockState blockState, final PlayerEntity player, final BlockPos pos, final World world) -> {
-					final Direction facing = blockState.get(BlockStateProperties.FACING);
+		IValidPlayerFacing playerFacingObserver =
+				(BlockState blockState, PlayerEntity player, BlockPos pos, World world) -> {
+					Direction facing = blockState.get(BlockStateProperties.FACING);
 					return facing == Direction.getFacingFromVector((float) player.getPosX() - pos.getX(),
 					                                               (float) player.getPosY() - pos.getY(),
 					                                               (float) player.getPosZ() - pos.getZ()).getOpposite();
 				};
 
-		final IValidPlayerFacing playerFacingRotateY =
-				(final BlockState blockState, final PlayerEntity player, final BlockPos pos, final World world) -> {
-					final Direction facing = blockState.get(BlockStateProperties.FACING);
+		IValidPlayerFacing playerFacingRotateY =
+				(BlockState blockState, PlayerEntity player, BlockPos pos, World world) -> {
+					Direction facing = blockState.get(BlockStateProperties.FACING);
 					return facing == player.getHorizontalFacing().rotateY();
 				};
 
-		final IValidPlayerFacing playerFacingLever =
-				(final BlockState blockState, final PlayerEntity player, final BlockPos pos, final World world) -> {
-					final AttachFace face = blockState.get(BlockStateProperties.FACE);
-					final Direction facing = blockState.get(BlockStateProperties.HORIZONTAL_FACING);
+		IValidPlayerFacing playerFacingLever =
+				(BlockState blockState, PlayerEntity player, BlockPos pos, World world) -> {
+					AttachFace face = blockState.get(BlockStateProperties.FACE);
+					Direction facing = blockState.get(BlockStateProperties.HORIZONTAL_FACING);
 					return !facing.getAxis().isVertical() || (face == AttachFace.WALL
 							                                          && facing == player.getHorizontalFacing()) || (
 							face != AttachFace.WALL
 									&& facing == player.getHorizontalFacing().getOpposite());
 				};
 
-		final IValidPlayerFacing playerFacingStandingSign =
-				(final BlockState blockState, final PlayerEntity player, final BlockPos pos, final World world) -> {
-					final int value = blockState.get(BlockStateProperties.ROTATION_0_15);
-					final int facing = MathHelper.floor((player.rotationYaw + 180.0) * 16.0 / 360.0 + 0.5) & 15;
+		IValidPlayerFacing playerFacingStandingSign =
+				(BlockState blockState, PlayerEntity player, BlockPos pos, World world) -> {
+					int value = blockState.get(BlockStateProperties.ROTATION_0_15);
+					int facing = MathHelper.floor((player.rotationYaw + 180.0) * 16.0 / 360.0 + 0.5) & 15;
 					return value == facing;
 				};
 
-		final IValidPlayerFacing playerFacingIgnore =
-				(final BlockState state, final PlayerEntity player, final BlockPos pos, final World world) -> false;
+		IValidPlayerFacing playerFacingIgnore =
+				(BlockState state, PlayerEntity player, BlockPos pos, World world) -> false;
 
-		final IOffset offsetSlab = (final BlockState blockState) -> {
+		IOffset offsetSlab = (BlockState blockState) -> {
 			if (!(blockState.get(BlockStateProperties.SLAB_TYPE) == SlabType.DOUBLE)) {
-				final SlabType half = blockState.get(BlockStateProperties.SLAB_TYPE);
+				SlabType half = blockState.get(BlockStateProperties.SLAB_TYPE);
 				return half == SlabType.TOP ? 1 : 0;
 			}
 
 			return 0;
 		};
 
-		final IOffset offsetHalfBlock = (final BlockState blockState) -> {
-			final Half half = blockState.get(BlockStateProperties.HALF);
+		IOffset offsetHalfBlock = (BlockState blockState) -> {
+			Half half = blockState.get(BlockStateProperties.HALF);
 			return half == Half.TOP ? 1 : 0;
 		};
 
-		final IValidBlockFacing blockFacingAxis = (final List<Direction> solidSides, final BlockState blockState) -> {
-			final List<Direction> list = new ArrayList<>();
+		IValidBlockFacing blockFacingAxis = (List<Direction> solidSides, BlockState blockState) -> {
+			List<Direction> list = new ArrayList<>();
 
-			final Direction.Axis axis = blockState.get(BlockStateProperties.AXIS);
-			for (final Direction side : solidSides) {
+			Direction.Axis axis = blockState.get(BlockStateProperties.AXIS);
+			for (Direction side : solidSides) {
 				if (axis != side.getAxis()) {
 					continue;
 				}
@@ -114,27 +114,26 @@ public class PlacementRegistry {
 			return list;
 		};
 
-		final IValidBlockFacing blockFacingOpposite =
-				(final List<Direction> solidSides, final BlockState blockState) -> {
-					final List<Direction> list = new ArrayList<>();
+		IValidBlockFacing blockFacingOpposite = (List<Direction> solidSides, BlockState blockState) -> {
+			List<Direction> list = new ArrayList<>();
 
-					final Direction facing = blockState.get(BlockStateProperties.FACING);
-					for (final Direction side : solidSides) {
-						if (facing.getOpposite() != side) {
-							continue;
-						}
+			Direction facing = blockState.get(BlockStateProperties.FACING);
+			for (Direction side : solidSides) {
+				if (facing.getOpposite() != side) {
+					continue;
+				}
 
-						list.add(side);
-					}
+				list.add(side);
+			}
 
-					return list;
-				};
+			return list;
+		};
 
-		final IValidBlockFacing blockFacingSame = (final List<Direction> solidSides, final BlockState blockState) -> {
-			final List<Direction> list = new ArrayList<>();
+		IValidBlockFacing blockFacingSame = (List<Direction> solidSides, BlockState blockState) -> {
+			List<Direction> list = new ArrayList<>();
 
-			final Direction facing = blockState.get(BlockStateProperties.FACING);
-			for (final Direction side : solidSides) {
+			Direction facing = blockState.get(BlockStateProperties.FACING);
+			for (Direction side : solidSides) {
 				if (facing != side) {
 					continue;
 				}
@@ -145,10 +144,8 @@ public class PlacementRegistry {
 			return list;
 		};
 
-		final IExtraClick extraClickDoubleSlab =
-				(final BlockState blockState) -> (blockState.get(BlockStateProperties.SLAB_TYPE) == SlabType.DOUBLE)
-				                                 ? 1
-				                                 : 0;
+		IExtraClick extraClickDoubleSlab =
+				(BlockState blockState) -> (blockState.get(BlockStateProperties.SLAB_TYPE) == SlabType.DOUBLE) ? 1 : 0;
 
 		addPlacementMapping(LogBlock.class, new PlacementData(blockFacingAxis));
 		addPlacementMapping(AbstractButtonBlock.class, new PlacementData(blockFacingOpposite));
@@ -191,7 +188,7 @@ public class PlacementRegistry {
 		addPlacementMapping(Blocks.REPEATING_COMMAND_BLOCK, new PlacementData(playerFacingEntityOpposite));
 	}
 
-	private PlacementData addPlacementMapping(final Class<? extends Block> clazz, final PlacementData data) {
+	private PlacementData addPlacementMapping(Class<? extends Block> clazz, PlacementData data) {
 		if (clazz == null || data == null) {
 			return null;
 		}
@@ -199,7 +196,7 @@ public class PlacementRegistry {
 		return this.classPlacementMap.put(clazz, data);
 	}
 
-	private PlacementData addPlacementMapping(final Block block, final PlacementData data) {
+	private PlacementData addPlacementMapping(Block block, PlacementData data) {
 		if (block == null || data == null) {
 			return null;
 		}
@@ -207,7 +204,7 @@ public class PlacementRegistry {
 		return this.blockPlacementMap.put(block, data);
 	}
 
-	private PlacementData addPlacementMapping(final Item item, final PlacementData data) {
+	private PlacementData addPlacementMapping(Item item, PlacementData data) {
 		if (item == null || data == null) {
 			return null;
 		}
@@ -215,22 +212,22 @@ public class PlacementRegistry {
 		return this.itemPlacementMap.put(item, data);
 	}
 
-	public PlacementData getPlacementData(final BlockState blockState, final ItemStack itemStack) {
-		final Item item = itemStack.getItem();
+	public PlacementData getPlacementData(BlockState blockState, ItemStack itemStack) {
+		Item item = itemStack.getItem();
 
-		final PlacementData placementDataItem = this.itemPlacementMap.get(item);
+		PlacementData placementDataItem = this.itemPlacementMap.get(item);
 		if (placementDataItem != null) {
 			return placementDataItem;
 		}
 
-		final Block block = blockState.getBlock();
+		Block block = blockState.getBlock();
 
-		final PlacementData placementDataBlock = this.blockPlacementMap.get(block);
+		PlacementData placementDataBlock = this.blockPlacementMap.get(block);
 		if (placementDataBlock != null) {
 			return placementDataBlock;
 		}
 
-		for (final Class<? extends Block> clazz : this.classPlacementMap.keySet()) {
+		for (Class<? extends Block> clazz : this.classPlacementMap.keySet()) {
 			if (clazz.isInstance(block)) {
 				return this.classPlacementMap.get(clazz);
 			}

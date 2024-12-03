@@ -28,35 +28,32 @@ public class RenderTickHandler {
 
 	@SuppressWarnings("SameParameterValue")
 	private RayTraceResult rayTrace(SchematicWorld schematic, float partialTicks) {
-		final Entity renderViewEntity = this.minecraft.getRenderViewEntity();
+		Entity renderViewEntity = this.minecraft.getRenderViewEntity();
 		if (renderViewEntity == null) {
 			return null;
 		}
 
 		if (this.minecraft.playerController != null) {
-			final double blockReachDistance = this.minecraft.playerController.getBlockReachDistance();
+			double blockReachDistance = this.minecraft.playerController.getBlockReachDistance();
 
-			final double posX = renderViewEntity.getPosX();
-			final double posY = renderViewEntity.getPosY();
-			final double posZ = renderViewEntity.getPosZ();
+			double posX = renderViewEntity.getPosX();
+			double posY = renderViewEntity.getPosY();
+			double posZ = renderViewEntity.getPosZ();
 
 			renderViewEntity.setPosition(renderViewEntity.getPosX() - schematic.position.x,
 			                             renderViewEntity.getPosY() - schematic.position.y,
 			                             renderViewEntity.getPosZ() - schematic.position.z);
 
-			final Vec3d vecPosition = renderViewEntity.getEyePosition(partialTicks);
-			final Vec3d vecLook = renderViewEntity.getLook(partialTicks);
-			final Vec3d vecExtendedLook = vecPosition.add(vecLook.x * blockReachDistance,
-			                                              vecLook.y * blockReachDistance,
-			                                              vecLook.z * blockReachDistance);
+			Vec3d vecPosition = renderViewEntity.getEyePosition(partialTicks);
+			Vec3d vecLook = renderViewEntity.getLook(partialTicks);
+			Vec3d vecExtendedLook = vecPosition.add(vecLook.x * blockReachDistance, vecLook.y * blockReachDistance,
+			                                        vecLook.z * blockReachDistance);
 
 			renderViewEntity.setPosition(posX, posY, posZ);
 
-			return schematic.rayTraceBlocks(new RayTraceContext(vecPosition,
-			                                                    vecExtendedLook,
-			                                                    RayTraceContext.BlockMode.OUTLINE,
-			                                                    RayTraceContext.FluidMode.NONE,
-			                                                    renderViewEntity));
+			return schematic.rayTraceBlocks(
+					new RayTraceContext(vecPosition, vecExtendedLook, RayTraceContext.BlockMode.OUTLINE,
+					                    RayTraceContext.FluidMode.NONE, renderViewEntity));
 		}
 
 		throw new IllegalStateException("Error rendering Schematic");

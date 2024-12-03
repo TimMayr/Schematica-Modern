@@ -26,39 +26,53 @@ public class CommandSchematicaReplace extends CommandSchematicaBase {
 
 	public static void register(CommandDispatcher<CommandSource> dispatcher) {
 		dispatcher.register(Commands.literal(Names.Command.Replace.NAME)
-				.then(Commands.argument("toReplace", BlockStateArgument.blockState())
-						.then(Commands.argument("with", BlockStateArgument.blockState()).executes((commandContext) -> {
-							CommandSource source = commandContext.getSource();
-							BlockState toReplace =
-									BlockStateArgument.getBlockState(commandContext, "toReplace").getState();
+		                            .then(Commands.argument("toReplace", BlockStateArgument.blockState())
+		                                          .then(Commands.argument("with", BlockStateArgument.blockState())
+		                                                        .executes((commandContext) -> {
+			                                                        CommandSource source = commandContext.getSource();
+			                                                        BlockState toReplace =
+					                                                        BlockStateArgument.getBlockState(
+							                                                                          commandContext,
+							                                                                          "toReplace")
+					                                                                          .getState();
 
-							BlockState with = BlockStateArgument.getBlockState(commandContext, "toReplace").getState();
+			                                                        BlockState with = BlockStateArgument.getBlockState(
+					                                                        commandContext, "toReplace").getState();
 
-							final SchematicWorld schematic = ClientProxy.schematic;
+			                                                        SchematicWorld schematic = ClientProxy.schematic;
 
-							if (schematic == null) {
-								throw new CommandException(
-										new TranslationTextComponent(Names.Command.Replace.Message.NO_SCHEMATIC));
-							}
+			                                                        if (schematic == null) {
+				                                                        throw new CommandException(
+						                                                        new TranslationTextComponent(
+								                                                        Names.Command.Replace.Message.NO_SCHEMATIC));
+			                                                        }
 
-							try {
-								final BlockStateMatcher matcher = BlockStateMatcher.forBlock(toReplace.getBlock());
-								final BlockStateReplacer replacer = BlockStateReplacer.forBlockState(with);
-								final int count = schematic.replaceBlock(matcher, replacer);
+			                                                        try {
+				                                                        BlockStateMatcher matcher =
+						                                                        BlockStateMatcher.forBlock(
+								                                                        toReplace.getBlock());
+				                                                        BlockStateReplacer replacer =
+						                                                        BlockStateReplacer.forBlockState(with);
+				                                                        int count = schematic.replaceBlock(matcher,
+				                                                                                           replacer);
 
-								source.sendFeedback(
-										new TranslationTextComponent(Names.Command.Replace.Message.SUCCESS, count),
-										true);
-							} catch (final Exception e) {
-								Reference.logger.error("Something went wrong!", e);
-								throw new CommandException(new StringTextComponent(e.getMessage()));
-							}
-							return 0;
-						}))));
+				                                                        source.sendFeedback(
+						                                                        new TranslationTextComponent(
+								                                                        Names.Command.Replace.Message.SUCCESS,
+								                                                        count), true);
+			                                                        } catch (Exception e) {
+				                                                        Reference.logger.error("Something went wrong!",
+				                                                                               e);
+				                                                        throw new CommandException(
+						                                                        new StringTextComponent(
+								                                                        e.getMessage()));
+			                                                        }
+			                                                        return 0;
+		                                                        }))));
 	}
 
 	@Override
-	public String getUsage(final ICommandSource sender) {
+	public String getUsage(ICommandSource sender) {
 		return Names.Command.Replace.Message.USAGE;
 	}
 }

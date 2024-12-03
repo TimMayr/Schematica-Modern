@@ -27,12 +27,12 @@ import java.io.File;
 import java.io.IOException;
 
 public class ClientProxy extends CommonProxy {
+	private static final Minecraft MINECRAFT = Minecraft.getInstance();
 	public static final Vector3d playerPosition = new Vector3d();
 	public static final MBlockPos pointA = new MBlockPos();
 	public static final MBlockPos pointB = new MBlockPos();
 	public static final MBlockPos pointMin = new MBlockPos();
 	public static final MBlockPos pointMax = new MBlockPos();
-	private static final Minecraft MINECRAFT = Minecraft.getInstance();
 	public static boolean isRenderingGuide = false;
 	public static boolean isPendingReset = false;
 	public static Direction orientation = null;
@@ -42,7 +42,7 @@ public class ClientProxy extends CommonProxy {
 	public static Direction axisRotation = Direction.UP;
 	public static RayTraceResult objectMouseOver = null;
 
-	public static void setPlayerData(final PlayerEntity player, final float partialTicks) {
+	public static void setPlayerData(PlayerEntity player, float partialTicks) {
 		playerPosition.x = player.lastTickPosX + (player.getPosX() - player.lastTickPosX) * partialTicks;
 		playerPosition.y = player.lastTickPosY + (player.getPosY() - player.lastTickPosY) * partialTicks;
 		playerPosition.z = player.lastTickPosZ + (player.getPosZ() - player.lastTickPosZ) * partialTicks;
@@ -52,7 +52,7 @@ public class ClientProxy extends CommonProxy {
 		rotationRender = MathHelper.floor(player.rotationYaw / 90) & 3;
 	}
 
-	private static Direction getOrientation(final PlayerEntity player) {
+	private static Direction getOrientation(PlayerEntity player) {
 		if (player.rotationPitch > 45) {
 			return Direction.DOWN;
 		} else if (player.rotationPitch < -45) {
@@ -73,7 +73,7 @@ public class ClientProxy extends CommonProxy {
 		return null;
 	}
 
-	public static void movePointToPlayer(final MBlockPos point) {
+	public static void movePointToPlayer(MBlockPos point) {
 		point.x = (int) Math.floor(playerPosition.x);
 		point.y = (int) Math.floor(playerPosition.y);
 		point.z = (int) Math.floor(playerPosition.z);
@@ -98,9 +98,9 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 
-	public static void moveSchematicToPlayer(final SchematicWorld schematic) {
+	public static void moveSchematicToPlayer(SchematicWorld schematic) {
 		if (schematic != null) {
-			final MBlockPos position = schematic.position;
+			MBlockPos position = schematic.position;
 			position.x = (int) Math.floor(playerPosition.x);
 			position.y = (int) Math.floor(playerPosition.y);
 			position.z = (int) Math.floor(playerPosition.z);
@@ -127,18 +127,18 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@SubscribeEvent
-	public void preInit(final FMLClientSetupEvent event) {
+	public void preInit(FMLClientSetupEvent event) {
 		this.createFolders();
 		SchematicaClientConfig.populateExtraAirBlocks();
 		SchematicaClientConfig.normalizeSchematicPath();
 
-		for (final KeyBinding keyBinding : InputHandler.KEY_BINDINGS) {
+		for (KeyBinding keyBinding : InputHandler.KEY_BINDINGS) {
 			ClientRegistry.registerKeyBinding(keyBinding);
 		}
 	}
 
 	@SubscribeEvent
-	public void init(final FMLClientSetupEvent event) {
+	public void init(FMLClientSetupEvent event) {
 		MinecraftForge.EVENT_BUS.register(InputHandler.INSTANCE);
 		MinecraftForge.EVENT_BUS.register(TickHandler.INSTANCE);
 		MinecraftForge.EVENT_BUS.register(RenderTickHandler.INSTANCE);
@@ -149,16 +149,16 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@SubscribeEvent
-	public void postInit(final FMLClientSetupEvent event) {
+	public void postInit(FMLClientSetupEvent event) {
 		resetSettings();
 	}
 
 	@Override
 	public File getDataDirectory() {
-		final File file = MINECRAFT.gameDir;
+		File file = MINECRAFT.gameDir;
 		try {
 			return file.getCanonicalFile();
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			Reference.logger.debug("Could not canonize path!", e);
 		}
 		return file;
@@ -201,16 +201,16 @@ public class ClientProxy extends CommonProxy {
 
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public boolean loadSchematic(final PlayerEntity player, final File directory, final String filename) {
-		final ISchematic schematic = SchematicFormat.readFromFile(directory, filename);
+	public boolean loadSchematic(PlayerEntity player, File directory, String filename) {
+		ISchematic schematic = SchematicFormat.readFromFile(directory, filename);
 		if (schematic == null) {
 			return false;
 		}
 
-		final SchematicWorld world = new SchematicWorld(schematic);
+		SchematicWorld world = new SchematicWorld(schematic);
 
 		Reference.logger.debug("Loaded {} [w:{},h:{},l:{}]", filename, world.getWidth(), world.getHeight(),
-				world.getLength());
+		                       world.getLength());
 
 		ClientProxy.schematic = world;
 		RenderSchematic.INSTANCE.setWorldAndLoadRenderers(world);
@@ -221,12 +221,12 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public boolean isPlayerQuotaExceeded(final PlayerEntity player) {
+	public boolean isPlayerQuotaExceeded(PlayerEntity player) {
 		return false;
 	}
 
 	@Override
-	public File getPlayerSchematicDirectory(final PlayerEntity player, final boolean privateDirectory) {
+	public File getPlayerSchematicDirectory(PlayerEntity player, boolean privateDirectory) {
 		return SchematicaClientConfig.schematicDirectory;
 	}
 }

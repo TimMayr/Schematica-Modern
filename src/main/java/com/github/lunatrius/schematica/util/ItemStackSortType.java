@@ -7,62 +7,56 @@ import java.util.Comparator;
 import java.util.List;
 
 public enum ItemStackSortType {
-	NAME_ASC("name",
-	         "↑",
-	         (final BlockList.WrappedItemStack wrappedItemStackA, final BlockList.WrappedItemStack wrappedItemStackB) -> {
-		         final String nameA = wrappedItemStackA.getItemStackDisplayName();
-		         final String nameB = wrappedItemStackB.getItemStackDisplayName();
+	NAME_ASC("name", "↑",
+	         (BlockList.WrappedItemStack wrappedItemStackA, BlockList.WrappedItemStack wrappedItemStackB) -> {
+		         String nameA = wrappedItemStackA.getItemStackDisplayName();
+		         String nameB = wrappedItemStackB.getItemStackDisplayName();
 
 		         return nameA.compareTo(nameB);
 	         }),
-	NAME_DESC("name",
-	          "↓",
-	          (final BlockList.WrappedItemStack wrappedItemStackA, final BlockList.WrappedItemStack wrappedItemStackB) -> {
-		          final String nameA = wrappedItemStackA.getItemStackDisplayName();
-		          final String nameB = wrappedItemStackB.getItemStackDisplayName();
+	NAME_DESC("name", "↓",
+	          (BlockList.WrappedItemStack wrappedItemStackA, BlockList.WrappedItemStack wrappedItemStackB) -> {
+		          String nameA = wrappedItemStackA.getItemStackDisplayName();
+		          String nameB = wrappedItemStackB.getItemStackDisplayName();
 
 		          return nameB.compareTo(nameA);
 	          }),
-	SIZE_ASC("amount",
-	         "↑",
+	SIZE_ASC("amount", "↑",
 	         Comparator.comparingInt((BlockList.WrappedItemStack wrappedItemStackA) -> wrappedItemStackA.total)),
-	SIZE_DESC("amount",
-	          "↓",
-	          (final BlockList.WrappedItemStack wrappedItemStackA,
-	           final BlockList.WrappedItemStack wrappedItemStackB) ->
+	SIZE_DESC("amount", "↓",
+	          (BlockList.WrappedItemStack wrappedItemStackA, BlockList.WrappedItemStack wrappedItemStackB) ->
 			          wrappedItemStackB.total
 					          - wrappedItemStackA.total);
 
+	private final Comparator<BlockList.WrappedItemStack> comparator;
 	public final String label;
 	public final String glyph;
-	private final Comparator<BlockList.WrappedItemStack> comparator;
 
-	ItemStackSortType(final String label, final String glyph,
-	                  final Comparator<BlockList.WrappedItemStack> comparator) {
+	ItemStackSortType(String label, String glyph, Comparator<BlockList.WrappedItemStack> comparator) {
 		this.label = label;
 		this.glyph = glyph;
 		this.comparator = comparator;
 	}
 
-	public static ItemStackSortType fromString(final String name) {
+	public static ItemStackSortType fromString(String name) {
 		try {
 			return valueOf(name);
-		} catch (final Exception ignored) {
+		} catch (Exception ignored) {
 		}
 
 		return NAME_ASC;
 	}
 
-	public void sort(final List<BlockList.WrappedItemStack> blockList) {
+	public void sort(List<BlockList.WrappedItemStack> blockList) {
 		try {
 			blockList.sort(this.comparator);
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			Reference.logger.error("Could not sort the block list!", e);
 		}
 	}
 
 	public ItemStackSortType next() {
-		final ItemStackSortType[] values = values();
+		ItemStackSortType[] values = values();
 		return values[(ordinal() + 1) % values.length];
 	}
 }

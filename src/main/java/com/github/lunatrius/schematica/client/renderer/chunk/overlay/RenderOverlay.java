@@ -24,202 +24,214 @@ import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
 public class RenderOverlay extends RenderChunk {
-    private static enum BlockType {
-        /** Purple - a block that is present in the world but not the schematic */
-        EXTRA_BLOCK(0xBF00BF),
-        /** Red - a mismatch between the block in the world and the schematic */
-        WRONG_BLOCK(0xFF0000),
-        /** Orange - a mismatch between the metadata for the block in the world and the schematic */
-        WRONG_META(0xBF5F00),
-        /** Blue - a block that is present in the schematic but not in the world */
-        MISSING_BLOCK(0x00BFFF);
+	private final VertexBuffer vertexBuffer;
 
-        public final int color;
+	public RenderOverlay(World world, RenderGlobal renderGlobal, int index) {
+		super(world, renderGlobal, index);
+		this.vertexBuffer = OpenGlHelper.useVbo() ? new VertexBuffer(DefaultVertexFormats.POSITION_COLOR) : null;
+	}
 
-        private BlockType(int color) {
-            this.color = color;
-        }
-    }
+	@Override
+	public VertexBuffer getVertexBufferByLayer(int layer) {
+		return this.vertexBuffer;
+	}
 
-    private final VertexBuffer vertexBuffer;
+	@Override
+	public void rebuildChunk(float x, float y, float z, ChunkCompileTaskGenerator generator) {
+		CompiledOverlay compiledOverlay = new CompiledOverlay();
+		BlockPos from = getPosition();
+		BlockPos to = from.add(15, 15, 15);
+		BlockPos fromEx = from.add(-1, -1, -1);
+		BlockPos toEx = to.add(1, 1, 1);
+		generator.getLock().lock();
+		ChunkCache chunkCache;
+		SchematicWorld schematic = (SchematicWorld) this.world;
 
-    public RenderOverlay(final World world, final RenderGlobal renderGlobal, final int index) {
-        super(world, renderGlobal, index);
-        this.vertexBuffer = OpenGlHelper.useVbo() ? new VertexBuffer(DefaultVertexFormats.POSITION_COLOR) : null;
-    }
+		try {
+			if (generator.getStatus() != ChunkCompileTaskGenerator.Status.COMPILING) {
+				return;
+			}
 
-    @Override
-    public VertexBuffer getVertexBufferByLayer(final int layer) {
-        return this.vertexBuffer;
-    }
+			if (from.getX() < 0
+					|| from.getZ() < 0
+					|| from.getX() >= schematic.getWidth()
+					|| from.getZ() >= schematic.getLength()) {
+				generator.setCompiledChunk(CompiledChunk.DUMMY);
+				return;
+			}
 
-    @Override
-    public void rebuildChunk(final float x, final float y, final float z, final ChunkCompileTaskGenerator generator) {
-        final CompiledOverlay compiledOverlay = new CompiledOverlay();
-        final BlockPos from = getPosition();
-        final BlockPos to = from.add(15, 15, 15);
-        final BlockPos fromEx = from.add(-1, -1, -1);
-        final BlockPos toEx = to.add(1, 1, 1);
-        generator.getLock().lock();
-        ChunkCache chunkCache;
-        final SchematicWorld schematic = (SchematicWorld) this.world;
+			chunkCache = new ChunkCache(this.world, fromEx, toEx, 1);
+			generator.setCompiledChunk(compiledOverlay);
+		} ly {
+			generator.getLock().unlock();
+		}
 
-        try {
-            if (generator.getStatus() != ChunkCompileTaskGenerator.Status.COMPILING) {
-                return;
-            }
+		VisGraph visgraph = new VisGraph();
 
-            if (from.getX() < 0 || from.getZ() < 0 || from.getX() >= schematic.getWidth() || from.getZ() >= schematic.getLength()) {
-                generator.setCompiledChunk(CompiledChunk.DUMMY);
-                return;
-            }
+		if (!chunkCache.isEmpty()) {
+			++renderChunksUpdated;
 
-            chunkCache = new ChunkCache(this.world, fromEx, toEx, 1);
-            generator.setCompiledChunk(compiledOverlay);
-        } finally {
-            generator.getLock().unlock();
-        }
+			World mcWorld = Minecraft.getMinecraft().world;
 
-        final VisGraph visgraph = new VisGraph();
+			BlockRenderLayer layer = BlockRenderLayer.TRANSLUCENT;
+			BufferBuilder buffer = generator.getRegionRenderCacheBuilder().getWorldRendererByLayer(layer);
 
-        if (!chunkCache.isEmpty()) {
-            ++renderChunksUpdated;
+			GeometryTessellator.setStaticDelta(SchematicaClientConfig.blockDelta);
 
-            final World mcWorld = Minecraft.getMinecraft().world;
+			// Elements in this array may be null, indicating that nothing should be rendered (or out of bounds)
+			// 18 elements to provide padding on both sides (this padding is not rendered).
+			BlockType[][][] types = new BlockType[18][18][18];
 
-            final BlockRenderLayer layer = BlockRenderLayer.TRANSLUCENT;
-            final BufferBuilder buffer = generator.getRegionRenderCacheBuilder().getWorldRendererByLayer(layer);
+			// Build the type array (including the padding)
+			BlockPos.MutableBlockPos mcPos = new BlockPos.MutableBlockPos();
+			for (BlockPos.MutableBlockPos pos : BlockPos.getAllInBoxMutable(fromEx, toEx)) {
+				if (!schematic.isInside(pos) || !schematic.layerMode.shouldUseLayer(schematic, pos.getY())) {
+					continue;
+				}
 
-            GeometryTessellator.setStaticDelta(SchematicaClientConfig.blockDelta);
+				// Indices in types
+				int secX = pos.getX() - fromEx.getX();
+				int secY = pos.getY() - fromEx.getY();
+				int secZ = pos.getZ() - fromEx.getZ();
 
-            // Elements in this array may be null, indicating that nothing should be rendered (or out of bounds)
-            // 18 elements to provide padding on both sides (this padding is not rendered).
-            final BlockType[][][] types = new BlockType[18][18][18];
+				IBlockState schBlockState = schematic.getBlockState(pos);
+				Block schBlock = schBlockState.getBlock();
 
-            // Build the type array (including the padding)
-            BlockPos.MutableBlockPos mcPos = new BlockPos.MutableBlockPos();
-            for (final BlockPos.MutableBlockPos pos : BlockPos.getAllInBoxMutable(fromEx, toEx)) {
-                if (!schematic.isInside(pos) || !schematic.layerMode.shouldUseLayer(schematic, pos.getY())) {
-                    continue;
-                }
+				if (schBlockState.isOpaqueCube()) {
+					visgraph.setOpaqueCube(pos);
+				}
 
-                // Indices in types
-                int secX = pos.getX() - fromEx.getX();
-                int secY = pos.getY() - fromEx.getY();
-                int secZ = pos.getZ() - fromEx.getZ();
+				mcPos.setPos(pos.getX() + schematic.position.getX(), pos.getY() + schematic.position.getY(),
+				             pos.getZ() + schematic.position.getZ());
+				IBlockState mcBlockState = mcWorld.getBlockState(mcPos);
+				Block mcBlock = mcBlockState.getBlock();
 
-                final IBlockState schBlockState = schematic.getBlockState(pos);
-                final Block schBlock = schBlockState.getBlock();
+				boolean isSchAirBlock = schematic.isAirBlock(pos);
+				boolean isMcAirBlock = mcWorld.isAirBlock(mcPos) || SchematicaClientConfig.isExtraAirBlock(mcBlock);
 
-                if (schBlockState.isOpaqueCube()) {
-                    visgraph.setOpaqueCube(pos);
-                }
+				if (SchematicaClientConfig.highlightAir && !isMcAirBlock && isSchAirBlock) {
+					types[secX][secY][secZ] = BlockType.EXTRA_BLOCK;
+				} else if (SchematicaClientConfig.highlight) {
+					if (!isMcAirBlock) {
+						if (schBlock != mcBlock) {
+							types[secX][secY][secZ] = BlockType.WRONG_BLOCK;
+						} else if (schBlock.getMetaFromState(schBlockState) != mcBlock.getMetaFromState(mcBlockState)) {
+							types[secX][secY][secZ] = BlockType.WRONG_META;
+						}
+					} else if (!isSchAirBlock) {
+						types[secX][secY][secZ] = BlockType.MISSING_BLOCK;
+					}
+				}
+			}
 
-                mcPos.setPos(pos.getX() + schematic.position.getX(), pos.getY() + schematic.position.getY(), pos.getZ() + schematic.position.getZ());
-                final IBlockState mcBlockState = mcWorld.getBlockState(mcPos);
-                final Block mcBlock = mcBlockState.getBlock();
+			// Draw the type array (but not the padding)
+			for (BlockPos.MutableBlockPos pos : BlockPos.getAllInBoxMutable(from, to)) {
+				int secX = pos.getX() - fromEx.getX();
+				int secY = pos.getY() - fromEx.getY();
+				int secZ = pos.getZ() - fromEx.getZ();
 
-                final boolean isSchAirBlock = schematic.isAirBlock(pos);
-                final boolean isMcAirBlock = mcWorld.isAirBlock(mcPos) || SchematicaClientConfig.isExtraAirBlock(mcBlock);
+				BlockType type = types[secX][secY][secZ];
 
-                if (SchematicaClientConfig.highlightAir && !isMcAirBlock && isSchAirBlock) {
-                    types[secX][secY][secZ] = BlockType.EXTRA_BLOCK;
-                } else if (SchematicaClientConfig.highlight) {
-                    if (!isMcAirBlock) {
-                        if (schBlock != mcBlock) {
-                            types[secX][secY][secZ] = BlockType.WRONG_BLOCK;
-                        } else if (schBlock.getMetaFromState(schBlockState) != mcBlock.getMetaFromState(mcBlockState)) {
-                            types[secX][secY][secZ] = BlockType.WRONG_META;
-                        }
-                    } else if (!isSchAirBlock) {
-                        types[secX][secY][secZ] = BlockType.MISSING_BLOCK;
-                    }
-                }
-            }
+				if (type != null) {
+					if (!compiledOverlay.isLayerStarted(layer)) {
+						compiledOverlay.setLayerStarted(layer);
+						preRenderBlocks(buffer, from);
+					}
 
-            // Draw the type array (but not the padding)
-            for (final BlockPos.MutableBlockPos pos : BlockPos.getAllInBoxMutable(from, to)) {
-                int secX = pos.getX() - fromEx.getX();
-                int secY = pos.getY() - fromEx.getY();
-                int secZ = pos.getZ() - fromEx.getZ();
+					int sides = getSides(types, secX, secY, secZ);
+					GeometryTessellator.drawCuboid(buffer, pos, sides, 0x3F000000 | type.color);
+					compiledOverlay.setLayerUsed(layer);
+				}
+			}
 
-                BlockType type = types[secX][secY][secZ];
+			if (compiledOverlay.isLayerStarted(layer)) {
+				postRenderBlocks(layer, x, y, z, buffer, compiledOverlay);
+			}
+		}
 
-                if (type != null) {
-                    if (!compiledOverlay.isLayerStarted(layer)) {
-                        compiledOverlay.setLayerStarted(layer);
-                        preRenderBlocks(buffer, from);
-                    }
+		compiledOverlay.setVisibility(visgraph.computeVisibility());
+	}
 
-                    int sides = getSides(types, secX, secY, secZ);
-                    GeometryTessellator.drawCuboid(buffer, pos, sides, 0x3F000000 | type.color);
-                    compiledOverlay.setLayerUsed(layer);
-                }
-            }
+	private int getSides(BlockType[][][] types, int x, int y, int z) {
+		// The padding cannot be rendered (it lacks neighbors)
+		if (!(x > 0 && x < 17)) {
+			throw new IndexOutOfBoundsException("x cannot be in padding: " + x);
+		}
+		if (!(y > 0 && y < 17)) {
+			throw new IndexOutOfBoundsException("y cannot be in padding: " + y);
+		}
+		if (!(z > 0 && z < 17)) {
+			throw new IndexOutOfBoundsException("z cannot be in padding: " + z);
+		}
 
-            if (compiledOverlay.isLayerStarted(layer)) {
-                postRenderBlocks(layer, x, y, z, buffer, compiledOverlay);
-            }
-        }
+		int sides = 0;
 
-        compiledOverlay.setVisibility(visgraph.computeVisibility());
-    }
+		BlockType type = types[x][y][z];
 
-    private int getSides(final BlockType[][][] types, final int x, final int y, final int z) {
-        // The padding cannot be rendered (it lacks neighbors)
-        if (!(x > 0 && x < 17)) {
-            throw new IndexOutOfBoundsException("x cannot be in padding: " + x);
-        }
-        if (!(y > 0 && y < 17)) {
-            throw new IndexOutOfBoundsException("y cannot be in padding: " + y);
-        }
-        if (!(z > 0 && z < 17)) {
-            throw new IndexOutOfBoundsException("z cannot be in padding: " + z);
-        }
+		if (types[x][y - 1][z] != type) {
+			sides |= GeometryMasks.Quad.DOWN;
+		}
 
-        int sides = 0;
+		if (types[x][y + 1][z] != type) {
+			sides |= GeometryMasks.Quad.UP;
+		}
 
-        final BlockType type = types[x][y][z];
+		if (types[x][y][z - 1] != type) {
+			sides |= GeometryMasks.Quad.NORTH;
+		}
 
-        if (types[x][y - 1][z] != type) {
-            sides |= GeometryMasks.Quad.DOWN;
-        }
+		if (types[x][y][z + 1] != type) {
+			sides |= GeometryMasks.Quad.SOUTH;
+		}
 
-        if (types[x][y + 1][z] != type) {
-            sides |= GeometryMasks.Quad.UP;
-        }
+		if (types[x - 1][y][z] != type) {
+			sides |= GeometryMasks.Quad.WEST;
+		}
 
-        if (types[x][y][z - 1] != type) {
-            sides |= GeometryMasks.Quad.NORTH;
-        }
+		if (types[x + 1][y][z] != type) {
+			sides |= GeometryMasks.Quad.EAST;
+		}
 
-        if (types[x][y][z + 1] != type) {
-            sides |= GeometryMasks.Quad.SOUTH;
-        }
+		return sides;
+	}
 
-        if (types[x - 1][y][z] != type) {
-            sides |= GeometryMasks.Quad.WEST;
-        }
+	@Override
+	public void preRenderBlocks(BufferBuilder buffer, BlockPos pos) {
+		buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+		buffer.setTranslation(-pos.getX(), -pos.getY(), -pos.getZ());
+	}
 
-        if (types[x + 1][y][z] != type) {
-            sides |= GeometryMasks.Quad.EAST;
-        }
+	@Override
+	public void deleteGlResources() {
+		super.deleteGlResources();
 
-        return sides;
-    }
+		if (this.vertexBuffer != null) {
+			this.vertexBuffer.deleteGlBuffers();
+		}
+	}
 
-    @Override
-    public void preRenderBlocks(final BufferBuilder buffer, final BlockPos pos) {
-        buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-        buffer.setTranslation(-pos.getX(), -pos.getY(), -pos.getZ());
-    }
+	private enum BlockType {
+		/**
+		 * Purple - a block that is present in the world but not the schematic
+		 */
+		EXTRA_BLOCK(0xBF00BF),
+		/**
+		 * Red - a mismatch between the block in the world and the schematic
+		 */
+		WRONG_BLOCK(0xFF0000),
+		/**
+		 * Orange - a mismatch between the metadata for the block in the world and the schematic
+		 */
+		WRONG_META(0xBF5F00),
+		/**
+		 * Blue - a block that is present in the schematic but not in the world
+		 */
+		MISSING_BLOCK(0x00BFFF);
 
-    @Override
-    public void deleteGlResources() {
-        super.deleteGlResources();
+		public final int color;
 
-        if (this.vertexBuffer != null) {
-            this.vertexBuffer.deleteGlBuffers();
-        }
-    }
+		BlockType(int color) {
+			this.color = color;
+		}
+	}
 }

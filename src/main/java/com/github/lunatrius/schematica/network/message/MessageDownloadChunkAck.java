@@ -16,14 +16,14 @@ public class MessageDownloadChunkAck {
 	public MessageDownloadChunkAck() {
 	}
 
-	public MessageDownloadChunkAck(final int baseX, final int baseY, final int baseZ) {
+	public MessageDownloadChunkAck(int baseX, int baseY, int baseZ) {
 		this.baseX = baseX;
 		this.baseY = baseY;
 		this.baseZ = baseZ;
 	}
 
 
-	public static MessageDownloadChunkAck decode(final ByteBuf buf) {
+	public static MessageDownloadChunkAck decode(ByteBuf buf) {
 		return new MessageDownloadChunkAck(buf.readInt(), buf.readInt(), buf.readInt());
 	}
 
@@ -36,8 +36,8 @@ public class MessageDownloadChunkAck {
 
 	public static void handle(MessageDownloadChunkAck msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
-			final PlayerEntity player = ctx.get().getSender();
-			final SchematicTransfer transfer = DownloadHandler.INSTANCE.transferMap.get(player);
+			PlayerEntity player = ctx.get().getSender();
+			SchematicTransfer transfer = DownloadHandler.INSTANCE.transferMap.get(player);
 
 			if (transfer != null) {
 				transfer.confirmChunk(msg.baseX, msg.baseY, msg.baseZ);

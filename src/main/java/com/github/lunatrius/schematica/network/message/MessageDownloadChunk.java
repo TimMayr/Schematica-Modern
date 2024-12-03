@@ -19,15 +19,15 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class MessageDownloadChunk {
-	public int baseX;
-	public int baseY;
-	public int baseZ;
+	public final int baseX;
+	public final int baseY;
+	public final int baseZ;
 
-	public BlockState[][][] blocks;
-	public List<TileEntity> tileEntities;
-	public List<Entity> entities;
+	public final BlockState[][][] blocks;
+	public final List<TileEntity> tileEntities;
+	public final List<Entity> entities;
 
-	public MessageDownloadChunk(final ISchematic schematic, final int baseX, final int baseY, final int baseZ) {
+	public MessageDownloadChunk(ISchematic schematic, int baseX, int baseY, int baseZ) {
 		this.baseX = baseX;
 		this.baseY = baseY;
 		this.baseZ = baseZ;
@@ -38,14 +38,14 @@ public class MessageDownloadChunk {
 		this.tileEntities = new ArrayList<>();
 		this.entities = new ArrayList<>();
 
-		final MBlockPos pos = new MBlockPos();
+		MBlockPos pos = new MBlockPos();
 		for (int x = 0; x < Constants.SchematicChunk.WIDTH; x++) {
 			for (int y = 0; y < Constants.SchematicChunk.HEIGHT; y++) {
 				for (int z = 0; z < Constants.SchematicChunk.LENGTH; z++) {
 					pos.set(baseX + x, baseY + y, baseZ + z);
-					final BlockState blockState = schematic.getBlockState(pos);
+					BlockState blockState = schematic.getBlockState(pos);
 					this.blocks[x][y][z] = blockState;
-					final TileEntity tileEntity = schematic.getTileEntity(pos);
+					TileEntity tileEntity = schematic.getTileEntity(pos);
 					if (tileEntity != null) {
 						this.tileEntities.add(tileEntity);
 					}
@@ -82,12 +82,12 @@ public class MessageDownloadChunk {
 			}
 		}
 
-		final CompoundNBT compound = buf.readCompoundTag();
+		CompoundNBT compound = buf.readCompoundTag();
 		if (compound != null) {
 			NBTHelper.readTileEntitiesFromCompound(compound, msgTileEntities);
 		}
 
-		final CompoundNBT compound2 = buf.readCompoundTag();
+		CompoundNBT compound2 = buf.readCompoundTag();
 		NBTHelper.readEntitiesFromCompound(compound2, msgEntities);
 
 		return new MessageDownloadChunk(msgBaseX, msgBaseY, msgBaseZ, msgBlocks, msgTileEntities, msgEntities);
@@ -106,10 +106,10 @@ public class MessageDownloadChunk {
 			}
 		}
 
-		final CompoundNBT compound = NBTHelper.writeTileEntitiesToCompound(msg.tileEntities);
+		CompoundNBT compound = NBTHelper.writeTileEntitiesToCompound(msg.tileEntities);
 		buf.writeCompoundTag(compound);
 
-		final CompoundNBT compound1 = NBTHelper.writeEntitiesToCompound(msg.entities);
+		CompoundNBT compound1 = NBTHelper.writeEntitiesToCompound(msg.entities);
 		buf.writeCompoundTag(compound1);
 	}
 
@@ -123,12 +123,12 @@ public class MessageDownloadChunk {
 	}
 
 
-	private void copyToSchematic(final ISchematic schematic) {
-		final MBlockPos pos = new MBlockPos();
+	private void copyToSchematic(ISchematic schematic) {
+		MBlockPos pos = new MBlockPos();
 		for (int x = 0; x < Constants.SchematicChunk.WIDTH; x++) {
 			for (int y = 0; y < Constants.SchematicChunk.HEIGHT; y++) {
 				for (int z = 0; z < Constants.SchematicChunk.LENGTH; z++) {
-					final BlockState blockState = this.blocks[x][y][z];
+					BlockState blockState = this.blocks[x][y][z];
 					pos.set(this.baseX + x, this.baseY + y, this.baseZ + z);
 
 					schematic.setBlockState(pos, blockState);
@@ -136,7 +136,7 @@ public class MessageDownloadChunk {
 			}
 		}
 
-		for (final TileEntity tileEntity : this.tileEntities) {
+		for (TileEntity tileEntity : this.tileEntities) {
 			schematic.setTileEntity(tileEntity.getPos(), tileEntity);
 		}
 	}

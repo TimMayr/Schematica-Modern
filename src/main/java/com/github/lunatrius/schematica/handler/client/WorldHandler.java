@@ -11,34 +11,34 @@ import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber
 public class WorldHandler {
-    @SubscribeEvent
-    public void onLoad(final WorldEvent.Load event) {
-        final World world = event.getWorld().getWorld();
-        if (world.isRemote && !(world instanceof SchematicWorld)) {
-            RenderSchematic.INSTANCE.setWorldAndLoadRenderers(ClientProxy.schematic);
-            addWorldAccess(world, RenderSchematic.INSTANCE);
-        }
-    }
+	@SubscribeEvent
+	public void onLoad(WorldEvent.Load event) {
+		World world = event.getWorld().getWorld();
+		if (world.isRemote && !(world instanceof SchematicWorld)) {
+			RenderSchematic.INSTANCE.setWorldAndLoadRenderers(ClientProxy.schematic);
+			addWorldAccess(world, RenderSchematic.INSTANCE);
+		}
+	}
 
-    @SubscribeEvent
-    public void onUnload(final WorldEvent.Unload event) {
-        final World world = event.getWorld().getWorld();
-        if (world.isRemote) {
-            removeWorldAccess(world, RenderSchematic.INSTANCE);
-        }
-    }
+	public static void addWorldAccess(World world, RenderSchematic schematic) {
+		if (world != null && schematic != null) {
+			Reference.logger.debug("Adding world access to {}", world);
+			schematic.addWorld(world);
+		}
+	}
 
-    public static void addWorldAccess(final World world, final IWorldEventListener schematic) {
-        if (world != null && schematic != null) {
-            Reference.logger.debug("Adding world access to {}", world);
-            world.addEventListener(schematic);
-        }
-    }
+	@SubscribeEvent
+	public void onUnload(WorldEvent.Unload event) {
+		World world = event.getWorld().getWorld();
+		if (world.isRemote) {
+			removeWorldAccess(world, RenderSchematic.INSTANCE);
+		}
+	}
 
-    public static void removeWorldAccess(final World world, final IWorldEventListener schematic) {
-        if (world != null && schematic != null) {
-            Reference.logger.debug("Removing world access from {}", world);
-            world.removeEventListener(schematic);
-        }
-    }
+	public static void removeWorldAccess(World world, RenderSchematic schematic) {
+		if (world != null && schematic != null) {
+			Reference.logger.debug("Removing world access from {}", world);
+			schematic.removeWorld(world);
+		}
+	}
 }

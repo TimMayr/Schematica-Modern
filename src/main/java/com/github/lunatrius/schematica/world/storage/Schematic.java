@@ -18,7 +18,7 @@ public class Schematic implements ISchematic {
 	private static final ItemStack DEFAULT_ICON = new ItemStack(Blocks.GRASS);
 	private final BlockState[][][] blockstates;
 	private final List<TileEntity> tileEntities = new ArrayList<>();
-	private final List<Entity> entities = new ArrayList<Entity>();
+	private final List<Entity> entities = new ArrayList<>();
 	private final int width;
 	private final int height;
 	private final int length;

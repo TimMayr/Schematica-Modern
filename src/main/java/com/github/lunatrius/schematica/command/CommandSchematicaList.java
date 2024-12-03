@@ -29,94 +29,112 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 
 	public static void register(CommandDispatcher<CommandSource> dispatcher) {
 		dispatcher.register(Commands.literal(Names.Command.List.NAME)
-				.then(Commands.argument("page", IntegerArgumentType.integer(1))
-				              .executes((commandContext) -> {
-					CommandSource source = commandContext.getSource();
-					ServerPlayerEntity player = source.asPlayer();
-					int page = IntegerArgumentType.getInteger(commandContext, "page");
+		                            .then(Commands.argument("page", IntegerArgumentType.integer(1))
+		                                          .executes((commandContext) -> {
+			                                          CommandSource source = commandContext.getSource();
+			                                          ServerPlayerEntity player = source.asPlayer();
+			                                          int page = IntegerArgumentType.getInteger(commandContext,
+			                                                                                    "page");
 
-					final int pageSize = 9; //maximum number of lines available without opening chat.
-					final int pageStart = page * pageSize;
-					final int pageEnd = pageStart + pageSize;
-					int currentFile = 0;
+			                                          int pageSize =
+					                                          9; //maximum number of lines available without opening
+			                                          // chat.
+			                                          int pageStart = page * pageSize;
+			                                          int pageEnd = pageStart + pageSize;
+			                                          int currentFile = 0;
 
-					final LinkedList<ITextComponent> componentsToSend = new LinkedList<>();
+			                                          LinkedList<ITextComponent> componentsToSend = new LinkedList<>();
 
-					final File schematicDirectory = Reference.proxy.getPlayerSchematicDirectory(player, true);
+			                                          File schematicDirectory =
+					                                          Reference.proxy.getPlayerSchematicDirectory(player,
+					                                                                                      true);
 
 
-					if (schematicDirectory == null) {
-						Reference.logger.warn("Unable to determine the schematic directory for player {}", player);
-						throw new CommandException(new TranslationTextComponent(
-								Names.Command.Save.Message.PLAYER_SCHEMATIC_DIR_UNAVAILABLE));
-					}
+			                                          if (schematicDirectory == null) {
+				                                          Reference.logger.warn(
+						                                          "Unable to determine the schematic directory for "
+								                                          + "player {}",
+						                                          player);
+				                                          throw new CommandException(new TranslationTextComponent(
+						                                          Names.Command.Save.Message.PLAYER_SCHEMATIC_DIR_UNAVAILABLE));
+			                                          }
 
-					if (!schematicDirectory.exists()) {
-						if (!schematicDirectory.mkdirs()) {
-							Reference.logger.warn("Could not create player schematic directory {}",
-									schematicDirectory.getAbsolutePath());
-							throw new CommandException(new TranslationTextComponent(
-									Names.Command.Save.Message.PLAYER_SCHEMATIC_DIR_UNAVAILABLE));
-						}
-					}
+			                                          if (!schematicDirectory.exists()) {
+				                                          if (!schematicDirectory.mkdirs()) {
+					                                          Reference.logger.warn(
+							                                          "Could not create player schematic directory {}",
+							                                          schematicDirectory.getAbsolutePath());
+					                                          throw new CommandException(new TranslationTextComponent(
+							                                          Names.Command.Save.Message.PLAYER_SCHEMATIC_DIR_UNAVAILABLE));
+				                                          }
+			                                          }
 
-					final File[] files = schematicDirectory.listFiles(FILE_FILTER_SCHEMATIC);
-					if (files != null) {
-						for (final File path : files) {
-							if (currentFile >= pageStart && currentFile < pageEnd) {
-								final String fileName = path.getName();
+			                                          File[] files =
+					                                          schematicDirectory.listFiles(FILE_FILTER_SCHEMATIC);
+			                                          if (files != null) {
+				                                          for (File path : files) {
+					                                          if (currentFile >= pageStart && currentFile < pageEnd) {
+						                                          String fileName = path.getName();
 
-								final ITextComponent chatComponent = new StringTextComponent(
-										String.format("%2d (%s): %s [", currentFile + 1,
-												FileUtils.humanReadableByteCount(path.length()),
-												FilenameUtils.removeExtension(fileName)));
+						                                          ITextComponent chatComponent =
+								                                          new StringTextComponent(
+										                                          String.format("%2d (%s): %s [",
+										                                                        currentFile + 1,
+										                                                        FileUtils.humanReadableByteCount(
+												                                                        path.length()),
+										                                                        FilenameUtils.removeExtension(
+												                                                        fileName)));
 
-								final String removeCommand =
-										String.format("/%s %s", Names.Command.Remove.NAME, fileName);
-								final ITextComponent removeLink =
-										withStyle(new TranslationTextComponent(Names.Command.List.Message.REMOVE),
-												TextFormatting.RED, removeCommand);
-								chatComponent.appendSibling(removeLink);
-								chatComponent.appendText("][");
+						                                          String removeCommand = String.format("/%s %s",
+						                                                                               Names.Command.Remove.NAME,
+						                                                                               fileName);
+						                                          ITextComponent removeLink = withStyle(
+								                                          new TranslationTextComponent(
+										                                          Names.Command.List.Message.REMOVE),
+								                                          TextFormatting.RED, removeCommand);
+						                                          chatComponent.appendSibling(removeLink);
+						                                          chatComponent.appendText("][");
 
-								final String downloadCommand =
-										String.format("/%s %s", Names.Command.Download.NAME, fileName);
-								final ITextComponent downloadLink =
-										withStyle(new TranslationTextComponent(Names.Command.List.Message.DOWNLOAD),
-												TextFormatting.GREEN, downloadCommand);
-								chatComponent.appendSibling(downloadLink);
-								chatComponent.appendText("]");
+						                                          String downloadCommand = String.format("/%s %s",
+						                                                                                 Names.Command.Download.NAME,
+						                                                                                 fileName);
+						                                          ITextComponent downloadLink = withStyle(
+								                                          new TranslationTextComponent(
+										                                          Names.Command.List.Message.DOWNLOAD),
+								                                          TextFormatting.GREEN, downloadCommand);
+						                                          chatComponent.appendSibling(downloadLink);
+						                                          chatComponent.appendText("]");
 
-								componentsToSend.add(chatComponent);
-							}
-							++currentFile;
-						}
-					}
+						                                          componentsToSend.add(chatComponent);
+					                                          }
+					                                          ++currentFile;
+				                                          }
+			                                          }
 
-					if (currentFile == 0) {
-						throw new CommandException(
-								new TranslationTextComponent(Names.Command.List.Message.NO_SCHEMATICS));
-					}
+			                                          if (currentFile == 0) {
+				                                          throw new CommandException(new TranslationTextComponent(
+						                                          Names.Command.List.Message.NO_SCHEMATICS));
+			                                          }
 
-					final int totalPages = (currentFile - 1) / pageSize;
-					if (page > totalPages) {
-						throw new CommandException(
-								new TranslationTextComponent(Names.Command.List.Message.NO_SUCH_PAGE));
-					}
+			                                          int totalPages = (currentFile - 1) / pageSize;
+			                                          if (page > totalPages) {
+				                                          throw new CommandException(new TranslationTextComponent(
+						                                          Names.Command.List.Message.NO_SUCH_PAGE));
+			                                          }
 
-					source.sendFeedback(withStyle(
-							new TranslationTextComponent(Names.Command.List.Message.PAGE_HEADER, page + 1,
-									totalPages + 1), TextFormatting.DARK_GREEN, null), true);
-					for (final ITextComponent chatComponent : componentsToSend) {
-						source.sendFeedback(chatComponent, true);
-					}
+			                                          source.sendFeedback(withStyle(new TranslationTextComponent(
+					                                          Names.Command.List.Message.PAGE_HEADER, page + 1,
+					                                          totalPages + 1), TextFormatting.DARK_GREEN, null), true);
+			                                          for (ITextComponent chatComponent : componentsToSend) {
+				                                          source.sendFeedback(chatComponent, true);
+			                                          }
 
-					return page;
-				})));
+			                                          return page;
+		                                          })));
 	}
 
 	@Override
-	public String getUsage(final ICommandSource sender) {
+	public String getUsage(ICommandSource sender) {
 		return Names.Command.List.Message.USAGE;
 	}
 }

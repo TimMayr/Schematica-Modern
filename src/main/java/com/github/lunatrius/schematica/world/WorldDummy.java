@@ -45,8 +45,8 @@ public class WorldDummy extends World {
 
 	public static WorldDummy instance() {
 		if (instance == null) {
-			final WorldSettings worldSettings = new WorldSettings(0, GameType.CREATIVE, false, false, WorldType.FLAT);
-			final WorldInfo worldInfo = new WorldInfo(worldSettings, "FakeWorld");
+			WorldSettings worldSettings = new WorldSettings(0, GameType.CREATIVE, false, false, WorldType.FLAT);
+			WorldInfo worldInfo = new WorldInfo(worldSettings, "FakeWorld");
 			instance = new WorldDummy(worldInfo, DimensionType.OVERWORLD,
 			                          (world, dimension) -> new ClientChunkProvider((ClientWorld) world, 8),
 			                          Minecraft.getInstance().getProfiler(), false);

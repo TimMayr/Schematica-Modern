@@ -44,7 +44,7 @@ public abstract class CommonProxy {
 	public boolean isLoadEnabled = true;
 
 	@SubscribeEvent
-	public void init(final FMLCommonSetupEvent event) {
+	public void init(FMLCommonSetupEvent event) {
 		PacketHandler.init();
 
 		MinecraftForge.EVENT_BUS.register(QueueTickHandler.INSTANCE);
@@ -52,7 +52,7 @@ public abstract class CommonProxy {
 	}
 
 	@SubscribeEvent
-	public void serverStarting(final FMLServerStartingEvent event) {
+	public void serverStarting(FMLServerStartingEvent event) {
 		CommandDispatcher<CommandSource> dispatcher = event.getCommandDispatcher();
 		CommandSchematicaSave.register(dispatcher);
 		CommandSchematicaList.register(dispatcher);
@@ -69,9 +69,9 @@ public abstract class CommonProxy {
 		}
 	}
 
-	public File getDirectory(final String directory) {
-		final File dataDirectory = getDataDirectory();
-		final File subDirectory = new File(dataDirectory, directory);
+	public File getDirectory(String directory) {
+		File dataDirectory = getDataDirectory();
+		File subDirectory = new File(dataDirectory, directory);
 
 		if (!subDirectory.exists()) {
 			if (!subDirectory.mkdirs()) {
@@ -81,7 +81,7 @@ public abstract class CommonProxy {
 
 		try {
 			return subDirectory.getCanonicalFile();
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
@@ -98,106 +98,105 @@ public abstract class CommonProxy {
 	public void unloadSchematic() {
 	}
 
-	public void copyChunkToSchematic(final ISchematic schematic, final World world, final int chunkX, final int chunkZ,
-	                                 final int minX, final int maxX, final int minY, final int maxY, final int minZ,
-	                                 final int maxZ) {
-		final MBlockPos pos = new MBlockPos();
-		final MBlockPos localPos = new MBlockPos();
-		final int localMinX = minX < (chunkX << 4) ? 0 : (minX & 15);
-		final int localMaxX = maxX > ((chunkX << 4) + 15) ? 15 : (maxX & 15);
-		final int localMinZ = minZ < (chunkZ << 4) ? 0 : (minZ & 15);
-		final int localMaxZ = maxZ > ((chunkZ << 4) + 15) ? 15 : (maxZ & 15);
+	public void copyChunkToSchematic(ISchematic schematic, World world, int chunkX, int chunkZ, int minX, int maxX,
+	                                 int minY, int maxY, int minZ, int maxZ) {
+		MBlockPos pos = new MBlockPos();
+		MBlockPos localPos = new MBlockPos();
+		int localMinX = minX < (chunkX << 4) ? 0 : (minX & 15);
+		int localMaxX = maxX > ((chunkX << 4) + 15) ? 15 : (maxX & 15);
+		int localMinZ = minZ < (chunkZ << 4) ? 0 : (minZ & 15);
+		int localMaxZ = maxZ > ((chunkZ << 4) + 15) ? 15 : (maxZ & 15);
 
 		for (int chunkLocalX = localMinX; chunkLocalX <= localMaxX; chunkLocalX++) {
 			for (int chunkLocalZ = localMinZ; chunkLocalZ <= localMaxZ; chunkLocalZ++) {
 				for (int y = minY; y <= maxY; y++) {
-					final int x = chunkLocalX | (chunkX << 4);
-					final int z = chunkLocalZ | (chunkZ << 4);
+					int x = chunkLocalX | (chunkX << 4);
+					int z = chunkLocalZ | (chunkZ << 4);
 
-					final int localX = x - minX;
-					final int localY = y - minY;
-					final int localZ = z - minZ;
+					int localX = x - minX;
+					int localY = y - minY;
+					int localZ = z - minZ;
 
 					pos.set(x, y, z);
 					localPos.set(localX, localY, localZ);
 
 					try {
-						final BlockState blockState = world.getBlockState(pos);
-						final Block block = blockState.getBlock();
-						final boolean success = schematic.setBlockState(localPos, blockState);
+						BlockState blockState = world.getBlockState(pos);
+						Block block = blockState.getBlock();
+						boolean success = schematic.setBlockState(localPos, blockState);
 
 						if (success && block.hasTileEntity(blockState)) {
-							final TileEntity tileEntity = world.getTileEntity(pos);
+							TileEntity tileEntity = world.getTileEntity(pos);
 							if (tileEntity != null) {
 								try {
-									final TileEntity reloadedTileEntity =
+									TileEntity reloadedTileEntity =
 											NBTHelper.reloadTileEntity(tileEntity, minX, minY, minZ);
 									schematic.setTileEntity(localPos, reloadedTileEntity);
-								} catch (final NBTConversionException nce) {
+								} catch (NBTConversionException nce) {
 									Reference.logger.error("Error while trying to save tile entity '{}'!", tileEntity,
 									                       nce);
 									schematic.setBlockState(localPos, Blocks.BEDROCK.getDefaultState());
 								}
 							}
 						}
-					} catch (final Exception e) {
+					} catch (Exception e) {
 						Reference.logger.error("Something went wrong!", e);
 					}
 				}
 			}
 		}
 
-		final int minX1 = localMinX | (chunkX << 4);
-		final int minZ1 = localMinZ | (chunkZ << 4);
-		final int maxX1 = localMaxX | (chunkX << 4);
-		final int maxZ1 = localMaxZ | (chunkZ << 4);
-		final AxisAlignedBB bb = new AxisAlignedBB(minX1, minY, minZ1, maxX1 + 1, maxY + 1, maxZ1 + 1);
-		final List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, bb);
-		for (final Entity entity : entities) {
+		int minX1 = localMinX | (chunkX << 4);
+		int minZ1 = localMinZ | (chunkZ << 4);
+		int maxX1 = localMaxX | (chunkX << 4);
+		int maxZ1 = localMaxZ | (chunkZ << 4);
+		AxisAlignedBB bb = new AxisAlignedBB(minX1, minY, minZ1, maxX1 + 1, maxY + 1, maxZ1 + 1);
+		List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, bb);
+		for (Entity entity : entities) {
 			try {
-				final Entity reloadedEntity = NBTHelper.reloadEntity(entity, minX, minY, minZ);
+				Entity reloadedEntity = NBTHelper.reloadEntity(entity, minX, minY, minZ);
 				schematic.addEntity(reloadedEntity);
-			} catch (final NBTConversionException nce) {
+			} catch (NBTConversionException nce) {
 				Reference.logger.error("Error while trying to save entity '{}'!", entity, nce);
 			}
 		}
 	}
 
-	public boolean saveSchematic(final PlayerEntity player, final File directory, String filename, final World world,
-	                             @Nullable final String format, final BlockPos from, final BlockPos to) {
+	public boolean saveSchematic(PlayerEntity player, File directory, String filename, World world,
+	                             @Nullable String format, BlockPos from, BlockPos to) {
 		try {
 			String iconName = "";
 
 			try {
-				final String[] parts = filename.split(";");
+				String[] parts = filename.split(";");
 				if (parts.length == 2) {
 					iconName = parts[0];
 					filename = parts[1];
 				}
-			} catch (final Exception e) {
+			} catch (Exception e) {
 				Reference.logger.error("Failed to parse icon data!", e);
 			}
 
-			final int minX = Math.min(from.getX(), to.getX());
-			final int maxX = Math.max(from.getX(), to.getX());
-			final int minY = Math.min(from.getY(), to.getY());
-			final int maxY = Math.max(from.getY(), to.getY());
-			final int minZ = Math.min(from.getZ(), to.getZ());
-			final int maxZ = Math.max(from.getZ(), to.getZ());
+			int minX = Math.min(from.getX(), to.getX());
+			int maxX = Math.max(from.getX(), to.getX());
+			int minY = Math.min(from.getY(), to.getY());
+			int maxY = Math.max(from.getY(), to.getY());
+			int minZ = Math.min(from.getZ(), to.getZ());
+			int maxZ = Math.max(from.getZ(), to.getZ());
 
-			final short width = (short) (Math.abs(maxX - minX) + 1);
-			final short height = (short) (Math.abs(maxY - minY) + 1);
-			final short length = (short) (Math.abs(maxZ - minZ) + 1);
+			short width = (short) (Math.abs(maxX - minX) + 1);
+			short height = (short) (Math.abs(maxY - minY) + 1);
+			short length = (short) (Math.abs(maxZ - minZ) + 1);
 
-			final ISchematic schematic = new Schematic(SchematicUtil.getIconFromName(iconName), width, height, length,
-			                                           player.getScoreboardName());
-			final SchematicContainer container =
+			ISchematic schematic = new Schematic(SchematicUtil.getIconFromName(iconName), width, height, length,
+			                                     player.getScoreboardName());
+			SchematicContainer container =
 					new SchematicContainer(schematic, player, world, new File(directory, filename), format, minX, maxX,
 					                       minY, maxY, minZ, maxZ);
 			QueueTickHandler.INSTANCE.queueSchematic(container);
 
 			return true;
-		} catch (final Exception e) {
+		} catch (Exception e) {
 			Reference.logger.error("Failed to save schematic!", e);
 		}
 		return false;
