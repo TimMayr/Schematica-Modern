@@ -3,6 +3,7 @@ package com.github.lunatrius.schematica.command;
 import com.github.lunatrius.core.util.FileUtils;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -22,18 +23,54 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class CommandSchematicaRemove extends CommandSchematicaBase {
+	private static final FileFilterSchematic FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
+
 	public static void register(CommandDispatcher<CommandSource> dispatcher) {
 		dispatcher.register(Commands.literal(Names.Command.Remove.NAME)
-				.requires((source) -> source.hasPermissionLevel(0))
-				.then(Commands.argument("name", StringArgumentType.string())
-						.executes(CommandSchematicaRemove::showDeleteConfirmation)
-						.then(Commands.argument("hash", StringArgumentType.string())
-								.executes(CommandSchematicaRemove::delete))));
+		                            .requires((source) -> source.hasPermissionLevel(0))
+		                            .then(Commands.argument("name", StringArgumentType.string())
+		                                          .suggests(((context, builder) -> {
+			                                          CommandSource source = context.getSource();
+			                                          PlayerEntity player;
+			                                          final String name =
+					                                          StringArgumentType.getString(context, "filename");
+
+			                                          try {
+				                                          player = source.asPlayer();
+			                                          } catch (CommandSyntaxException e) {
+				                                          return builder.buildFuture();
+			                                          }
+
+			                                          final File directory =
+					                                          Reference.proxy.getPlayerSchematicDirectory(player,
+					                                                                                      true);
+			                                          final File[] files = directory.listFiles(FILE_FILTER_SCHEMATIC);
+
+			                                          if (files != null) {
+				                                          final List<String> filenames = new ArrayList<>();
+
+				                                          for (final File file : files) {
+					                                          filenames.add(file.getName());
+				                                          }
+
+				                                          filenames.stream()
+				                                                   .filter(s -> s.startsWith(name))
+				                                                   .forEach(builder::suggest);
+				                                          return builder.buildFuture();
+			                                          }
+
+			                                          return builder.buildFuture();
+		                                          }))
+		                                          .executes(CommandSchematicaRemove::showDeleteConfirmation)
+		                                          .then(Commands.argument("hash", StringArgumentType.string())
+		                                                        .executes(CommandSchematicaRemove::delete))));
 	}
 
 	private static int delete(CommandContext<CommandSource> context) throws CommandSyntaxException {
@@ -74,8 +111,8 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 			final ITextComponent chatComponent =
 					new TranslationTextComponent(Names.Command.Remove.Message.ARE_YOU_SURE_START, name);
 			chatComponent.appendSibling(withStyle(TextComponentUtils.wrapInSquareBrackets(
-							new TranslationTextComponent(Names.Command.Remove.Message.YES)), TextFormatting.RED,
-					confirmCommand));
+					                                      new TranslationTextComponent(Names.Command.Remove.Message.YES)), TextFormatting.RED,
+			                                      confirmCommand));
 
 			sender.sendFeedback(chatComponent, true);
 			return 0;

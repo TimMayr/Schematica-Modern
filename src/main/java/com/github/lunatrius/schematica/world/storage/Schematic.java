@@ -1,214 +1,180 @@
 package com.github.lunatrius.schematica.world.storage;
 
 import com.github.lunatrius.schematica.api.ISchematic;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import net.minecraftforge.common.extensions.IForgeBlockState;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Schematic implements ISchematic {
-    private static final ItemStack DEFAULT_ICON = new ItemStack(Blocks.GRASS);
+	private static final ItemStack DEFAULT_ICON = new ItemStack(Blocks.GRASS);
+	private final BlockState[][][] blockstates;
+	private final List<TileEntity> tileEntities = new ArrayList<>();
+	private final List<Entity> entities = new ArrayList<Entity>();
+	private final int width;
+	private final int height;
+	private final int length;
+	private ItemStack icon;
+	private String author;
 
-    private ItemStack icon;
-    private final short[][][] blocks;
-    private final byte[][][] metadata;
-    private final List<TileEntity> tileEntities = new ArrayList<TileEntity>();
-    private final List<Entity> entities = new ArrayList<Entity>();
-    private final int width;
-    private final int height;
-    private final int length;
-    private String author;
+	public Schematic(ItemStack icon, int width, int height, int length) {
+		this(icon, width, height, length, "");
+	}
 
-    public Schematic(final ItemStack icon, final int width, final int height, final int length) {
-        this(icon, width, height, length, "");
-    }
+	public Schematic(ItemStack icon, int width, int height, int length, @Nonnull String author) {
+		this.icon = icon;
+		this.blockstates = new BlockState[width][height][length];
 
-    public Schematic(final ItemStack icon, final int width, final int height, final int length, @Nonnull final String author) {
-        if (author == null) {
-            throw new IllegalArgumentException("Author cannot be null");
-        }
+		this.width = width;
+		this.height = height;
+		this.length = length;
 
-        this.icon = icon;
-        this.blocks = new short[width][height][length];
-        this.metadata = new byte[width][height][length];
+		this.author = author;
+	}
 
-        this.width = width;
-        this.height = height;
-        this.length = length;
+	@Override
+	public BlockState getBlockState(BlockPos pos) {
+		if (!isValid(pos)) {
+			return Blocks.AIR.getDefaultState();
+		}
 
-        this.author = author;
-    }
+		int x = pos.getX();
+		int y = pos.getY();
+		int z = pos.getZ();
 
-    @Override
-    public IBlockState getBlockState(final BlockPos pos) {
-        if (!isValid(pos)) {
-            return Blocks.AIR.getDefaultState();
-        }
+		return blockstates[x][y][z];
+	}
 
-        final int x = pos.getX();
-        final int y = pos.getY();
-        final int z = pos.getZ();
-        final Block block = Block.REGISTRY.getObjectById(this.blocks[x][y][z]);
+	private boolean isValid(BlockPos pos) {
+		int x = pos.getX();
+		int y = pos.getY();
+		int z = pos.getZ();
 
-        return block.getStateFromMeta(this.metadata[x][y][z]);
-    }
+		return !(x < 0 || y < 0 || z < 0 || x >= this.width || y >= this.height || z >= this.length);
+	}
 
-    @Override
-    public boolean setBlockState(final BlockPos pos, final IBlockState blockState) {
-        if (!isValid(pos)) {
-            return false;
-        }
+	@Override
+	public boolean setBlockState(BlockPos pos, IForgeBlockState blockState) {
+		if (!isValid(pos)) {
+			return false;
+		}
 
-        final Block block = blockState.getBlock();
-        final int id = Block.REGISTRY.getIDForObject(block);
-        if (id == -1) {
-            return false;
-        }
+		int x = pos.getX();
+		int y = pos.getY();
+		int z = pos.getZ();
 
-        final int meta = block.getMetaFromState(blockState);
-        final int x = pos.getX();
-        final int y = pos.getY();
-        final int z = pos.getZ();
+		this.blockstates[x][y][z] = blockState.getBlockState();
+		return true;
+	}
 
-        this.blocks[x][y][z] = (short) id;
-        this.metadata[x][y][z] = (byte) meta;
-        return true;
-    }
+	@Override
+	public TileEntity getTileEntity(BlockPos pos) {
+		for (TileEntity tileEntity : this.tileEntities) {
+			if (tileEntity.getPos().equals(pos)) {
+				return tileEntity;
+			}
+		}
 
-    @Override
-    public TileEntity getTileEntity(final BlockPos pos) {
-        for (final TileEntity tileEntity : this.tileEntities) {
-            if (tileEntity.getPos().equals(pos)) {
-                return tileEntity;
-            }
-        }
+		return null;
+	}
 
-        return null;
-    }
+	@Override
+	public List<TileEntity> getTileEntities() {
+		return this.tileEntities;
+	}
 
-    @Override
-    public List<TileEntity> getTileEntities() {
-        return this.tileEntities;
-    }
+	@Override
+	public void setTileEntity(BlockPos pos, TileEntity tileEntity) {
+		if (!isValid(pos)) {
+			return;
+		}
 
-    @Override
-    public void setTileEntity(final BlockPos pos, final TileEntity tileEntity) {
-        if (!isValid(pos)) {
-            return;
-        }
+		removeTileEntity(pos);
 
-        removeTileEntity(pos);
+		if (tileEntity != null) {
+			this.tileEntities.add(tileEntity);
+		}
+	}
 
-        if (tileEntity != null) {
-            this.tileEntities.add(tileEntity);
-        }
-    }
+	@Override
+	public void removeTileEntity(BlockPos pos) {
+		this.tileEntities.removeIf(tileEntity -> tileEntity.getPos().equals(pos));
+	}
 
-    @Override
-    public void removeTileEntity(final BlockPos pos) {
-        final Iterator<TileEntity> iterator = this.tileEntities.iterator();
+	@Override
+	public List<Entity> getEntities() {
+		return this.entities;
+	}
 
-        while (iterator.hasNext()) {
-            final TileEntity tileEntity = iterator.next();
-            if (tileEntity.getPos().equals(pos)) {
-                iterator.remove();
-            }
-        }
-    }
+	@Override
+	public void addEntity(Entity entity) {
+		if (entity == null || entity instanceof PlayerEntity) {
+			return;
+		}
 
-    @Override
-    public List<Entity> getEntities() {
-        return this.entities;
-    }
+		for (Entity e : this.entities) {
+			if (entity.getUniqueID().equals(e.getUniqueID())) {
+				return;
+			}
+		}
 
-    @Override
-    public void addEntity(final Entity entity) {
-        if (entity == null || entity.getUniqueID() == null || entity instanceof EntityPlayer) {
-            return;
-        }
+		this.entities.add(entity);
+	}
 
-        for (final Entity e : this.entities) {
-            if (entity.getUniqueID().equals(e.getUniqueID())) {
-                return;
-            }
-        }
+	@Override
+	public void removeEntity(Entity entity) {
+		if (entity == null) {
+			return;
+		}
 
-        this.entities.add(entity);
-    }
+		this.entities.removeIf(e -> entity.getUniqueID().equals(e.getUniqueID()));
+	}
 
-    @Override
-    public void removeEntity(final Entity entity) {
-        if (entity == null || entity.getUniqueID() == null) {
-            return;
-        }
+	@Override
+	public ItemStack getIcon() {
+		return this.icon;
+	}
 
-        final Iterator<Entity> iterator = this.entities.iterator();
-        while (iterator.hasNext()) {
-            final Entity e = iterator.next();
-            if (entity.getUniqueID().equals(e.getUniqueID())) {
-                iterator.remove();
-            }
-        }
-    }
+	@Override
+	public void setIcon(ItemStack icon) {
+		if (icon != null) {
+			this.icon = icon;
+		} else {
+			this.icon = DEFAULT_ICON.copy();
+		}
+	}
 
-    @Override
-    public ItemStack getIcon() {
-        return this.icon;
-    }
+	@Override
+	public int getWidth() {
+		return this.width;
+	}
 
-    @Override
-    public void setIcon(final ItemStack icon) {
-        if (icon != null) {
-            this.icon = icon;
-        } else {
-            this.icon = DEFAULT_ICON.copy();
-        }
-    }
+	@Override
+	public int getLength() {
+		return this.length;
+	}
 
-    @Override
-    public int getWidth() {
-        return this.width;
-    }
+	@Override
+	public int getHeight() {
+		return this.height;
+	}
 
-    @Override
-    public int getLength() {
-        return this.length;
-    }
+	@Override
+	@Nonnull
+	public String getAuthor() {
+		return this.author;
+	}
 
-    @Override
-    public int getHeight() {
-        return this.height;
-    }
-
-    private boolean isValid(final BlockPos pos) {
-        final int x = pos.getX();
-        final int y = pos.getY();
-        final int z = pos.getZ();
-
-        return !(x < 0 || y < 0 || z < 0 || x >= this.width || y >= this.height || z >= this.length);
-    }
-
-    @Override
-    @Nonnull
-    public String getAuthor() {
-        return this.author;
-    }
-
-    @Override
-    public void setAuthor(@Nonnull final String author) {
-        if (author == null) {
-            throw new IllegalArgumentException("Author cannot be null");
-        }
-        this.author = author;
-    }
+	@Override
+	public void setAuthor(@Nonnull String author) {
+		this.author = author;
+	}
 }

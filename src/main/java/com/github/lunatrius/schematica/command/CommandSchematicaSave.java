@@ -33,7 +33,6 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 		                                                                                              StringArgumentType.string())
 		                                                                                    .suggests(((context,
 		                                                                                                builder) -> {
-			                                                                                    builder.suggest(Names.Formats.CLASSIC);
 			                                                                                    builder.suggest(Names.Formats.STRUCTURE);
 			                                                                                    builder.suggest(Names.Formats.ALPHA);
 			                                                                                    return builder.buildFuture();

@@ -64,7 +64,7 @@ public abstract class CommonProxy {
 		if (!SchematicaClientConfig.schematicDirectory.exists()) {
 			if (!SchematicaClientConfig.schematicDirectory.mkdirs()) {
 				Reference.logger.warn("Could not create schematic directory [{}]!",
-						SchematicaClientConfig.schematicDirectory.getAbsolutePath());
+				                      SchematicaClientConfig.schematicDirectory.getAbsolutePath());
 			}
 		}
 	}
@@ -135,7 +135,7 @@ public abstract class CommonProxy {
 									schematic.setTileEntity(localPos, reloadedTileEntity);
 								} catch (final NBTConversionException nce) {
 									Reference.logger.error("Error while trying to save tile entity '{}'!", tileEntity,
-											nce);
+									                       nce);
 									schematic.setBlockState(localPos, Blocks.BEDROCK.getDefaultState());
 								}
 							}
@@ -190,10 +190,10 @@ public abstract class CommonProxy {
 			final short length = (short) (Math.abs(maxZ - minZ) + 1);
 
 			final ISchematic schematic = new Schematic(SchematicUtil.getIconFromName(iconName), width, height, length,
-					player.getScoreboardName());
+			                                           player.getScoreboardName());
 			final SchematicContainer container =
 					new SchematicContainer(schematic, player, world, new File(directory, filename), format, minX, maxX,
-							minY, maxY, minZ, maxZ);
+					                       minY, maxY, minZ, maxZ);
 			QueueTickHandler.INSTANCE.queueSchematic(container);
 
 			return true;

@@ -1,6 +1,8 @@
 package com.github.lunatrius.schematica.api.event;
 
 import com.github.lunatrius.schematica.api.ISchematic;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.eventbus.api.Event;
 
@@ -20,14 +22,14 @@ public class PreSchematicSaveEvent extends Event {
 	 * The Extended Metadata tag compound provides a facility to add custom metadata to the schematic.
 	 */
 	public final CompoundNBT extendedMetadata;
-	private final Map<String, Short> mappings;
+	private final Map<String, Block> mappings;
 
 	@Deprecated
-	public PreSchematicSaveEvent(final Map<String, Short> mappings) {
+	public PreSchematicSaveEvent(final Map<String, Block> mappings) {
 		this(null, mappings);
 	}
 
-	public PreSchematicSaveEvent(final ISchematic schematic, final Map<String, Short> mappings) {
+	public PreSchematicSaveEvent(final ISchematic schematic, final Map<String, Block> mappings) {
 		this.schematic = schematic;
 		this.mappings = mappings;
 		this.extendedMetadata = new CompoundNBT();
@@ -53,13 +55,13 @@ public class PreSchematicSaveEvent extends Event {
 	 */
 	public boolean replaceMapping(final String oldName, final String newName) throws DuplicateMappingException {
 		if (this.mappings.containsKey(newName)) {
-			throw new DuplicateMappingException(
-					String.format("Could not replace block type %s, the block type %s already exists in the "
-					              + "schematic.",
-					              oldName, newName));
+			throw new DuplicateMappingException(String.format(
+					"Could not replace block type %s, the block type %s already exists in the " + "schematic.",
+					oldName,
+					newName));
 		}
 
-		final Short id = this.mappings.get(oldName);
+		final Block id = this.mappings.get(oldName);
 		if (id != null) {
 			this.mappings.remove(oldName);
 			this.mappings.put(newName, id);

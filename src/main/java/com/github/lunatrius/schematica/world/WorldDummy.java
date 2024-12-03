@@ -3,6 +3,9 @@ package com.github.lunatrius.schematica.world;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientChunkProvider;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
@@ -15,6 +18,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.*;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.Biomes;
 import net.minecraft.world.chunk.AbstractChunkProvider;
 import net.minecraft.world.dimension.Dimension;
 import net.minecraft.world.dimension.DimensionType;
@@ -30,13 +34,11 @@ import java.util.function.BiFunction;
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class WorldDummy extends World {
-	private static final WorldDummy instance;
+	private static WorldDummy instance;
 
-	protected WorldDummy(WorldInfo worldInfo,
-	                     DimensionType dimensionType,
+	protected WorldDummy(WorldInfo worldInfo, DimensionType dimensionType,
 	                     BiFunction<World, Dimension, AbstractChunkProvider> chunkProviderBiFunction,
-	                     IProfiler profiler,
-	                     boolean remote) {
+	                     IProfiler profiler, boolean remote) {
 		super(worldInfo, dimensionType, chunkProviderBiFunction, profiler, remote);
 	}
 
@@ -45,7 +47,10 @@ public class WorldDummy extends World {
 		if (instance == null) {
 			final WorldSettings worldSettings = new WorldSettings(0, GameType.CREATIVE, false, false, WorldType.FLAT);
 			final WorldInfo worldInfo = new WorldInfo(worldSettings, "FakeWorld");
-			instance = new WorldDummy();
+			instance = new WorldDummy(worldInfo, DimensionType.OVERWORLD,
+			                          (world, dimension) -> new ClientChunkProvider((ClientWorld) world, 8),
+			                          Minecraft.getInstance().getProfiler(), false);
+
 		}
 
 		return instance;
@@ -57,24 +62,14 @@ public class WorldDummy extends World {
 	}
 
 	@Override
-	public void playSound(@Nullable PlayerEntity player,
-	                      double x,
-	                      double y,
-	                      double z,
-	                      SoundEvent soundIn,
-	                      SoundCategory category,
-	                      float volume,
-	                      float pitch) {
+	public void playSound(@Nullable PlayerEntity player, double x, double y, double z, SoundEvent soundIn,
+	                      SoundCategory category, float volume, float pitch) {
 
 	}
 
 	@Override
-	public void playMovingSound(@Nullable PlayerEntity playerIn,
-	                            Entity entityIn,
-	                            SoundEvent eventIn,
-	                            SoundCategory categoryIn,
-	                            float volume,
-	                            float pitch) {
+	public void playMovingSound(@Nullable PlayerEntity playerIn, Entity entityIn, SoundEvent eventIn,
+	                            SoundCategory categoryIn, float volume, float pitch) {
 
 	}
 
@@ -107,27 +102,27 @@ public class WorldDummy extends World {
 
 	@Override
 	public Scoreboard getScoreboard() {
-		return null;
+		return new Scoreboard();
 	}
 
 	@Override
 	public RecipeManager getRecipeManager() {
-		return null;
+		return new RecipeManager();
 	}
 
 	@Override
 	public NetworkTagManager getTags() {
-		return null;
+		return new NetworkTagManager();
 	}
 
 	@Override
 	public ITickList<Block> getPendingBlockTicks() {
-		return null;
+		return new EmptyTickList<>();
 	}
 
 	@Override
 	public ITickList<Fluid> getPendingFluidTicks() {
-		return null;
+		return new EmptyTickList<>();
 	}
 
 	@Override
@@ -142,6 +137,6 @@ public class WorldDummy extends World {
 
 	@Override
 	public Biome getNoiseBiomeRaw(int x, int y, int z) {
-		return null;
+		return Biomes.JUNGLE;
 	}
 }

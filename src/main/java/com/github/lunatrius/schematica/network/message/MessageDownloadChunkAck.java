@@ -9,9 +9,12 @@ import net.minecraftforge.fml.network.NetworkEvent;
 import java.util.function.Supplier;
 
 public class MessageDownloadChunkAck {
-	private final int baseX;
-	private final int baseY;
-	private final int baseZ;
+	private int baseX;
+	private int baseY;
+	private int baseZ;
+
+	public MessageDownloadChunkAck() {
+	}
 
 	public MessageDownloadChunkAck(final int baseX, final int baseY, final int baseZ) {
 		this.baseX = baseX;

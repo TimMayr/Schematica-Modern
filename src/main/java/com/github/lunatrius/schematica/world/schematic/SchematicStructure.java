@@ -1,113 +1,124 @@
 package com.github.lunatrius.schematica.world.schematic;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.gen.structure.template.Template;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.nbt.NBTHelper;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.storage.Schematic;
+import net.minecraft.entity.Entity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.gen.feature.template.Template;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class SchematicStructure extends SchematicFormat {
-    @Override
-    public ISchematic readFromNBT(final NBTTagCompound tagCompound) {
-        final ItemStack icon = SchematicUtil.getIconFromNBT(tagCompound);
+	@Override
+	public ISchematic readFromNBT(final CompoundNBT tagCompound) {
+		final ItemStack icon = SchematicUtil.getIconFromNBT(tagCompound);
 
-        final Template template = new Template();
-        template.read(tagCompound);
+		final Template template = new Template();
+		template.read(tagCompound);
 
-        final Schematic schematic = new Schematic(icon,
-                template.size.getX(), template.size.getY(), template.size.getZ(), template.getAuthor());
+		final Schematic schematic =
+				new Schematic(icon, template.getSize().getX(), template.getSize().getY(), template.getSize().getZ(),
+				              template.getAuthor());
 
-        for (Template.BlockInfo block : template.blocks) {
-            schematic.setBlockState(block.pos, block.blockState);
-            if (block.tileentityData != null) {
-                try {
-                    // This position isn't included by default
-                    block.tileentityData.setInteger("x", block.pos.getX());
-                    block.tileentityData.setInteger("y", block.pos.getY());
-                    block.tileentityData.setInteger("z", block.pos.getZ());
+		for (List<Template.BlockInfo> blockList : template.blocks) {
+			for (Template.BlockInfo block : blockList) {
+				schematic.setBlockState(block.pos, block.state.getBlockState());
+				if (block.nbt != null) {
+					try {
+						// This position isn't included by default
+						block.nbt.putInt("x", block.pos.getX());
+						block.nbt.putInt("y", block.pos.getY());
+						block.nbt.putInt("z", block.pos.getZ());
 
-                    final TileEntity tileEntity = NBTHelper.readTileEntityFromCompound(block.tileentityData);
-                    if (tileEntity != null) {
-                        schematic.setTileEntity(block.pos, tileEntity);
-                    }
-                } catch (final Exception e) {
-                    Reference.logger.error("TileEntity failed to load properly!", e);
-                }
-            }
-        }
+						final TileEntity tileEntity = NBTHelper.readTileEntityFromCompound(block.nbt);
+						if (tileEntity != null) {
+							schematic.setTileEntity(block.pos, tileEntity);
+						}
+					} catch (final Exception e) {
+						Reference.logger.error("TileEntity failed to load properly!", e);
+					}
+				}
+			}
+		}
 
-        // for (Template.EntityInfo entity : template.entities) {
-        //     schematic.addEntity(...);
-        // }
+		// for (Template.EntityInfo entity : template.entities) {
+		//     schematic.addEntity(...);
+		// }
 
-        return schematic;
-    }
+		return schematic;
+	}
 
-    @Override
-    public boolean writeToNBT(final NBTTagCompound tagCompound, final ISchematic schematic) {
-        Template template = new Template();
-        template.size = new BlockPos(schematic.getWidth(), schematic.getHeight(), schematic.getLength());
 
-        template.setAuthor(schematic.getAuthor());
+	@Override
+	public boolean writeToNBT(final CompoundNBT tagCompound, final ISchematic schematic) {
+		Template template = new Template();
+		template.size = new BlockPos(schematic.getWidth(), schematic.getHeight(), schematic.getLength());
 
-        // NOTE: Can't use MutableBlockPos here because we're keeping a reference to it in BlockInfo
-        for (BlockPos pos : BlockPos.getAllInBox(BlockPos.ORIGIN, template.size.add(-1, -1, -1))) {
-            final TileEntity tileEntity = schematic.getTileEntity(pos);
-            final NBTTagCompound compound;
-            if (tileEntity != null) {
-                compound = NBTHelper.writeTileEntityToCompound(tileEntity);
-                // Tile entities in structures don't store these coords
-                compound.removeTag("x");
-                compound.removeTag("y");
-                compound.removeTag("z");
-            } else {
-                compound = null;
-            }
+		template.setAuthor(schematic.getAuthor());
 
-            template.blocks.add(new Template.BlockInfo(pos, schematic.getBlockState(pos), compound));
-        }
+		List<Template.BlockInfo> blockInfos = new LinkedList<>();
+		// NOTE: Can't use MutableBlockPos here because we're keeping a reference to it in BlockInfo
+		for (BlockPos pos : BlockPos.getAllInBox(BlockPos.ZERO, template.size.add(-1, -1, -1))
+		                            .collect(Collectors.toList())) {
+			final TileEntity tileEntity = schematic.getTileEntity(pos);
+			final CompoundNBT compound;
+			if (tileEntity != null) {
+				compound = NBTHelper.writeTileEntityToCompound(tileEntity);
+				// Tile entities in structures don't store these coords
+				compound.remove("x");
+				compound.remove("y");
+				compound.remove("z");
+			} else {
+				compound = null;
+			}
 
-        for (Entity entity : schematic.getEntities()) {
-            try {
-                // Entity positions are already offset via NBTHelper.reloadEntity
-                Vec3d vec3d = new Vec3d(entity.posX, entity.posY, entity.posZ);
-                NBTTagCompound nbttagcompound = new NBTTagCompound();
-                entity.writeToNBTOptional(nbttagcompound);
-                BlockPos blockpos;
+			blockInfos.add(new Template.BlockInfo(pos, schematic.getBlockState(pos), compound));
+		}
 
-                // TODO: Vanilla has a check like this, but we don't; this doesn't seem to
-                // cause any problems though.
-                // if (entity instanceof EntityPainting) {
-                //     blockpos = ((EntityPainting)entity).getHangingPosition().subtract(startPos);
-                // } else {
-                blockpos = new BlockPos(vec3d);
-                // }
+		template.blocks.add(blockInfos);
 
-                template.entities.add(new Template.EntityInfo(vec3d, blockpos, nbttagcompound));
-            } catch (final Throwable t) {
-                Reference.logger.error("Entity {} failed to save, skipping!", entity, t);
-            }
-        }
+		for (Entity entity : schematic.getEntities()) {
+			try {
+				// Entity positions are already offset via NBTHelper.reloadEntity
+				Vec3d vec3d = new Vec3d(entity.getPosX(), entity.getPosY(), entity.getPosZ());
+				CompoundNBT CompoundNBT = new CompoundNBT();
+				entity.writeUnlessPassenger(CompoundNBT);
+				BlockPos blockpos;
 
-        template.writeToNBT(tagCompound);
-        return true;
-    }
+				// TODO: Vanilla has a check like this, but we don't; this doesn't seem to
+				// cause any problems though.
+				// if (entity instanceof EntityPainting) {
+				//     blockpos = ((EntityPainting)entity).getHangingPosition().subtract(startPos);
+				// } else {
+				blockpos = new BlockPos(vec3d);
+				// }
 
-    @Override
-    public String getName() {
-        return Names.Formats.STRUCTURE;
-    }
+				template.entities.add(new Template.EntityInfo(vec3d, blockpos, CompoundNBT));
+			} catch (final Throwable t) {
+				Reference.logger.error("Entity {} failed to save, skipping!", entity, t);
+			}
+		}
 
-    @Override
-    public String getExtension() {
-        return Names.Extensions.STRUCTURE;
-    }
+		template.writeToNBT(tagCompound);
+		return true;
+	}
+
+	@Override
+	public String getName() {
+		return Names.Formats.STRUCTURE;
+	}
+
+	@Override
+	public String getExtension() {
+		return Names.Extensions.STRUCTURE;
+	}
 }

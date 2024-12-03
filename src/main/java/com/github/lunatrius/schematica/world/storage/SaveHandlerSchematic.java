@@ -1,60 +1,57 @@
 package com.github.lunatrius.schematica.world.storage;
 
+import com.mojang.datafixers.DataFixer;
 import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.MinecraftException;
-import net.minecraft.world.WorldProvider;
-import net.minecraft.world.chunk.storage.IChunkLoader;
-import net.minecraft.world.gen.structure.template.TemplateManager;
-import net.minecraft.world.storage.IPlayerFileData;
-import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.gen.feature.template.TemplateManager;
+import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 
+import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class SaveHandlerSchematic implements ISaveHandler {
-    @Override
-    public WorldInfo loadWorldInfo() {
-        return null;
-    }
+public class SaveHandlerSchematic extends SaveHandler {
+	public SaveHandlerSchematic(File directory, String filename, @Nullable MinecraftServer server,
+	                            DataFixer dataFixer) {
+		super(directory, filename, server, dataFixer);
+	}
 
-    @Override
-    public void checkSessionLock() throws MinecraftException {}
+	@Override
+	public void saveWorldInfoWithPlayer(final WorldInfo info, @Nullable final CompoundNBT compound) {}
 
-    @Override
-    public IChunkLoader getChunkLoader(final WorldProvider provider) {
-        return null;
-    }
+	@Override
+	public File getWorldDirectory() {
+		return null;
+	}
 
-    @Override
-    public void saveWorldInfoWithPlayer(final WorldInfo info, final NBTTagCompound compound) {}
+	@Override
+	public void checkSessionLock() {}
 
-    @Override
-    public void saveWorldInfo(final WorldInfo info) {}
+	@Override
+	public WorldInfo loadWorldInfo() {
+		return null;
+	}
 
-    @Override
-    public IPlayerFileData getPlayerNBTManager() {
-        return null;
-    }
+	@Override
+	public void saveWorldInfo(final WorldInfo info) {}
 
-    @Override
-    public void flush() {}
+	@Override
+	public String[] func_215771_d() {
+		return null;
+	}
 
-    @Override
-    public File getWorldDirectory() {
-        return null;
-    }
+	@Override
+	public TemplateManager getStructureTemplateManager() {
+		return null;
+	}
 
-    @Override
-    public File getMapFileFromName(final String name) {
-        return null;
-    }
-
-    @Override
-    public TemplateManager getStructureTemplateManager() {
-        return null;
-    }
+	@Override
+	public CompoundNBT getPlayerNBT(ServerPlayerEntity player) {
+		return null;
+	}
 }

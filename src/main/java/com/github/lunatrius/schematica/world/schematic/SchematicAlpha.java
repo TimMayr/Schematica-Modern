@@ -8,216 +8,177 @@ import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.storage.Schematic;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class SchematicAlpha extends SchematicFormat {
-    @Override
-    public ISchematic readFromNBT(final NBTTagCompound tagCompound) {
-        final ItemStack icon = SchematicUtil.getIconFromNBT(tagCompound);
+	@Override
+	public ISchematic readFromNBT(CompoundNBT tagCompound) {
+		ItemStack icon = SchematicUtil.getIconFromNBT(tagCompound);
 
-        final byte[] localBlocks = tagCompound.getByteArray(Names.NBT.BLOCKS);
-        final byte[] localMetadata = tagCompound.getByteArray(Names.NBT.DATA);
+		List<BlockState> localBlockList = Arrays.stream(tagCompound.getIntArray(Names.NBT.BLOCKS))
+		                                        .mapToObj(Block::getStateById)
+		                                        .collect(Collectors.toList());
+		BlockState[] localBlocks = localBlockList.toArray(new BlockState[] {});
 
-        boolean extra = false;
-        byte extraBlocks[] = null;
-        byte extraBlocksNibble[] = null;
-        if (tagCompound.hasKey(Names.NBT.ADD_BLOCKS)) {
-            extra = true;
-            extraBlocksNibble = tagCompound.getByteArray(Names.NBT.ADD_BLOCKS);
-            extraBlocks = new byte[extraBlocksNibble.length * 2];
-            for (int i = 0; i < extraBlocksNibble.length; i++) {
-                extraBlocks[i * 2 + 0] = (byte) ((extraBlocksNibble[i] >> 4) & 0xF);
-                extraBlocks[i * 2 + 1] = (byte) (extraBlocksNibble[i] & 0xF);
-            }
-        } else if (tagCompound.hasKey(Names.NBT.ADD_BLOCKS_SCHEMATICA)) {
-            extra = true;
-            extraBlocks = tagCompound.getByteArray(Names.NBT.ADD_BLOCKS_SCHEMATICA);
-        }
+		int width = tagCompound.getInt(Names.NBT.WIDTH);
+		int length = tagCompound.getInt(Names.NBT.LENGTH);
+		int height = tagCompound.getInt(Names.NBT.HEIGHT);
 
-        final short width = tagCompound.getShort(Names.NBT.WIDTH);
-        final short length = tagCompound.getShort(Names.NBT.LENGTH);
-        final short height = tagCompound.getShort(Names.NBT.HEIGHT);
+		Block id;
+		Map<ResourceLocation, Block> oldToNew = new HashMap<>();
+		if (tagCompound.hasUniqueId(Names.NBT.MAPPING_SCHEMATICA)) {
+			CompoundNBT mapping = tagCompound.getCompound(Names.NBT.MAPPING_SCHEMATICA);
+			Set<String> names = mapping.keySet();
+			for (String name : names) {
+				oldToNew.put(ResourceLocation.tryCreate(mapping.getString(name)),
+				             ForgeRegistries.BLOCKS.getValue(new ResourceLocation(name)));
+			}
+		}
 
-        Short id = null;
-        final Map<Short, Short> oldToNew = new HashMap<Short, Short>();
-        if (tagCompound.hasKey(Names.NBT.MAPPING_SCHEMATICA)) {
-            final NBTTagCompound mapping = tagCompound.getCompoundTag(Names.NBT.MAPPING_SCHEMATICA);
-            final Set<String> names = mapping.getKeySet();
-            for (final String name : names) {
-                oldToNew.put(mapping.getShort(name), (short) Block.REGISTRY.getIDForObject(Block.REGISTRY.getObject(new ResourceLocation(name))));
-            }
-        }
+		MBlockPos pos = new MBlockPos();
+		ISchematic schematic = new Schematic(icon, width, height, length);
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				for (int z = 0; z < length; z++) {
+					int index = x + (y * length + z) * width;
+					BlockState blockstate = localBlocks[index];
 
-        final MBlockPos pos = new MBlockPos();
-        final ISchematic schematic = new Schematic(icon, width, height, length);
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                for (int z = 0; z < length; z++) {
-                    final int index = x + (y * length + z) * width;
-                    int blockID = (localBlocks[index] & 0xFF) | (extra ? ((extraBlocks[index] & 0xFF) << 8) : 0);
-                    final int meta = localMetadata[index] & 0xFF;
+					if ((id = oldToNew.get(blockstate.getBlock().getRegistryName())) != null) {
+						blockstate = id.getDefaultState();
+					}
 
-                    if ((id = oldToNew.get((short) blockID)) != null) {
-                        blockID = id;
-                    }
+					pos.set(x, y, z);
+					try {
+						schematic.setBlockState(pos, blockstate);
+					} catch (Exception e) {
+						Reference.logger.error("Could not set block state at {} to {} with blockstate {}", pos,
+						                       blockstate.getBlock().getRegistryName(), blockstate, e);
+					}
+				}
+			}
+		}
 
-                    final Block block = Block.REGISTRY.getObjectById(blockID);
-                    pos.set(x, y, z);
-                    try {
-                        final IBlockState blockState = block.getStateFromMeta(meta);
-                        schematic.setBlockState(pos, blockState);
-                    } catch (final Exception e) {
-                        Reference.logger.error("Could not set block state at {} to {} with metadata {}", pos, Block.REGISTRY.getNameForObject(block), meta, e);
-                    }
-                }
-            }
-        }
+		ListNBT tileEntitiesList = tagCompound.getList(Names.NBT.TILE_ENTITIES, Constants.NBT.TAG_COMPOUND);
 
-        final NBTTagList tileEntitiesList = tagCompound.getTagList(Names.NBT.TILE_ENTITIES, Constants.NBT.TAG_COMPOUND);
+		for (int i = 0; i < tileEntitiesList.size(); i++) {
+			try {
+				TileEntity tileEntity = NBTHelper.readTileEntityFromCompound(tileEntitiesList.getCompound(i));
+				if (tileEntity != null) {
+					schematic.setTileEntity(tileEntity.getPos(), tileEntity);
+				}
+			} catch (Exception e) {
+				Reference.logger.error("TileEntity failed to load properly!", e);
+			}
+		}
 
-        for (int i = 0; i < tileEntitiesList.tagCount(); i++) {
-            try {
-                final TileEntity tileEntity = NBTHelper.readTileEntityFromCompound(tileEntitiesList.getCompoundTagAt(i));
-                if (tileEntity != null) {
-                    schematic.setTileEntity(tileEntity.getPos(), tileEntity);
-                }
-            } catch (final Exception e) {
-                Reference.logger.error("TileEntity failed to load properly!", e);
-            }
-        }
+		return schematic;
+	}
 
-        return schematic;
-    }
+	@Override
+	public boolean writeToNBT(CompoundNBT tagCompound, ISchematic schematic) {
+		CompoundNBT tagCompoundIcon = new CompoundNBT();
+		ItemStack icon = schematic.getIcon();
+		icon.write(tagCompoundIcon);
+		tagCompound.put(Names.NBT.ICON, tagCompoundIcon);
 
-    @Override
-    public boolean writeToNBT(final NBTTagCompound tagCompound, final ISchematic schematic) {
-        final NBTTagCompound tagCompoundIcon = new NBTTagCompound();
-        final ItemStack icon = schematic.getIcon();
-        icon.writeToNBT(tagCompoundIcon);
-        tagCompound.setTag(Names.NBT.ICON, tagCompoundIcon);
+		tagCompound.putInt(Names.NBT.WIDTH, schematic.getWidth());
+		tagCompound.putInt(Names.NBT.LENGTH, schematic.getLength());
+		tagCompound.putInt(Names.NBT.HEIGHT, schematic.getHeight());
 
-        tagCompound.setShort(Names.NBT.WIDTH, (short) schematic.getWidth());
-        tagCompound.setShort(Names.NBT.LENGTH, (short) schematic.getLength());
-        tagCompound.setShort(Names.NBT.HEIGHT, (short) schematic.getHeight());
+		int size = schematic.getWidth() * schematic.getLength() * schematic.getHeight();
+		BlockState[] localBlocks = new BlockState[size];
 
-        final int size = schematic.getWidth() * schematic.getLength() * schematic.getHeight();
-        final byte[] localBlocks = new byte[size];
-        final byte[] localMetadata = new byte[size];
-        final byte[] extraBlocks = new byte[size];
-        final byte[] extraBlocksNibble = new byte[(int) Math.ceil(size / 2.0)];
-        boolean extra = false;
+		MBlockPos pos = new MBlockPos();
+		Map<String, Block> mappings = new HashMap<>();
+		for (int x = 0; x < schematic.getWidth(); x++) {
+			for (int y = 0; y < schematic.getHeight(); y++) {
+				for (int z = 0; z < schematic.getLength(); z++) {
+					int index = x + (y * schematic.getLength() + z) * schematic.getWidth();
+					BlockState blockState = schematic.getBlockState(pos.set(x, y, z));
+					localBlocks[index] = blockState;
+					String name = String.valueOf(blockState.getBlock().getRegistryName());
+					if (!mappings.containsKey(name)) {
+						mappings.put(name, blockState.getBlock());
+					}
+				}
+			}
+		}
 
-        final MBlockPos pos = new MBlockPos();
-        final Map<String, Short> mappings = new HashMap<String, Short>();
-        for (int x = 0; x < schematic.getWidth(); x++) {
-            for (int y = 0; y < schematic.getHeight(); y++) {
-                for (int z = 0; z < schematic.getLength(); z++) {
-                    final int index = x + (y * schematic.getLength() + z) * schematic.getWidth();
-                    final IBlockState blockState = schematic.getBlockState(pos.set(x, y, z));
-                    final Block block = blockState.getBlock();
-                    final int blockId = Block.REGISTRY.getIDForObject(block);
-                    localBlocks[index] = (byte) blockId;
-                    localMetadata[index] = (byte) block.getMetaFromState(blockState);
-                    if ((extraBlocks[index] = (byte) (blockId >> 8)) > 0) {
-                        extra = true;
-                    }
+		int count = 20;
+		ListNBT tileEntitiesList = new ListNBT();
+		for (TileEntity tileEntity : schematic.getTileEntities()) {
+			try {
+				CompoundNBT tileEntityTagCompound = NBTHelper.writeTileEntityToCompound(tileEntity);
+				tileEntitiesList.add(tileEntityTagCompound);
+			} catch (Exception e) {
+				BlockPos tePos = tileEntity.getPos();
+				int index =
+						tePos.getX() + (tePos.getY() * schematic.getLength() + tePos.getZ()) * schematic.getWidth();
+				if (--count > 0) {
+					BlockState blockState = schematic.getBlockState(tePos);
+					Block block = blockState.getBlock();
+					Reference.logger.error("Block {}[{}] with TileEntity {} failed to save! Replacing with bedrock...",
+					                       block, ForgeRegistries.BLOCKS.getKey(block),
+					                       tileEntity.getClass().getName(),
+					                       e);
+				}
 
-                    final String name = String.valueOf(Block.REGISTRY.getNameForObject(block));
-                    if (!mappings.containsKey(name)) {
-                        mappings.put(name, (short) blockId);
-                    }
-                }
-            }
-        }
+				localBlocks[index] = Blocks.BEDROCK.getDefaultState();
+			}
+		}
 
-        int count = 20;
-        final NBTTagList tileEntitiesList = new NBTTagList();
-        for (final TileEntity tileEntity : schematic.getTileEntities()) {
-            try {
-                final NBTTagCompound tileEntityTagCompound = NBTHelper.writeTileEntityToCompound(tileEntity);
-                tileEntitiesList.appendTag(tileEntityTagCompound);
-            } catch (final Exception e) {
-                final BlockPos tePos = tileEntity.getPos();
-                final int index = tePos.getX() + (tePos.getY() * schematic.getLength() + tePos.getZ()) * schematic.getWidth();
-                if (--count > 0) {
-                    final IBlockState blockState = schematic.getBlockState(tePos);
-                    final Block block = blockState.getBlock();
-                    Reference.logger.error("Block {}[{}] with TileEntity {} failed to save! Replacing with bedrock...", block, block != null ? Block.REGISTRY.getNameForObject(block) : "?", tileEntity.getClass().getName(), e);
-                }
-                localBlocks[index] = (byte) Block.REGISTRY.getIDForObject(Blocks.BEDROCK);
-                localMetadata[index] = 0;
-                extraBlocks[index] = 0;
-            }
-        }
+		ListNBT entityList = new ListNBT();
+		List<Entity> entities = schematic.getEntities();
+		for (Entity entity : entities) {
+			try {
+				CompoundNBT entityCompound = NBTHelper.writeEntityToCompound(entity);
+				if (entityCompound != null) {
+					entityList.add(entityCompound);
+				}
+			} catch (Throwable t) {
+				Reference.logger.error("Entity {} failed to save, skipping!", entity, t);
+			}
+		}
 
-        for (int i = 0; i < extraBlocksNibble.length; i++) {
-            if (i * 2 + 1 < extraBlocks.length) {
-                extraBlocksNibble[i] = (byte) ((extraBlocks[i * 2 + 0] << 4) | extraBlocks[i * 2 + 1]);
-            } else {
-                extraBlocksNibble[i] = (byte) (extraBlocks[i * 2 + 0] << 4);
-            }
-        }
+		PreSchematicSaveEvent event = new PreSchematicSaveEvent(schematic, mappings);
+		MinecraftForge.EVENT_BUS.post(event);
 
-        final NBTTagList entityList = new NBTTagList();
-        final List<Entity> entities = schematic.getEntities();
-        for (final Entity entity : entities) {
-            try {
-                final NBTTagCompound entityCompound = NBTHelper.writeEntityToCompound(entity);
-                if (entityCompound != null) {
-                    entityList.appendTag(entityCompound);
-                }
-            } catch (final Throwable t) {
-                Reference.logger.error("Entity {} failed to save, skipping!", entity, t);
-            }
-        }
+		CompoundNBT nbtMapping = new CompoundNBT();
+		for (Map.Entry<String, Block> entry : mappings.entrySet()) {
+			nbtMapping.putString(entry.getKey(),
+			                     Objects.requireNonNull(entry.getValue().getRegistryName()).toString());
+		}
 
-        final PreSchematicSaveEvent event = new PreSchematicSaveEvent(schematic, mappings);
-        MinecraftForge.EVENT_BUS.post(event);
+		tagCompound.putString(Names.NBT.MATERIALS, Names.NBT.FORMAT_ALPHA);
+		tagCompound.putIntArray(Names.NBT.BLOCKS, Arrays.stream(localBlocks).mapToInt(Block::getStateId).toArray());
+		tagCompound.put(Names.NBT.ENTITIES, entityList);
+		tagCompound.put(Names.NBT.TILE_ENTITIES, tileEntitiesList);
+		tagCompound.put(Names.NBT.MAPPING_SCHEMATICA, nbtMapping);
 
-        final NBTTagCompound nbtMapping = new NBTTagCompound();
-        for (final Map.Entry<String, Short> entry : mappings.entrySet()) {
-            nbtMapping.setShort(entry.getKey(), entry.getValue());
-        }
+		return true;
+	}
 
-        tagCompound.setString(Names.NBT.MATERIALS, Names.NBT.FORMAT_ALPHA);
-        tagCompound.setByteArray(Names.NBT.BLOCKS, localBlocks);
-        tagCompound.setByteArray(Names.NBT.DATA, localMetadata);
-        if (extra) {
-            tagCompound.setByteArray(Names.NBT.ADD_BLOCKS, extraBlocksNibble);
-        }
-        tagCompound.setTag(Names.NBT.ENTITIES, entityList);
-        tagCompound.setTag(Names.NBT.TILE_ENTITIES, tileEntitiesList);
-        tagCompound.setTag(Names.NBT.MAPPING_SCHEMATICA, nbtMapping);
-        final NBTTagCompound extendedMetadata = event.extendedMetadata;
-        if (!extendedMetadata.hasNoTags()) {
-            tagCompound.setTag(Names.NBT.EXTENDED_METADATA, extendedMetadata);
-        }
+	@Override
+	public String getName() {
+		return Names.Formats.ALPHA;
+	}
 
-        return true;
-    }
-
-    @Override
-    public String getName() {
-        return Names.Formats.ALPHA;
-    }
-
-    @Override
-    public String getExtension() {
-        return Names.Extensions.SCHEMATIC;
-    }
+	@Override
+	public String getExtension() {
+		return Names.Extensions.SCHEMATIC;
+	}
 }
