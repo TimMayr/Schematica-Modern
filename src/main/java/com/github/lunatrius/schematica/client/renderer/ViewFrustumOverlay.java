@@ -2,21 +2,22 @@ package com.github.lunatrius.schematica.client.renderer;
 
 import com.github.lunatrius.schematica.client.renderer.chunk.overlay.ISchematicRenderChunkFactory;
 import com.github.lunatrius.schematica.client.renderer.chunk.overlay.RenderOverlay;
-import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.ViewFrustum;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-@SideOnly(Side.CLIENT)
+@OnlyIn(Dist.CLIENT)
 public class ViewFrustumOverlay extends ViewFrustum {
 	public RenderOverlay[] renderOverlays;
 
-	public ViewFrustumOverlay(World world, int renderDistanceChunks, RenderGlobal renderGlobal,
-	                          ISchematicRenderChunkFactory renderChunkFactory) {
-		super(world, renderDistanceChunks, renderGlobal, renderChunkFactory);
+	public ViewFrustumOverlay(ChunkRenderDispatcher dispatcher, World world, int countChunks,
+	                          WorldRenderer worldRenderer) {
+		super(dispatcher, world, countChunks, worldRenderer);
 		createRenderOverlays(renderChunkFactory);
 	}
 
@@ -85,43 +86,27 @@ public class ViewFrustumOverlay extends ViewFrustum {
 	}
 
 	@Override
-	public void markBlocksForUpdate(int fromX, int fromY, int fromZ, int toX, int toY, int toZ, boolean needsUpdate) {
-		super.markBlocksForUpdate(fromX, fromY, fromZ, toX, toY, toZ, needsUpdate);
+	public void markForRerender(int sectionX, int sectionY, int sectionZ, boolean rerenderOnMainThread) {
+		super.markForRerender(sectionX, sectionY, sectionZ, rerenderOnMainThread);
 
-		int x0 = MathHelper.intFloorDiv(fromX, 16);
-		int y0 = MathHelper.intFloorDiv(fromY, 16);
-		int z0 = MathHelper.intFloorDiv(fromZ, 16);
-		int x1 = MathHelper.intFloorDiv(toX, 16);
-		int y1 = MathHelper.intFloorDiv(toY, 16);
-		int z1 = MathHelper.intFloorDiv(toZ, 16);
-
-		for (int xi = x0; xi <= x1; ++xi) {
-			int x = xi % this.countChunksX;
-
-			if (x < 0) {
-				x += this.countChunksX;
-			}
-
-			for (int yi = y0; yi <= y1; ++yi) {
-				int y = yi % this.countChunksY;
-
-				if (y < 0) {
-					y += this.countChunksY;
-				}
-
-				for (int zi = z0; zi <= z1; ++zi) {
-					int z = zi % this.countChunksZ;
-
-					if (z < 0) {
-						z += this.countChunksZ;
-					}
-
-					int index = (z * this.countChunksY + y) * this.countChunksX + x;
-					RenderOverlay renderOverlay = this.renderOverlays[index];
-					renderOverlay.setNeedsUpdate(needsUpdate);
-				}
-			}
+		int x = MathHelper.intFloorDiv(sectionX, 16) % this.countChunksX;
+		if (x < 0) {
+			x += this.countChunksX;
 		}
+
+		int y = MathHelper.intFloorDiv(sectionY, 16) % this.countChunksY;
+		if (y < 0) {
+			y += this.countChunksY;
+		}
+
+		int z = MathHelper.intFloorDiv(sectionZ, 16) % this.countChunksZ;
+		if (z < 0) {
+			z += this.countChunksZ;
+		}
+
+		int index = (z * this.countChunksY + y) * this.countChunksX + x;
+		RenderOverlay renderOverlay = this.renderOverlays[index];
+		renderOverlay.setNeedsUpdate(rerenderOnMainThread);
 	}
 
 	public RenderOverlay getRenderOverlay(BlockPos pos) {
@@ -147,5 +132,22 @@ public class ViewFrustumOverlay extends ViewFrustum {
 		} else {
 			return null;
 		}
+	}
+
+	public ChunkRenderDispatcher.ChunkRender getChunkRender(BlockPos pos) {
+		int i = MathHelper.intFloorDiv(pos.getX(), 16);
+		int j = MathHelper.intFloorDiv(pos.getY(), 16);
+		int k = MathHelper.intFloorDiv(pos.getZ(), 16);
+		if (j >= 0 && j < this.countChunksY) {
+			i = MathHelper.normalizeAngle(i, this.countChunksX);
+			k = MathHelper.normalizeAngle(k, this.countChunksZ);
+			return this.renderChunks[this.getIndexPublic(i, j, k)];
+		} else {
+			return null;
+		}
+	}
+
+	public int getIndexPublic(int x, int y, int z) {
+		return (z * this.countChunksY + y) * this.countChunksX + x;
 	}
 }

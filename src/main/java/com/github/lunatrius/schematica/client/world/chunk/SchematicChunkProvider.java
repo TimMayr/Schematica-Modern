@@ -35,8 +35,9 @@ public class SchematicChunkProvider extends ClientChunkProvider {
 		};
 	}
 
+	@Nullable
 	@Override
-	public Chunk getChunkWithoutLoading(int x, int z) {
+	public Chunk getChunkNow(int x, int z) {
 		if (!chunkExists(x, z)) {
 			return this.emptyChunk;
 		}

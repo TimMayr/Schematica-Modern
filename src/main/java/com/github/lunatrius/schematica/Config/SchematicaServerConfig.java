@@ -1,4 +1,4 @@
-package com.github.lunatrius.schematica.handler;
+package com.github.lunatrius.schematica.Config;
 
 import com.github.lunatrius.schematica.reference.Names;
 import net.minecraftforge.common.ForgeConfigSpec;

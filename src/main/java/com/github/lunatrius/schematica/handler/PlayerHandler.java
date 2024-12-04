@@ -1,5 +1,6 @@
 package com.github.lunatrius.schematica.handler;
 
+import com.github.lunatrius.schematica.Config.SchematicaConfig;
 import com.github.lunatrius.schematica.network.PacketHandler;
 import com.github.lunatrius.schematica.network.message.MessageCapabilities;
 import com.github.lunatrius.schematica.reference.Reference;

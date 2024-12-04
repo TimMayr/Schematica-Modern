@@ -4,16 +4,16 @@ import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.reference.Reference;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 
 @MethodsReturnNonnullByDefault
 public class BlockStateToItemStack {
-	public static ItemStack getItemStack(IBlockState blockState, RayTraceResult rayTraceResult, SchematicWorld world,
-	                                     BlockPos pos, EntityPlayer player) {
+	public static ItemStack getItemStack(BlockState blockState, RayTraceResult rayTraceResult, SchematicWorld world,
+	                                     BlockPos pos, PlayerEntity player) {
 		Block block = blockState.getBlock();
 
 		try {

@@ -3,7 +3,7 @@ package com.github.lunatrius.schematica.handler.client;
 import com.github.lunatrius.schematica.block.state.BlockStateHelper;
 import com.github.lunatrius.schematica.client.renderer.RenderSchematic;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
-import com.github.lunatrius.schematica.handler.SchematicaConfig;
+import com.github.lunatrius.schematica.Config.SchematicaConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;

@@ -3,24 +3,23 @@ package com.github.lunatrius.schematica.client.renderer.chunk.proxy;
 import com.github.lunatrius.schematica.client.renderer.SchematicRenderCache;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.client.renderer.RenderGlobal;
-import net.minecraft.client.renderer.chunk.ChunkCompileTaskGenerator;
-import net.minecraft.client.renderer.chunk.CompiledChunk;
-import net.minecraft.client.renderer.chunk.RenderChunk;
+import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.chunk.ChunkRenderCache;
+import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.chunk.SetVisibility;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ChunkCache;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Objects;
 
-@SideOnly(Side.CLIENT)
+@OnlyIn(Dist.CLIENT)
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class SchematicRenderChunkVbo extends RenderChunk {
-	public SchematicRenderChunkVbo(World world, RenderGlobal renderGlobal, int index) {
+public class SchematicRenderChunkVbo extends ChunkRenderDispatcher.ChunkRender {
+	public SchematicRenderChunkVbo(World world, WorldRenderer renderGlobal, int index) {
 		super(world, renderGlobal, index);
 	}
 
@@ -55,7 +54,7 @@ public class SchematicRenderChunkVbo extends RenderChunk {
 	}
 
 	@Override
-	protected ChunkCache createRegionRenderCache(World world, BlockPos from, BlockPos to, int subtract) {
-		return new SchematicRenderCache(world, from, to, subtract);
+	protected ChunkRenderCache createRegionRenderCache(World world, BlockPos from, BlockPos to, int subtract) {
+		return Objects.requireNonNull(SchematicRenderCache.generateCache(world, from, to, subtract));
 	}
 }

@@ -1,4 +1,4 @@
-package com.github.lunatrius.schematica.handler;
+package com.github.lunatrius.schematica.Config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.common.Mod;

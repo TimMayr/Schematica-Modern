@@ -7,23 +7,21 @@ import com.github.lunatrius.schematica.block.state.BlockStateHelper;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.storage.Schematic;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockLever;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.properties.PropertyDirection;
-import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.state.DirectionProperty;
+import net.minecraft.state.IProperty;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 
 public class FlipHelper {
 	public static final FlipHelper INSTANCE = new FlipHelper();
 
-	public boolean flip(SchematicWorld world, EnumFacing axis, boolean forced) {
+	public boolean flip(SchematicWorld world, Direction axis, boolean forced) {
 		if (world == null) {
 			return false;
 		}
@@ -48,7 +46,7 @@ public class FlipHelper {
 		return false;
 	}
 
-	public Schematic flip(ISchematic schematic, EnumFacing axis, boolean forced) throws FlipException {
+	public Schematic flip(ISchematic schematic, Direction axis, boolean forced) throws FlipException {
 		Vec3i dimensionsFlipped = new Vec3i(schematic.getWidth(), schematic.getHeight(), schematic.getLength());
 		Schematic schematicFlipped =
 				new Schematic(schematic.getIcon(), dimensionsFlipped.getX(), dimensionsFlipped.getY(),
@@ -57,8 +55,8 @@ public class FlipHelper {
 
 		for (MBlockPos pos : BlockPosHelper.getAllInBox(0, 0, 0, schematic.getWidth() - 1, schematic.getHeight() - 1,
 		                                                schematic.getLength() - 1)) {
-			IBlockState blockState = schematic.getBlockState(pos);
-			IBlockState blockStateFlipped = flipBlock(blockState, axis, forced);
+			BlockState blockState = schematic.getBlockState(pos);
+			BlockState blockStateFlipped = flipBlock(blockState, axis, forced);
 			schematicFlipped.setBlockState(flipPos(pos, axis, dimensionsFlipped, tmp), blockStateFlipped);
 		}
 
@@ -72,7 +70,7 @@ public class FlipHelper {
 		return schematicFlipped;
 	}
 
-	private BlockPos flipPos(BlockPos pos, EnumFacing axis, Vec3i dimensions, MBlockPos flipped) throws FlipException {
+	private BlockPos flipPos(BlockPos pos, Direction axis, Vec3i dimensions, MBlockPos flipped) throws FlipException {
 		switch (axis) {
 			case DOWN:
 			case UP:
@@ -91,64 +89,36 @@ public class FlipHelper {
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private IBlockState flipBlock(IBlockState blockState, EnumFacing axis, boolean forced) throws FlipException {
+	private BlockState flipBlock(BlockState blockState, Direction axis, boolean forced) throws FlipException {
 		IProperty propertyFacing = BlockStateHelper.getProperty(blockState, "facing");
-		if (propertyFacing instanceof PropertyDirection) {
-			Comparable value = blockState.getValue(propertyFacing);
-			if (value instanceof EnumFacing) {
-				EnumFacing facing = getFlippedFacing(axis, (EnumFacing) value);
+		if (propertyFacing instanceof DirectionProperty) {
+			Comparable value = blockState.get(propertyFacing);
+			if (value instanceof Direction) {
+				Direction facing = getFlippedFacing(axis, (Direction) value);
 				if (propertyFacing.getAllowedValues().contains(facing)) {
-					return blockState.withProperty(propertyFacing, facing);
-				}
-			}
-		} else if (propertyFacing instanceof PropertyEnum) {
-			if (BlockLever.EnumOrientation.class.isAssignableFrom(propertyFacing.getValueClass())) {
-				BlockLever.EnumOrientation orientation =
-						(BlockLever.EnumOrientation) blockState.getValue(propertyFacing);
-				BlockLever.EnumOrientation orientationRotated = getFlippedLeverFacing(axis, orientation);
-				if (propertyFacing.getAllowedValues().contains(orientationRotated)) {
-					return blockState.withProperty(propertyFacing, orientationRotated);
+					return blockState.with(propertyFacing, facing);
 				}
 			}
 		} else if (propertyFacing != null) {
 			Reference.logger.error("'{}': found 'facing' property with unknown type {}",
-			                       Block.REGISTRY.getNameForObject(blockState.getBlock()),
+			                       ForgeRegistries.BLOCKS.getKey(blockState.getBlock()),
 			                       propertyFacing.getClass().getSimpleName());
 		}
 
 		if (!forced && propertyFacing != null) {
 			throw new FlipException("'%s' cannot be flipped across '%s'",
-			                        Block.REGISTRY.getNameForObject(blockState.getBlock()), axis);
+			                        ForgeRegistries.BLOCKS.getKey(blockState.getBlock()), axis);
 		}
 
 		return blockState;
 	}
 
-	private static EnumFacing getFlippedFacing(EnumFacing axis, EnumFacing side) {
+	private static Direction getFlippedFacing(Direction axis, Direction side) {
 		if (axis.getAxis() == side.getAxis()) {
 			return side.getOpposite();
 		}
 
 		return side;
-	}
-
-	private static BlockLever.EnumOrientation getFlippedLeverFacing(EnumFacing source,
-	                                                                BlockLever.EnumOrientation side) {
-		if (source.getAxis() != side.getFacing().getAxis()) {
-			return side;
-		}
-
-		EnumFacing facing;
-		if (side == BlockLever.EnumOrientation.UP_Z || side == BlockLever.EnumOrientation.DOWN_Z) {
-			facing = EnumFacing.NORTH;
-		} else if (side == BlockLever.EnumOrientation.UP_X || side == BlockLever.EnumOrientation.DOWN_X) {
-			facing = EnumFacing.WEST;
-		} else {
-			facing = side.getFacing();
-		}
-
-		EnumFacing facingFlipped = getFlippedFacing(source, side.getFacing());
-		return BlockLever.EnumOrientation.forFacings(facingFlipped, facing);
 	}
 
 	public static class FlipException extends Exception {

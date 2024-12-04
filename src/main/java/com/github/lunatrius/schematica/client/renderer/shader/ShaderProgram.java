@@ -1,8 +1,8 @@
 package com.github.lunatrius.schematica.client.renderer.shader;
 
 import com.github.lunatrius.schematica.reference.Reference;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
@@ -12,7 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class ShaderProgram {
-	private static final Minecraft MINECRAFT = Minecraft.getMinecraft();
+	private static final Minecraft MINECRAFT = Minecraft.getInstance();
 
 	private int program;
 
@@ -31,11 +31,6 @@ public class ShaderProgram {
 	}
 
 	private void init(String domain, String vertShaderFilename, String fragShaderFilename) {
-		if (!OpenGlHelper.shadersSupported) {
-			this.program = 0;
-			return;
-		}
-
 		this.program = GL20.glCreateProgram();
 
 		int vertShader = loadAndCompileShader(domain, vertShaderFilename, GL20.GL_VERTEX_SHADER);

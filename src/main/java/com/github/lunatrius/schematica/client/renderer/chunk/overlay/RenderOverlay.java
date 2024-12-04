@@ -4,7 +4,7 @@ import com.github.lunatrius.core.client.renderer.GeometryMasks;
 import com.github.lunatrius.core.client.renderer.GeometryTessellator;
 import com.github.lunatrius.schematica.client.renderer.chunk.CompiledOverlay;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
-import com.github.lunatrius.schematica.handler.SchematicaClientConfig;
+import com.github.lunatrius.schematica.Config.SchematicaClientConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.chunk.ChunkCompileTaskGenerator;
+import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.client.renderer.chunk.CompiledChunk;
 import net.minecraft.client.renderer.chunk.RenderChunk;
 import net.minecraft.client.renderer.chunk.VisGraph;
@@ -23,7 +24,7 @@ import net.minecraft.world.ChunkCache;
 import net.minecraft.world.World;
 import org.lwjgl.opengl.GL11;
 
-public class RenderOverlay extends RenderChunk {
+public class RenderOverlay extends ChunkRenderDispatcher.ChunkRender {
 	private final VertexBuffer vertexBuffer;
 
 	public RenderOverlay(World world, RenderGlobal renderGlobal, int index) {

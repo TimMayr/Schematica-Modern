@@ -1,23 +1,28 @@
 package com.github.lunatrius.schematica.client.renderer;
 
-import com.github.lunatrius.schematica.handler.SchematicaClientConfig;
+import com.github.lunatrius.schematica.Config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
-import net.minecraft.init.Blocks;
+import net.minecraft.client.renderer.chunk.ChunkRenderCache;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ChunkCache;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 
-public class SchematicRenderCache extends ChunkCache {
-	private final Minecraft minecraft = Minecraft.getMinecraft();
+import javax.annotation.Nonnull;
 
-	public SchematicRenderCache(World world, BlockPos from, BlockPos to, int subtract) {
-		super(world, from, to, subtract);
+public class SchematicRenderCache extends ChunkRenderCache {
+	private final Minecraft minecraft = Minecraft.getInstance();
+
+	public SchematicRenderCache(World worldIn, int chunkStartXIn, int chunkStartZIn, Chunk[][] chunksIn,
+	                            BlockPos startPos, BlockPos endPos) {
+		super(worldIn, chunkStartXIn, chunkStartZIn, chunksIn, startPos, endPos);
 	}
 
 	@Override
-	public IBlockState getBlockState(BlockPos pos) {
+	@Nonnull
+	public BlockState getBlockState(@Nonnull BlockPos pos) {
 		BlockPos schPos = ClientProxy.schematic.position;
 		if (schPos == null) {
 			return Blocks.AIR.getDefaultState();

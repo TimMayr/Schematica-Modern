@@ -2,7 +2,7 @@ package com.github.lunatrius.schematica.handler.client;
 
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
-import com.github.lunatrius.schematica.handler.SchematicaConfig;
+import com.github.lunatrius.schematica.Config.SchematicaConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.client.Minecraft;
