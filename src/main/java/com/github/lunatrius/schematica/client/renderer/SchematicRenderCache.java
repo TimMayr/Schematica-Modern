@@ -1,6 +1,6 @@
 package com.github.lunatrius.schematica.client.renderer;
 
-import com.github.lunatrius.schematica.Config.SchematicaClientConfig;
+import com.github.lunatrius.schematica.config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;

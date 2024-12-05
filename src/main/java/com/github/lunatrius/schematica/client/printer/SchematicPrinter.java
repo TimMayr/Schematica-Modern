@@ -2,8 +2,8 @@ package com.github.lunatrius.schematica.client.printer;
 
 import com.github.lunatrius.core.util.math.BlockPosHelper;
 import com.github.lunatrius.core.util.math.MBlockPos;
-import com.github.lunatrius.schematica.Config.SchematicaClientConfig;
-import com.github.lunatrius.schematica.Config.SchematicaConfig;
+import com.github.lunatrius.schematica.config.SchematicaClientConfig;
+import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.block.state.BlockStateHelper;
 import com.github.lunatrius.schematica.client.printer.nbtsync.NBTSync;
 import com.github.lunatrius.schematica.client.printer.nbtsync.SyncRegistry;

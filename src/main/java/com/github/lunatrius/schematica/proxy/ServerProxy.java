@@ -2,8 +2,8 @@ package com.github.lunatrius.schematica.proxy;
 
 import com.github.lunatrius.schematica.command.CommandSchematicaDownload;
 import com.github.lunatrius.schematica.handler.PlayerHandler;
-import com.github.lunatrius.schematica.Config.SchematicaClientConfig;
-import com.github.lunatrius.schematica.Config.SchematicaConfig;
+import com.github.lunatrius.schematica.config.SchematicaClientConfig;
+import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;

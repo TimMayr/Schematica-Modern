@@ -3,7 +3,7 @@ package com.github.lunatrius.schematica.client.gui.save;
 import com.github.lunatrius.core.client.gui.NumericFieldWidget;
 import com.github.lunatrius.core.client.gui.ScreenBase;
 import com.github.lunatrius.schematica.Schematica;
-import com.github.lunatrius.schematica.Config.SchematicaClientConfig;
+import com.github.lunatrius.schematica.config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;

@@ -1,7 +1,7 @@
 package com.github.lunatrius.schematica.client.gui.config;
 
 import com.github.lunatrius.core.client.gui.config.GuiConfigComplex;
-import com.github.lunatrius.schematica.Config.SchematicaClientConfig;
+import com.github.lunatrius.schematica.config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.client.Minecraft;
