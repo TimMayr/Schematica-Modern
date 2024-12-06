@@ -24,9 +24,6 @@ public class SchematicRenderCache extends ChunkRenderCache {
 	@Nonnull
 	public BlockState getBlockState(@Nonnull BlockPos pos) {
 		BlockPos schPos = ClientProxy.schematic.position;
-		if (schPos == null) {
-			return Blocks.AIR.getDefaultState();
-		}
 
 		BlockPos realPos = pos.add(schPos);
 		World world = this.minecraft.world;

@@ -1,30 +1,30 @@
 package com.github.lunatrius.schematica.client.renderer.chunk;
 
-import net.minecraft.client.renderer.chunk.CompiledChunk;
-import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 
-public class CompiledOverlay extends CompiledChunk {
-	@Override
-	public void setLayerStarted(BlockRenderLayer layer) {
-		if (layer == BlockRenderLayer.TRANSLUCENT) {
-			super.setLayerStarted(layer);
+import javax.annotation.Nonnull;
+
+
+public class CompiledOverlay extends ChunkRenderDispatcher.CompiledChunk {
+	public void setLayerStarted(RenderType layer) {
+		if (layer == RenderType.getTranslucent()) {
+			this.layersStarted.add(layer);
 		}
 	}
 
-	@Override
-	public void setLayerUsed(BlockRenderLayer layer) {
-		if (layer == BlockRenderLayer.TRANSLUCENT) {
-			super.setLayerUsed(layer);
+	public void setLayerUsed(RenderType layer) {
+		if (layer == RenderType.getTranslucent()) {
+			this.layersUsed.add(layer);
 		}
 	}
 
-	@Override
-	public boolean isLayerStarted(BlockRenderLayer layer) {
-		return layer == BlockRenderLayer.TRANSLUCENT && super.isLayerStarted(layer);
+	public boolean isLayerStarted(RenderType layer) {
+		return layer == RenderType.getTranslucent() && this.layersStarted.contains(layer);
 	}
 
 	@Override
-	public boolean isLayerEmpty(BlockRenderLayer layer) {
-		return layer == BlockRenderLayer.TRANSLUCENT && super.isLayerEmpty(layer);
+	public boolean isLayerEmpty(@Nonnull RenderType layer) {
+		return layer == RenderType.getTranslucent() && super.isLayerEmpty(layer);
 	}
 }

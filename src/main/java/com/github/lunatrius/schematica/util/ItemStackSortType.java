@@ -9,15 +9,15 @@ import java.util.List;
 public enum ItemStackSortType {
 	NAME_ASC("name", "↑",
 	         (BlockList.WrappedItemStack wrappedItemStackA, BlockList.WrappedItemStack wrappedItemStackB) -> {
-		         String nameA = wrappedItemStackA.getItemStackDisplayName();
-		         String nameB = wrappedItemStackB.getItemStackDisplayName();
+		         String nameA = String.valueOf(wrappedItemStackA.getItemStackDisplayName());
+		         String nameB = String.valueOf(wrappedItemStackB.getItemStackDisplayName());
 
 		         return nameA.compareTo(nameB);
 	         }),
 	NAME_DESC("name", "↓",
 	          (BlockList.WrappedItemStack wrappedItemStackA, BlockList.WrappedItemStack wrappedItemStackB) -> {
-		          String nameA = wrappedItemStackA.getItemStackDisplayName();
-		          String nameB = wrappedItemStackB.getItemStackDisplayName();
+		          String nameA = String.valueOf(wrappedItemStackA.getItemStackDisplayName());
+		          String nameB = String.valueOf(wrappedItemStackB.getItemStackDisplayName());
 
 		          return nameB.compareTo(nameA);
 	          }),

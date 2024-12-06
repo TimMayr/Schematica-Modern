@@ -18,7 +18,6 @@ public class ViewFrustumOverlay extends ViewFrustum {
 	public ViewFrustumOverlay(ChunkRenderDispatcher dispatcher, World world, int countChunks,
 	                          WorldRenderer worldRenderer) {
 		super(dispatcher, world, countChunks, worldRenderer);
-		createRenderOverlays(renderChunkFactory);
 	}
 
 	protected void createRenderOverlays(ISchematicRenderChunkFactory renderChunkFactory) {
