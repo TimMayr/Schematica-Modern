@@ -33,13 +33,13 @@ import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
@@ -47,6 +47,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.event.world.NoteBlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.opengl.GL11;
@@ -65,8 +66,8 @@ public class RenderSchematic extends WorldRenderer {
 			new RenderSchematic(Minecraft.getInstance(), new RenderTypeBuffers());
 	public static final int RENDER_DISTANCE = 32;
 	public static final int CHUNKS_XZ = (RENDER_DISTANCE + 1) * 2;
-	public static final int CHUNKS = CHUNKS_XZ * CHUNKS_XZ * CHUNKS_Y;
 	public static final int CHUNKS_Y = 16;
+	public static final int CHUNKS = CHUNKS_XZ * CHUNKS_XZ * CHUNKS_Y;
 	public static final int PASS = 2;
 	private static final ShaderProgram SHADER_ALPHA = new ShaderProgram("schematica", null, "shaders/alpha.frag");
 	private static final Vector3d PLAYER_POSITION_OFFSET = new Vector3d();
@@ -488,9 +489,9 @@ public class RenderSchematic extends WorldRenderer {
 		RenderSystem.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
 		renderBlockLayer(RenderType.getSolid(), partialTicks, PASS, entity);
 		renderBlockLayer(RenderType.getCutoutMipped(), partialTicks, PASS, entity);
-		this.mc.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
+		this.mc.getTextureManager().getTexture(PlayerContainer.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
 		renderBlockLayer(RenderType.getCutout(), partialTicks, PASS, entity);
-		this.mc.getTextureManager().getTexture(TextureMap.LOCATION_BLOCKS_TEXTURE).restoreLastBlurMipmap();
+		this.mc.getTextureManager().getTexture(PlayerContainer.LOCATION_BLOCKS_TEXTURE).restoreLastBlurMipmap();
 		RenderSystem.disableBlend();
 		RenderSystem.shadeModel(GL11.GL_FLAT);
 		RenderSystem.alphaFunc(GL11.GL_GREATER, 0.1f);
@@ -500,47 +501,54 @@ public class RenderSchematic extends WorldRenderer {
 		RenderSystem.pushMatrix();
 		this.profiler.endStartSection("entities");
 		if (this.isRenderEntityOutlines()) {
-         this.entityOutlineFramebuffer.framebufferClear(Minecraft.IS_RUNNING_ON_MAC);
-         this.mc.getFramebuffer().bindFramebuffer(false);
-      }
+			this.getEntityOutlineFramebuffer().framebufferClear(Minecraft.IS_RUNNING_ON_MAC);
+			this.mc.getFramebuffer().bindFramebuffer(false);
+		}
 
-      boolean flag2 = false;
-      IRenderTypeBuffer.Impl irendertypebuffer$impl = this.renderTypeTextures.getBufferSource();
+		boolean flag2 = false;
+		IRenderTypeBuffer.Impl irendertypebuffer$impl = this.renderTypeTextures.getBufferSource();
 
-      for(Entity entity : this.world.getAllEntities()) {
-         if ((this.renderManager.shouldRender(entity, clippinghelperimpl, d0, d1, d2) || entity.isRidingOrBeingRiddenBy(this.mc.player)) && (entity != activeRenderInfoIn.getRenderViewEntity() || activeRenderInfoIn.isThirdPerson() || activeRenderInfoIn.getRenderViewEntity() instanceof LivingEntity
-		         && ((LivingEntity)activeRenderInfoIn.getRenderViewEntity()).isSleeping()) && (!(entity instanceof ClientPlayerEntity) || activeRenderInfoIn.getRenderViewEntity() == entity)) {
-            ++this.countEntitiesRendered;
-            if (entity.ticksExisted == 0) {
-               entity.lastTickPosX = entity.getPosX();
-               entity.lastTickPosY = entity.getPosY();
-               entity.lastTickPosZ = entity.getPosZ();
-            }
+		for (Entity entityToRender : this.world.getAllEntities()) {
+			if ((this.renderManager.shouldRender(entityToRender, clippinghelperimpl, x, y, z)
+					     || entityToRender.isRidingOrBeingRiddenBy(this.mc.player))
+					&& (entityToRender
+							    != activeRenderInfoIn.getRenderViewEntity()
+							    || activeRenderInfoIn.isThirdPerson()
+							    || activeRenderInfoIn.getRenderViewEntity() instanceof LivingEntity
+					&& ((LivingEntity) activeRenderInfoIn.getRenderViewEntity()).isSleeping())
+					&& (!(entityToRender instanceof ClientPlayerEntity)
+							    || activeRenderInfoIn.getRenderViewEntity() == entityToRender)) {
+				++this.countEntitiesRendered;
+				if (entityToRender.ticksExisted == 0) {
+					entityToRender.lastTickPosX = entityToRender.getPosX();
+					entityToRender.lastTickPosY = entityToRender.getPosY();
+					entityToRender.lastTickPosZ = entityToRender.getPosZ();
+				}
 
-            IRenderTypeBuffer irendertypebuffer;
-            if (this.isRenderEntityOutlines() && entity.isGlowing()) {
-               flag2 = true;
-               OutlineLayerBuffer outlinelayerbuffer = this.renderTypeTextures.getOutlineBufferSource();
-               irendertypebuffer = outlinelayerbuffer;
-               int i2 = entity.getTeamColor();
-               int j2 = 255;
-               int k2 = i2 >> 16 & 255;
-               int l2 = i2 >> 8 & 255;
-               int i3 = i2 & 255;
-               outlinelayerbuffer.setColor(k2, l2, i3, 255);
-            } else {
-               irendertypebuffer = irendertypebuffer$impl;
-            }
+				IRenderTypeBuffer irendertypebuffer;
+				if (this.isRenderEntityOutlines() && entityToRender.isGlowing()) {
+					flag2 = true;
+					OutlineLayerBuffer outlinelayerbuffer = this.renderTypeTextures.getOutlineBufferSource();
+					irendertypebuffer = outlinelayerbuffer;
+					int i2 = entityToRender.getTeamColor();
+					int j2 = 255;
+					int k2 = i2 >> 16 & 255;
+					int l2 = i2 >> 8 & 255;
+					int i3 = i2 & 255;
+					outlinelayerbuffer.setColor(k2, l2, i3, 255);
+				} else {
+					irendertypebuffer = irendertypebuffer$impl;
+				}
 
-            this.renderEntity(entity, d0, d1, d2, partialTicks, matrixStackIn, irendertypebuffer);
-         }
-      }
+				this.renderEntity(entityToRender, d0, d1, d2, partialTicks, matrixStackIn, irendertypebuffer);
+			}
+		}
 
-      this.checkMatrixStack(matrixStackIn);
-      irendertypebuffer$impl.finish(RenderType.getEntitySolid(AtlasTexture.LOCATION_BLOCKS_TEXTURE));
-      irendertypebuffer$impl.finish(RenderType.getEntityCutout(AtlasTexture.LOCATION_BLOCKS_TEXTURE));
-      irendertypebuffer$impl.finish(RenderType.getEntityCutoutNoCull(AtlasTexture.LOCATION_BLOCKS_TEXTURE));
-      irendertypebuffer$impl.finish(RenderType.getEntitySmoothCutout(AtlasTexture.LOCATION_BLOCKS_TEXTURE));
+		this.checkMatrixStack(matrixStackIn);
+		irendertypebuffer$impl.finish(RenderType.getEntitySolid(AtlasTexture.LOCATION_BLOCKS_TEXTURE));
+		irendertypebuffer$impl.finish(RenderType.getEntityCutout(AtlasTexture.LOCATION_BLOCKS_TEXTURE));
+		irendertypebuffer$impl.finish(RenderType.getEntityCutoutNoCull(AtlasTexture.LOCATION_BLOCKS_TEXTURE));
+		irendertypebuffer$impl.finish(RenderType.getEntitySmoothCutout(AtlasTexture.LOCATION_BLOCKS_TEXTURE));
 		this.profiler.endSection();
 
 		RenderSystem.disableBlend();
