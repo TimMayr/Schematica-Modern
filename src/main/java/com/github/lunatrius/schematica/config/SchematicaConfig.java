@@ -6,26 +6,22 @@ import net.minecraftforge.fml.config.ModConfig;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class SchematicaConfig {
-	public static final ForgeConfigSpec serverSpec;
-	public static final SchematicaServerConfig SERVER;
-	public static final ForgeConfigSpec clientSpec;
-	public static final SchematicaClientConfig CLIENT;
+	public static ForgeConfigSpec serverSpec;
+	public static SchematicaServerConfig SERVER;
+	public static ForgeConfigSpec clientSpec;
+	public static SchematicaClientConfig CLIENT;
 
-	static {
-		Pair<SchematicaServerConfig, ForgeConfigSpec> specPair =
+	public static void init() {
+		Pair<SchematicaServerConfig, ForgeConfigSpec> serverSpecPair =
 				new ForgeConfigSpec.Builder().configure(SchematicaServerConfig::new);
-		serverSpec = specPair.getRight();
-		SERVER = specPair.getLeft();
-	}
+		serverSpec = serverSpecPair.getRight();
+		SERVER = serverSpecPair.getLeft();
 
-	static {
-		Pair<SchematicaClientConfig, ForgeConfigSpec> specPair =
+		Pair<SchematicaClientConfig, ForgeConfigSpec> clientSpecPair =
 				new ForgeConfigSpec.Builder().configure(SchematicaClientConfig::new);
-		clientSpec = specPair.getRight();
-		CLIENT = specPair.getLeft();
-	}
+		clientSpec = clientSpecPair.getRight();
+		CLIENT = clientSpecPair.getLeft();
 
-	static {
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, clientSpec);
 		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, serverSpec);
 	}

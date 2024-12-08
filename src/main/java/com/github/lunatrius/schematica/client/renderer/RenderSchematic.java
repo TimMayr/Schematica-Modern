@@ -111,11 +111,11 @@ public class RenderSchematic extends WorldRenderer {
 	}
 
 	public void init() {
-		if (RenderSystem.isOnRenderThread()) {
-			RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
-			RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
-			RenderSystem.bindTexture(0);
-		}
+//		if (RenderSystem.isOnRenderThread()) {
+//			RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
+//			RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
+//			RenderSystem.bindTexture(0);
+//		}
 	}
 
 	public void addWorld(World world) {

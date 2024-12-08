@@ -3,6 +3,7 @@ package com.github.lunatrius.schematica;
 import com.github.lunatrius.schematica.client.renderer.RenderSchematic;
 import com.github.lunatrius.schematica.command.CommandSchematicaBase;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
+import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.handler.PlayerHandler;
 import com.github.lunatrius.schematica.handler.QueueTickHandler;
@@ -33,33 +34,6 @@ public class Schematica {
 		MinecraftForge.EVENT_BUS.register(this);
 		Reference.proxy = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> ServerProxy::new);
 		FMLJavaModLoadingContext.get().getModEventBus().register(this);
-
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
-		System.out.println("Mod started loading");
 	}
 
 	@SubscribeEvent
@@ -69,64 +43,11 @@ public class Schematica {
 		MinecraftForge.EVENT_BUS.register(QueueTickHandler.INSTANCE);
 		MinecraftForge.EVENT_BUS.register(DownloadHandler.INSTANCE);
 
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-		System.out.println("Mod proxy started loading");
-
+		SchematicaConfig.init();
 	}
 
 	@SubscribeEvent
 	public void preInit(FMLClientSetupEvent event) {
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-		System.out.println("Mod client started loading");
-
 		Reference.proxy.createFolders();
 		SchematicaClientConfig.populateExtraAirBlocks();
 		SchematicaClientConfig.normalizeSchematicPath();
@@ -150,32 +71,5 @@ public class Schematica {
 		MinecraftForge.EVENT_BUS.register(PlayerHandler.INSTANCE);
 		CommandSchematicaBase.register(event.getCommandDispatcher());
 		ServerProxy.serverWeakReference = new WeakReference<>(event.getServer());
-
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
-		System.out.println("Mod server started loading");
 	}
 }

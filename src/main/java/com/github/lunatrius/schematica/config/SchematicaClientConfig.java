@@ -127,7 +127,6 @@ public class SchematicaClientConfig {
 		                   .translation("schematica.config.swapslots.tooltip")
 		                   .defineList(Names.Config.SWAP_SLOT, Arrays.asList(5, 6, 7, 8),
 		                               num -> num instanceof Integer && (Integer) num > 0 && (Integer) num < 9);
-
 	}
 
 	public static void normalizeSchematicPath() {

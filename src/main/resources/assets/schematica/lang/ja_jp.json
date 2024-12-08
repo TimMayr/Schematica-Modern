@@ -136,7 +136,6 @@
   "schematica.command.download.downloadFail": "ダウンロード失敗",
 
   "_comment": "commands - replace",
-
   "_comment": "messages",
   "schematica.gui.down": "Down",
   "schematica.gui.up": "Up",

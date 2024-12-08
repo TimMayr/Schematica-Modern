@@ -32,18 +32,6 @@ public abstract class CommandSchematicaBase {
 	}
 
 	public static void register(CommandDispatcher<CommandSource> dispatcher) {
-		System.out.print("Registering commands");
-		System.out.print("Registering commands");
-		System.out.print("Registering commands");
-		System.out.print("Registering commands");
-		System.out.print("Registering commands");
-		System.out.print("Registering commands");
-		System.out.print("Registering commands");
-		System.out.print("Registering commands");
-		System.out.print("Registering commands");
-		System.out.print("Registering commands");
-		System.out.print("Registering commands");
-		System.out.print("Registering commands");
 		dispatcher.register(Commands.literal("schematica")
 		                            .then(CommandSchematicaDownload.register())
 		                            .then(CommandSchematicaList.register())
