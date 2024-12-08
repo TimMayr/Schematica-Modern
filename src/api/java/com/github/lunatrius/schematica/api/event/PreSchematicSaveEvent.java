@@ -17,11 +17,11 @@ public class PreSchematicSaveEvent extends Event {
 	/**
 	 * The schematic that will be saved.
 	 */
-	public ISchematic schematic;
+	public final ISchematic schematic;
 	/**
 	 * The Extended Metadata tag compound provides a facility to add custom metadata to the schematic.
 	 */
-	public CompoundNBT extendedMetadata;
+	public final CompoundNBT extendedMetadata;
 
 	@Deprecated
 	public PreSchematicSaveEvent(Map<String, Block> mappings) {

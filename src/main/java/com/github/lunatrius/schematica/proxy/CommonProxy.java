@@ -2,63 +2,33 @@ package com.github.lunatrius.schematica.proxy;
 
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
-import com.github.lunatrius.schematica.command.CommandSchematicaList;
-import com.github.lunatrius.schematica.command.CommandSchematicaRemove;
-import com.github.lunatrius.schematica.command.CommandSchematicaSave;
-import com.github.lunatrius.schematica.command.client.CommandSchematicaReplace;
-import com.github.lunatrius.schematica.handler.DownloadHandler;
-import com.github.lunatrius.schematica.handler.QueueTickHandler;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
+import com.github.lunatrius.schematica.handler.QueueTickHandler;
 import com.github.lunatrius.schematica.nbt.NBTConversionException;
 import com.github.lunatrius.schematica.nbt.NBTHelper;
-import com.github.lunatrius.schematica.network.PacketHandler;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.chunk.SchematicContainer;
 import com.github.lunatrius.schematica.world.schematic.SchematicUtil;
 import com.github.lunatrius.schematica.world.storage.Schematic;
-import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import org.apache.commons.lang3.NotImplementedException;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-@Mod.EventBusSubscriber
 public abstract class CommonProxy {
 	public boolean isSaveEnabled = true;
 	public boolean isLoadEnabled = true;
-
-	@SubscribeEvent
-	public void init(FMLCommonSetupEvent event) {
-		PacketHandler.init();
-
-		MinecraftForge.EVENT_BUS.register(QueueTickHandler.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(DownloadHandler.INSTANCE);
-	}
-
-	@SubscribeEvent
-	public void serverStarting(FMLServerStartingEvent event) {
-		CommandDispatcher<CommandSource> dispatcher = event.getCommandDispatcher();
-		CommandSchematicaSave.register(dispatcher);
-		CommandSchematicaList.register(dispatcher);
-		CommandSchematicaRemove.register(dispatcher);
-		CommandSchematicaReplace.register(dispatcher);
-	}
 
 	public void createFolders() {
 		if (!SchematicaClientConfig.schematicDirectory.exists()) {
@@ -88,7 +58,9 @@ public abstract class CommonProxy {
 		return subDirectory;
 	}
 
-	public abstract File getDataDirectory();
+	public File getDataDirectory() {
+		throw new NotImplementedException("Can't call on common proxy");
+	}
 
 	public void resetSettings() {
 		this.isSaveEnabled = true;
@@ -202,9 +174,15 @@ public abstract class CommonProxy {
 		return false;
 	}
 
-	public abstract boolean loadSchematic(PlayerEntity player, File directory, String filename);
+	public boolean loadSchematic(PlayerEntity player, File directory, String filename) {
+		throw new NotImplementedException("Can't call on common proxy");
+	}
 
-	public abstract boolean isPlayerQuotaExceeded(PlayerEntity player);
+	public boolean isPlayerQuotaExceeded(PlayerEntity player) {
+		throw new NotImplementedException("Can't call on common proxy");
+	}
 
-	public abstract File getPlayerSchematicDirectory(PlayerEntity player, boolean privateDirectory);
+	public File getPlayerSchematicDirectory(PlayerEntity player, boolean privateDirectory) {
+		throw new NotImplementedException("Can't call on common proxy");
+	}
 }

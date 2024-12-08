@@ -12,7 +12,7 @@ public class PostSchematicCaptureEvent extends Event {
 	/**
 	 * The schematic that was just generated.
 	 */
-	public  ISchematic schematic;
+	public final ISchematic schematic;
 
 	public PostSchematicCaptureEvent( ISchematic schematic) {
 		this.schematic = schematic;

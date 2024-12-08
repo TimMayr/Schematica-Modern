@@ -28,17 +28,17 @@ version = "${project.version_minecraft}-${modversion}"
 
 repositories {
 	maven {
-		url = "https://maven.minecraftforge.net/"
+		url = "https://files.minecraftforge.net/maven"
 	}
 	flatDir {
-		dir 'libs'
+		dirs 'libs'
 	}
 }
 
 dependencies {
 	minecraft "net.minecraftforge:forge:${fullyQualifiedForgeVersion}"
 
-	fg.deobf group: group, name: 'LunatriusCore', version: "${project.version_minecraft}-${project.version_lunatriuscore}", classifier: 'universal'
+	implementation fg.deobf("${group}.core:LunatriusCore:${version_minecraft}-${version_lunatriuscore}")
 }
 
 minecraft {
@@ -109,6 +109,7 @@ processResources {
 		        mcversion            : version_minecraft,
 		        forgeversion         : forgeversion,
 		        modid                : id,
+		        modname: modname,
 		        version_lunatriuscore: version_lunatriuscore])
 	}
 
@@ -119,12 +120,12 @@ processResources {
 }
 
 def processReferenceJava = tasks.register('processReferenceJava', Copy) {
-	from 'src/main/java/com/github/lunatrius/core/reference'
+	from 'src/main/java/com/github/lunatrius/schematica/reference'
 	into "$buildDir/generated/sources/reference"
 
 	include 'Reference.java' // Target only Reference.java
 	expand([modversion           : modversion,
-	        mcversion            : version_minecraft,
+	        version_minecraft: version_minecraft,
 	        version_forge        : version_forge,
 	        modid                : id,
 	        modname              : modname,
@@ -143,7 +144,14 @@ sourceSets {
 		java {
 			srcDirs = ['src/api/java']
 		}
+		compileClasspath += configurations.minecraft
+		runtimeClasspath += configurations.minecraft
 	}
+}
+
+sourceSets.main {
+	compileClasspath += sourceSets.api.output
+	runtimeClasspath += sourceSets.api.output
 }
 
 tasks.compileJava {

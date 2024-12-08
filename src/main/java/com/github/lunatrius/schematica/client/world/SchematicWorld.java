@@ -37,7 +37,6 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -121,8 +120,7 @@ public class SchematicWorld extends ClientWorld {
 
 	public boolean isBlockNormalCube(BlockPos pos, boolean _default) {
 		Chunk chunk = getChunkAt(pos);
-		return getBlockState(pos).isNormalCube(
-				Objects.requireNonNull(getWorld().getBlockReader(chunk.getPos().x, chunk.getPos().z)), pos);
+		return getBlockState(pos).isNormalCube(getWorld().getBlockReader(chunk.getPos().x, chunk.getPos().z), pos);
 	}
 
 	@Override

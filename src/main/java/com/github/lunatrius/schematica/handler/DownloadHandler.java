@@ -11,13 +11,11 @@ import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.network.PacketDistributor;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@Mod.EventBusSubscriber
 public class DownloadHandler {
 	public static final DownloadHandler INSTANCE = new DownloadHandler();
 	public final Map<ServerPlayerEntity, SchematicTransfer> transferMap = new LinkedHashMap<>();

@@ -27,8 +27,6 @@ public class GuiSchematicMaterials extends ScreenBase {
 	private GuiSchematicMaterialsSlot guiSchematicMaterialsSlot;
 	private ItemStackSortType sortType = SchematicaConfig.CLIENT.sortType.get();
 	private Button btnSort = null;
-	private Button btnDump = null;
-	private Button btnDone = null;
 
 	public GuiSchematicMaterials(Screen guiScreen) {
 		super(guiScreen);
@@ -63,18 +61,16 @@ public class GuiSchematicMaterials extends ScreenBase {
 		});
 		this.buttons.add(this.btnSort);
 
-		this.btnDump = new Button(this.width / 2 - 50, this.height - 30, 100, 20, I18n.format(Names.Gui.Control.DUMP),
-		                          (button) -> {
-			                          dumpMaterialList(this.blockList);
+		Button btnDump = new Button(this.width / 2 - 50, this.height - 30, 100, 20,
+		                            I18n.format(Names.Gui.Control.DUMP),
+		                            (button) -> dumpMaterialList(this.blockList));
+		this.buttons.add(btnDump);
 
-		                          });
-		this.buttons.add(this.btnDump);
-
-		this.btnDone =
+		Button btnDone =
 				new Button(this.width / 2 + 54, this.height - 30, 100, 20, I18n.format(Names.Gui.DONE), (button) -> {
 
 				});
-		this.buttons.add(this.btnDone);
+		this.buttons.add(btnDone);
 
 		this.guiSchematicMaterialsSlot = new GuiSchematicMaterialsSlot(this);
 	}

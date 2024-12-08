@@ -81,8 +81,8 @@ public class NBTHelper {
 		return readEntitiesFromCompound(compound, world, new ArrayList<>());
 	}
 
-	public static List<Entity> readEntitiesFromCompound(CompoundNBT compound, List<Entity> entities) {
-		return readEntitiesFromCompound(compound, null, entities);
+	public static void readEntitiesFromCompound(CompoundNBT compound, List<Entity> entities) {
+		readEntitiesFromCompound(compound, null, entities);
 	}
 
 	public static CompoundNBT writeEntitiesToCompound(List<Entity> entities) {

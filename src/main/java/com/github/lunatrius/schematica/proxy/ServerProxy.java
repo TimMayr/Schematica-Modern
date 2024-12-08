@@ -1,16 +1,10 @@
 package com.github.lunatrius.schematica.proxy;
 
-import com.github.lunatrius.schematica.command.CommandSchematicaDownload;
-import com.github.lunatrius.schematica.handler.PlayerHandler;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,23 +12,12 @@ import java.lang.ref.WeakReference;
 import java.util.UUID;
 
 public class ServerProxy extends CommonProxy {
-	private WeakReference<MinecraftServer> serverWeakReference = null;
-
-	@SubscribeEvent
-	public void init(FMLClientSetupEvent event) {
-		MinecraftForge.EVENT_BUS.register(PlayerHandler.INSTANCE);
-	}
-
-	@SubscribeEvent
-	public void serverStarting(FMLServerStartingEvent event) {
-		super.serverStarting(event);
-		CommandSchematicaDownload.register(event.getCommandDispatcher());
-		this.serverWeakReference = new WeakReference<>(event.getServer());
-	}
+	public static WeakReference<MinecraftServer> serverWeakReference = null;
 
 	@Override
 	public File getDataDirectory() {
-		MinecraftServer server = this.serverWeakReference != null ? this.serverWeakReference.get() : null;
+		MinecraftServer server = ServerProxy.serverWeakReference != null ? ServerProxy.serverWeakReference.get() :
+		                         null;
 		File file = server != null ? server.getFile(".") : new File(".");
 		try {
 			return file.getCanonicalFile();

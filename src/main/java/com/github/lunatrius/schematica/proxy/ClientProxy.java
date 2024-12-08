@@ -7,21 +7,15 @@ import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.client.renderer.RenderSchematic;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
-import com.github.lunatrius.schematica.handler.client.*;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -126,33 +120,6 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 
-	@SubscribeEvent
-	public void preInit(FMLClientSetupEvent event) {
-		this.createFolders();
-		SchematicaClientConfig.populateExtraAirBlocks();
-		SchematicaClientConfig.normalizeSchematicPath();
-
-		for (KeyBinding keyBinding : InputHandler.KEY_BINDINGS) {
-			ClientRegistry.registerKeyBinding(keyBinding);
-		}
-	}
-
-	@SubscribeEvent
-	public void init(FMLClientSetupEvent event) {
-		MinecraftForge.EVENT_BUS.register(InputHandler.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(TickHandler.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(RenderTickHandler.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(RenderSchematic.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(GuiHandler.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(new OverlayHandler());
-		MinecraftForge.EVENT_BUS.register(new WorldHandler());
-	}
-
-	@SubscribeEvent
-	public void postInit(FMLClientSetupEvent event) {
-		resetSettings();
-	}
-
 	@Override
 	public File getDataDirectory() {
 		File file = MINECRAFT.gameDir;
@@ -195,7 +162,7 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void unloadSchematic() {
 		schematic = null;
-		RenderSchematic.INSTANCE.setWorldAndLoadRenderers(Minecraft.getInstance().world);
+		RenderSchematic.getINSTANCE().setWorldAndLoadRenderers(Minecraft.getInstance().world);
 		SchematicPrinter.INSTANCE.setSchematic(null);
 	}
 
@@ -213,7 +180,7 @@ public class ClientProxy extends CommonProxy {
 		                       world.getLength());
 
 		ClientProxy.schematic = world;
-		RenderSchematic.INSTANCE.setWorldAndLoadRenderers(world);
+		RenderSchematic.getINSTANCE().setWorldAndLoadRenderers(world);
 		SchematicPrinter.INSTANCE.setSchematic(world);
 		world.isRendering = true;
 

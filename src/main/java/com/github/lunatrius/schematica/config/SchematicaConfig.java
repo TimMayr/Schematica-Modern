@@ -1,10 +1,10 @@
 package com.github.lunatrius.schematica.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.config.ModConfig;
 import org.apache.commons.lang3.tuple.Pair;
 
-@Mod.EventBusSubscriber()
 public class SchematicaConfig {
 	public static final ForgeConfigSpec serverSpec;
 	public static final SchematicaServerConfig SERVER;
@@ -23,5 +23,10 @@ public class SchematicaConfig {
 				new ForgeConfigSpec.Builder().configure(SchematicaClientConfig::new);
 		clientSpec = specPair.getRight();
 		CLIENT = specPair.getLeft();
+	}
+
+	static {
+		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, clientSpec);
+		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, serverSpec);
 	}
 }

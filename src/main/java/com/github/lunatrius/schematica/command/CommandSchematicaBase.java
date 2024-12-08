@@ -1,6 +1,10 @@
 package com.github.lunatrius.schematica.command;
 
+import com.github.lunatrius.schematica.command.client.CommandSchematicaReplace;
+import com.mojang.brigadier.CommandDispatcher;
 import mcp.MethodsReturnNonnullByDefault;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
 import net.minecraft.command.ICommandSource;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
@@ -25,6 +29,27 @@ public abstract class CommandSchematicaBase {
 		component.setStyle(style);
 
 		return component;
+	}
+
+	public static void register(CommandDispatcher<CommandSource> dispatcher) {
+		System.out.print("Registering commands");
+		System.out.print("Registering commands");
+		System.out.print("Registering commands");
+		System.out.print("Registering commands");
+		System.out.print("Registering commands");
+		System.out.print("Registering commands");
+		System.out.print("Registering commands");
+		System.out.print("Registering commands");
+		System.out.print("Registering commands");
+		System.out.print("Registering commands");
+		System.out.print("Registering commands");
+		System.out.print("Registering commands");
+		dispatcher.register(Commands.literal("schematica")
+		                            .then(CommandSchematicaDownload.register())
+		                            .then(CommandSchematicaList.register())
+		                            .then(CommandSchematicaSave.register())
+		                            .then(CommandSchematicaRemove.register())
+		                            .then(CommandSchematicaReplace.register()));
 	}
 
 	public abstract String getUsage(ICommandSource sender);

@@ -2,8 +2,6 @@ package com.github.lunatrius.schematica.client.printer;
 
 import com.github.lunatrius.core.util.math.BlockPosHelper;
 import com.github.lunatrius.core.util.math.MBlockPos;
-import com.github.lunatrius.schematica.config.SchematicaClientConfig;
-import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.block.state.BlockStateHelper;
 import com.github.lunatrius.schematica.client.printer.nbtsync.NBTSync;
 import com.github.lunatrius.schematica.client.printer.nbtsync.SyncRegistry;
@@ -11,6 +9,8 @@ import com.github.lunatrius.schematica.client.printer.registry.PlacementData;
 import com.github.lunatrius.schematica.client.printer.registry.PlacementRegistry;
 import com.github.lunatrius.schematica.client.util.BlockStateToItemStack;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
+import com.github.lunatrius.schematica.config.SchematicaClientConfig;
+import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Reference;
@@ -37,7 +37,10 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.IFluidBlock;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 public class SchematicPrinter {
 	public static final SchematicPrinter INSTANCE = new SchematicPrinter();
@@ -89,14 +92,14 @@ public class SchematicPrinter {
 		this.syncBlacklist.clear();
 	}
 
-	public boolean print(ClientWorld world, ClientPlayerEntity player) {
+	public void print(ClientWorld world, ClientPlayerEntity player) {
 		double dX = ClientProxy.playerPosition.x - this.schematic.position.x;
 		double dY = ClientProxy.playerPosition.y - this.schematic.position.y;
 		double dZ = ClientProxy.playerPosition.z - this.schematic.position.z;
 		int x = (int) Math.floor(dX);
 		int y = (int) Math.floor(dY);
 		int z = (int) Math.floor(dZ);
-		int range = SchematicaConfig.SERVER.placeDistance.get();
+		int range = SchematicaConfig.CLIENT.placeDistance.get();
 
 		int minX = Math.max(0, x - range);
 		int maxX = Math.min(this.schematic.getWidth() - 1, x + range);
@@ -106,7 +109,7 @@ public class SchematicPrinter {
 		int maxZ = Math.min(this.schematic.getLength() - 1, z + range);
 
 		if (minX > maxX || minY > maxY || minZ > maxZ) {
-			return false;
+			return;
 		}
 
 		int slot = player.inventory.currentItem;
@@ -117,13 +120,12 @@ public class SchematicPrinter {
 				break;
 			case SINGLE_LAYER:
 				if (schematic.renderingLayer > maxY) {
-					return false;
+					return;
 				}
-				maxY = schematic.renderingLayer;
 				//$FALL-THROUGH$
 			case ALL_BELOW:
 				if (schematic.renderingLayer < minY) {
-					return false;
+					return;
 				}
 				maxY = schematic.renderingLayer;
 				break;
@@ -131,8 +133,7 @@ public class SchematicPrinter {
 
 		syncSneaking(player, true);
 
-		double blockReachDistance =
-				Objects.requireNonNull(this.minecraft.playerController).getBlockReachDistance() - 0.1;
+		double blockReachDistance = this.minecraft.playerController.getBlockReachDistance() - 0.1;
 		double blockReachDistanceSq = blockReachDistance * blockReachDistance;
 		for (MBlockPos pos : BlockPosHelper.getAllInBoxXZY(minX, minY, minZ, maxX, maxY, maxZ)) {
 			if (pos.distanceSq(dX, dY, dZ, true) > blockReachDistanceSq) {
@@ -141,15 +142,17 @@ public class SchematicPrinter {
 
 			try {
 				if (placeBlock(world, player, pos)) {
-					return syncSlotAndSneaking(player, slot, isSneaking, true);
+					syncSlotAndSneaking(player, slot, isSneaking, true);
+					return;
 				}
 			} catch (Exception e) {
 				Reference.logger.error("Could not place block!", e);
-				return syncSlotAndSneaking(player, slot, isSneaking, false);
+				syncSlotAndSneaking(player, slot, isSneaking, false);
+				return;
 			}
 		}
 
-		return syncSlotAndSneaking(player, slot, isSneaking, true);
+		syncSlotAndSneaking(player, slot, isSneaking, true);
 	}
 
 	private boolean syncSlotAndSneaking(ClientPlayerEntity player, int slot, boolean isSneaking, boolean success) {
@@ -180,7 +183,7 @@ public class SchematicPrinter {
 			// TODO: clean up this mess
 			NBTSync handler = SyncRegistry.INSTANCE.getHandler(realBlock);
 			if (handler != null) {
-				this.timeout[x][y][z] = SchematicaConfig.SERVER.timeout.get().byteValue();
+				this.timeout[x][y][z] = SchematicaConfig.CLIENT.timeout.get().byteValue();
 
 				Integer tries = this.syncBlacklist.get(realPos);
 				if (tries == null) {
@@ -201,13 +204,14 @@ public class SchematicPrinter {
 			return false;
 		}
 
-		if (SchematicaConfig.SERVER.destroyBlocks.get() && !world.isAirBlock(realPos) && Objects.requireNonNull(
-				this.minecraft.playerController).isInCreativeMode()) {
+		if (SchematicaConfig.CLIENT.destroyBlocks.get()
+				&& !world.isAirBlock(realPos)
+				&& this.minecraft.playerController.isInCreativeMode()) {
 			this.minecraft.playerController.clickBlock(realPos, Direction.DOWN);
 
-			this.timeout[x][y][z] = SchematicaConfig.SERVER.timeout.get().byteValue();
+			this.timeout[x][y][z] = SchematicaConfig.CLIENT.timeout.get().byteValue();
 
-			return !SchematicaConfig.SERVER.destroyInstantly.get();
+			return !SchematicaConfig.CLIENT.destroyInstantly.get();
 		}
 
 		if (this.schematic.isAirBlock(pos)) {
@@ -231,9 +235,9 @@ public class SchematicPrinter {
 		}
 
 		if (placeBlock(world, player, realPos, blockState, itemStack)) {
-			this.timeout[x][y][z] = SchematicaConfig.SERVER.timeout.get().byteValue();
+			this.timeout[x][y][z] = SchematicaConfig.CLIENT.timeout.get().byteValue();
 
-			return !SchematicaConfig.SERVER.placeInstantly.get();
+			return !SchematicaConfig.CLIENT.placeInstantly.get();
 		}
 
 		return false;
@@ -261,11 +265,11 @@ public class SchematicPrinter {
 	}
 
 	private List<Direction> getSolidSides(World world, BlockPos pos, PlayerEntity player) {
-		if (!SchematicaConfig.SERVER.placeAdjacent.get()) {
+		if (!SchematicaConfig.CLIENT.placeAdjacent.get()) {
 			return Arrays.asList(Direction.values());
 		}
 
-		List<Direction> list = new ArrayList<Direction>();
+		List<Direction> list = new ArrayList<>();
 
 		for (Direction side : Direction.values()) {
 			if (isSolid(world, pos, side, player)) {
@@ -331,7 +335,7 @@ public class SchematicPrinter {
 		ItemStack itemStack = player.getHeldItem(hand);
 		boolean success;
 
-		if (!Objects.requireNonNull(this.minecraft.playerController).isInCreativeMode()
+		if (!this.minecraft.playerController.isInCreativeMode()
 				&& !itemStack.isEmpty()
 				&& itemStack.getCount() <= extraClicks) {
 			return false;
@@ -365,8 +369,7 @@ public class SchematicPrinter {
 
 		// FIXME: when an adjacent block is not required the blocks should be placed 1 block away from the actual
 		// position (because air is replaceable)
-		ActionResultType result = Objects.requireNonNull(this.minecraft.playerController)
-		                                 .processRightClick(player, world, hand);
+		ActionResultType result = this.minecraft.playerController.processRightClick(player, world, hand);
 		if ((result != ActionResultType.SUCCESS)) {
 			return false;
 		}
@@ -447,9 +450,8 @@ public class SchematicPrinter {
 		return slot;
 	}
 
-	private boolean swapSlots(int from, int to) {
-		return Objects.requireNonNull(this.minecraft.playerController)
-		              .windowClick(Objects.requireNonNull(this.minecraft.player).container.windowId, from, to,
-		                           ClickType.SWAP, this.minecraft.player) == ItemStack.EMPTY;
+	private void swapSlots(int from, int to) {
+		this.minecraft.playerController.windowClick(this.minecraft.player.container.windowId, from, to, ClickType.SWAP,
+		                                            this.minecraft.player);
 	}
 }

@@ -12,7 +12,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Objects;
 
 public class SchematicUtil {
 	public static final ItemStack DEFAULT_ICON = new ItemStack(Blocks.GRASS);
@@ -29,12 +28,12 @@ public class SchematicUtil {
 			return DEFAULT_ICON.copy();
 		}
 
-		ItemStack block = new ItemStack(Objects.requireNonNull(ForgeRegistries.BLOCKS.getValue(rl)), 1, null);
+		ItemStack block = new ItemStack(ForgeRegistries.BLOCKS.getValue(rl), 1, null);
 		if (!block.isEmpty()) {
 			return block;
 		}
 
-		ItemStack item = new ItemStack(Objects.requireNonNull(ForgeRegistries.ITEMS.getValue(rl)), 1, null);
+		ItemStack item = new ItemStack(ForgeRegistries.ITEMS.getValue(rl), 1, null);
 		if (!item.isEmpty()) {
 			return item;
 		}

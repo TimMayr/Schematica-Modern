@@ -4,8 +4,8 @@ import com.github.lunatrius.core.util.FileUtils;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.util.FileFilterSchematic;
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import mcp.MethodsReturnNonnullByDefault;
@@ -32,44 +32,42 @@ import java.util.List;
 public class CommandSchematicaRemove extends CommandSchematicaBase {
 	private static final FileFilterSchematic FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
 
-	public static void register(CommandDispatcher<CommandSource> dispatcher) {
-		dispatcher.register(Commands.literal(Names.Command.Remove.NAME)
-		                            .requires((source) -> source.hasPermissionLevel(0))
-		                            .then(Commands.argument("name", StringArgumentType.string())
-		                                          .suggests(((context, builder) -> {
-			                                          CommandSource source = context.getSource();
-			                                          PlayerEntity player;
-			                                          String name = StringArgumentType.getString(context, "filename");
+	public static ArgumentBuilder<CommandSource, ?> register() {
+		return Commands.literal(Names.Command.Remove.NAME)
+		               .requires((source) -> source.hasPermissionLevel(0))
+		               .then(Commands.argument("name", StringArgumentType.string())
+		                             .suggests(((context, builder) -> {
+			                             CommandSource source = context.getSource();
+			                             PlayerEntity player;
+			                             String name = StringArgumentType.getString(context, "filename");
 
-			                                          try {
-				                                          player = source.asPlayer();
-			                                          } catch (CommandSyntaxException e) {
-				                                          return builder.buildFuture();
-			                                          }
+			                             try {
+				                             player = source.asPlayer();
+			                             } catch (CommandSyntaxException e) {
+				                             return builder.buildFuture();
+			                             }
 
-			                                          File directory =
-					                                          Reference.proxy.getPlayerSchematicDirectory(player,
-					                                                                                      true);
-			                                          File[] files = directory.listFiles(FILE_FILTER_SCHEMATIC);
+			                             File directory = Reference.proxy.getPlayerSchematicDirectory(player, true);
+			                             File[] files = directory.listFiles(FILE_FILTER_SCHEMATIC);
 
-			                                          if (files != null) {
-				                                          List<String> filenames = new ArrayList<>();
+			                             if (files != null) {
+				                             List<String> filenames = new ArrayList<>();
 
-				                                          for (File file : files) {
-					                                          filenames.add(file.getName());
-				                                          }
+				                             for (File file : files) {
+					                             filenames.add(file.getName());
+				                             }
 
-				                                          filenames.stream()
-				                                                   .filter(s -> s.startsWith(name))
-				                                                   .forEach(builder::suggest);
-				                                          return builder.buildFuture();
-			                                          }
+				                             filenames.stream()
+				                                      .filter(s -> s.startsWith(name))
+				                                      .forEach(builder::suggest);
+				                             return builder.buildFuture();
+			                             }
 
-			                                          return builder.buildFuture();
-		                                          }))
-		                                          .executes(CommandSchematicaRemove::showDeleteConfirmation)
-		                                          .then(Commands.argument("hash", StringArgumentType.string())
-		                                                        .executes(CommandSchematicaRemove::delete))));
+			                             return builder.buildFuture();
+		                             }))
+		                             .executes(CommandSchematicaRemove::showDeleteConfirmation)
+		                             .then(Commands.argument("hash", StringArgumentType.string())
+		                                           .executes(CommandSchematicaRemove::delete)));
 	}
 
 	private static int delete(CommandContext<CommandSource> context) throws CommandSyntaxException {

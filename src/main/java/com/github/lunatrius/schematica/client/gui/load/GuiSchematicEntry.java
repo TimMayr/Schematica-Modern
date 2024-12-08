@@ -5,24 +5,24 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 public class GuiSchematicEntry {
-	private String name;
-	private ItemStack itemStack;
-	private boolean isDirectory;
+	private final String name;
+	private final ItemStack itemStack;
+	private final boolean isDirectory;
 
 	public GuiSchematicEntry(String name, ItemStack itemStack, boolean isDirectory) {
-		this(name, itemStack.getItem(), itemStack.getItemDamage(), isDirectory);
+		this(name, itemStack.getItem(), isDirectory);
 	}
 
-	public GuiSchematicEntry(String name, Item item, int itemDamage, boolean isDirectory) {
+	public GuiSchematicEntry(String name, Item item, boolean isDirectory) {
 		this.name = name;
 		this.isDirectory = isDirectory;
-		this.itemStack = new ItemStack(item, 1, itemDamage);
+		this.itemStack = new ItemStack(item, 1);
 	}
 
-	public GuiSchematicEntry(String name, Block block, int itemDamage, boolean isDirectory) {
+	public GuiSchematicEntry(String name, Block block, boolean isDirectory) {
 		this.name = name;
 		this.isDirectory = isDirectory;
-		this.itemStack = new ItemStack(block, 1, itemDamage);
+		this.itemStack = new ItemStack(block, 1);
 	}
 
 	public String getName() {
@@ -34,7 +34,7 @@ public class GuiSchematicEntry {
 	}
 
 	public int getItemDamage() {
-		return this.itemStack.getItemDamage();
+		return this.itemStack.getDamage();
 	}
 
 	public boolean isDirectory() {

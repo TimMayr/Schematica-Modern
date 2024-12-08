@@ -67,7 +67,7 @@ public class Names {
 
 	public static class Command {
 		public static class Save {
-			public static final String NAME = "schematicaSave";
+			public static final String NAME = "save";
 
 			public static class Message {
 				public static final String USAGE = "schematica.command.save.usage";
@@ -83,7 +83,7 @@ public class Names {
 		}
 
 		public static class List {
-			public static final String NAME = "schematicaList";
+			public static final String NAME = "list";
 
 			public static class Message {
 				public static final String USAGE = "schematica.command.list.usage";
@@ -97,7 +97,7 @@ public class Names {
 		}
 
 		public static class Remove {
-			public static final String NAME = "schematicaRemove";
+			public static final String NAME = "remove";
 
 			public static class Message {
 				public static final String USAGE = "schematica.command.remove.usage";
@@ -110,7 +110,7 @@ public class Names {
 		}
 
 		public static class Download {
-			public static final String NAME = "schematicaDownload";
+			public static final String NAME = "download";
 
 			public static class Message {
 				public static final String USAGE = "schematica.command.download.usage";
@@ -122,7 +122,7 @@ public class Names {
 		}
 
 		public static class Replace {
-			public static final String NAME = "schematicaReplace";
+			public static final String NAME = "replace";
 
 			public static class Message {
 				public static final String USAGE = "schematica.command.replace.usage";
@@ -141,52 +141,52 @@ public class Names {
 	}
 
 	public static class Gui {
-		public static String X = "schematica.gui.x";
-		public static String Y = "schematica.gui.y";
-		public static String Z = "schematica.gui.z";
+		public static final String X = "schematica.gui.x";
+		public static final String Y = "schematica.gui.y";
+		public static final String Z = "schematica.gui.z";
 		public static final String ON = "schematica.gui.on";
 		public static final String OFF = "schematica.gui.off";
-		public static String DONE = "schematica.gui.done";
+		public static final String DONE = "schematica.gui.done";
 
 		public static class Load {
-			public static String TITLE = "schematica.gui.title";
-			public static String FOLDER_INFO = "schematica.gui.folderInfo";
-			public static String OPEN_FOLDER = "schematica.gui.openFolder";
-			public static String NO_SCHEMATIC = "schematica.gui.noschematic";
+			public static final String TITLE = "schematica.gui.title";
+			public static final String FOLDER_INFO = "schematica.gui.folderInfo";
+			public static final String OPEN_FOLDER = "schematica.gui.openFolder";
+			public static final String NO_SCHEMATIC = "schematica.gui.noschematic";
 		}
 
 		public static class Save {
-			public static String POINT_RED = "schematica.gui.point.red";
-			public static String POINT_BLUE = "schematica.gui.point.blue";
-			public static String SAVE = "schematica.gui.save";
-			public static String SAVE_SELECTION = "schematica.gui.saveselection";
-			public static String FORMAT = "schematica.gui.format";
+			public static final String POINT_RED = "schematica.gui.point.red";
+			public static final String POINT_BLUE = "schematica.gui.point.blue";
+			public static final String SAVE = "schematica.gui.save";
+			public static final String SAVE_SELECTION = "schematica.gui.saveselection";
+			public static final String FORMAT = "schematica.gui.format";
 		}
 
 		public static class Control {
-			public static String MOVE_SCHEMATIC = "schematica.gui.moveschematic";
-			public static String MATERIALS = "schematica.gui.materials";
-			public static String PRINTER = "schematica.gui.printer";
-			public static String OPERATIONS = "schematica.gui.operations";
+			public static final String MOVE_SCHEMATIC = "schematica.gui.moveschematic";
+			public static final String MATERIALS = "schematica.gui.materials";
+			public static final String PRINTER = "schematica.gui.printer";
+			public static final String OPERATIONS = "schematica.gui.operations";
 
-			public static String UNLOAD = "schematica.gui.unload";
-			public static String MODE_ALL = "schematica.gui.all";
-			public static String MODE_LAYERS = "schematica.gui.layers";
-			public static String MODE_BELOW = "schematica.gui.below";
-			public static String HIDE = "schematica.gui.hide";
-			public static String SHOW = "schematica.gui.show";
-			public static String MOVE_HERE = "schematica.gui.movehere";
+			public static final String UNLOAD = "schematica.gui.unload";
+			public static final String MODE_ALL = "schematica.gui.all";
+			public static final String MODE_LAYERS = "schematica.gui.layers";
+			public static final String MODE_BELOW = "schematica.gui.below";
+			public static final String HIDE = "schematica.gui.hide";
+			public static final String SHOW = "schematica.gui.show";
+			public static final String MOVE_HERE = "schematica.gui.movehere";
 			public static String FLIP = "schematica.gui.flip";
 			public static String ROTATE = "schematica.gui.rotate";
-			public static String TRANSFORM_PREFIX = "schematica.gui.";
+			public static final String TRANSFORM_PREFIX = "schematica.gui.";
 
-			public static String MATERIAL_NAME = "schematica.gui.materialname";
-			public static String MATERIAL_AMOUNT = "schematica.gui.materialamount";
-			public static String MATERIAL_AVAILABLE = "schematica.gui.materialavailable";
-			public static String MATERIAL_MISSING = "schematica.gui.materialmissing";
+			public static final String MATERIAL_NAME = "schematica.gui.materialname";
+			public static final String MATERIAL_AMOUNT = "schematica.gui.materialamount";
+			public static final String MATERIAL_AVAILABLE = "schematica.gui.materialavailable";
+			public static final String MATERIAL_MISSING = "schematica.gui.materialmissing";
 
-			public static String SORT_PREFIX = "schematica.gui.material";
-			public static String DUMP = "schematica.gui.materialdump";
+			public static final String SORT_PREFIX = "schematica.gui.material";
+			public static final String DUMP = "schematica.gui.materialdump";
 		}
 	}
 

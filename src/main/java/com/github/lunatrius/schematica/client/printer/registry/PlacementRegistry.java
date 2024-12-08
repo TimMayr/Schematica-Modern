@@ -188,20 +188,20 @@ public class PlacementRegistry {
 		addPlacementMapping(Blocks.REPEATING_COMMAND_BLOCK, new PlacementData(playerFacingEntityOpposite));
 	}
 
-	private PlacementData addPlacementMapping(Class<? extends Block> clazz, PlacementData data) {
+	private void addPlacementMapping(Class<? extends Block> clazz, PlacementData data) {
 		if (clazz == null || data == null) {
-			return null;
+			return;
 		}
 
-		return this.classPlacementMap.put(clazz, data);
+		this.classPlacementMap.put(clazz, data);
 	}
 
-	private PlacementData addPlacementMapping(Block block, PlacementData data) {
+	private void addPlacementMapping(Block block, PlacementData data) {
 		if (block == null || data == null) {
-			return null;
+			return;
 		}
 
-		return this.blockPlacementMap.put(block, data);
+		this.blockPlacementMap.put(block, data);
 	}
 
 	private PlacementData addPlacementMapping(Item item, PlacementData data) {

@@ -12,12 +12,10 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 
-@Mod.EventBusSubscriber
 public class OverlayHandler {
 	private static final String SCHEMATICA_PREFIX =
 			"[" + TextFormatting.GOLD + "Schematica" + TextFormatting.RESET + "] ";
@@ -34,8 +32,8 @@ public class OverlayHandler {
 
 				left.add("");
 				left.add(SCHEMATICA_PREFIX + schematic.getDebugDimensions());
-				left.add(SCHEMATICA_PREFIX + RenderSchematic.INSTANCE.getDebugInfoTileEntities());
-				left.add(SCHEMATICA_PREFIX + RenderSchematic.INSTANCE.getDebugInfoRenders());
+				left.add(SCHEMATICA_PREFIX + RenderSchematic.getINSTANCE().getDebugInfoTileEntities());
+				left.add(SCHEMATICA_PREFIX + RenderSchematic.getINSTANCE().getDebugInfoRenders());
 
 				RayTraceResult rtr = ClientProxy.objectMouseOver;
 				if (rtr != null && rtr.getType() == RayTraceResult.Type.BLOCK) {

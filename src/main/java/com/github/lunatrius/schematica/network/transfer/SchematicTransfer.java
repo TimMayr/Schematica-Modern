@@ -24,7 +24,7 @@ public class SchematicTransfer {
 		this.length = schematic.getLength();
 	}
 
-	public boolean confirmChunk(int chunkX, int chunkY, int chunkZ) {
+	public void confirmChunk(int chunkX, int chunkY, int chunkZ) {
 		if (chunkX == this.baseX && chunkY == this.baseY && chunkZ == this.baseZ) {
 			setState(State.CHUNK_WAIT);
 			this.baseX += Constants.SchematicChunk.WIDTH;
@@ -39,13 +39,11 @@ public class SchematicTransfer {
 
 					if (this.baseZ >= this.length) {
 						setState(State.END_WAIT);
-						return false;
 					}
 				}
 			}
 		}
 
-		return true;
 	}
 
 	public void setState(State state) {

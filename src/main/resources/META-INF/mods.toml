@@ -17,7 +17,7 @@ version = "${modversion}" #mandatory
 # A display name for the mod
 displayName = "${modname}" #mandatory
 # A file name (in the root of the mod JAR) containing a logo for display
-logoFile = "/assets/schematica/logo.png" #optional
+logoFile = "logo.png" #optional
 # A text field displayed in the mod UI
 credits = "AbrarSyed, AtomicBlom, UltraMoogleMan" #optional
 # A text field displayed in the mod UI

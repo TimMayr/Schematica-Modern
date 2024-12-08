@@ -39,16 +39,11 @@ public class GuiSchematicControl extends ScreenBase {
 	private NumericFieldWidget numericX = null;
 	private NumericFieldWidget numericY = null;
 	private NumericFieldWidget numericZ = null;
-	private Button btnUnload = null;
 	private Button btnLayerMode = null;
 	private NumericFieldWidget nfLayer = null;
 	private Button btnHide = null;
-	private Button btnMove = null;
-	private Button btnFlipDirection = null;
 	private Button btnFlip = null;
-	private Button btnRotateDirection = null;
 	private Button btnRotate = null;
-	private Button btnMaterials = null;
 	private Button btnPrint = null;
 
 	public GuiSchematicControl(Screen Screen) {
@@ -97,45 +92,42 @@ public class GuiSchematicControl extends ScreenBase {
 
 		int id = 0;
 
-		this.numericX =
-				new NumericFieldWidget(this.font, id++, this.centerX - 50, this.centerY - 30, 100, 20, (button) -> {
-					this.schematic.position.x = this.numericX.getValue();
-					RenderSchematic.INSTANCE.refresh();
-				});
+		this.numericX = new NumericFieldWidget(this.font, this.centerX - 50, this.centerY - 30, 100, 20, (button) -> {
+			this.schematic.position.x = this.numericX.getValue();
+			RenderSchematic.getINSTANCE().refresh();
+		});
 		this.buttons.add(this.numericX);
 
-		this.numericY =
-				new NumericFieldWidget(this.font, id++, this.centerX - 50, this.centerY - 5, 100, 20, (button) -> {
-					this.schematic.position.y = this.numericY.getValue();
-					RenderSchematic.INSTANCE.refresh();
-				});
+		this.numericY = new NumericFieldWidget(this.font, this.centerX - 50, this.centerY - 5, 100, 20, (button) -> {
+			this.schematic.position.y = this.numericY.getValue();
+			RenderSchematic.getINSTANCE().refresh();
+		});
 		this.buttons.add(this.numericY);
 
-		this.numericZ =
-				new NumericFieldWidget(this.font, id++, this.centerX - 50, this.centerY + 20, 100, 20, (button) -> {
-					this.schematic.position.z = this.numericZ.getValue();
-					RenderSchematic.INSTANCE.refresh();
-				});
+		this.numericZ = new NumericFieldWidget(this.font, this.centerX - 50, this.centerY + 20, 100, 20, (button) -> {
+			this.schematic.position.z = this.numericZ.getValue();
+			RenderSchematic.getINSTANCE().refresh();
+		});
 		this.buttons.add(this.numericZ);
 
-		this.btnUnload = new Button(this.width - 90, this.height - 200, 80, 20, strUnload, (button) -> {
+		Button btnUnload = new Button(this.width - 90, this.height - 200, 80, 20, strUnload, (button) -> {
 			Reference.proxy.unloadSchematic();
 			this.minecraft.displayGuiScreen(this.parentScreen);
 		});
-		this.buttons.add(this.btnUnload);
+		this.buttons.add(btnUnload);
 
 		this.btnLayerMode = new Button(this.width - 90, this.height - 150 - 25, 80, 20, I18n.format(
 				(this.schematic != null ? this.schematic.layerMode : LayerMode.ALL).name), (button) -> {
 			this.schematic.layerMode = LayerMode.next(this.schematic.layerMode);
 			this.btnLayerMode.setMessage(I18n.format(this.schematic.layerMode.name));
 			this.nfLayer.setActive(this.schematic.layerMode != LayerMode.ALL);
-			RenderSchematic.INSTANCE.refresh();
+			RenderSchematic.getINSTANCE().refresh();
 		});
 		this.buttons.add(this.btnLayerMode);
 
-		this.nfLayer = new NumericFieldWidget(this.font, id, this.width - 90, this.height - 150, 80, 20, (button) -> {
+		this.nfLayer = new NumericFieldWidget(this.font, this.width - 90, this.height - 150, 80, 20, (button) -> {
 			this.schematic.renderingLayer = this.nfLayer.getValue();
-			RenderSchematic.INSTANCE.refresh();
+			RenderSchematic.getINSTANCE().refresh();
 		});
 		this.buttons.add(this.nfLayer);
 
@@ -145,50 +137,52 @@ public class GuiSchematicControl extends ScreenBase {
 				                          this.schematic.toggleRendering() ? this.strHide : this.strShow));
 		this.buttons.add(this.btnHide);
 
-		this.btnMove = new Button(this.width - 90, this.height - 80, 80, 20, I18n.format(Names.Gui.Control.MOVE_HERE),
-		                          (button) -> {
-			                          ClientProxy.moveSchematicToPlayer(this.schematic);
-			                          RenderSchematic.INSTANCE.refresh();
-			                          setPoint(this.numericX, this.numericY, this.numericZ, this.schematic.position);
-		                          });
-		this.buttons.add(this.btnMove);
+		Button btnMove = new Button(this.width - 90, this.height - 80, 80, 20,
+		                            I18n.format(Names.Gui.Control.MOVE_HERE),
+		                            (button) -> {
+			                            ClientProxy.moveSchematicToPlayer(this.schematic);
+			                            RenderSchematic.getINSTANCE().refresh();
+			                            setPoint(this.numericX, this.numericY, this.numericZ, this.schematic.position);
+		                            });
+		this.buttons.add(btnMove);
 
-		this.btnFlipDirection = new Button(this.width - 180, this.height - 55, 80, 20, I18n.format(
+		Button btnFlipDirection = new Button(this.width - 180, this.height - 55, 80, 20, I18n.format(
 				Names.Gui.Control.TRANSFORM_PREFIX + ClientProxy.axisFlip.getName()), (button) -> {
 			Direction[] values = Direction.values();
 			ClientProxy.axisFlip = values[((ClientProxy.axisFlip.ordinal() + 2) % values.length)];
 			button.setMessage(I18n.format(Names.Gui.Control.TRANSFORM_PREFIX + ClientProxy.axisFlip.getName()));
 		});
-		this.buttons.add(this.btnFlipDirection);
+		this.buttons.add(btnFlipDirection);
 
 		this.btnFlip = new Button(this.width - 90, this.height - 55, 80, 20, "↔", (button) -> {
 			if (FlipHelper.INSTANCE.flip(this.schematic, ClientProxy.axisFlip, hasShiftDown())) {
-				RenderSchematic.INSTANCE.refresh();
+				RenderSchematic.getINSTANCE().refresh();
 				SchematicPrinter.INSTANCE.refresh();
 			}
 		});
 		this.buttons.add(this.btnFlip);
 
-		this.btnRotateDirection = new Button(this.width - 180, this.height - 30, 80, 20, I18n.format(
+		Button btnRotateDirection = new Button(this.width - 180, this.height - 30, 80, 20, I18n.format(
 				Names.Gui.Control.TRANSFORM_PREFIX + ClientProxy.axisRotation.getName()), (button) -> {
 			Direction[] values = Direction.values();
 			ClientProxy.axisRotation = values[((ClientProxy.axisRotation.ordinal() + 1) % values.length)];
 			button.setMessage(I18n.format(Names.Gui.Control.TRANSFORM_PREFIX + ClientProxy.axisRotation.getName()));
 		});
-		this.buttons.add(this.btnRotateDirection);
+		this.buttons.add(btnRotateDirection);
 
 		this.btnRotate = new Button(this.width - 90, this.height - 30, 80, 20, "↻", (button) -> {
 			if (RotationHelper.INSTANCE.rotate(this.schematic, ClientProxy.axisRotation, hasShiftDown())) {
 				setPoint(this.numericX, this.numericY, this.numericZ, this.schematic.position);
-				RenderSchematic.INSTANCE.refresh();
+				RenderSchematic.getINSTANCE().refresh();
 				SchematicPrinter.INSTANCE.refresh();
 			}
 		});
 		this.buttons.add(this.btnRotate);
 
-		this.btnMaterials = new Button(10, this.height - 70, 80, 20, this.strMaterials,
-		                               (button) -> this.minecraft.displayGuiScreen(new GuiSchematicMaterials(screen)));
-		this.buttons.add(this.btnMaterials);
+		Button btnMaterials = new Button(10, this.height - 70, 80, 20, this.strMaterials,
+		                                 (button) -> this.minecraft.displayGuiScreen(
+				                                 new GuiSchematicMaterials(screen)));
+		this.buttons.add(btnMaterials);
 
 		this.btnPrint = new Button(10, this.height - 30, 80, 20, this.printer.isPrinting() ? this.strOn : this.strOff,
 		                           (button) -> {
@@ -201,17 +195,17 @@ public class GuiSchematicControl extends ScreenBase {
 		this.numericY.setActive(this.schematic != null);
 		this.numericZ.setActive(this.schematic != null);
 
-		this.btnUnload.active = this.schematic != null;
+		btnUnload.active = this.schematic != null;
 		this.btnLayerMode.active = this.schematic != null;
 		this.nfLayer.setActive(this.schematic != null && this.schematic.layerMode != LayerMode.ALL);
 
 		this.btnHide.active = this.schematic != null;
-		this.btnMove.active = this.schematic != null;
-		this.btnFlipDirection.active = this.schematic != null;
+		btnMove.active = this.schematic != null;
+		btnFlipDirection.active = this.schematic != null;
 		this.btnFlip.active = this.schematic != null;
-		this.btnRotateDirection.active = this.schematic != null;
+		btnRotateDirection.active = this.schematic != null;
 		this.btnRotate.active = this.schematic != null;
-		this.btnMaterials.active = this.schematic != null;
+		btnMaterials.active = this.schematic != null;
 		this.btnPrint.active = this.schematic != null && this.printer.isEnabled();
 
 		setMinMax(this.numericX);

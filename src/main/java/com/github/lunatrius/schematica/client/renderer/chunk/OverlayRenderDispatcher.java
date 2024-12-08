@@ -113,6 +113,7 @@ public class OverlayRenderDispatcher extends ChunkRenderDispatcher {
 				}
 			}
 
+
 			for (BlockPos pos : BlockPos.getAllInBoxMutable(from, to)) {
 				int secX = pos.getX() - fromEx.getX();
 				int secY = pos.getY() - fromEx.getY();
@@ -123,7 +124,6 @@ public class OverlayRenderDispatcher extends ChunkRenderDispatcher {
 				if (type != null) {
 					if (!compiledOverlay.isLayerStarted(layer)) {
 						compiledOverlay.setLayerStarted(layer);
-						preRenderBlocks(buffer, from);
 					}
 
 					int sides = getSides(types, secX, secY, secZ);
@@ -131,6 +131,8 @@ public class OverlayRenderDispatcher extends ChunkRenderDispatcher {
 					compiledOverlay.setLayerUsed(layer);
 				}
 			}
+
+			buffer.finishDrawing();
 		}
 
 		compiledOverlay.setVisibility = visgraph.computeVisibility();
@@ -182,10 +184,6 @@ public class OverlayRenderDispatcher extends ChunkRenderDispatcher {
 		}
 
 		return sides;
-	}
-
-	public void preRenderBlocks(BufferBuilder buffer, BlockPos pos) {
-		buffer.begin(RenderType.getSolid().getDrawMode(), DefaultVertexFormats.POSITION_COLOR);
 	}
 
 	private enum BlockType {

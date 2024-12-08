@@ -41,7 +41,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 
@@ -52,16 +51,16 @@ import java.util.*;
 @OnlyIn(Dist.CLIENT)
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-@Mod.EventBusSubscriber
 public class RenderSchematic extends WorldRenderer {
-	public static final RenderSchematic INSTANCE =
-			new RenderSchematic(Minecraft.getInstance(), new RenderTypeBuffers());
 	public static final int RENDER_DISTANCE = 32;
 	public static final int CHUNKS_XZ = (RENDER_DISTANCE + 1) * 2;
 	public static final int CHUNKS_Y = 16;
 	public static final int CHUNKS = CHUNKS_XZ * CHUNKS_XZ * CHUNKS_Y;
-	private static final ShaderProgram SHADER_ALPHA = new ShaderProgram("schematica", null, "shaders/alpha.frag");
+	private static final RenderSchematic INSTANCE =
+			new RenderSchematic(Minecraft.getInstance(), new RenderTypeBuffers());
 	private static final Vector3d PLAYER_POSITION_OFFSET = new Vector3d();
+	private static ShaderProgram SHADER_ALPHA;
+	private static boolean isInstanceInit = false;
 	private final HashSet<World> worlds = new HashSet<>();
 	private final Minecraft mc;
 	private final IProfiler profiler;
@@ -100,9 +99,23 @@ public class RenderSchematic extends WorldRenderer {
 		this.mc = minecraft;
 		this.profiler = minecraft.getProfiler();
 		this.renderManager = minecraft.getRenderManager();
-		RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
-		RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
-		RenderSystem.bindTexture(0);
+	}
+
+	public static RenderSchematic getINSTANCE() {
+		if (!isInstanceInit) {
+			INSTANCE.init();
+			isInstanceInit = true;
+		}
+
+		return INSTANCE;
+	}
+
+	public void init() {
+		if (RenderSystem.isOnRenderThread()) {
+			RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
+			RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
+			RenderSystem.bindTexture(0);
+		}
 	}
 
 	public void addWorld(World world) {
@@ -690,7 +703,7 @@ public class RenderSchematic extends WorldRenderer {
 			this.profiler.endStartSection("guide");
 			if (ClientProxy.isRenderingGuide || isRenderingSchematic) {
 				RenderSystem.pushMatrix();
-				renderOverlay(event.getMatrixStack(), Objects.requireNonNull(schematic), isRenderingSchematic);
+				renderOverlay(event.getMatrixStack(), schematic, isRenderingSchematic);
 				RenderSystem.popMatrix();
 			}
 
@@ -702,6 +715,10 @@ public class RenderSchematic extends WorldRenderer {
 	private void renderSchematic(MatrixStack matrixStackIn, long finishTimeNano, ActiveRenderInfo activeRenderInfoIn,
 	                             GameRenderer gameRendererIn, LightTexture lightmapIn, Matrix4f projectionIn,
 	                             SchematicWorld schematic, float partialTicks) {
+		if (RenderSchematic.SHADER_ALPHA == null) {
+			RenderSchematic.SHADER_ALPHA = new ShaderProgram("schematica", null, "shaders/alpha.frag");
+		}
+
 		if (this.world != schematic) {
 			this.world = schematic;
 

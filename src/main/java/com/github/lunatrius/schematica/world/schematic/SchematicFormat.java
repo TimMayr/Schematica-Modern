@@ -15,7 +15,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.zip.GZIPOutputStream;
 
 public abstract class SchematicFormat {
@@ -109,7 +108,7 @@ public abstract class SchematicFormat {
 
 			try (DataOutputStream dataOutputStream = new DataOutputStream(
 					new GZIPOutputStream(Files.newOutputStream(file.toPath())))) {
-				Objects.requireNonNull(tagCompound.get(Names.NBT.ROOT)).write(dataOutputStream);
+				tagCompound.get(Names.NBT.ROOT).write(dataOutputStream);
 			}
 
 			return true;
@@ -120,7 +119,7 @@ public abstract class SchematicFormat {
 		return false;
 	}
 
-	public abstract boolean writeToNBT(CompoundNBT tagCompound, ISchematic schematic);
+	public abstract void writeToNBT(CompoundNBT tagCompound, ISchematic schematic);
 
 	/**
 	 * Writes the given schematic, notifying the player when finished.

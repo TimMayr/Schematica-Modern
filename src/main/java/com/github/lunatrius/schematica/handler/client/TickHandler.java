@@ -11,9 +11,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
-@Mod.EventBusSubscriber
 public class TickHandler {
 	public static final TickHandler INSTANCE = new TickHandler();
 
@@ -43,7 +41,7 @@ public class TickHandler {
 			this.minecraft.getProfiler().startSection("printer");
 			SchematicPrinter printer = SchematicPrinter.INSTANCE;
 			if (printer.isEnabled() && printer.isPrinting() && this.ticks-- < 0) {
-				this.ticks = SchematicaConfig.SERVER.placeDelay.get();
+				this.ticks = SchematicaConfig.CLIENT.placeDelay.get();
 
 				printer.print(world, player);
 			}

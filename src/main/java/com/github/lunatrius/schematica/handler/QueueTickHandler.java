@@ -9,12 +9,10 @@ import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-@Mod.EventBusSubscriber
 public class QueueTickHandler {
 	public static final QueueTickHandler INSTANCE = new QueueTickHandler();
 

@@ -8,8 +8,8 @@ import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.command.CommandException;
@@ -30,76 +30,67 @@ import java.util.List;
 public class CommandSchematicaDownload extends CommandSchematicaBase {
 	private static final FileFilterSchematic FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
 
-	public static void register(CommandDispatcher<CommandSource> dispatcher) {
-		dispatcher.register(Commands.literal(Names.Command.Download.NAME)
-		                            .then(Commands.argument("filename", StringArgumentType.string())
-		                                          .suggests(((context, builder) -> {
-			                                          CommandSource source = context.getSource();
-			                                          PlayerEntity player;
-			                                          String name = StringArgumentType.getString(context, "filename");
+	public static ArgumentBuilder<CommandSource, ?> register() {
+		return Commands.literal(Names.Command.Download.NAME)
+		               .then(Commands.argument("filename", StringArgumentType.string())
+		                             .suggests(((context, builder) -> {
+			                             CommandSource source = context.getSource();
+			                             PlayerEntity player;
+			                             String name = StringArgumentType.getString(context, "filename");
 
-			                                          try {
-				                                          player = source.asPlayer();
-			                                          } catch (CommandSyntaxException e) {
-				                                          return builder.buildFuture();
-			                                          }
+			                             try {
+				                             player = source.asPlayer();
+			                             } catch (CommandSyntaxException e) {
+				                             return builder.buildFuture();
+			                             }
 
-			                                          File directory =
-					                                          Reference.proxy.getPlayerSchematicDirectory(player,
-					                                                                                      true);
-			                                          File[] files = directory.listFiles(FILE_FILTER_SCHEMATIC);
+			                             File directory = Reference.proxy.getPlayerSchematicDirectory(player, true);
+			                             File[] files = directory.listFiles(FILE_FILTER_SCHEMATIC);
 
-			                                          if (files != null) {
-				                                          List<String> filenames = new ArrayList<>();
+			                             if (files != null) {
+				                             List<String> filenames = new ArrayList<>();
 
-				                                          for (File file : files) {
-					                                          filenames.add(file.getName());
-				                                          }
+				                             for (File file : files) {
+					                             filenames.add(file.getName());
+				                             }
 
-				                                          filenames.stream()
-				                                                   .filter(s -> s.startsWith(name))
-				                                                   .forEach(builder::suggest);
-				                                          return builder.buildFuture();
-			                                          }
+				                             filenames.stream()
+				                                      .filter(s -> s.startsWith(name))
+				                                      .forEach(builder::suggest);
+				                             return builder.buildFuture();
+			                             }
 
-			                                          return builder.buildFuture();
-		                                          }))
-		                                          .executes((commandContext) -> {
-			                                          CommandSource source = commandContext.getSource();
-			                                          ServerPlayerEntity player = source.asPlayer();
+			                             return builder.buildFuture();
+		                             }))
+		                             .executes((commandContext) -> {
+			                             CommandSource source = commandContext.getSource();
+			                             ServerPlayerEntity player = source.asPlayer();
 
-			                                          String filename =
-					                                          StringArgumentType.getString(commandContext, "filename");
-			                                          File directory =
-					                                          Reference.proxy.getPlayerSchematicDirectory(player,
-					                                                                                      true);
+			                             String filename = StringArgumentType.getString(commandContext, "filename");
+			                             File directory = Reference.proxy.getPlayerSchematicDirectory(player, true);
 
-			                                          if (!FileUtils.contains(directory, filename)) {
-				                                          Reference.logger.error("{} has tried to download the file "
-						                                                                 + "{}",
-				                                                                 player.getName(), filename);
-				                                          throw new CommandException(new TranslationTextComponent(
-						                                          Names.Command.Download.Message.DOWNLOAD_FAILED));
-			                                          }
+			                             if (!FileUtils.contains(directory, filename)) {
+				                             Reference.logger.error("{} has tried to download" + " the file " + "{}",
+				                                                    player.getName(), filename);
+				                             throw new CommandException(new TranslationTextComponent(
+						                             Names.Command.Download.Message.DOWNLOAD_FAILED));
+			                             }
 
-			                                          ISchematic schematic =
-					                                          SchematicFormat.readFromFile(directory, filename);
+			                             ISchematic schematic = SchematicFormat.readFromFile(directory, filename);
 
-			                                          if (schematic != null) {
-				                                          DownloadHandler.INSTANCE.transferMap.put(player,
-				                                                                                   new SchematicTransfer(
-						                                                                                   schematic,
-						                                                                                   filename));
-				                                          source.sendFeedback(new TranslationTextComponent(
-						                                          Names.Command.Download.Message.DOWNLOAD_STARTED,
-						                                          filename), true);
-			                                          } else {
-				                                          throw new CommandException(new TranslationTextComponent(
-						                                          Names.Command.Download.Message.DOWNLOAD_FAILED));
-			                                          }
+			                             if (schematic != null) {
+				                             DownloadHandler.INSTANCE.transferMap.put(player,
+				                                                                      new SchematicTransfer(schematic,
+				                                                                                            filename));
+				                             source.sendFeedback(new TranslationTextComponent(
+						                             Names.Command.Download.Message.DOWNLOAD_STARTED, filename), true);
+			                             } else {
+				                             throw new CommandException(new TranslationTextComponent(
+						                             Names.Command.Download.Message.DOWNLOAD_FAILED));
+			                             }
 
-			                                          return 0;
-		                                          })));
+			                             return 0;
+		                             }));
 	}
 
 	@Override

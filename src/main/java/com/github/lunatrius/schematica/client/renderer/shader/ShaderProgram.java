@@ -1,7 +1,6 @@
 package com.github.lunatrius.schematica.client.renderer.shader;
 
 import com.github.lunatrius.schematica.reference.Reference;
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;

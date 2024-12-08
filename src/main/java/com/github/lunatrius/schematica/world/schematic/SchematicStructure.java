@@ -59,7 +59,7 @@ public class SchematicStructure extends SchematicFormat {
 
 
 	@Override
-	public boolean writeToNBT(CompoundNBT tagCompound, ISchematic schematic) {
+	public void writeToNBT(CompoundNBT tagCompound, ISchematic schematic) {
 		Template template = new Template();
 		template.size = new BlockPos(schematic.getWidth(), schematic.getHeight(), schematic.getLength());
 
@@ -109,7 +109,6 @@ public class SchematicStructure extends SchematicFormat {
 		}
 
 		template.writeToNBT(tagCompound);
-		return true;
 	}
 
 	@Override

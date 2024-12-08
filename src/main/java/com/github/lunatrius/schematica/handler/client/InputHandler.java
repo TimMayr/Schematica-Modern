@@ -22,11 +22,10 @@ import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import org.lwjgl.glfw.GLFW;
 
-@Mod.EventBusSubscriber
 public class InputHandler {
+	public static final InputHandler INSTANCE = new InputHandler();
 	private static final KeyBinding KEY_BINDING_LOAD =
 			new KeyBinding(Names.Keys.LOAD, GLFW.GLFW_KEY_KP_DIVIDE, Names.Keys.CATEGORY);
 	private static final KeyBinding KEY_BINDING_SAVE =
@@ -47,8 +46,7 @@ public class InputHandler {
 			new KeyBinding(Names.Keys.MOVE_HERE, GLFW.GLFW_KEY_UNKNOWN, Names.Keys.CATEGORY);
 	private static final KeyBinding KEY_BINDING_PICK_BLOCK =
 			new KeyBinding(Names.Keys.PICK_BLOCK, KeyConflictContext.IN_GAME, KeyModifier.SHIFT,
-			               InputMappings.Type.KEYSYM, -98, Names.Keys.CATEGORY);
-	public static final InputHandler INSTANCE = new InputHandler();
+			               InputMappings.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, Names.Keys.CATEGORY);
 	public static final KeyBinding[] KEY_BINDINGS = new KeyBinding[] {KEY_BINDING_LOAD,
 	                                                                  KEY_BINDING_SAVE,
 	                                                                  KEY_BINDING_CONTROL,
@@ -84,7 +82,7 @@ public class InputHandler {
 				if (schematic != null && schematic.layerMode != LayerMode.ALL) {
 					schematic.renderingLayer =
 							MathHelper.clamp(schematic.renderingLayer + 1, 0, schematic.getHeight() - 1);
-					RenderSchematic.INSTANCE.refresh();
+					RenderSchematic.getINSTANCE().refresh();
 				}
 			}
 
@@ -93,7 +91,7 @@ public class InputHandler {
 				if (schematic != null && schematic.layerMode != LayerMode.ALL) {
 					schematic.renderingLayer =
 							MathHelper.clamp(schematic.renderingLayer - 1, 0, schematic.getHeight() - 1);
-					RenderSchematic.INSTANCE.refresh();
+					RenderSchematic.getINSTANCE().refresh();
 				}
 			}
 
@@ -101,7 +99,7 @@ public class InputHandler {
 				SchematicWorld schematic = ClientProxy.schematic;
 				if (schematic != null) {
 					schematic.layerMode = LayerMode.next(schematic.layerMode);
-					RenderSchematic.INSTANCE.refresh();
+					RenderSchematic.getINSTANCE().refresh();
 				}
 			}
 
@@ -109,7 +107,7 @@ public class InputHandler {
 				SchematicWorld schematic = ClientProxy.schematic;
 				if (schematic != null) {
 					schematic.isRendering = !schematic.isRendering;
-					RenderSchematic.INSTANCE.refresh();
+					RenderSchematic.getINSTANCE().refresh();
 				}
 			}
 
@@ -129,7 +127,7 @@ public class InputHandler {
 				SchematicWorld schematic = ClientProxy.schematic;
 				if (schematic != null) {
 					ClientProxy.moveSchematicToPlayer(schematic);
-					RenderSchematic.INSTANCE.refresh();
+					RenderSchematic.getINSTANCE().refresh();
 				}
 			}
 
@@ -142,19 +140,19 @@ public class InputHandler {
 		}
 	}
 
-	private boolean pickBlock(SchematicWorld schematic, RayTraceResult objectMouseOver) {
+	private void pickBlock(SchematicWorld schematic, RayTraceResult objectMouseOver) {
 		// Minecraft.func_147112_ai
 		if (objectMouseOver == null) {
-			return false;
+			return;
 		}
 
 		if (objectMouseOver.getType() == RayTraceResult.Type.MISS) {
-			return false;
+			return;
 		}
 
 		ClientPlayerEntity player = this.minecraft.player;
 		if (player != null && !ForgeHooks.onPickBlock(objectMouseOver, player, schematic)) {
-			return true;
+			return;
 		}
 
 		if (player != null && player.isCreative()) {
@@ -163,9 +161,7 @@ public class InputHandler {
 				this.minecraft.playerController.sendSlotPacket(
 						player.inventory.getStackInSlot(player.inventory.currentItem), slot);
 			}
-			return true;
 		}
 
-		return false;
 	}
 }
