@@ -11,7 +11,7 @@ public class SchematicaConfig {
 	public static ForgeConfigSpec clientSpec;
 	public static SchematicaClientConfig CLIENT;
 
-	public static void init() {
+	static {
 		Pair<SchematicaServerConfig, ForgeConfigSpec> serverSpecPair =
 				new ForgeConfigSpec.Builder().configure(SchematicaServerConfig::new);
 		serverSpec = serverSpecPair.getRight();
@@ -21,8 +21,5 @@ public class SchematicaConfig {
 				new ForgeConfigSpec.Builder().configure(SchematicaClientConfig::new);
 		clientSpec = clientSpecPair.getRight();
 		CLIENT = clientSpecPair.getLeft();
-
-		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, clientSpec);
-		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, serverSpec);
 	}
 }

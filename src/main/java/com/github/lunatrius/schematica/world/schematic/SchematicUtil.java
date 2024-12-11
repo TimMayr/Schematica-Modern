@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 public class SchematicUtil {
-	public static final ItemStack DEFAULT_ICON = new ItemStack(Blocks.GRASS);
+	public static final ItemStack DEFAULT_ICON = new ItemStack(Blocks.GRASS_BLOCK);
 
 	public static ItemStack getIconFromName(String iconName) {
 		ResourceLocation rl = null;

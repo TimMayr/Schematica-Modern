@@ -150,79 +150,79 @@ public class RenderSchematic extends WorldRenderer {
 	}
 
 	public void setWorldAndLoadRenderers(@Nullable SchematicWorld worldClientIn) {
-		this.worlds.remove(worldClientIn);
-		this.frustumUpdatePosX = Double.MIN_VALUE;
-		this.frustumUpdatePosY = Double.MIN_VALUE;
-		this.frustumUpdatePosZ = Double.MIN_VALUE;
-		this.frustumUpdatePosChunkX = Integer.MIN_VALUE;
-		this.frustumUpdatePosChunkY = Integer.MIN_VALUE;
-		this.frustumUpdatePosChunkZ = Integer.MIN_VALUE;
-		this.renderManager.setWorld(world);
-
-		if (world != null) {
-			this.worlds.add(worldClientIn);
-			loadRenderers();
-		} else {
-			this.chunksToUpdate.clear();
-			this.renderInfos.clear();
-
-			if (this.viewFrustum != null) {
-				this.viewFrustum.deleteGlResources();
-			}
-
-			this.viewFrustum = null;
-
-			if (this.renderDispatcher != null) {
-				this.renderDispatcher.stopWorkerThreads();
-			}
-
-			this.renderDispatcher = null;
-
-			if (this.renderDispatcherOverlay != null) {
-				this.renderDispatcherOverlay.stopWorkerThreads();
-			}
-
-			this.renderDispatcherOverlay = null;
-		}
+//		this.worlds.remove(worldClientIn);
+//		this.frustumUpdatePosX = Double.MIN_VALUE;
+//		this.frustumUpdatePosY = Double.MIN_VALUE;
+//		this.frustumUpdatePosZ = Double.MIN_VALUE;
+//		this.frustumUpdatePosChunkX = Integer.MIN_VALUE;
+//		this.frustumUpdatePosChunkY = Integer.MIN_VALUE;
+//		this.frustumUpdatePosChunkZ = Integer.MIN_VALUE;
+//		this.renderManager.setWorld(world);
+//
+//		if (world != null) {
+//			this.worlds.add(worldClientIn);
+//			loadRenderers();
+//		} else {
+//			this.chunksToUpdate.clear();
+//			this.renderInfos.clear();
+//
+//			if (this.viewFrustum != null) {
+//				this.viewFrustum.deleteGlResources();
+//			}
+//
+//			this.viewFrustum = null;
+//
+//			if (this.renderDispatcher != null) {
+//				this.renderDispatcher.stopWorkerThreads();
+//			}
+//
+//			this.renderDispatcher = null;
+//
+//			if (this.renderDispatcherOverlay != null) {
+//				this.renderDispatcherOverlay.stopWorkerThreads();
+//			}
+//
+//			this.renderDispatcherOverlay = null;
+//		}
 	}
 
 	@Override
 	public void loadRenderers() {
-		if (this.world != null) {
-			if (this.renderDispatcher == null) {
-				this.renderDispatcher =
-						new ChunkRenderDispatcher(world, this, Util.getServerExecutor(), mc.isJava64bit(),
-						                          this.renderTypeTextures.getFixedBuilder());
-			}
-
-			if (this.renderDispatcherOverlay == null) {
-				this.renderDispatcherOverlay =
-						new OverlayRenderDispatcher(world, this, Util.getServerExecutor(), mc.isJava64bit(),
-						                            this.renderTypeTextures.getFixedBuilder());
-			}
-
-			this.displayListEntitiesDirty = true;
-			this.renderDistanceChunks = SchematicaConfig.CLIENT.renderDistance.get();
-
-
-			if (this.viewFrustum != null) {
-				this.viewFrustum.deleteGlResources();
-			}
-
-			stopChunkUpdates();
-			this.viewFrustum = new ViewFrustumOverlay(renderDispatcher, world, this.renderDistanceChunks, this);
-
-			double posX = PLAYER_POSITION_OFFSET.x;
-			double posZ = PLAYER_POSITION_OFFSET.z;
-			this.viewFrustum.updateChunkPositions(posX, posZ);
-		}
+//		if (this.world != null) {
+//			if (this.renderDispatcher == null) {
+//				this.renderDispatcher =
+//						new ChunkRenderDispatcher(world, this, Util.getServerExecutor(), mc.isJava64bit(),
+//						                          this.renderTypeTextures.getFixedBuilder());
+//			}
+//
+//			if (this.renderDispatcherOverlay == null) {
+//				this.renderDispatcherOverlay =
+//						new OverlayRenderDispatcher(world, this, Util.getServerExecutor(), mc.isJava64bit(),
+//						                            this.renderTypeTextures.getFixedBuilder());
+//			}
+//
+//			this.displayListEntitiesDirty = true;
+//			this.renderDistanceChunks = SchematicaConfig.CLIENT.renderDistance.get();
+//
+//
+//			if (this.viewFrustum != null) {
+//				this.viewFrustum.deleteGlResources();
+//			}
+//
+//			stopChunkUpdates();
+//			this.viewFrustum = new ViewFrustumOverlay(renderDispatcher, world, this.renderDistanceChunks, this);
+//
+//			double posX = PLAYER_POSITION_OFFSET.x;
+//			double posZ = PLAYER_POSITION_OFFSET.z;
+//			this.viewFrustum.updateChunkPositions(posX, posZ);
+//		}
 	}
 
 	@Override
 	protected void stopChunkUpdates() {
-		this.chunksToUpdate.clear();
-		this.renderDispatcher.stopChunkUpdates();
-		this.renderDispatcherOverlay.stopChunkUpdates();
+//		this.chunksToUpdate.clear();
+//		this.renderDispatcher.stopChunkUpdates();
+//		this.renderDispatcherOverlay.stopChunkUpdates();
 	}
 
 	@Override
@@ -259,296 +259,296 @@ public class RenderSchematic extends WorldRenderer {
 	@Override
 	public void setupTerrain(ActiveRenderInfo activeRenderInfoIn, ClippingHelperImpl camera, boolean debugCamera,
 	                         int frameCount, boolean playerSpectator) {
-		if (SchematicaConfig.CLIENT.renderDistance.get() != this.renderDistanceChunks) {
-			loadRenderers();
-		}
-		Entity viewEntity = activeRenderInfoIn.getRenderViewEntity();
-
-		this.profiler.startSection("camera");
-		double posX = PLAYER_POSITION_OFFSET.x;
-		double posY = PLAYER_POSITION_OFFSET.y;
-		double posZ = PLAYER_POSITION_OFFSET.z;
-
-		double deltaX = posX - this.frustumUpdatePosX;
-		double deltaY = posY - this.frustumUpdatePosY;
-		double deltaZ = posZ - this.frustumUpdatePosZ;
-
-		int chunkCoordX = MathHelper.floor(posX) >> 4;
-		int chunkCoordY = MathHelper.floor(posY) >> 4;
-		int chunkCoordZ = MathHelper.floor(posZ) >> 4;
-
-		if (this.frustumUpdatePosChunkX != chunkCoordX
-				|| this.frustumUpdatePosChunkY != chunkCoordY
-				|| this.frustumUpdatePosChunkZ != chunkCoordZ
-				|| deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ > 16.0) {
-			this.frustumUpdatePosX = posX;
-			this.frustumUpdatePosY = posY;
-			this.frustumUpdatePosZ = posZ;
-			this.frustumUpdatePosChunkX = chunkCoordX;
-			this.frustumUpdatePosChunkY = chunkCoordY;
-			this.frustumUpdatePosChunkZ = chunkCoordZ;
-			this.viewFrustum.updateChunkPositions(posX, posZ);
-		}
-
-		this.profiler.endStartSection("renderlistcamera");
-
-		this.profiler.endStartSection("culling");
-		BlockPos posEye = new BlockPos(posX, posY + viewEntity.getEyeHeight(), posZ);
-		ChunkRenderDispatcher.ChunkRender renderChunkCurrent = this.viewFrustum.getChunkRender(posEye);
-
-		this.displayListEntitiesDirty = this.displayListEntitiesDirty
-				|| !this.chunksToUpdate.isEmpty()
-				|| posX != this.lastViewEntityX
-				|| posY != this.lastViewEntityY
-				|| posZ != this.lastViewEntityZ
-				|| viewEntity.rotationPitch != this.lastViewEntityPitch
-				|| viewEntity.rotationYaw != this.lastViewEntityYaw;
-		this.lastViewEntityX = posX;
-		this.lastViewEntityY = posY;
-		this.lastViewEntityZ = posZ;
-		this.lastViewEntityPitch = viewEntity.rotationPitch;
-		this.lastViewEntityYaw = viewEntity.rotationYaw;
-
-		this.profiler.endStartSection("update");
-		if (this.displayListEntitiesDirty) {
-			this.displayListEntitiesDirty = false;
-			this.renderInfos = Lists.newArrayListWithCapacity(CHUNKS);
-
-			LinkedList<ContainerLocalRenderInformation> renderInfoList = Lists.newLinkedList();
-			boolean renderChunksMany = this.mc.renderChunksMany;
-
-			if (renderChunkCurrent == null) {
-				int chunkY = posEye.getY() > 0 ? 248 : 8;
-
-				for (int chunkX = -this.renderDistanceChunks; chunkX <= this.renderDistanceChunks; chunkX++) {
-					for (int chunkZ = -this.renderDistanceChunks; chunkZ <= this.renderDistanceChunks; chunkZ++) {
-						BlockPos pos = new BlockPos((chunkX << 4) + 8, chunkY, (chunkZ << 4) + 8);
-						ChunkRenderDispatcher.ChunkRender renderChunk = this.viewFrustum.getChunkRender(pos);
-
-						if (renderChunk != null && camera.isBoundingBoxInFrustum(renderChunk.boundingBox)) {
-							renderChunk.setFrameIndex(frameCount);
-						}
-					}
-				}
-			} else {
-				boolean add = false;
-				Set<Direction> visibleSides = getVisibleSides(posEye);
-
-				if (visibleSides.size() == 1) {
-					Vector3f viewVector = new Vector3f(viewEntity.getLook(mc.getRenderPartialTicks()));
-					Direction facing =
-							Direction.getFacingFromVector(viewVector.getX(), viewVector.getY(), viewVector.getZ())
-							         .getOpposite();
-					visibleSides.remove(facing);
-				}
-
-				if (visibleSides.isEmpty()) {
-					add = true;
-				}
-
-				if (!add || playerSpectator) {
-					renderChunkCurrent.setFrameIndex(frameCount);
-				}
-			}
-
-			this.profiler.startSection("iteration");
-			this.profiler.endSection();
-		}
-
-		this.profiler.endStartSection("rebuild");
-		Set<ChunkRenderDispatcher.ChunkRender> set = this.chunksToUpdate;
-		this.chunksToUpdate = Sets.newLinkedHashSet();
-
-		for (ContainerLocalRenderInformation renderInfo : this.renderInfos) {
-			ChunkRenderDispatcher.ChunkRender renderChunk = renderInfo.renderChunk;
-
-			if (renderChunk.needsUpdate() || set.contains(renderChunk)) {
-				this.displayListEntitiesDirty = true;
-
-				this.chunksToUpdate.add(renderChunk);
-			}
-		}
-
-		this.chunksToUpdate.addAll(set);
-		this.profiler.endSection();
+//		if (SchematicaConfig.CLIENT.renderDistance.get() != this.renderDistanceChunks) {
+//			loadRenderers();
+//		}
+//		Entity viewEntity = activeRenderInfoIn.getRenderViewEntity();
+//
+//		this.profiler.startSection("camera");
+//		double posX = PLAYER_POSITION_OFFSET.x;
+//		double posY = PLAYER_POSITION_OFFSET.y;
+//		double posZ = PLAYER_POSITION_OFFSET.z;
+//
+//		double deltaX = posX - this.frustumUpdatePosX;
+//		double deltaY = posY - this.frustumUpdatePosY;
+//		double deltaZ = posZ - this.frustumUpdatePosZ;
+//
+//		int chunkCoordX = MathHelper.floor(posX) >> 4;
+//		int chunkCoordY = MathHelper.floor(posY) >> 4;
+//		int chunkCoordZ = MathHelper.floor(posZ) >> 4;
+//
+//		if (this.frustumUpdatePosChunkX != chunkCoordX
+//				|| this.frustumUpdatePosChunkY != chunkCoordY
+//				|| this.frustumUpdatePosChunkZ != chunkCoordZ
+//				|| deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ > 16.0) {
+//			this.frustumUpdatePosX = posX;
+//			this.frustumUpdatePosY = posY;
+//			this.frustumUpdatePosZ = posZ;
+//			this.frustumUpdatePosChunkX = chunkCoordX;
+//			this.frustumUpdatePosChunkY = chunkCoordY;
+//			this.frustumUpdatePosChunkZ = chunkCoordZ;
+//			this.viewFrustum.updateChunkPositions(posX, posZ);
+//		}
+//
+//		this.profiler.endStartSection("renderlistcamera");
+//
+//		this.profiler.endStartSection("culling");
+//		BlockPos posEye = new BlockPos(posX, posY + viewEntity.getEyeHeight(), posZ);
+//		ChunkRenderDispatcher.ChunkRender renderChunkCurrent = this.viewFrustum.getChunkRender(posEye);
+//
+//		this.displayListEntitiesDirty = this.displayListEntitiesDirty
+//				|| !this.chunksToUpdate.isEmpty()
+//				|| posX != this.lastViewEntityX
+//				|| posY != this.lastViewEntityY
+//				|| posZ != this.lastViewEntityZ
+//				|| viewEntity.rotationPitch != this.lastViewEntityPitch
+//				|| viewEntity.rotationYaw != this.lastViewEntityYaw;
+//		this.lastViewEntityX = posX;
+//		this.lastViewEntityY = posY;
+//		this.lastViewEntityZ = posZ;
+//		this.lastViewEntityPitch = viewEntity.rotationPitch;
+//		this.lastViewEntityYaw = viewEntity.rotationYaw;
+//
+//		this.profiler.endStartSection("update");
+//		if (this.displayListEntitiesDirty) {
+//			this.displayListEntitiesDirty = false;
+//			this.renderInfos = Lists.newArrayListWithCapacity(CHUNKS);
+//
+//			LinkedList<ContainerLocalRenderInformation> renderInfoList = Lists.newLinkedList();
+//			boolean renderChunksMany = this.mc.renderChunksMany;
+//
+//			if (renderChunkCurrent == null) {
+//				int chunkY = posEye.getY() > 0 ? 248 : 8;
+//
+//				for (int chunkX = -this.renderDistanceChunks; chunkX <= this.renderDistanceChunks; chunkX++) {
+//					for (int chunkZ = -this.renderDistanceChunks; chunkZ <= this.renderDistanceChunks; chunkZ++) {
+//						BlockPos pos = new BlockPos((chunkX << 4) + 8, chunkY, (chunkZ << 4) + 8);
+//						ChunkRenderDispatcher.ChunkRender renderChunk = this.viewFrustum.getChunkRender(pos);
+//
+//						if (renderChunk != null && camera.isBoundingBoxInFrustum(renderChunk.boundingBox)) {
+//							renderChunk.setFrameIndex(frameCount);
+//						}
+//					}
+//				}
+//			} else {
+//				boolean add = false;
+//				Set<Direction> visibleSides = getVisibleSides(posEye);
+//
+//				if (visibleSides.size() == 1) {
+//					Vector3f viewVector = new Vector3f(viewEntity.getLook(mc.getRenderPartialTicks()));
+//					Direction facing =
+//							Direction.getFacingFromVector(viewVector.getX(), viewVector.getY(), viewVector.getZ())
+//							         .getOpposite();
+//					visibleSides.remove(facing);
+//				}
+//
+//				if (visibleSides.isEmpty()) {
+//					add = true;
+//				}
+//
+//				if (!add || playerSpectator) {
+//					renderChunkCurrent.setFrameIndex(frameCount);
+//				}
+//			}
+//
+//			this.profiler.startSection("iteration");
+//			this.profiler.endSection();
+//		}
+//
+//		this.profiler.endStartSection("rebuild");
+//		Set<ChunkRenderDispatcher.ChunkRender> set = this.chunksToUpdate;
+//		this.chunksToUpdate = Sets.newLinkedHashSet();
+//
+//		for (ContainerLocalRenderInformation renderInfo : this.renderInfos) {
+//			ChunkRenderDispatcher.ChunkRender renderChunk = renderInfo.renderChunk;
+//
+//			if (renderChunk.needsUpdate() || set.contains(renderChunk)) {
+//				this.displayListEntitiesDirty = true;
+//
+//				this.chunksToUpdate.add(renderChunk);
+//			}
+//		}
+//
+//		this.chunksToUpdate.addAll(set);
+//		this.profiler.endSection();
 	}
 
 	public void updateCameraAndRender(MatrixStack matrixStackIn, float partialTicks, long finishTimeNano,
 	                                  boolean drawBlockOutline, ActiveRenderInfo activeRenderInfoIn,
 	                                  GameRenderer gameRendererIn, LightTexture lightmapIn, Matrix4f projectionIn) {
-		TileEntityRendererDispatcher.instance.prepare(this.world, this.mc.getTextureManager(), this.mc.fontRenderer,
-		                                              activeRenderInfoIn, this.mc.objectMouseOver);
-		this.renderManager.cacheActiveRenderInfo(this.world, activeRenderInfoIn, this.mc.pointedEntity);
-		IProfiler iprofiler = this.world.getProfiler();
-		iprofiler.endStartSection("light_updates");
-		this.mc.world.getChunkProvider().getLightManager().tick(Integer.MAX_VALUE, true, true);
-
-		Matrix4f matrix4f = matrixStackIn.getLast().getMatrix();
-		iprofiler.endStartSection("culling");
-
-		ClippingHelperImpl clippinghelperimpl;
-
-		double x = PLAYER_POSITION_OFFSET.x;
-		double y = PLAYER_POSITION_OFFSET.y;
-		double z = PLAYER_POSITION_OFFSET.z;
-
-		clippinghelperimpl = new ClippingHelperImpl(matrix4f, projectionIn);
-		clippinghelperimpl.setCameraPosition(x, y, z);
-
-		RenderSystem.enableCull();
-		Entity entity = this.mc.getRenderViewEntity();
-
-		RenderSystem.shadeModel(GL11.GL_SMOOTH);
-
-		RenderHelper.disableStandardItemLighting();
-
-		this.profiler.endStartSection("terrain_setup");
-		this.setupTerrain(activeRenderInfoIn, clippinghelperimpl, false, this.frameCount++, isInsideWorld(x, y, z));
-
-		this.profiler.endStartSection("updatechunks");
-		updateChunks(finishTimeNano / 2);
-
-		this.profiler.endStartSection("terrain");
-		RenderSystem.matrixMode(GL11.GL_MODELVIEW);
-		RenderSystem.pushMatrix();
-		RenderSystem.enableBlend();
-		RenderSystem.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
-		renderBlockLayer(RenderType.getSolid(), matrixStackIn, x, y, z);
-		renderBlockLayer(RenderType.getCutoutMipped(), matrixStackIn, x, y, z);
-		this.mc.getTextureManager().getTexture(PlayerContainer.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
-		renderBlockLayer(RenderType.getCutout(), matrixStackIn, x, y, z);
-		this.mc.getTextureManager().getTexture(PlayerContainer.LOCATION_BLOCKS_TEXTURE).restoreLastBlurMipmap();
-		RenderSystem.disableBlend();
-		RenderSystem.shadeModel(GL11.GL_FLAT);
-		RenderSystem.alphaFunc(GL11.GL_GREATER, 0.1f);
-		RenderSystem.matrixMode(GL11.GL_MODELVIEW);
-		RenderSystem.popMatrix();
-
-		RenderSystem.pushMatrix();
-		this.profiler.endStartSection("entities");
-		if (this.isRenderEntityOutlines()) {
-			this.getEntityOutlineFramebuffer().framebufferClear(Minecraft.IS_RUNNING_ON_MAC);
-			this.mc.getFramebuffer().bindFramebuffer(false);
-		}
-
-		IRenderTypeBuffer.Impl irendertypebuffer$impl = this.renderTypeTextures.getBufferSource();
-
-		for (Entity entityToRender : this.world.getAllEntities()) {
-			if ((this.renderManager.shouldRender(entityToRender, clippinghelperimpl, x, y, z)
-					     || entityToRender.isRidingOrBeingRiddenBy(this.mc.player))
-					&& (entityToRender
-							    != activeRenderInfoIn.getRenderViewEntity()
-							    || activeRenderInfoIn.isThirdPerson()
-							    || activeRenderInfoIn.getRenderViewEntity() instanceof LivingEntity
-					&& ((LivingEntity) activeRenderInfoIn.getRenderViewEntity()).isSleeping())
-					&& (!(entityToRender instanceof ClientPlayerEntity)
-							    || activeRenderInfoIn.getRenderViewEntity() == entityToRender)) {
-				++this.countEntitiesRendered;
-				if (entityToRender.ticksExisted == 0) {
-					entityToRender.lastTickPosX = entityToRender.getPosX();
-					entityToRender.lastTickPosY = entityToRender.getPosY();
-					entityToRender.lastTickPosZ = entityToRender.getPosZ();
-				}
-
-				IRenderTypeBuffer irendertypebuffer;
-				if (this.isRenderEntityOutlines() && entityToRender.isGlowing()) {
-					OutlineLayerBuffer outlinelayerbuffer = this.renderTypeTextures.getOutlineBufferSource();
-					irendertypebuffer = outlinelayerbuffer;
-					int i2 = entityToRender.getTeamColor();
-					int k2 = i2 >> 16 & 255;
-					int l2 = i2 >> 8 & 255;
-					int i3 = i2 & 255;
-					outlinelayerbuffer.setColor(k2, l2, i3, 255);
-				} else {
-					irendertypebuffer = irendertypebuffer$impl;
-				}
-
-				this.renderEntity(entityToRender, x, y, z, partialTicks, matrixStackIn, irendertypebuffer);
-			}
-		}
-
-		super.checkMatrixStack(matrixStackIn);
-		irendertypebuffer$impl.finish(RenderType.getEntitySolid(PlayerContainer.LOCATION_BLOCKS_TEXTURE));
-		irendertypebuffer$impl.finish(RenderType.getEntityCutout(PlayerContainer.LOCATION_BLOCKS_TEXTURE));
-		irendertypebuffer$impl.finish(RenderType.getEntityCutoutNoCull(PlayerContainer.LOCATION_BLOCKS_TEXTURE));
-		irendertypebuffer$impl.finish(RenderType.getEntitySmoothCutout(PlayerContainer.LOCATION_BLOCKS_TEXTURE));
-		this.profiler.endSection();
-
-		RenderSystem.disableBlend();
-		RenderHelper.disableStandardItemLighting();
-		disableLightmap();
-		RenderSystem.matrixMode(GL11.GL_MODELVIEW);
-		RenderSystem.popMatrix();
-
-		RenderSystem.enableCull();
-		RenderSystem.alphaFunc(GL11.GL_GREATER, 0.1f);
-		this.mc.getTextureManager().bindTexture(PlayerContainer.LOCATION_BLOCKS_TEXTURE);
-		RenderSystem.shadeModel(GL11.GL_SMOOTH);
-
-		RenderSystem.depthMask(false);
-		RenderSystem.pushMatrix();
-		this.profiler.endStartSection("translucent");
-		RenderSystem.enableBlend();
-		RenderSystem.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
-		renderBlockLayer(RenderType.getTranslucent(), matrixStackIn, x, y, z);
-		RenderSystem.disableBlend();
-		RenderSystem.popMatrix();
-		RenderSystem.depthMask(true);
-
-		RenderSystem.shadeModel(GL11.GL_FLAT);
-		RenderSystem.enableCull();
+//		TileEntityRendererDispatcher.instance.prepare(this.world, this.mc.getTextureManager(), this.mc.fontRenderer,
+//		                                              activeRenderInfoIn, this.mc.objectMouseOver);
+//		this.renderManager.cacheActiveRenderInfo(this.world, activeRenderInfoIn, this.mc.pointedEntity);
+//		IProfiler iprofiler = this.world.getProfiler();
+//		iprofiler.endStartSection("light_updates");
+//		this.mc.world.getChunkProvider().getLightManager().tick(Integer.MAX_VALUE, true, true);
+//
+//		Matrix4f matrix4f = matrixStackIn.getLast().getMatrix();
+//		iprofiler.endStartSection("culling");
+//
+//		ClippingHelperImpl clippinghelperimpl;
+//
+//		double x = PLAYER_POSITION_OFFSET.x;
+//		double y = PLAYER_POSITION_OFFSET.y;
+//		double z = PLAYER_POSITION_OFFSET.z;
+//
+//		clippinghelperimpl = new ClippingHelperImpl(matrix4f, projectionIn);
+//		clippinghelperimpl.setCameraPosition(x, y, z);
+//
+//		RenderSystem.enableCull();
+//		Entity entity = this.mc.getRenderViewEntity();
+//
+//		RenderSystem.shadeModel(GL11.GL_SMOOTH);
+//
+//		RenderHelper.disableStandardItemLighting();
+//
+//		this.profiler.endStartSection("terrain_setup");
+//		this.setupTerrain(activeRenderInfoIn, clippinghelperimpl, false, this.frameCount++, isInsideWorld(x, y, z));
+//
+//		this.profiler.endStartSection("updatechunks");
+//		updateChunks(finishTimeNano / 2);
+//
+//		this.profiler.endStartSection("terrain");
+//		RenderSystem.matrixMode(GL11.GL_MODELVIEW);
+//		RenderSystem.pushMatrix();
+//		RenderSystem.enableBlend();
+//		RenderSystem.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
+//		renderBlockLayer(RenderType.getSolid(), matrixStackIn, x, y, z);
+//		renderBlockLayer(RenderType.getCutoutMipped(), matrixStackIn, x, y, z);
+//		this.mc.getTextureManager().getTexture(PlayerContainer.LOCATION_BLOCKS_TEXTURE).setBlurMipmap(false, false);
+//		renderBlockLayer(RenderType.getCutout(), matrixStackIn, x, y, z);
+//		this.mc.getTextureManager().getTexture(PlayerContainer.LOCATION_BLOCKS_TEXTURE).restoreLastBlurMipmap();
+//		RenderSystem.disableBlend();
+//		RenderSystem.shadeModel(GL11.GL_FLAT);
+//		RenderSystem.alphaFunc(GL11.GL_GREATER, 0.1f);
+//		RenderSystem.matrixMode(GL11.GL_MODELVIEW);
+//		RenderSystem.popMatrix();
+//
+//		RenderSystem.pushMatrix();
+//		this.profiler.endStartSection("entities");
+//		if (this.isRenderEntityOutlines()) {
+//			this.getEntityOutlineFramebuffer().framebufferClear(Minecraft.IS_RUNNING_ON_MAC);
+//			this.mc.getFramebuffer().bindFramebuffer(false);
+//		}
+//
+//		IRenderTypeBuffer.Impl irendertypebuffer$impl = this.renderTypeTextures.getBufferSource();
+//
+//		for (Entity entityToRender : this.world.getAllEntities()) {
+//			if ((this.renderManager.shouldRender(entityToRender, clippinghelperimpl, x, y, z)
+//					     || entityToRender.isRidingOrBeingRiddenBy(this.mc.player))
+//					&& (entityToRender
+//							    != activeRenderInfoIn.getRenderViewEntity()
+//							    || activeRenderInfoIn.isThirdPerson()
+//							    || activeRenderInfoIn.getRenderViewEntity() instanceof LivingEntity
+//					&& ((LivingEntity) activeRenderInfoIn.getRenderViewEntity()).isSleeping())
+//					&& (!(entityToRender instanceof ClientPlayerEntity)
+//							    || activeRenderInfoIn.getRenderViewEntity() == entityToRender)) {
+//				++this.countEntitiesRendered;
+//				if (entityToRender.ticksExisted == 0) {
+//					entityToRender.lastTickPosX = entityToRender.getPosX();
+//					entityToRender.lastTickPosY = entityToRender.getPosY();
+//					entityToRender.lastTickPosZ = entityToRender.getPosZ();
+//				}
+//
+//				IRenderTypeBuffer irendertypebuffer;
+//				if (this.isRenderEntityOutlines() && entityToRender.isGlowing()) {
+//					OutlineLayerBuffer outlinelayerbuffer = this.renderTypeTextures.getOutlineBufferSource();
+//					irendertypebuffer = outlinelayerbuffer;
+//					int i2 = entityToRender.getTeamColor();
+//					int k2 = i2 >> 16 & 255;
+//					int l2 = i2 >> 8 & 255;
+//					int i3 = i2 & 255;
+//					outlinelayerbuffer.setColor(k2, l2, i3, 255);
+//				} else {
+//					irendertypebuffer = irendertypebuffer$impl;
+//				}
+//
+//				this.renderEntity(entityToRender, x, y, z, partialTicks, matrixStackIn, irendertypebuffer);
+//			}
+//		}
+//
+//		super.checkMatrixStack(matrixStackIn);
+//		irendertypebuffer$impl.finish(RenderType.getEntitySolid(PlayerContainer.LOCATION_BLOCKS_TEXTURE));
+//		irendertypebuffer$impl.finish(RenderType.getEntityCutout(PlayerContainer.LOCATION_BLOCKS_TEXTURE));
+//		irendertypebuffer$impl.finish(RenderType.getEntityCutoutNoCull(PlayerContainer.LOCATION_BLOCKS_TEXTURE));
+//		irendertypebuffer$impl.finish(RenderType.getEntitySmoothCutout(PlayerContainer.LOCATION_BLOCKS_TEXTURE));
+//		this.profiler.endSection();
+//
+//		RenderSystem.disableBlend();
+//		RenderHelper.disableStandardItemLighting();
+//		disableLightmap();
+//		RenderSystem.matrixMode(GL11.GL_MODELVIEW);
+//		RenderSystem.popMatrix();
+//
+//		RenderSystem.enableCull();
+//		RenderSystem.alphaFunc(GL11.GL_GREATER, 0.1f);
+//		this.mc.getTextureManager().bindTexture(PlayerContainer.LOCATION_BLOCKS_TEXTURE);
+//		RenderSystem.shadeModel(GL11.GL_SMOOTH);
+//
+//		RenderSystem.depthMask(false);
+//		RenderSystem.pushMatrix();
+//		this.profiler.endStartSection("translucent");
+//		RenderSystem.enableBlend();
+//		RenderSystem.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, 1, 0);
+//		renderBlockLayer(RenderType.getTranslucent(), matrixStackIn, x, y, z);
+//		RenderSystem.disableBlend();
+//		RenderSystem.popMatrix();
+//		RenderSystem.depthMask(true);
+//
+//		RenderSystem.shadeModel(GL11.GL_FLAT);
+//		RenderSystem.enableCull();
 	}
 
 	@Override
 	public void renderBlockLayer(RenderType layer, MatrixStack matrixStackIn, double xIn, double yIn, double zIn) {
-		RenderHelper.disableStandardItemLighting();
-		layer.setupRenderState();
-
-		if (layer == RenderType.getTranslucent()) {
-			this.profiler.startSection("translucent_sort");
-			double posX = PLAYER_POSITION_OFFSET.x;
-			double posY = PLAYER_POSITION_OFFSET.y;
-			double posZ = PLAYER_POSITION_OFFSET.z;
-
-			double deltaX = posX - this.prevRenderSortX;
-			double deltaY = posY - this.prevRenderSortY;
-			double deltaZ = posZ - this.prevRenderSortZ;
-
-			if (deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ > 1.0) {
-				this.prevRenderSortX = posX;
-				this.prevRenderSortY = posY;
-				this.prevRenderSortZ = posZ;
-				int count = 0;
-
-				for (ContainerLocalRenderInformation renderInfo : this.renderInfos) {
-					if (!renderInfo.renderChunk.compiledChunk.get().isLayerEmpty(layer) && count++ < 15) {
-						this.renderDispatcher.schedule(renderInfo.renderChunk.makeCompileTaskChunk());
-					}
-				}
-			}
-
-			this.profiler.endSection();
-		}
-
-		this.profiler.startSection("filterempty");
-		int count = 0;
-		boolean isTranslucent = layer == RenderType.getTranslucent();
-		int start = isTranslucent ? this.renderInfos.size() - 1 : 0;
-		int end = isTranslucent ? -1 : this.renderInfos.size();
-		int step = isTranslucent ? -1 : 1;
-
-		for (int index = start; index != end; index += step) {
-			ContainerLocalRenderInformation renderInfo = this.renderInfos.get(index);
-			ChunkRenderDispatcher.ChunkRender renderChunk = renderInfo.renderChunk;
-
-			if (!renderChunk.getCompiledChunk().isLayerEmpty(layer)) {
-				count++;
-			}
-		}
-
-		this.profiler.endStartSection("render_" + layer);
-		super.renderBlockLayer(layer, matrixStackIn, xIn, yIn, zIn);
-		this.profiler.endSection();
+//		RenderHelper.disableStandardItemLighting();
+//		layer.setupRenderState();
+//
+//		if (layer == RenderType.getTranslucent()) {
+//			this.profiler.startSection("translucent_sort");
+//			double posX = PLAYER_POSITION_OFFSET.x;
+//			double posY = PLAYER_POSITION_OFFSET.y;
+//			double posZ = PLAYER_POSITION_OFFSET.z;
+//
+//			double deltaX = posX - this.prevRenderSortX;
+//			double deltaY = posY - this.prevRenderSortY;
+//			double deltaZ = posZ - this.prevRenderSortZ;
+//
+//			if (deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ > 1.0) {
+//				this.prevRenderSortX = posX;
+//				this.prevRenderSortY = posY;
+//				this.prevRenderSortZ = posZ;
+//				int count = 0;
+//
+//				for (ContainerLocalRenderInformation renderInfo : this.renderInfos) {
+//					if (!renderInfo.renderChunk.compiledChunk.get().isLayerEmpty(layer) && count++ < 15) {
+//						this.renderDispatcher.schedule(renderInfo.renderChunk.makeCompileTaskChunk());
+//					}
+//				}
+//			}
+//
+//			this.profiler.endSection();
+//		}
+//
+//		this.profiler.startSection("filterempty");
+//		int count = 0;
+//		boolean isTranslucent = layer == RenderType.getTranslucent();
+//		int start = isTranslucent ? this.renderInfos.size() - 1 : 0;
+//		int end = isTranslucent ? -1 : this.renderInfos.size();
+//		int step = isTranslucent ? -1 : 1;
+//
+//		for (int index = start; index != end; index += step) {
+//			ContainerLocalRenderInformation renderInfo = this.renderInfos.get(index);
+//			ChunkRenderDispatcher.ChunkRender renderChunk = renderInfo.renderChunk;
+//
+//			if (!renderChunk.getCompiledChunk().isLayerEmpty(layer)) {
+//				count++;
+//			}
+//		}
+//
+//		this.profiler.endStartSection("render_" + layer);
+//		super.renderBlockLayer(layer, matrixStackIn, xIn, yIn, zIn);
+//		this.profiler.endSection();
 	}
 
 	@Override

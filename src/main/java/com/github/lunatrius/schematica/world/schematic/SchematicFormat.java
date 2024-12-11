@@ -108,7 +108,7 @@ public abstract class SchematicFormat {
 
 			try (DataOutputStream dataOutputStream = new DataOutputStream(
 					new GZIPOutputStream(Files.newOutputStream(file.toPath())))) {
-				tagCompound.get(Names.NBT.ROOT).write(dataOutputStream);
+				tagCompound.write(dataOutputStream);
 			}
 
 			return true;
