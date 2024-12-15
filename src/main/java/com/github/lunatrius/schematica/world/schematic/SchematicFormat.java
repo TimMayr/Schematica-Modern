@@ -37,16 +37,11 @@ public abstract class SchematicFormat {
 	public static ISchematic readFromFile(File file) {
 		try {
 			CompoundNBT tagCompound = SchematicUtil.readTagCompoundFromFile(file);
-			SchematicFormat schematicFormat;
-			if (tagCompound.hasUniqueId(Names.NBT.MATERIALS)) {
-				String format = tagCompound.getString(Names.NBT.MATERIALS);
-				schematicFormat = FORMATS.get(format);
+			String format = tagCompound.getString(Names.NBT.FORMAT);
+			SchematicFormat schematicFormat = FORMATS.get(format);
 
-				if (schematicFormat == null) {
-					throw new UnsupportedFormatException(format);
-				}
-			} else {
-				schematicFormat = FORMATS.get(Names.NBT.FORMAT_STRUCTURE);
+			if (schematicFormat == null) {
+				throw new UnsupportedFormatException(format);
 			}
 
 			return schematicFormat.readFromNBT(tagCompound);

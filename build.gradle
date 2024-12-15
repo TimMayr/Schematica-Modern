@@ -1,3 +1,4 @@
+//file:noinspection GroovyAssignabilityCheck
 buildscript {
 	repositories {
 		mavenCentral()
@@ -189,7 +190,8 @@ tasks.register('sourceJar', Jar) {
 	from sourceSets.api.allSource
 }
 
-task apiJar(dependsOn: 'classes', type: Jar) {
+tasks.register('apiJar', Jar) {
+	dependsOn 'classes'
 	from sourceSets.api.output
 	archiveClassifier = 'api'
 	manifest commonManifest

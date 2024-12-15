@@ -1,6 +1,5 @@
 package com.github.lunatrius.schematica;
 
-import com.github.lunatrius.schematica.client.renderer.RenderSchematic;
 import com.github.lunatrius.schematica.command.CommandSchematicaBase;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.config.SchematicaConfig;
@@ -63,7 +62,6 @@ public class Schematica {
 		MinecraftForge.EVENT_BUS.register(InputHandler.INSTANCE);
 		MinecraftForge.EVENT_BUS.register(TickHandler.INSTANCE);
 		MinecraftForge.EVENT_BUS.register(RenderTickHandler.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(RenderSchematic.getINSTANCE());
 		MinecraftForge.EVENT_BUS.register(GuiHandler.INSTANCE);
 		MinecraftForge.EVENT_BUS.register(new OverlayHandler());
 		MinecraftForge.EVENT_BUS.register(new WorldHandler());

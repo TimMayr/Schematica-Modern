@@ -45,13 +45,15 @@ public class DownloadHandler {
 		}
 
 		if (!transfer.state.isWaiting()) {
-			if (++transfer.timeout >= Constants.Network.TIMEOUT) {
-				if (++transfer.retries >= Constants.Network.RETRIES) {
-					Reference.logger.warn("{}'s download was dropped!", player.getName());
+			transfer.timeout += 1;
+			if (transfer.timeout >= Constants.Network.TIMEOUT) {
+				transfer.retries += 1;
+				if (transfer.retries >= Constants.Network.RETRIES) {
+					Reference.logger.warn("{}'s download was dropped!", player.getScoreboardName());
 					return;
 				}
 
-				Reference.logger.warn("{}'s download timed out, retrying (#{})", player.getName(), transfer.retries);
+				Reference.logger.warn("{}'s download timed out, retrying (#{})", player.getScoreboardName(), transfer.retries);
 
 				sendChunk(player, transfer);
 				transfer.timeout = 0;

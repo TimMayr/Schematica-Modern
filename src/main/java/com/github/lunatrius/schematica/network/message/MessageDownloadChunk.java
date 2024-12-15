@@ -117,7 +117,7 @@ public class MessageDownloadChunk {
 		ctx.get().enqueueWork(() -> {
 			msg.copyToSchematic(DownloadHandler.INSTANCE.schematic);
 
-			PacketHandler.INSTANCE.sendToServer(new MessageDownloadChunkAck());
+			PacketHandler.INSTANCE.sendToServer(new MessageDownloadChunkAck(msg.baseX, msg.baseY, msg.baseZ));
 		});
 		ctx.get().setPacketHandled(true);
 	}

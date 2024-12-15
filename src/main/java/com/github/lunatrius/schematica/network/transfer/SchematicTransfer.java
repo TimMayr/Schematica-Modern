@@ -43,7 +43,6 @@ public class SchematicTransfer {
 				}
 			}
 		}
-
 	}
 
 	public void setState(State state) {

@@ -25,6 +25,7 @@ public class MessageDownloadBeginAck {
 		return new MessageDownloadBeginAck();
 	}
 
+	@SuppressWarnings("EmptyMethod")
 	public static void encode(MessageDownloadBeginAck ignoredMsg, ByteBuf ignoredBuf) {
 
 	}

@@ -19,7 +19,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.apache.commons.lang3.NotImplementedException;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -58,9 +57,7 @@ public abstract class CommonProxy {
 		return subDirectory;
 	}
 
-	public File getDataDirectory() {
-		throw new NotImplementedException("Can't call on common proxy");
-	}
+	public abstract File getDataDirectory();
 
 	public void resetSettings() {
 		this.isSaveEnabled = true;
@@ -174,15 +171,9 @@ public abstract class CommonProxy {
 		return false;
 	}
 
-	public boolean loadSchematic(PlayerEntity player, File directory, String filename) {
-		throw new NotImplementedException("Can't call on common proxy");
-	}
+	public abstract boolean loadSchematic(PlayerEntity player, File directory, String filename);
 
-	public boolean isPlayerQuotaExceeded(PlayerEntity player) {
-		throw new NotImplementedException("Can't call on common proxy");
-	}
+	public abstract boolean isPlayerQuotaExceeded(PlayerEntity player);
 
-	public File getPlayerSchematicDirectory(PlayerEntity player, boolean privateDirectory) {
-		throw new NotImplementedException("Can't call on common proxy");
-	}
+	public abstract File getPlayerSchematicDirectory(PlayerEntity player, boolean privateDirectory);
 }

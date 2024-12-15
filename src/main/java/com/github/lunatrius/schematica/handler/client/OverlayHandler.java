@@ -1,7 +1,6 @@
 package com.github.lunatrius.schematica.handler.client;
 
 import com.github.lunatrius.schematica.block.state.BlockStateHelper;
-import com.github.lunatrius.schematica.client.renderer.RenderSchematic;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
@@ -32,8 +31,8 @@ public class OverlayHandler {
 
 				left.add("");
 				left.add(SCHEMATICA_PREFIX + schematic.getDebugDimensions());
-				left.add(SCHEMATICA_PREFIX + RenderSchematic.getINSTANCE().getDebugInfoTileEntities());
-				left.add(SCHEMATICA_PREFIX + RenderSchematic.getINSTANCE().getDebugInfoRenders());
+//				left.add(SCHEMATICA_PREFIX + RenderSchematic.getINSTANCE().getDebugInfoTileEntities());
+//				left.add(SCHEMATICA_PREFIX + RenderSchematic.getINSTANCE().getDebugInfoRenders());
 
 				RayTraceResult rtr = ClientProxy.objectMouseOver;
 				if (rtr != null && rtr.getType() == RayTraceResult.Type.BLOCK) {

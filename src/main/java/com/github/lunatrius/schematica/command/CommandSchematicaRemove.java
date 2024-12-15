@@ -23,8 +23,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 
 @MethodsReturnNonnullByDefault
@@ -34,37 +32,10 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 
 	public static ArgumentBuilder<CommandSource, ?> register() {
 		return Commands.literal(Names.Command.Remove.NAME)
-		               .requires((source) -> source.hasPermissionLevel(0))
 		               .then(Commands.argument("name", StringArgumentType.string())
-		                             .suggests(((context, builder) -> {
-			                             CommandSource source = context.getSource();
-			                             PlayerEntity player;
-			                             String name = StringArgumentType.getString(context, "filename");
-
-			                             try {
-				                             player = source.asPlayer();
-			                             } catch (CommandSyntaxException e) {
-				                             return builder.buildFuture();
-			                             }
-
-			                             File directory = Reference.proxy.getPlayerSchematicDirectory(player, true);
-			                             File[] files = directory.listFiles(FILE_FILTER_SCHEMATIC);
-
-			                             if (files != null) {
-				                             List<String> filenames = new ArrayList<>();
-
-				                             for (File file : files) {
-					                             filenames.add(file.getName());
-				                             }
-
-				                             filenames.stream()
-				                                      .filter(s -> s.startsWith(name))
-				                                      .forEach(builder::suggest);
-				                             return builder.buildFuture();
-			                             }
-
-			                             return builder.buildFuture();
-		                             }))
+		                             .suggests(
+				                             ((context, builder) -> CommandSchematicaBase.getSchematicNamesSuggestions(
+						                             context, builder, FILE_FILTER_SCHEMATIC)))
 		                             .executes(CommandSchematicaRemove::showDeleteConfirmation)
 		                             .then(Commands.argument("hash", StringArgumentType.string())
 		                                           .executes(CommandSchematicaRemove::delete)));
@@ -104,7 +75,8 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 
 		if (file.exists()) {
 			String hash = DigestUtils.md5Hex(name);
-			String confirmCommand = String.format("/%s %s %s", Names.Command.Remove.NAME, name, hash);
+			String confirmCommand =
+					String.format("/%s %s %s", Reference.MODID + " " + Names.Command.Remove.NAME, name, hash);
 			ITextComponent chatComponent =
 					new TranslationTextComponent(Names.Command.Remove.Message.ARE_YOU_SURE_START, name);
 			chatComponent.appendSibling(withStyle(TextComponentUtils.wrapInSquareBrackets(

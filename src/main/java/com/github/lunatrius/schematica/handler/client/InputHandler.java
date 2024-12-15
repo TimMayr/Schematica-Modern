@@ -4,7 +4,6 @@ import com.github.lunatrius.schematica.client.gui.control.GuiSchematicControl;
 import com.github.lunatrius.schematica.client.gui.load.GuiSchematicLoad;
 import com.github.lunatrius.schematica.client.gui.save.GuiSchematicSave;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
-import com.github.lunatrius.schematica.client.renderer.RenderSchematic;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.client.world.SchematicWorld.LayerMode;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
@@ -17,13 +16,15 @@ import net.minecraft.client.util.InputMappings;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.settings.KeyConflictContext;
 import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
-
+@OnlyIn(Dist.CLIENT)
 public class InputHandler {
 	public static final InputHandler INSTANCE = new InputHandler();
 	private static final KeyBinding KEY_BINDING_LOAD =
@@ -82,7 +83,6 @@ public class InputHandler {
 				if (schematic != null && schematic.layerMode != LayerMode.ALL) {
 					schematic.renderingLayer =
 							MathHelper.clamp(schematic.renderingLayer + 1, 0, schematic.getHeight() - 1);
-					RenderSchematic.getINSTANCE().refresh();
 				}
 			}
 
@@ -91,7 +91,6 @@ public class InputHandler {
 				if (schematic != null && schematic.layerMode != LayerMode.ALL) {
 					schematic.renderingLayer =
 							MathHelper.clamp(schematic.renderingLayer - 1, 0, schematic.getHeight() - 1);
-					RenderSchematic.getINSTANCE().refresh();
 				}
 			}
 
@@ -99,7 +98,6 @@ public class InputHandler {
 				SchematicWorld schematic = ClientProxy.schematic;
 				if (schematic != null) {
 					schematic.layerMode = LayerMode.next(schematic.layerMode);
-					RenderSchematic.getINSTANCE().refresh();
 				}
 			}
 
@@ -107,7 +105,6 @@ public class InputHandler {
 				SchematicWorld schematic = ClientProxy.schematic;
 				if (schematic != null) {
 					schematic.isRendering = !schematic.isRendering;
-					RenderSchematic.getINSTANCE().refresh();
 				}
 			}
 
@@ -127,7 +124,6 @@ public class InputHandler {
 				SchematicWorld schematic = ClientProxy.schematic;
 				if (schematic != null) {
 					ClientProxy.moveSchematicToPlayer(schematic);
-					RenderSchematic.getINSTANCE().refresh();
 				}
 			}
 

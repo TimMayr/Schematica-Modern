@@ -4,7 +4,6 @@ import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.core.util.vector.Vector3d;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
-import com.github.lunatrius.schematica.client.renderer.RenderSchematic;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.reference.Reference;
@@ -21,12 +20,12 @@ import java.io.File;
 import java.io.IOException;
 
 public class ClientProxy extends CommonProxy {
-	private static final Minecraft MINECRAFT = Minecraft.getInstance();
 	public static final Vector3d playerPosition = new Vector3d();
 	public static final MBlockPos pointA = new MBlockPos();
 	public static final MBlockPos pointB = new MBlockPos();
 	public static final MBlockPos pointMin = new MBlockPos();
 	public static final MBlockPos pointMax = new MBlockPos();
+	private static final Minecraft MINECRAFT = Minecraft.getInstance();
 	public static boolean isRenderingGuide = false;
 	public static boolean isPendingReset = false;
 	public static Direction orientation = null;
@@ -162,7 +161,6 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void unloadSchematic() {
 		schematic = null;
-		RenderSchematic.getINSTANCE().setWorldAndLoadRenderers(Minecraft.getInstance().world);
 		SchematicPrinter.INSTANCE.setSchematic(null);
 	}
 
@@ -180,7 +178,6 @@ public class ClientProxy extends CommonProxy {
 		                       world.getLength());
 
 		ClientProxy.schematic = world;
-		RenderSchematic.getINSTANCE().setWorldAndLoadRenderers(world);
 		SchematicPrinter.INSTANCE.setSchematic(world);
 		world.isRendering = true;
 

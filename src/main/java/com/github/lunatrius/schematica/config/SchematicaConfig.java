@@ -1,15 +1,13 @@
 package com.github.lunatrius.schematica.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
 import org.apache.commons.lang3.tuple.Pair;
 
 public class SchematicaConfig {
-	public static ForgeConfigSpec serverSpec;
-	public static SchematicaServerConfig SERVER;
-	public static ForgeConfigSpec clientSpec;
-	public static SchematicaClientConfig CLIENT;
+	public static final ForgeConfigSpec serverSpec;
+	public static final SchematicaServerConfig SERVER;
+	public static final ForgeConfigSpec clientSpec;
+	public static final SchematicaClientConfig CLIENT;
 
 	static {
 		Pair<SchematicaServerConfig, ForgeConfigSpec> serverSpecPair =

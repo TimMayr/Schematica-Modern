@@ -10,20 +10,16 @@ import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.ICommandSource;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -33,35 +29,9 @@ public class CommandSchematicaDownload extends CommandSchematicaBase {
 	public static ArgumentBuilder<CommandSource, ?> register() {
 		return Commands.literal(Names.Command.Download.NAME)
 		               .then(Commands.argument("filename", StringArgumentType.string())
-		                             .suggests(((context, builder) -> {
-			                             CommandSource source = context.getSource();
-			                             PlayerEntity player;
-			                             String name = StringArgumentType.getString(context, "filename");
-
-			                             try {
-				                             player = source.asPlayer();
-			                             } catch (CommandSyntaxException e) {
-				                             return builder.buildFuture();
-			                             }
-
-			                             File directory = Reference.proxy.getPlayerSchematicDirectory(player, true);
-			                             File[] files = directory.listFiles(FILE_FILTER_SCHEMATIC);
-
-			                             if (files != null) {
-				                             List<String> filenames = new ArrayList<>();
-
-				                             for (File file : files) {
-					                             filenames.add(file.getName());
-				                             }
-
-				                             filenames.stream()
-				                                      .filter(s -> s.startsWith(name))
-				                                      .forEach(builder::suggest);
-				                             return builder.buildFuture();
-			                             }
-
-			                             return builder.buildFuture();
-		                             }))
+		                             .suggests(
+				                             ((context, builder) -> CommandSchematicaBase.getSchematicNamesSuggestions(
+						                             context, builder, FILE_FILTER_SCHEMATIC)))
 		                             .executes((commandContext) -> {
 			                             CommandSource source = commandContext.getSource();
 			                             ServerPlayerEntity player = source.asPlayer();

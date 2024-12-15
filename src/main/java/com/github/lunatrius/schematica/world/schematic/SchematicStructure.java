@@ -15,7 +15,6 @@ import net.minecraft.world.gen.feature.template.Template;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SchematicStructure extends SchematicFormat {
 	@Override
@@ -59,7 +58,7 @@ public class SchematicStructure extends SchematicFormat {
 
 
 	@Override
-	public void writeToNBT(CompoundNBT tagCompound, ISchematic schematic) {
+	public void writeToNBT(CompoundNBT tagCompoundIn, ISchematic schematic) {
 		Template template = new Template();
 		template.size = new BlockPos(schematic.getWidth(), schematic.getHeight(), schematic.getLength());
 
@@ -67,8 +66,8 @@ public class SchematicStructure extends SchematicFormat {
 
 		List<Template.BlockInfo> blockInfos = new LinkedList<>();
 		// NOTE: Can't use MutableBlockPos here because we're keeping a reference to it in BlockInfo
-		for (BlockPos pos : BlockPos.getAllInBox(BlockPos.ZERO, template.size.add(-1, -1, -1))
-		                            .collect(Collectors.toList())) {
+		BlockPos.getAllInBox(BlockPos.ZERO, template.size.add(-1, -1, -1)).forEach(posMut -> {
+			BlockPos pos = new BlockPos(posMut);
 			TileEntity tileEntity = schematic.getTileEntity(pos);
 			CompoundNBT compound;
 			if (tileEntity != null) {
@@ -82,7 +81,7 @@ public class SchematicStructure extends SchematicFormat {
 			}
 
 			blockInfos.add(new Template.BlockInfo(pos, schematic.getBlockState(pos), compound));
-		}
+		});
 
 		template.blocks.add(blockInfos);
 
@@ -94,8 +93,7 @@ public class SchematicStructure extends SchematicFormat {
 				entity.writeUnlessPassenger(CompoundNBT);
 				BlockPos blockpos;
 
-				// TODO: Vanilla has a check like this, but we don't; this doesn't seem to
-				// cause any problems though.
+				// TODO: Vanilla has a check like this, but we don't; this doesn't seem to cause any problems though.
 				// if (entity instanceof EntityPainting) {
 				//     blockpos = ((EntityPainting)entity).getHangingPosition().subtract(startPos);
 				// } else {
@@ -107,8 +105,12 @@ public class SchematicStructure extends SchematicFormat {
 				Reference.logger.error("Entity {} failed to save, skipping!", entity, t);
 			}
 		}
+		CompoundNBT writeTo = new CompoundNBT();
 
-		template.writeToNBT(tagCompound);
+		template.writeToNBT(writeTo);
+		writeTo.putString(Names.NBT.FORMAT, Names.NBT.FORMAT_STRUCTURE);
+
+		tagCompoundIn.put("root", writeTo);
 	}
 
 	@Override

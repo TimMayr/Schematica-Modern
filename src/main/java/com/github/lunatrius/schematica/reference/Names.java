@@ -7,7 +7,7 @@ public class Names {
 		public static final String DUMP_BLOCK_LIST_DESC = "Dump all block states on startup.";
 		public static final String SHOW_DEBUG_INFO = "showDebugInfo";
 		public static final String SHOW_DEBUG_INFO_DESC = "Display extra information on the debug screen (F3).";
-		public static String ALPHA_ENABLED = "alphaEnabled";
+		public static final String ALPHA_ENABLED = "alphaEnabled";
 		public static final String ALPHA_ENABLED_DESC = "Enable transparent textures.";
 		public static final String ALPHA = "alpha";
 		public static final String ALPHA_DESC =
@@ -212,6 +212,7 @@ public class Names {
 		public static final String ROOT = "Schematic";
 
 		public static final String MATERIALS = "Materials";
+		public static final String FORMAT = "Format";
 		public static final String FORMAT_ALPHA = "Alpha";
 		public static final String FORMAT_STRUCTURE = "Structure";
 

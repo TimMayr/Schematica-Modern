@@ -39,7 +39,11 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 	private static int printList(CommandContext<CommandSource> commandContext) throws CommandSyntaxException {
 		CommandSource source = commandContext.getSource();
 		ServerPlayerEntity player = source.asPlayer();
-		int page = IntegerArgumentType.getInteger(commandContext, "page");
+		int page = 0;
+
+		try {
+			page = IntegerArgumentType.getInteger(commandContext, "page") - 1;
+		} catch (IllegalArgumentException ignored) {}
 
 		int pageSize = 9; //maximum number of lines available without opening chat.
 		int pageStart = page * pageSize;
@@ -77,14 +81,16 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 							              FileUtils.humanReadableByteCount(path.length()),
 							              FilenameUtils.removeExtension(fileName)));
 
-					String removeCommand = String.format("/%s %s", Names.Command.Remove.NAME, fileName);
+					String removeCommand =
+							String.format("/%s %s", Reference.MODID + " " + Names.Command.Remove.NAME, fileName);
 					ITextComponent removeLink =
 							withStyle(new TranslationTextComponent(Names.Command.List.Message.REMOVE),
 							          TextFormatting.RED, removeCommand);
 					chatComponent.appendSibling(removeLink);
 					chatComponent.appendText("][");
 
-					String downloadCommand = String.format("/%s %s", Names.Command.Download.NAME, fileName);
+					String downloadCommand =
+							String.format("/%s %s", Reference.MODID + " " + Names.Command.Download.NAME, fileName);
 					ITextComponent downloadLink =
 							withStyle(new TranslationTextComponent(Names.Command.List.Message.DOWNLOAD),
 							          TextFormatting.GREEN, downloadCommand);
@@ -106,9 +112,9 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 			throw new CommandException(new TranslationTextComponent(Names.Command.List.Message.NO_SUCH_PAGE));
 		}
 
-		source.sendFeedback(withStyle(
-				new TranslationTextComponent(Names.Command.List.Message.PAGE_HEADER, page + 1, totalPages + 1),
-				TextFormatting.DARK_GREEN, null), true);
+		source.sendFeedback(
+				withStyle(new TranslationTextComponent(Names.Command.List.Message.PAGE_HEADER, page, totalPages),
+				          TextFormatting.DARK_GREEN, null), true);
 		for (ITextComponent chatComponent : componentsToSend) {
 			source.sendFeedback(chatComponent, true);
 		}

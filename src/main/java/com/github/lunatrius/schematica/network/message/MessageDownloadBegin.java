@@ -30,9 +30,9 @@ public class MessageDownloadBegin {
 
 	public static void encode(MessageDownloadBegin msg, PacketBuffer buf) {
 		buf.writeItemStack(msg.icon);
-		buf.writeShort(msg.width);
-		buf.writeShort(msg.height);
-		buf.writeShort(msg.length);
+		buf.writeInt(msg.width);
+		buf.writeInt(msg.height);
+		buf.writeInt(msg.length);
 	}
 
 	public static void handle(MessageDownloadBegin msg, Supplier<NetworkEvent.Context> ctx) {

@@ -89,7 +89,8 @@ public class SchematicAlpha extends SchematicFormat {
 	}
 
 	@Override
-	public void writeToNBT(CompoundNBT tagCompound, ISchematic schematic) {
+	public void writeToNBT(CompoundNBT tagCompoundIn, ISchematic schematic) {
+		CompoundNBT tagCompound = new CompoundNBT();
 		CompoundNBT tagCompoundIcon = new CompoundNBT();
 		ItemStack icon = schematic.getIcon();
 		icon.write(tagCompoundIcon);
@@ -162,12 +163,12 @@ public class SchematicAlpha extends SchematicFormat {
 			nbtMapping.putString(entry.getKey(), entry.getValue().getRegistryName().toString());
 		}
 
-		tagCompound.putString(Names.NBT.MATERIALS, Names.NBT.FORMAT_ALPHA);
+		tagCompound.putString(Names.NBT.FORMAT, Names.NBT.FORMAT_ALPHA);
 		tagCompound.putIntArray(Names.NBT.BLOCKS, Arrays.stream(localBlocks).mapToInt(Block::getStateId).toArray());
 		tagCompound.put(Names.NBT.ENTITIES, entityList);
 		tagCompound.put(Names.NBT.TILE_ENTITIES, tileEntitiesList);
 		tagCompound.put(Names.NBT.MAPPING_SCHEMATICA, nbtMapping);
-
+		tagCompoundIn.put("root", tagCompound);
 	}
 
 	@Override

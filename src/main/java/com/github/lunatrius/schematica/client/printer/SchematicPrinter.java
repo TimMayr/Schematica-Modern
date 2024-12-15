@@ -180,7 +180,6 @@ public class SchematicPrinter {
 		Block realBlock = realBlockState.getBlock();
 
 		if (BlockStateHelper.areBlockStatesEqual(blockState, realBlockState)) {
-			// TODO: clean up this mess
 			NBTSync handler = SyncRegistry.INSTANCE.getHandler(realBlock);
 			if (handler != null) {
 				this.timeout[x][y][z] = SchematicaConfig.CLIENT.timeout.get().byteValue();

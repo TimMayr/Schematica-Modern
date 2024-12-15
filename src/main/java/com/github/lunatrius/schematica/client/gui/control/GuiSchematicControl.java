@@ -3,7 +3,6 @@ package com.github.lunatrius.schematica.client.gui.control;
 import com.github.lunatrius.core.client.gui.NumericFieldWidget;
 import com.github.lunatrius.core.client.gui.ScreenBase;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
-import com.github.lunatrius.schematica.client.renderer.RenderSchematic;
 import com.github.lunatrius.schematica.client.util.FlipHelper;
 import com.github.lunatrius.schematica.client.util.RotationHelper;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
@@ -94,19 +93,19 @@ public class GuiSchematicControl extends ScreenBase {
 
 		this.numericX = new NumericFieldWidget(this.font, this.centerX - 50, this.centerY - 30, 100, 20, (button) -> {
 			this.schematic.position.x = this.numericX.getValue();
-			RenderSchematic.getINSTANCE().refresh();
+			//			RenderSchematic.getINSTANCE().refresh();
 		});
 		this.buttons.add(this.numericX);
 
 		this.numericY = new NumericFieldWidget(this.font, this.centerX - 50, this.centerY - 5, 100, 20, (button) -> {
 			this.schematic.position.y = this.numericY.getValue();
-			RenderSchematic.getINSTANCE().refresh();
+			//			RenderSchematic.getINSTANCE().refresh();
 		});
 		this.buttons.add(this.numericY);
 
 		this.numericZ = new NumericFieldWidget(this.font, this.centerX - 50, this.centerY + 20, 100, 20, (button) -> {
 			this.schematic.position.z = this.numericZ.getValue();
-			RenderSchematic.getINSTANCE().refresh();
+			//			RenderSchematic.getINSTANCE().refresh();
 		});
 		this.buttons.add(this.numericZ);
 
@@ -121,13 +120,13 @@ public class GuiSchematicControl extends ScreenBase {
 			this.schematic.layerMode = LayerMode.next(this.schematic.layerMode);
 			this.btnLayerMode.setMessage(I18n.format(this.schematic.layerMode.name));
 			this.nfLayer.setActive(this.schematic.layerMode != LayerMode.ALL);
-			RenderSchematic.getINSTANCE().refresh();
+			//			RenderSchematic.getINSTANCE().refresh();
 		});
 		this.buttons.add(this.btnLayerMode);
 
 		this.nfLayer = new NumericFieldWidget(this.font, this.width - 90, this.height - 150, 80, 20, (button) -> {
 			this.schematic.renderingLayer = this.nfLayer.getValue();
-			RenderSchematic.getINSTANCE().refresh();
+			//			RenderSchematic.getINSTANCE().refresh();
 		});
 		this.buttons.add(this.nfLayer);
 
@@ -141,7 +140,8 @@ public class GuiSchematicControl extends ScreenBase {
 		                            I18n.format(Names.Gui.Control.MOVE_HERE),
 		                            (button) -> {
 			                            ClientProxy.moveSchematicToPlayer(this.schematic);
-			                            RenderSchematic.getINSTANCE().refresh();
+			                            //			                            RenderSchematic.getINSTANCE()
+			                            //			                            .refresh();
 			                            setPoint(this.numericX, this.numericY, this.numericZ, this.schematic.position);
 		                            });
 		this.buttons.add(btnMove);
@@ -156,7 +156,7 @@ public class GuiSchematicControl extends ScreenBase {
 
 		this.btnFlip = new Button(this.width - 90, this.height - 55, 80, 20, "↔", (button) -> {
 			if (FlipHelper.INSTANCE.flip(this.schematic, ClientProxy.axisFlip, hasShiftDown())) {
-				RenderSchematic.getINSTANCE().refresh();
+				//				RenderSchematic.getINSTANCE().refresh();
 				SchematicPrinter.INSTANCE.refresh();
 			}
 		});
@@ -173,7 +173,7 @@ public class GuiSchematicControl extends ScreenBase {
 		this.btnRotate = new Button(this.width - 90, this.height - 30, 80, 20, "↻", (button) -> {
 			if (RotationHelper.INSTANCE.rotate(this.schematic, ClientProxy.axisRotation, hasShiftDown())) {
 				setPoint(this.numericX, this.numericY, this.numericZ, this.schematic.position);
-				RenderSchematic.getINSTANCE().refresh();
+				//				RenderSchematic.getINSTANCE().refresh();
 				SchematicPrinter.INSTANCE.refresh();
 			}
 		});
