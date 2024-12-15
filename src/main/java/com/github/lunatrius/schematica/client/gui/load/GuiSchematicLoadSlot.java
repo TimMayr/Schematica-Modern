@@ -57,11 +57,12 @@ public class GuiSchematicLoadSlot extends SlotGui {
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int index) {
+	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		boolean ignore = System.nanoTime() - this.lastClick < 500;
 		this.lastClick = System.nanoTime();
+		int index = this.getItemAtPosition(mouseX, mouseY);
 
-		if (ignore) {
+		if (ignore || index == -1) {
 			return true;
 		}
 

@@ -33,10 +33,6 @@ public class GuiSchematicEntry {
 		return this.itemStack.getItem();
 	}
 
-	public int getItemDamage() {
-		return this.itemStack.getDamage();
-	}
-
 	public boolean isDirectory() {
 		return this.isDirectory;
 	}

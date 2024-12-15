@@ -38,19 +38,18 @@ public class Schematica {
 	}
 
 	@SubscribeEvent
-	public void init(FMLCommonSetupEvent event) {
+	public void commonSetup(FMLCommonSetupEvent event) {
 		PacketHandler.init();
 
 		MinecraftForge.EVENT_BUS.register(QueueTickHandler.INSTANCE);
 		MinecraftForge.EVENT_BUS.register(DownloadHandler.INSTANCE);
-
 
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, SchematicaConfig.clientSpec);
 		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SchematicaConfig.serverSpec);
 	}
 
 	@SubscribeEvent
-	public void preInit(FMLClientSetupEvent event) {
+	public void clientSetup(FMLClientSetupEvent event) {
 		Reference.proxy.createFolders();
 		SchematicaClientConfig.populateExtraAirBlocks();
 		SchematicaClientConfig.normalizeSchematicPath();

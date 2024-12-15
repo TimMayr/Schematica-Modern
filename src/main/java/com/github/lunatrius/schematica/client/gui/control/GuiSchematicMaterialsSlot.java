@@ -47,7 +47,7 @@ class GuiSchematicMaterialsSlot extends SlotGui {
 		BlockList.WrappedItemStack wrappedItemStack = this.guiSchematicMaterials.blockList.get(index);
 		ItemStack itemStack = wrappedItemStack.itemStack;
 
-		String itemName = String.valueOf(wrappedItemStack.getItemStackDisplayName());
+		String itemName = wrappedItemStack.getItemStackDisplayName().getFormattedText();
 		String amount = wrappedItemStack.getFormattedAmount();
 		String amountMissing = wrappedItemStack.getFormattedAmountMissing(strMaterialAvailable, strMaterialMissing);
 

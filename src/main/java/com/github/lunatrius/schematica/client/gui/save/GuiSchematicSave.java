@@ -67,12 +67,12 @@ public class GuiSchematicSave extends ScreenBase {
 					"The default format does not exist!";
 
 			this.formatIterator = SchematicFormat.FORMATS.keySet().iterator();
-			return SchematicFormat.FORMAT_DEFAULT;
 		}
 
 		if (!this.formatIterator.hasNext()) {
 			this.formatIterator = SchematicFormat.FORMATS.keySet().iterator();
 		}
+
 		return this.formatIterator.next();
 	}
 
@@ -114,13 +114,17 @@ public class GuiSchematicSave extends ScreenBase {
 	}
 
 	@Override
+	public boolean charTyped(char character, int code) {
+		this.filename = this.tfFilename.getText();
+		return super.charTyped(character, code);
+	}
+
+	@Override
 	public void init() {
 		this.centerX = this.width / 2;
 		this.centerY = this.height / 2;
 
 		this.buttons.clear();
-
-		int id = 0;
 
 		Button btnPointA =
 				new Button(this.centerX - 130, this.centerY - 55, 100, 20, I18n.format(Names.Gui.Save.POINT_RED),
@@ -207,8 +211,8 @@ public class GuiSchematicSave extends ScreenBase {
 						                                  SchematicaClientConfig.schematicDirectory, path,
 						                                  this.minecraft.world, this.format, ClientProxy.pointMin,
 						                                  ClientProxy.pointMax)) {
-							this.filename = "";
 							this.tfFilename.setText(this.filename);
+							this.minecraft.displayGuiScreen(this.parentScreen);
 						}
 					} else {
 						SchematicFormat.writeToFileAndNotify(new File(SchematicaClientConfig.schematicDirectory, path),

@@ -6,10 +6,12 @@ import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.block.state.BlockStateHelper;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.reference.Reference;
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.FlowingFluidBlock;
+import net.minecraft.block.SlabBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.state.properties.SlabType;
 import net.minecraft.util.math.BlockPos;
@@ -17,10 +19,7 @@ import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
-import net.minecraftforge.fluids.FluidActionResult;
-import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.IFluidBlock;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +45,7 @@ public class BlockList {
 			BlockState blockState = world.getBlockState(pos);
 			Block block = blockState.getBlock();
 
-			if (block == Blocks.AIR || world.isAirBlock(pos)) {
+			if (world.isAirBlock(pos)) {
 				continue;
 			}
 
@@ -64,17 +63,7 @@ public class BlockList {
 			}
 
 			if (block instanceof IFluidBlock || block instanceof FlowingFluidBlock) {
-				IFluidHandler fluidHandler = FluidUtil.getFluidHandler(world, pos, null)
-				                                      .orElseThrow(() -> new NullPointerException(
-						                                      "Error getting FluidHandler"));
-				FluidActionResult fluidActionResult =
-						FluidUtil.tryFillContainer(new ItemStack(Items.BUCKET), fluidHandler, 1000, null, false);
-				if (fluidActionResult.isSuccess()) {
-					ItemStack result = fluidActionResult.getResult();
-					if (!result.isEmpty()) {
-						stack = result;
-					}
-				}
+				stack = new ItemStack(((FlowingFluidBlock) block).getFluid().getFilledBucket());
 			}
 
 			if (stack == null) {
@@ -157,7 +146,7 @@ public class BlockList {
 
 		private static String getFormattedStackAmount(ItemStack itemStack, int amount) {
 			int stackSize = itemStack.getMaxStackSize();
-			if (amount < stackSize) {
+			if (amount < stackSize || stackSize == 1) {
 				return String.format("%d", amount);
 			} else {
 				int amountStack = amount / stackSize;

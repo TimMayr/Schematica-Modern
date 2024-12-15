@@ -49,15 +49,14 @@ public class GuiSchematicMaterials extends ScreenBase {
 
 	@Override
 	public void init() {
-		int id = 0;
-
-		this.btnSort = new Button(this.width / 2 - 154, this.height - 30, 100, 20, this.sortType.glyph, (button) -> {
+		this.btnSort = new Button(this.width / 2 - 154, this.height - 30, 100, 20,
+		                          I18n.format(Names.Gui.Control.SORT_PREFIX + this.sortType.label)
+				                          + " "
+				                          + this.sortType.glyph, (button) -> {
 			this.sortType = this.sortType.next();
 			this.sortType.sort(this.blockList);
 			this.btnSort.setMessage(
 					I18n.format(Names.Gui.Control.SORT_PREFIX + this.sortType.label) + " " + this.sortType.glyph);
-
-			SchematicaConfig.CLIENT.sortType.set(this.sortType);
 		});
 		this.buttons.add(this.btnSort);
 
@@ -66,10 +65,8 @@ public class GuiSchematicMaterials extends ScreenBase {
 		                            (button) -> dumpMaterialList(this.blockList));
 		this.buttons.add(btnDump);
 
-		Button btnDone =
-				new Button(this.width / 2 + 54, this.height - 30, 100, 20, I18n.format(Names.Gui.DONE), (button) -> {
-
-				});
+		Button btnDone = new Button(this.width / 2 + 54, this.height - 30, 100, 20, I18n.format(Names.Gui.DONE),
+		                            (button) -> this.minecraft.displayGuiScreen(this.parentScreen));
 		this.buttons.add(btnDone);
 
 		this.guiSchematicMaterialsSlot = new GuiSchematicMaterialsSlot(this);
@@ -83,7 +80,8 @@ public class GuiSchematicMaterials extends ScreenBase {
 		int maxLengthName = 0;
 		int maxSize = 0;
 		for (BlockList.WrappedItemStack wrappedItemStack : blockList) {
-			maxLengthName = Math.max(maxLengthName, wrappedItemStack.getItemStackDisplayName().getString().length());
+			maxLengthName =
+					Math.max(maxLengthName, wrappedItemStack.getItemStackDisplayName().getFormattedText().length());
 			maxSize = Math.max(maxSize, wrappedItemStack.total);
 		}
 
@@ -94,7 +92,7 @@ public class GuiSchematicMaterials extends ScreenBase {
 		StringBuilder stringBuilder = new StringBuilder((maxLengthName + 1 + maxLengthSize) * blockList.size());
 		Formatter formatter = new Formatter(stringBuilder);
 		for (BlockList.WrappedItemStack wrappedItemStack : blockList) {
-			formatter.format(formatName, wrappedItemStack.getItemStackDisplayName());
+			formatter.format(formatName, wrappedItemStack.getItemStackDisplayName().getFormattedText());
 			stringBuilder.append(" ");
 			formatter.format(formatSize, wrappedItemStack.total);
 			stringBuilder.append(System.lineSeparator());
@@ -109,5 +107,11 @@ public class GuiSchematicMaterials extends ScreenBase {
 		} catch (Exception e) {
 			Reference.logger.error("Could not dump the material list!", e);
 		}
+	}
+
+	@Override
+	public boolean mouseScrolled(double d1, double d2, double direction) {
+		this.guiSchematicMaterialsSlot.scroll((int) (d2 * direction * -1));
+		return super.mouseScrolled(d1, d2, direction);
 	}
 }

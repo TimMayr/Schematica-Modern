@@ -9,14 +9,15 @@ import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import com.github.lunatrius.schematica.world.schematic.SchematicUtil;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.util.Util;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,14 +32,20 @@ public class GuiSchematicLoad extends ScreenBase {
 	protected File currentDirectory = SchematicaClientConfig.schematicDirectory;
 	private GuiSchematicLoadSlot guiSchematicLoadSlot;
 
-	public GuiSchematicLoad(net.minecraft.client.gui.screen.Screen Screen) {
+	public GuiSchematicLoad(Screen Screen) {
 		super(Screen);
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int mouseEvent) {
-		super.mouseClicked(mouseX, mouseY, mouseEvent);
-		return this.guiSchematicLoadSlot.mouseClicked(mouseX, mouseY, mouseEvent);
+	public boolean mouseClicked(double mouseX, double mouseY, int button) {
+		super.mouseClicked(mouseX, mouseY, button);
+		return this.guiSchematicLoadSlot.mouseClicked(mouseX, mouseY, button);
+	}
+
+	@Override
+	public boolean mouseScrolled(double d1, double d2, double direction) {
+		this.guiSchematicLoadSlot.scroll((int) (d2 * direction * -1));
+		return super.mouseScrolled(d1, d2, direction);
 	}
 
 	@Override
@@ -47,10 +54,7 @@ public class GuiSchematicLoad extends ScreenBase {
 				new Button(this.width / 2 - 154, this.height - 36, 150, 20, I18n.format(Names.Gui.Load.OPEN_FOLDER),
 				           (event) -> {
 					           try {
-						           Class<?> c = Class.forName("java.awt.Desktop");
-						           Object m = c.getMethod("getDesktop").invoke(null);
-						           c.getMethod("browse", URI.class)
-						            .invoke(m, SchematicaClientConfig.schematicDirectory.toURI());
+						           Util.getOSType().openFile(SchematicaClientConfig.schematicDirectory);
 					           } catch (Throwable e) {
 						           System.out.println("Desktop actions are not supported on this platform.");
 					           }

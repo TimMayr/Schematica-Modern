@@ -68,7 +68,6 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 			                                                        format));
 		}
 
-
 		String filename = name + SchematicFormat.getExtension(format);
 
 		Reference.logger.debug("Saving " + "schematic from {} to {} to {}", from, to, filename);

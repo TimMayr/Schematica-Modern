@@ -89,8 +89,6 @@ public class GuiSchematicControl extends ScreenBase {
 
 		this.buttons.clear();
 
-		int id = 0;
-
 		this.numericX = new NumericFieldWidget(this.font, this.centerX - 50, this.centerY - 30, 100, 20, (button) -> {
 			this.schematic.position.x = this.numericX.getValue();
 			//			RenderSchematic.getINSTANCE().refresh();
@@ -154,12 +152,14 @@ public class GuiSchematicControl extends ScreenBase {
 		});
 		this.buttons.add(btnFlipDirection);
 
-		this.btnFlip = new Button(this.width - 90, this.height - 55, 80, 20, "↔", (button) -> {
-			if (FlipHelper.INSTANCE.flip(this.schematic, ClientProxy.axisFlip, hasShiftDown())) {
-				//				RenderSchematic.getINSTANCE().refresh();
-				SchematicPrinter.INSTANCE.refresh();
-			}
-		});
+		this.btnFlip =
+				new Button(this.width - 90, this.height - 55, 80, 20, "↔ " + " " + I18n.format(Names.Gui.Control.FLIP),
+				           (button) -> {
+					           if (FlipHelper.INSTANCE.flip(this.schematic, ClientProxy.axisFlip, hasShiftDown())) {
+						           //				RenderSchematic.getINSTANCE().refresh();
+						           SchematicPrinter.INSTANCE.refresh();
+					           }
+				           });
 		this.buttons.add(this.btnFlip);
 
 		Button btnRotateDirection = new Button(this.width - 180, this.height - 30, 80, 20, I18n.format(
@@ -170,7 +170,8 @@ public class GuiSchematicControl extends ScreenBase {
 		});
 		this.buttons.add(btnRotateDirection);
 
-		this.btnRotate = new Button(this.width - 90, this.height - 30, 80, 20, "↻", (button) -> {
+		this.btnRotate = new Button(this.width - 90, this.height - 30, 80, 20,
+		                            "↻ " + " " + I18n.format(Names.Gui.Control.ROTATE), (button) -> {
 			if (RotationHelper.INSTANCE.rotate(this.schematic, ClientProxy.axisRotation, hasShiftDown())) {
 				setPoint(this.numericX, this.numericY, this.numericZ, this.schematic.position);
 				//				RenderSchematic.getINSTANCE().refresh();
