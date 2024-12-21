@@ -35,6 +35,7 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.fluids.IFluidBlock;
 
 import java.util.ArrayList;
@@ -217,7 +218,7 @@ public class SchematicPrinter {
 			return false;
 		}
 
-		if (!realBlockState.isReplaceable(new BlockItemUseContext(new ItemUseContext(player, player.getActiveHand(),
+		if (!realBlockState.isReplaceable(new BlockItemUseContext(new ItemUseContext(player, Hand.MAIN_HAND,
 		                                                                             new BlockRayTraceResult(Vec3d.ZERO,
 		                                                                                                     Direction.UP,
 		                                                                                                     realPos,
@@ -256,7 +257,7 @@ public class SchematicPrinter {
 			return false;
 		}
 
-		return !blockState.isReplaceable(new BlockItemUseContext(new ItemUseContext(player, player.getActiveHand(),
+		return !blockState.isReplaceable(new BlockItemUseContext(new ItemUseContext(player, Hand.MAIN_HAND,
 		                                                                            new BlockRayTraceResult(Vec3d.ZERO,
 		                                                                                                    Direction.UP,
 		                                                                                                    offset,
@@ -368,7 +369,10 @@ public class SchematicPrinter {
 
 		// FIXME: when an adjacent block is not required the blocks should be placed 1 block away from the actual
 		// position (because air is replaceable)
-		ActionResultType result = this.minecraft.playerController.processRightClick(player, world, hand);
+		ActionResultType result = ForgeHooks.onPlaceItemIntoWorld(new BlockItemUseContext(
+				new ItemUseContext(player, Hand.MAIN_HAND,
+				                   new BlockRayTraceResult(Vec3d.ZERO, Direction.UP, pos.offset(side), false))));
+
 		if ((result != ActionResultType.SUCCESS)) {
 			return false;
 		}

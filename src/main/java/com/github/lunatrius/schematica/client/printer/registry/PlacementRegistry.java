@@ -33,7 +33,7 @@ public class PlacementRegistry {
 
 		IValidPlayerFacing playerFacingEntity =
 				(BlockState blockState, PlayerEntity player, BlockPos pos, World world) -> {
-					Direction facing = blockState.get(BlockStateProperties.FACING);
+					Direction facing = blockState.get(BlockStateProperties.HORIZONTAL_FACING);
 					return facing == player.getHorizontalFacing();
 				};
 
@@ -117,7 +117,7 @@ public class PlacementRegistry {
 		IValidBlockFacing blockFacingOpposite = (List<Direction> solidSides, BlockState blockState) -> {
 			List<Direction> list = new ArrayList<>();
 
-			Direction facing = blockState.get(BlockStateProperties.FACING);
+			Direction facing = blockState.get(BlockStateProperties.HORIZONTAL_FACING);
 			for (Direction side : solidSides) {
 				if (facing.getOpposite() != side) {
 					continue;
@@ -159,7 +159,7 @@ public class PlacementRegistry {
 		addPlacementMapping(HopperBlock.class, new PlacementData(blockFacingSame));
 		addPlacementMapping(ObserverBlock.class, new PlacementData(playerFacingObserver));
 		addPlacementMapping(PistonBlock.class, new PlacementData(playerFacingPiston));
-		addPlacementMapping(PumpkinBlock.class, new PlacementData(playerFacingEntityOpposite));
+		addPlacementMapping(CarvedPumpkinBlock.class, new PlacementData(playerFacingEntityOpposite));
 		addPlacementMapping(RotatedPillarBlock.class, new PlacementData(blockFacingAxis));
 		addPlacementMapping(SlabBlock.class,
 		                    new PlacementData().setOffsetY(offsetSlab).setExtraClick(extraClickDoubleSlab));
