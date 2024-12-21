@@ -13,14 +13,11 @@ import net.minecraft.item.ItemStack;
 import javax.annotation.Nonnull;
 
 class GuiSchematicMaterialsSlot extends SlotGui {
+	protected final int selectedIndex;
 	private final Minecraft minecraft = Minecraft.getInstance();
-
 	private final GuiSchematicMaterials guiSchematicMaterials;
-
 	private final String strMaterialAvailable = I18n.format(Names.Gui.Control.MATERIAL_AVAILABLE);
 	private final String strMaterialMissing = I18n.format(Names.Gui.Control.MATERIAL_MISSING);
-
-	protected final int selectedIndex;
 
 	public GuiSchematicMaterialsSlot(GuiSchematicMaterials parent) {
 		super(Minecraft.getInstance(), parent.width, parent.height, 16, parent.height - 34, 24);

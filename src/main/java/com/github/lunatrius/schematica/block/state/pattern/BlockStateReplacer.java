@@ -28,16 +28,8 @@ public class BlockStateReplacer {
 	}
 
 	@SuppressWarnings({"rawtypes"})
-	public BlockState getReplacement(BlockState original, Map<IProperty, Comparable> properties) {
-		BlockState replacement = original;
-
-		if (original == null) {
-			replacement = defaultReplacement;
-		}
-
-		replacement = applyProperties(replacement, properties);
-
-		return replacement;
+	public BlockState getReplacement(Map<IProperty, Comparable> properties) {
+		return applyProperties(defaultReplacement, properties);
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
@@ -48,7 +40,7 @@ public class BlockStateReplacer {
 			IProperty property = entry.getKey();
 			Comparable value = entry.getValue();
 
-			if (mutableState.getBlockState().get(property) != value) {
+			if (mutableState.getBlockState().has(property) && mutableState.getBlockState().get(property) != value) {
 				mutableState = mutableState.with(property, value);
 			}
 		}

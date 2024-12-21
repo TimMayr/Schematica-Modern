@@ -53,7 +53,8 @@ public class DownloadHandler {
 					return;
 				}
 
-				Reference.logger.warn("{}'s download timed out, retrying (#{})", player.getScoreboardName(), transfer.retries);
+				Reference.logger.warn("{}'s download timed out, retrying (#{})", player.getScoreboardName(),
+				                      transfer.retries);
 
 				sendChunk(player, transfer);
 				transfer.timeout = 0;

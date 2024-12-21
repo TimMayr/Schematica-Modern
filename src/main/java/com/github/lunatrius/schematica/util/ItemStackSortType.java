@@ -28,9 +28,9 @@ public enum ItemStackSortType {
 			          wrappedItemStackB.total
 					          - wrappedItemStackA.total);
 
-	private final Comparator<BlockList.WrappedItemStack> comparator;
 	public final String label;
 	public final String glyph;
+	private final Comparator<BlockList.WrappedItemStack> comparator;
 
 	ItemStackSortType(String label, String glyph, Comparator<BlockList.WrappedItemStack> comparator) {
 		this.label = label;

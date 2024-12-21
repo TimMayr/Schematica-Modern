@@ -43,9 +43,14 @@ public class GuiSchematicLoad extends ScreenBase {
 	}
 
 	@Override
-	public boolean mouseScrolled(double d1, double d2, double direction) {
-		this.guiSchematicLoadSlot.scroll((int) (d2 * direction * -1));
-		return super.mouseScrolled(d1, d2, direction);
+	public void render(int x, int y, float partialTicks) {
+		this.guiSchematicLoadSlot.render(x, y, partialTicks);
+
+		drawCenteredString(this.minecraft.fontRenderer, this.strTitle, this.width / 2, 4, 0x00FFFFFF);
+		drawCenteredString(this.minecraft.fontRenderer, this.strFolderInfo, this.width / 2 - 78, this.height - 12,
+		                   0x00808080);
+
+		super.render(x, y, partialTicks);
 	}
 
 	@Override
@@ -142,14 +147,9 @@ public class GuiSchematicLoad extends ScreenBase {
 	}
 
 	@Override
-	public void render(int x, int y, float partialTicks) {
-		this.guiSchematicLoadSlot.render(x, y, partialTicks);
-
-		drawCenteredString(this.minecraft.fontRenderer, this.strTitle, this.width / 2, 4, 0x00FFFFFF);
-		drawCenteredString(this.minecraft.fontRenderer, this.strFolderInfo, this.width / 2 - 78, this.height - 12,
-		                   0x00808080);
-
-		super.render(x, y, partialTicks);
+	public boolean mouseScrolled(double d1, double d2, double direction) {
+		this.guiSchematicLoadSlot.scroll((int) (d2 * direction * -1));
+		return super.mouseScrolled(d1, d2, direction);
 	}
 
 	protected void changeDirectory(String directory) {

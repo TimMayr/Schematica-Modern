@@ -24,6 +24,7 @@ import net.minecraftforge.client.settings.KeyModifier;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.lwjgl.glfw.GLFW;
+
 @OnlyIn(Dist.CLIENT)
 public class InputHandler {
 	public static final InputHandler INSTANCE = new InputHandler();

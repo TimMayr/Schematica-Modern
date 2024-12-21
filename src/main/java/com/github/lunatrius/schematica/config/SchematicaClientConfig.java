@@ -39,7 +39,7 @@ public class SchematicaClientConfig {
 	public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> swapSlots;
 
 	SchematicaClientConfig(ForgeConfigSpec.Builder builder) {
-		builder.comment(Names.Config.Category.RENDER).push(Names.Config.Category.RENDER);
+		builder.push(Names.Config.Category.RENDER);
 
 		alpha = builder.comment(Names.Config.ALPHA_DESC)
 		               .translation("schematica.config.alpha.tooltip")
@@ -66,7 +66,7 @@ public class SchematicaClientConfig {
 		                        .defineInRange(Names.Config.RENDER_DISTANCE, 8, 2, 32);
 
 
-		builder.pop().comment(Names.Config.Category.DEBUG).push(Names.Config.Category.DEBUG);
+		builder.pop().push(Names.Config.Category.DEBUG);
 
 		dumpBlockList = builder.comment(Names.Config.DUMP_BLOCK_LIST_DESC)
 		                       .translation("schematica.config.dumpBlockList.tooltip")
@@ -77,7 +77,7 @@ public class SchematicaClientConfig {
 		                       .define(Names.Config.SHOW_DEBUG_INFO, true);
 
 
-		builder.pop().comment(Names.Config.Category.GENERAL).push(Names.Config.Category.GENERAL);
+		builder.pop().push(Names.Config.Category.GENERAL);
 
 		extraAirBlocks = builder.comment(Names.Config.EXTRA_AIR_BLOCKS_DESC)
 		                        .translation("schematica.config.extraAirBlocks.tooltip")
@@ -93,7 +93,7 @@ public class SchematicaClientConfig {
 		                  .translation("schematica.config.extraAirBlocks.tooltip")
 		                  .defineEnum(Names.Config.SORT_TYPE, ItemStackSortType.SIZE_DESC);
 
-		builder.pop().comment(Names.Config.Category.PRINTER).push(Names.Config.Category.PRINTER);
+		builder.pop().push(Names.Config.Category.PRINTER);
 
 		destroyBlocks = builder.comment(Names.Config.DESTROY_BLOCKS_DESC)
 		                       .translation("schematica.config.destroyBlocks.tooltip")
@@ -169,4 +169,3 @@ public class SchematicaClientConfig {
 		return extraAirBlockList.contains(block);
 	}
 }
-

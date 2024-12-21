@@ -35,8 +35,8 @@ public class CommandSchematicaReplace extends CommandSchematicaBase {
 					                                                                            "toReplace").getState();
 
 			                                           BlockState with =
-					                                           BlockStateArgument.getBlockState(commandContext,
-					                                                                            "toReplace").getState();
+					                                           BlockStateArgument.getBlockState(commandContext, "with")
+					                                                             .getState();
 
 			                                           SchematicWorld schematic = ClientProxy.schematic;
 
