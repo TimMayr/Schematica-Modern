@@ -12,7 +12,7 @@ public class Names {
 		public static final String ALPHA = "alpha";
 		public static final String ALPHA_DESC =
 				"Alpha value used when rendering the schematic (1.0 = opaque, 0.5 = half transparent, 0.0 = "
-                        + "transparent).";
+						+ "transparent).";
 		public static final String HIGHLIGHT = "highlight";
 		public static final String HIGHLIGHT_DESC = "Highlight invalid placed blocks and to be placed blocks.";
 		public static final String HIGHLIGHT_AIR = "highlightAir";
@@ -35,13 +35,15 @@ public class Names {
 		public static final String DESTROY_INSTANTLY = "destroyInstantly";
 		public static final String DESTROY_INSTANTLY_DESC = "Destroy all blocks that can be destroyed in one tick.";
 		public static final String PLACE_ADJACENT = "placeAdjacent";
-		public static final String PLACE_ADJACENT_DESC = "Place blocks only if there is an adjacent block next to them.";
+		public static final String PLACE_ADJACENT_DESC =
+				"Place blocks only if there is an adjacent block next to them.";
 		public static final String SWAP_SLOT = "swapSlot";
 		public static final String SWAP_SLOT_DESC = "Allow the printer to use this hotbar slot.";
 		public static final String SCHEMATIC_DIRECTORY = "schematicDirectory";
 		public static final String SCHEMATIC_DIRECTORY_DESC = "Schematic directory.";
 		public static final String EXTRA_AIR_BLOCKS = "extraAirBlocks";
-		public static final String EXTRA_AIR_BLOCKS_DESC = "Extra blocks to consider as air for the schematic renderer.";
+		public static final String EXTRA_AIR_BLOCKS_DESC =
+				"Extra blocks to consider as air for the schematic renderer.";
 		public static final String SORT_TYPE = "sortType";
 		public static final String SORT_TYPE_DESC = "Default sort type for the material list.";
 		public static final String PRINTER_ENABLED = "printerEnabled";
@@ -53,13 +55,11 @@ public class Names {
 		public static final String PLAYER_QUOTA_KILOBYTES = "playerQuotaKilobytes";
 		public static final String PLAYER_QUOTA_KILOBYTES_DESC =
 				"Amount of storage provided per-player for schematics on the server.";
-		public static String LANG_PREFIX = Reference.MODID + ".config";
 
 		public static class Category {
 			public static final String DEBUG = "debug";
 			public static final String RENDER = "render";
 			public static final String PRINTER = "printer";
-			public static String PRINTER_SWAPSLOTS = "printer.swapslots";
 			public static final String GENERAL = "general";
 			public static final String SERVER = "server";
 		}
@@ -71,7 +71,6 @@ public class Names {
 
 			public static class Message {
 				public static final String USAGE = "schematica.command.save.usage";
-				public static String PLAYERS_ONLY = "schematica.command.save.playersOnly";
 				public static final String SAVE_STARTED = "schematica.command.save.started";
 				public static final String SAVE_SUCCESSFUL = "schematica.command.save.saveSucceeded";
 				public static final String SAVE_FAILED = "schematica.command.save.saveFailed";
@@ -87,7 +86,6 @@ public class Names {
 
 			public static class Message {
 				public static final String USAGE = "schematica.command.list.usage";
-				public static String LIST_NOT_AVAILABLE = "schematica.command.list.notAvailable";
 				public static final String REMOVE = "schematica.command.list.remove";
 				public static final String DOWNLOAD = "schematica.command.list.download";
 				public static final String PAGE_HEADER = "schematica.command.list.header";
@@ -101,7 +99,6 @@ public class Names {
 
 			public static class Message {
 				public static final String USAGE = "schematica.command.remove.usage";
-				public static String PLAYERS_ONLY = "schematica.command.save.playersOnly";
 				public static final String SCHEMATIC_REMOVED = "schematica.command.remove.schematicRemoved";
 				public static final String SCHEMATIC_NOT_FOUND = "schematica.command.remove.schematicNotFound";
 				public static final String ARE_YOU_SURE_START = "schematica.command.remove.areYouSure";
@@ -114,7 +111,6 @@ public class Names {
 
 			public static class Message {
 				public static final String USAGE = "schematica.command.download.usage";
-				public static String PLAYERS_ONLY = "schematica.command.save.playersOnly";
 				public static final String DOWNLOAD_STARTED = "schematica.command.download.started";
 				public static final String DOWNLOAD_SUCCEEDED = "schematica.command.download.downloadSucceeded";
 				public static final String DOWNLOAD_FAILED = "schematica.command.download.downloadFail";
@@ -134,10 +130,6 @@ public class Names {
 
 	public static class Messages {
 		public static final String TOGGLE_PRINTER = "schematica.message.togglePrinter";
-
-		public static String INVALID_BLOCK = "schematica.message.invalidBlock";
-		public static String INVALID_PROPERTY = "schematica.message.invalidProperty";
-		public static String INVALID_PROPERTY_FOR_BLOCK = "schematica.message.invalidPropertyForBlock";
 	}
 
 	public static class Gui {
@@ -176,8 +168,8 @@ public class Names {
 			public static final String HIDE = "schematica.gui.hide";
 			public static final String SHOW = "schematica.gui.show";
 			public static final String MOVE_HERE = "schematica.gui.movehere";
-			public static String FLIP = "schematica.gui.flip";
-			public static String ROTATE = "schematica.gui.rotate";
+			public static final String FLIP = "schematica.gui.flip";
+			public static final String ROTATE = "schematica.gui.rotate";
 			public static final String TRANSFORM_PREFIX = "schematica.gui.";
 
 			public static final String MATERIAL_NAME = "schematica.gui.materialname";
@@ -188,10 +180,6 @@ public class Names {
 			public static final String SORT_PREFIX = "schematica.gui.material";
 			public static final String DUMP = "schematica.gui.materialdump";
 		}
-	}
-
-	public static class ModId {
-		public static String MINECRAFT = "minecraft";
 	}
 
 	public static class Keys {
@@ -209,18 +197,12 @@ public class Names {
 	}
 
 	public static class NBT {
-		public static final String ROOT = "Schematic";
-
-		public static final String MATERIALS = "Materials";
 		public static final String FORMAT = "Format";
 		public static final String FORMAT_ALPHA = "Alpha";
 		public static final String FORMAT_STRUCTURE = "Structure";
 
 		public static final String ICON = "Icon";
 		public static final String BLOCKS = "Blocks";
-		public static String DATA = "Data";
-		public static String ADD_BLOCKS = "AddBlocks";
-		public static String ADD_BLOCKS_SCHEMATICA = "Add";
 		public static final String WIDTH = "Width";
 		public static final String LENGTH = "Length";
 		public static final String HEIGHT = "Height";

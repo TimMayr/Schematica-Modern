@@ -13,7 +13,6 @@ import java.util.Map;
  * Register to this event using MinecraftForge.EVENT_BUS
  */
 public class PreSchematicSaveEvent extends Event {
-	private final Map<String, Block> mappings;
 	/**
 	 * The schematic that will be saved.
 	 */
@@ -22,6 +21,7 @@ public class PreSchematicSaveEvent extends Event {
 	 * The Extended Metadata tag compound provides a facility to add custom metadata to the schematic.
 	 */
 	public final CompoundNBT extendedMetadata;
+	private final Map<String, Block> mappings;
 
 	@Deprecated
 	public PreSchematicSaveEvent(Map<String, Block> mappings) {

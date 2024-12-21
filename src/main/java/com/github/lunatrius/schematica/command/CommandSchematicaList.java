@@ -112,9 +112,9 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 			throw new CommandException(new TranslationTextComponent(Names.Command.List.Message.NO_SUCH_PAGE));
 		}
 
-		source.sendFeedback(
-				withStyle(new TranslationTextComponent(Names.Command.List.Message.PAGE_HEADER, page + 1, totalPages + 1),
-				          TextFormatting.DARK_GREEN, null), true);
+		source.sendFeedback(withStyle(
+				new TranslationTextComponent(Names.Command.List.Message.PAGE_HEADER, page + 1, totalPages + 1),
+				TextFormatting.DARK_GREEN, null), true);
 		for (ITextComponent chatComponent : componentsToSend) {
 			source.sendFeedback(chatComponent, true);
 		}

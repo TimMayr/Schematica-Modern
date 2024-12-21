@@ -215,7 +215,7 @@ public class SchematicWorld extends ClientWorld {
 
 			if (matcher.test(blockState)) {
 				Map<IProperty, Comparable> properties = BlockStateHelper.getProperties(blockState);
-				BlockState replacement = replacer.getReplacement(blockState, properties);
+				BlockState replacement = replacer.getReplacement(properties);
 
 				// TODO: add support for tile entities?
 				if (replacement.getBlock().hasTileEntity(replacement)) {

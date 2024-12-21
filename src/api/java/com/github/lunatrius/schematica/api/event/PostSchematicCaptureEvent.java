@@ -14,7 +14,7 @@ public class PostSchematicCaptureEvent extends Event {
 	 */
 	public final ISchematic schematic;
 
-	public PostSchematicCaptureEvent( ISchematic schematic) {
+	public PostSchematicCaptureEvent(ISchematic schematic) {
 		this.schematic = schematic;
 	}
 }

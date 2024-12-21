@@ -15,6 +15,7 @@ public class SchematicTransfer {
 	public int baseX = 0;
 	public int baseY = 0;
 	public int baseZ = 0;
+
 	public SchematicTransfer(ISchematic schematic, String name) {
 		this.schematic = schematic;
 		this.name = name;

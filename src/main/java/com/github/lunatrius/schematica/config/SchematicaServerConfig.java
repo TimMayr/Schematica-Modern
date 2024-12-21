@@ -10,7 +10,7 @@ public class SchematicaServerConfig {
 	public final ForgeConfigSpec.BooleanValue saveEnabled;
 
 	SchematicaServerConfig(ForgeConfigSpec.Builder builder) {
-		builder.comment(Names.Config.Category.SERVER).push(Names.Config.Category.SERVER);
+		builder.push(Names.Config.Category.SERVER);
 
 		loadEnabled = builder.comment(Names.Config.LOAD_ENABLED_DESC)
 		                     .translation("schematica.config.loadEnabled.tooltip")

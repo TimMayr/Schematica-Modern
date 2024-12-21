@@ -28,23 +28,14 @@ public enum ItemStackSortType {
 			          wrappedItemStackB.total
 					          - wrappedItemStackA.total);
 
-	private final Comparator<BlockList.WrappedItemStack> comparator;
 	public final String label;
 	public final String glyph;
+	private final Comparator<BlockList.WrappedItemStack> comparator;
 
 	ItemStackSortType(String label, String glyph, Comparator<BlockList.WrappedItemStack> comparator) {
 		this.label = label;
 		this.glyph = glyph;
 		this.comparator = comparator;
-	}
-
-	public static ItemStackSortType fromString(String name) {
-		try {
-			return valueOf(name);
-		} catch (Exception ignored) {
-		}
-
-		return NAME_ASC;
 	}
 
 	public void sort(List<BlockList.WrappedItemStack> blockList) {

@@ -108,15 +108,15 @@ public class GuiSchematicSave extends ScreenBase {
 	}
 
 	@Override
-	public boolean keyPressed(int character, int code, int modifiers) {
-		this.filename = this.tfFilename.getText();
-		return super.keyPressed(character, code, modifiers);
-	}
-
-	@Override
 	public boolean charTyped(char character, int code) {
 		this.filename = this.tfFilename.getText();
 		return super.charTyped(character, code);
+	}
+
+	@Override
+	public boolean keyPressed(int character, int code, int modifiers) {
+		this.filename = this.tfFilename.getText();
+		return super.keyPressed(character, code, modifiers);
 	}
 
 	@Override
