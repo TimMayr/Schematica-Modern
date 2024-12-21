@@ -68,15 +68,30 @@ public class GuiSchematicControl extends ScreenBase {
 	}
 
 	@Override
+	public boolean keyReleased(int character, int code, int modifiers) {
+		boolean b = super.keyReleased(character, code, modifiers);
+
+		if (this.btnFlip.active) {
+			this.btnFlip.setFGColor(hasShiftDown() ? 0xFF0000 : 0xFFFFFF);
+		}
+
+		if (this.btnRotate.active) {
+			this.btnRotate.setFGColor(hasShiftDown() ? 0xFF0000 : 0xFFFFFF);
+		}
+
+		return b;
+	}
+
+	@Override
 	public boolean keyPressed(int character, int code, int modifiers) {
 		boolean b = super.keyPressed(character, code, modifiers);
 
 		if (this.btnFlip.active) {
-			this.btnFlip.setFGColor(hasShiftDown() ? 0xFF0000 : 0x000000);
+			this.btnFlip.setFGColor(hasShiftDown() ? 0xFF0000 : 0xFFFFFF);
 		}
 
 		if (this.btnRotate.active) {
-			this.btnRotate.setFGColor(hasShiftDown() ? 0xFF0000 : 0x000000);
+			this.btnRotate.setFGColor(hasShiftDown() ? 0xFF0000 : 0xFFFFFF);
 		}
 
 		return b;
