@@ -11,7 +11,6 @@ So you found a bug in the code? Think you can make it more efficient? Want to he
 6. Click `Send pull request`, and wait for feedback!
 
 #### Instructions/Advice when submitting a Pull Request (PR)
-
 * tabs for indentation
 * braces on same lines
 
