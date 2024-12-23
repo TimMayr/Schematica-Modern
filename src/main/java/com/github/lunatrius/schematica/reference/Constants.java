@@ -1,6 +1,10 @@
 package com.github.lunatrius.schematica.reference;
 
 public class Constants {
+	public static class NBT {
+		public static final int TAG_COMPOUND = 10;
+	}
+
 	public static class Inventory {
 		public static class Size {
 			public static final int CRAFTING_OUT = 1;

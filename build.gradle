@@ -14,7 +14,8 @@ tasks.named('wrapper', Wrapper).configure {
 	distributionType = Wrapper.DistributionType.ALL
 }
 
-version = "${project.version_major}.${project.version_minor}.${project.version_micro}"
+def mod_version = "${project.version_major}.${project.version_minor}.${project.version_micro}"
+version = "${minecraft_version}-${mod_version}"
 group = mod_group
 
 repositories {
@@ -126,7 +127,7 @@ dependencies {
 	// Example mod dependency using a mod jar from ./libs with a flat dir repository
 	//This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
 	//The group id is ignored when searching -- in this case, it is "blank"
-	implementation "${mod_group}.core:LunatriusCore:${lunatriuscore_version}"
+	implementation "${mod_group}.core:LunatriusCore:${minecraft_version}-${lunatriuscore_version}"
 
 	// Example mod dependency using a file as dependency
 	// implementation files("libs/coolmod-${mc_version}-${coolmod_version}.jar")
@@ -147,9 +148,10 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
 	                         neo_version            : neo_version,
 	                         neo_version_range      : neo_version_range,
 	                         loader_version_range   : loader_version_range,
+	                         lunatriuscore_version  : lunatriuscore_version,
 	                         mod_id                 : mod_id,
 	                         mod_name               : mod_name,
-	                         mod_version            : version,]
+	                         mod_version            : mod_version,]
 	inputs.properties replaceProperties
 	expand replaceProperties
 	from "src/main/templates"
@@ -162,9 +164,10 @@ var generateReference = tasks.register("generateReference", ProcessResources) {
 	                         neo_version            : neo_version,
 	                         neo_version_range      : neo_version_range,
 	                         loader_version_range   : loader_version_range,
+	                         lunatriuscore_version  : lunatriuscore_version,
 	                         mod_id                 : mod_id,
 	                         mod_name               : mod_name,
-	                         mod_version            : version,]
+	                         mod_version            : mod_version,]
 	inputs.properties replaceProperties
 	expand replaceProperties
 	from "src/main/java/com/github/lunatrius/core/reference"

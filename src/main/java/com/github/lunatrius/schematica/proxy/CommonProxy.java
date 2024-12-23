@@ -4,21 +4,19 @@ import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.handler.QueueTickHandler;
-import com.github.lunatrius.schematica.nbt.NBTConversionException;
-import com.github.lunatrius.schematica.nbt.NBTHelper;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.chunk.SchematicContainer;
 import com.github.lunatrius.schematica.world.schematic.SchematicUtil;
 import com.github.lunatrius.schematica.world.storage.Schematic;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -67,7 +65,7 @@ public abstract class CommonProxy {
 	public void unloadSchematic() {
 	}
 
-	public void copyChunkToSchematic(ISchematic schematic, World world, int chunkX, int chunkZ, int minX, int maxX,
+	public void copyChunkToSchematic(ISchematic schematic, Level level, int chunkX, int chunkZ, int minX, int maxX,
 	                                 int minY, int maxY, int minZ, int maxZ) {
 		MBlockPos pos = new MBlockPos();
 		MBlockPos localPos = new MBlockPos();
@@ -90,22 +88,14 @@ public abstract class CommonProxy {
 					localPos.set(localX, localY, localZ);
 
 					try {
-						BlockState blockState = world.getBlockState(pos);
+						BlockState blockState = level.getBlockState(pos);
 						Block block = blockState.getBlock();
 						boolean success = schematic.setBlockState(localPos, blockState);
 
-						if (success && block.hasTileEntity(blockState)) {
-							TileEntity tileEntity = world.getTileEntity(pos);
-							if (tileEntity != null) {
-								try {
-									TileEntity reloadedTileEntity =
-											NBTHelper.reloadTileEntity(tileEntity, minX, minY, minZ);
-									schematic.setTileEntity(localPos, reloadedTileEntity);
-								} catch (NBTConversionException nce) {
-									Reference.logger.error("Error while trying to save tile entity '{}'!", tileEntity,
-									                       nce);
-									schematic.setBlockState(localPos, Blocks.BEDROCK.getDefaultState());
-								}
+						if (success && block instanceof EntityBlock) {
+							BlockEntity blockEntity = level.getBlockEntity(pos);
+							if (blockEntity != null) {
+								schematic.setBlockEntity(localPos, blockEntity);
 							}
 						}
 					} catch (Exception e) {
@@ -119,20 +109,15 @@ public abstract class CommonProxy {
 		int minZ1 = localMinZ | (chunkZ << 4);
 		int maxX1 = localMaxX | (chunkX << 4);
 		int maxZ1 = localMaxZ | (chunkZ << 4);
-		AxisAlignedBB bb = new AxisAlignedBB(minX1, minY, minZ1, maxX1 + 1, maxY + 1, maxZ1 + 1);
-		List<Entity> entities = world.getEntitiesWithinAABB(Entity.class, bb);
+		AABB bb = new AABB(minX1, minY, minZ1, maxX1 + 1, maxY + 1, maxZ1 + 1);
+		List<Entity> entities = level.getEntitiesOfClass(Entity.class, bb);
 		for (Entity entity : entities) {
-			try {
-				Entity reloadedEntity = NBTHelper.reloadEntity(entity, minX, minY, minZ);
-				schematic.addEntity(reloadedEntity);
-			} catch (NBTConversionException nce) {
-				Reference.logger.error("Error while trying to save entity '{}'!", entity, nce);
-			}
+			schematic.addEntity(entity);
 		}
 	}
 
-	public boolean saveSchematic(PlayerEntity player, File directory, String filename, World world,
-	                             @Nullable String format, BlockPos from, BlockPos to) {
+	public boolean saveSchematic(Player player, File directory, String filename, Level level, @Nullable String format,
+	                             BlockPos from, BlockPos to) {
 		try {
 			String iconName = "";
 
@@ -160,7 +145,7 @@ public abstract class CommonProxy {
 			ISchematic schematic = new Schematic(SchematicUtil.getIconFromName(iconName), width, height, length,
 			                                     player.getScoreboardName());
 			SchematicContainer container =
-					new SchematicContainer(schematic, player, world, new File(directory, filename), format, minX, maxX,
+					new SchematicContainer(schematic, player, level, new File(directory, filename), format, minX, maxX,
 					                       minY, maxY, minZ, maxZ);
 			QueueTickHandler.INSTANCE.queueSchematic(container);
 
@@ -171,9 +156,9 @@ public abstract class CommonProxy {
 		return false;
 	}
 
-	public abstract boolean loadSchematic(PlayerEntity player, File directory, String filename);
+	public abstract boolean loadSchematic(Player player, File directory, String filename);
 
-	public abstract boolean isPlayerQuotaExceeded(PlayerEntity player);
+	public abstract boolean isPlayerQuotaExceeded(Player player);
 
-	public abstract File getPlayerSchematicDirectory(PlayerEntity player, boolean privateDirectory);
+	public abstract File getPlayerSchematicDirectory(Player player, boolean privateDirectory);
 }

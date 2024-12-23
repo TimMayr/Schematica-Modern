@@ -3,11 +3,11 @@ package com.github.lunatrius.schematica.config;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.util.ItemStackSortType;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,27 +18,27 @@ public class SchematicaClientConfig {
 	public static final String SCHEMATIC_DEFAULT_FOLDER = "./schematics";
 	private static final Set<Block> extraAirBlockList = new HashSet<>();
 	public static File schematicDirectory = new File(Reference.proxy.getDataDirectory(), SCHEMATIC_DEFAULT_FOLDER);
-	public final ForgeConfigSpec.ConfigValue<List<? extends String>> extraAirBlocks;
-	public final ForgeConfigSpec.ConfigValue<String> schematicDirectoryPath;
-	public final ForgeConfigSpec.EnumValue<ItemStackSortType> sortType;
-	public final ForgeConfigSpec.BooleanValue dumpBlockList;
-	public final ForgeConfigSpec.BooleanValue showDebugInfo;
-	public final ForgeConfigSpec.DoubleValue alpha;
-	public final ForgeConfigSpec.BooleanValue alphaEnabled;
-	public final ForgeConfigSpec.DoubleValue blockDelta;
-	public final ForgeConfigSpec.BooleanValue highlight;
-	public final ForgeConfigSpec.BooleanValue highlightAir;
-	public final ForgeConfigSpec.IntValue renderDistance;
-	public final ForgeConfigSpec.BooleanValue destroyBlocks;
-	public final ForgeConfigSpec.BooleanValue destroyInstantly;
-	public final ForgeConfigSpec.BooleanValue placeAdjacent;
-	public final ForgeConfigSpec.IntValue placeDelay;
-	public final ForgeConfigSpec.IntValue placeDistance;
-	public final ForgeConfigSpec.BooleanValue placeInstantly;
-	public final ForgeConfigSpec.IntValue timeout;
-	public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> swapSlots;
+	public final ModConfigSpec.ConfigValue<List<? extends String>> extraAirBlocks;
+	public final ModConfigSpec.ConfigValue<String> schematicDirectoryPath;
+	public final ModConfigSpec.EnumValue<ItemStackSortType> sortType;
+	public final ModConfigSpec.BooleanValue dumpBlockList;
+	public final ModConfigSpec.BooleanValue showDebugInfo;
+	public final ModConfigSpec.DoubleValue alpha;
+	public final ModConfigSpec.BooleanValue alphaEnabled;
+	public final ModConfigSpec.DoubleValue blockDelta;
+	public final ModConfigSpec.BooleanValue highlight;
+	public final ModConfigSpec.BooleanValue highlightAir;
+	public final ModConfigSpec.IntValue renderDistance;
+	public final ModConfigSpec.BooleanValue destroyBlocks;
+	public final ModConfigSpec.BooleanValue destroyInstantly;
+	public final ModConfigSpec.BooleanValue placeAdjacent;
+	public final ModConfigSpec.IntValue placeDelay;
+	public final ModConfigSpec.IntValue placeDistance;
+	public final ModConfigSpec.BooleanValue placeInstantly;
+	public final ModConfigSpec.IntValue timeout;
+	public final ModConfigSpec.ConfigValue<List<? extends Integer>> swapSlots = null;
 
-	SchematicaClientConfig(ForgeConfigSpec.Builder builder) {
+	SchematicaClientConfig(ModConfigSpec.Builder builder) {
 		builder.push(Names.Config.Category.RENDER);
 
 		alpha = builder.comment(Names.Config.ALPHA_DESC)
@@ -82,8 +82,9 @@ public class SchematicaClientConfig {
 		extraAirBlocks = builder.comment(Names.Config.EXTRA_AIR_BLOCKS_DESC)
 		                        .translation("schematica.config.extraAirBlocks.tooltip")
 		                        .defineList(Names.Config.EXTRA_AIR_BLOCKS, Collections.singletonList("minecraft:air"),
-		                                    s -> s instanceof String && ForgeRegistries.BLOCKS.containsKey(
-				                                    new ResourceLocation((String) s)));
+		                                    () -> "minecraft:dirt",
+		                                    s -> s instanceof String && BuiltInRegistries.BLOCK.containsKey(
+				                                    ResourceLocation.parse((String) s)));
 
 		schematicDirectoryPath = builder.comment(Names.Config.SCHEMATIC_DIRECTORY_DESC)
 		                                .translation("schematica.config.schematicDirectory.tooltip")
@@ -125,8 +126,12 @@ public class SchematicaClientConfig {
 
 		swapSlots = builder.comment(Names.Config.SWAP_SLOT_DESC)
 		                   .translation("schematica.config.swapslots.tooltip")
-		                   .defineList(Names.Config.SWAP_SLOT, Arrays.asList(5, 6, 7, 8),
-		                               num -> num instanceof Integer && (Integer) num > 0 && (Integer) num < 9);
+		                   .defineList(Names.Config.SWAP_SLOT, Arrays.asList(5, 6, 7, 8), () -> 1, num -> {
+			                   return num instanceof Integer
+					                   && (Integer) num > 0
+					                   && (Integer) num <= 9
+					                   && swapSlots != null && !swapSlots.get().contains(num);
+		                   });
 	}
 
 	public static void normalizeSchematicPath() {

@@ -3,12 +3,13 @@ package com.github.lunatrius.schematica.proxy;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.reference.Reference;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.nio.file.Path;
 import java.util.UUID;
 
 public class ServerProxy extends CommonProxy {
@@ -18,7 +19,7 @@ public class ServerProxy extends CommonProxy {
 	public File getDataDirectory() {
 		MinecraftServer server = ServerProxy.serverWeakReference != null ? ServerProxy.serverWeakReference.get() :
 		                         null;
-		File file = server != null ? server.getFile(".") : new File(".");
+		File file = server != null ? server.getFile(".").toFile() : new File(".");
 		try {
 			return file.getCanonicalFile();
 		} catch (IOException e) {
@@ -28,12 +29,12 @@ public class ServerProxy extends CommonProxy {
 	}
 
 	@Override
-	public boolean loadSchematic(PlayerEntity player, File directory, String filename) {
+	public boolean loadSchematic(Player player, File directory, String filename) {
 		return false;
 	}
 
 	@Override
-	public boolean isPlayerQuotaExceeded(PlayerEntity player) {
+	public boolean isPlayerQuotaExceeded(Player player) {
 		int spaceUsed = 0;
 
 		//Space used by private directory
@@ -64,7 +65,7 @@ public class ServerProxy extends CommonProxy {
 	}
 
 	@Override
-	public File getPlayerSchematicDirectory(PlayerEntity player, boolean privateDirectory) {
+	public File getPlayerSchematicDirectory(Player player, boolean privateDirectory) {
 		UUID playerId = player.getUniqueID();
 
 		File playerDir = new File(SchematicaClientConfig.schematicDirectory.getAbsolutePath(), playerId.toString());

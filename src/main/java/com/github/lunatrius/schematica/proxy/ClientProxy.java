@@ -9,12 +9,11 @@ import com.github.lunatrius.schematica.config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.HitResult;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,25 +32,23 @@ public class ClientProxy extends CommonProxy {
 	public static SchematicWorld schematic = null;
 	public static Direction axisFlip = Direction.UP;
 	public static Direction axisRotation = Direction.UP;
-	public static RayTraceResult objectMouseOver = null;
+	public static HitResult objectMouseOver = null;
 
-	public static void setPlayerData(PlayerEntity player, float partialTicks) {
-		playerPosition.x = player.lastTickPosX + (player.getPosX() - player.lastTickPosX) * partialTicks;
-		playerPosition.y = player.lastTickPosY + (player.getPosY() - player.lastTickPosY) * partialTicks;
-		playerPosition.z = player.lastTickPosZ + (player.getPosZ() - player.lastTickPosZ) * partialTicks;
+	public static void setPlayerData(Player player, float partialTicks) {
+		playerPosition.set(new Vector3d(player.getPosition(partialTicks)));
 
 		orientation = getOrientation(player);
 
-		rotationRender = MathHelper.floor(player.rotationYaw / 90) & 3;
+		rotationRender = (int) Math.floor(player.getYRot() / 90) & 3;
 	}
 
-	private static Direction getOrientation(PlayerEntity player) {
-		if (player.rotationPitch > 45) {
+	private static Direction getOrientation(Player player) {
+		if (player.getXRot() > 45) {
 			return Direction.DOWN;
-		} else if (player.rotationPitch < -45) {
+		} else if (player.getXRot() < -45) {
 			return Direction.UP;
 		} else {
-			switch (MathHelper.floor(player.rotationYaw / 90.0 + 0.5) & 3) {
+			switch ((int) Math.floor(player.getYRot() / 90.0 + 0.5) & 3) {
 				case 0:
 					return Direction.SOUTH;
 				case 1:
@@ -121,7 +118,7 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public File getDataDirectory() {
-		File file = MINECRAFT.gameDir;
+		File file = MINECRAFT.gameDirectory;
 		try {
 			return file.getCanonicalFile();
 		} catch (IOException e) {
@@ -166,7 +163,7 @@ public class ClientProxy extends CommonProxy {
 
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public boolean loadSchematic(PlayerEntity player, File directory, String filename) {
+	public boolean loadSchematic(Player player, File directory, String filename) {
 		ISchematic schematic = SchematicFormat.readFromFile(directory, filename);
 		if (schematic == null) {
 			return false;
@@ -185,12 +182,12 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public boolean isPlayerQuotaExceeded(PlayerEntity player) {
+	public boolean isPlayerQuotaExceeded(Player player) {
 		return false;
 	}
 
 	@Override
-	public File getPlayerSchematicDirectory(PlayerEntity player, boolean privateDirectory) {
+	public File getPlayerSchematicDirectory(Player player, boolean privateDirectory) {
 		return SchematicaClientConfig.schematicDirectory;
 	}
 }
