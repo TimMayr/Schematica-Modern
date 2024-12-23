@@ -1,12 +1,12 @@
 package com.github.lunatrius.schematica.api.event;
 
 import com.github.lunatrius.schematica.api.ISchematic;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 
 /**
  * This event is fired after an ISchematic has been created out of a part of the world.
  * This is an appropriate place to modify the schematic's blocks, metadata and tile entities before they are persisted.
- * Register to this event using MinecraftForge.EVENT_BUS
+ * Register to this event using NeoForge.EVENT_BUS
  */
 public class PostSchematicCaptureEvent extends Event {
 	/**

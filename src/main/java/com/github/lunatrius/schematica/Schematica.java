@@ -32,7 +32,7 @@ public class Schematica {
 
 	public Schematica() {
 		instance = this;
-		MinecraftForge.EVENT_BUS.register(this);
+		NeoForge.EVENT_BUS.register(this);
 		Reference.proxy = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> ServerProxy::new);
 		FMLJavaModLoadingContext.get().getModEventBus().register(this);
 	}
@@ -41,8 +41,8 @@ public class Schematica {
 	public void commonSetup(FMLCommonSetupEvent event) {
 		PacketHandler.init();
 
-		MinecraftForge.EVENT_BUS.register(QueueTickHandler.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(DownloadHandler.INSTANCE);
+		NeoForge.EVENT_BUS.register(QueueTickHandler.INSTANCE);
+		NeoForge.EVENT_BUS.register(DownloadHandler.INSTANCE);
 
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, SchematicaConfig.clientSpec);
 		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SchematicaConfig.serverSpec);
@@ -58,18 +58,18 @@ public class Schematica {
 			ClientRegistry.registerKeyBinding(keyBinding);
 		}
 
-		MinecraftForge.EVENT_BUS.register(InputHandler.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(TickHandler.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(RenderTickHandler.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(GuiHandler.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(new OverlayHandler());
-		MinecraftForge.EVENT_BUS.register(new WorldHandler());
+		NeoForge.EVENT_BUS.register(InputHandler.INSTANCE);
+		NeoForge.EVENT_BUS.register(TickHandler.INSTANCE);
+		NeoForge.EVENT_BUS.register(RenderTickHandler.INSTANCE);
+		NeoForge.EVENT_BUS.register(GuiHandler.INSTANCE);
+		NeoForge.EVENT_BUS.register(new OverlayHandler());
+		NeoForge.EVENT_BUS.register(new WorldHandler());
 		Reference.proxy.resetSettings();
 	}
 
 	@SubscribeEvent
 	public void serverStarting(FMLServerStartingEvent event) {
-		MinecraftForge.EVENT_BUS.register(PlayerHandler.INSTANCE);
+		NeoForge.EVENT_BUS.register(PlayerHandler.INSTANCE);
 		CommandSchematicaBase.register(event.getCommandDispatcher());
 		ServerProxy.serverWeakReference = new WeakReference<>(event.getServer());
 	}

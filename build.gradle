@@ -19,6 +19,9 @@ group = mod_group
 
 repositories {
 	mavenLocal()
+	flatDir {
+		dirs("libs")
+	}
 }
 
 base {
@@ -123,7 +126,7 @@ dependencies {
 	// Example mod dependency using a mod jar from ./libs with a flat dir repository
 	//This maps to ./libs/coolmod-${mc_version}-${coolmod_version}.jar
 	//The group id is ignored when searching -- in this case, it is "blank"
-	implementation "${mod_group}.core:LunatriusCore:${minecraft_version}-${lunatriuscore_version}"
+	implementation "${mod_group}.core:LunatriusCore:${lunatriuscore_version}"
 
 	// Example mod dependency using a file as dependency
 	// implementation files("libs/coolmod-${mc_version}-${coolmod_version}.jar")

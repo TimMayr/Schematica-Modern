@@ -1,16 +1,16 @@
 package com.github.lunatrius.schematica.api.event;
 
 import com.github.lunatrius.schematica.api.ISchematic;
-import net.minecraft.block.Block;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraftforge.eventbus.api.Event;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.Block;
+import net.neoforged.bus.api.Event;
 
 import java.util.Map;
 
 /**
  * This event is fired after the schematic has been Captured, but before it is serialized to the schematic format.
  * This is your opportunity to add Metadata.
- * Register to this event using MinecraftForge.EVENT_BUS
+ * Register to this event using NeoForge.EVENT_BUS
  */
 public class PreSchematicSaveEvent extends Event {
 	/**
@@ -20,7 +20,7 @@ public class PreSchematicSaveEvent extends Event {
 	/**
 	 * The Extended Metadata tag compound provides a facility to add custom metadata to the schematic.
 	 */
-	public final CompoundNBT extendedMetadata;
+	public final CompoundTag extendedMetadata;
 	private final Map<String, Block> mappings;
 
 	@Deprecated
@@ -31,7 +31,7 @@ public class PreSchematicSaveEvent extends Event {
 	public PreSchematicSaveEvent(ISchematic schematic, Map<String, Block> mappings) {
 		this.schematic = schematic;
 		this.mappings = mappings;
-		this.extendedMetadata = new CompoundNBT();
+		this.extendedMetadata = new CompoundTag();
 	}
 
 	/**
@@ -46,7 +46,7 @@ public class PreSchematicSaveEvent extends Event {
 	 * @param oldName
 	 * 		The old name of the block mapping.
 	 * @param newName
-	 * 		The new name of the block Mapping.
+	 * 		The new name of the block mapping.
 	 *
 	 * @return true if a mapping was replaced.
 	 *

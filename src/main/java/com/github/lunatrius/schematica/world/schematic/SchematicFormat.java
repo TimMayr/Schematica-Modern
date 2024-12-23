@@ -95,7 +95,7 @@ public abstract class SchematicFormat {
 			}
 
 			PostSchematicCaptureEvent event = new PostSchematicCaptureEvent(schematic);
-			MinecraftForge.EVENT_BUS.post(event);
+			NeoForge.EVENT_BUS.post(event);
 
 			CompoundNBT tagCompound = new CompoundNBT();
 
