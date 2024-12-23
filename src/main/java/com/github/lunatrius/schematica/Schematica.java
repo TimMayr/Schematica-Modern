@@ -35,6 +35,9 @@ public class Schematica {
 		MinecraftForge.EVENT_BUS.register(this);
 		Reference.proxy = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> ServerProxy::new);
 		FMLJavaModLoadingContext.get().getModEventBus().register(this);
+
+		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, SchematicaConfig.clientSpec);
+		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SchematicaConfig.serverSpec);
 	}
 
 	@SubscribeEvent
@@ -43,9 +46,6 @@ public class Schematica {
 
 		MinecraftForge.EVENT_BUS.register(QueueTickHandler.INSTANCE);
 		MinecraftForge.EVENT_BUS.register(DownloadHandler.INSTANCE);
-
-		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, SchematicaConfig.clientSpec);
-		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SchematicaConfig.serverSpec);
 	}
 
 	@SubscribeEvent
