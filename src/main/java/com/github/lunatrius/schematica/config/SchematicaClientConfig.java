@@ -36,7 +36,7 @@ public class SchematicaClientConfig {
 	public final ModConfigSpec.IntValue placeDistance;
 	public final ModConfigSpec.BooleanValue placeInstantly;
 	public final ModConfigSpec.IntValue timeout;
-	public final ModConfigSpec.ConfigValue<List<? extends Integer>> swapSlots = null;
+	public final ModConfigSpec.ConfigValue<List<? extends Integer>> swapSlots;
 
 	SchematicaClientConfig(ModConfigSpec.Builder builder) {
 		builder.push(Names.Config.Category.RENDER);
@@ -81,8 +81,7 @@ public class SchematicaClientConfig {
 
 		extraAirBlocks = builder.comment(Names.Config.EXTRA_AIR_BLOCKS_DESC)
 		                        .translation("schematica.config.extraAirBlocks.tooltip")
-		                        .defineList(Names.Config.EXTRA_AIR_BLOCKS, Collections.singletonList("minecraft:air"),
-		                                    () -> "minecraft:dirt",
+		                        .defineList(Names.Config.EXTRA_AIR_BLOCKS, List.of(), () -> "minecraft:dirt",
 		                                    s -> s instanceof String && BuiltInRegistries.BLOCK.containsKey(
 				                                    ResourceLocation.parse((String) s)));
 
@@ -126,12 +125,8 @@ public class SchematicaClientConfig {
 
 		swapSlots = builder.comment(Names.Config.SWAP_SLOT_DESC)
 		                   .translation("schematica.config.swapslots.tooltip")
-		                   .defineList(Names.Config.SWAP_SLOT, Arrays.asList(5, 6, 7, 8), () -> 1, num -> {
-			                   return num instanceof Integer
-					                   && (Integer) num > 0
-					                   && (Integer) num <= 9
-					                   && swapSlots != null && !swapSlots.get().contains(num);
-		                   });
+		                   .defineList(Names.Config.SWAP_SLOT, Arrays.asList(5, 6, 7, 8), () -> 1,
+		                               num -> num instanceof Integer && (Integer) num > 0 && (Integer) num <= 9);
 	}
 
 	public static void normalizeSchematicPath() {
@@ -163,7 +158,7 @@ public class SchematicaClientConfig {
 	public static void populateExtraAirBlocks() {
 		extraAirBlockList.clear();
 		for (String name : SchematicaConfig.CLIENT.extraAirBlocks.get()) {
-			Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(name));
+			Block block = BuiltInRegistries.BLOCK.getValue(ResourceLocation.parse(name));
 			if (block != Blocks.AIR) {
 				extraAirBlockList.add(block);
 			}

@@ -9,7 +9,6 @@ import net.minecraft.world.entity.player.Player;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.nio.file.Path;
 import java.util.UUID;
 
 public class ServerProxy extends CommonProxy {
@@ -66,7 +65,7 @@ public class ServerProxy extends CommonProxy {
 
 	@Override
 	public File getPlayerSchematicDirectory(Player player, boolean privateDirectory) {
-		UUID playerId = player.getUniqueID();
+		UUID playerId = player.getUUID();
 
 		File playerDir = new File(SchematicaClientConfig.schematicDirectory.getAbsolutePath(), playerId.toString());
 		if (privateDirectory) {

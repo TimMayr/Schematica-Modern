@@ -1,7 +1,7 @@
 package com.github.lunatrius.schematica.block.state.pattern;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.state.IProperty;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 
 import java.util.Map;
 
@@ -17,20 +17,20 @@ public class BlockStateReplacer {
 	}
 
 	@SuppressWarnings({"rawtypes"})
-	public BlockState getReplacement(Map<IProperty, Comparable> properties) {
+	public BlockState getReplacement(Map<Property, Comparable> properties) {
 		return applyProperties(defaultReplacement, properties);
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private BlockState applyProperties(BlockState state, Map<IProperty, Comparable> properties) {
+	private BlockState applyProperties(BlockState state, Map<Property, Comparable> properties) {
 		BlockState mutableState = state;
 
-		for (Map.Entry<IProperty, Comparable> entry : properties.entrySet()) {
-			IProperty property = entry.getKey();
+		for (Map.Entry<Property, Comparable> entry : properties.entrySet()) {
+			Property property = entry.getKey();
 			Comparable value = entry.getValue();
 
-			if (mutableState.getBlockState().has(property) && mutableState.getBlockState().get(property) != value) {
-				mutableState = mutableState.with(property, value);
+			if (mutableState.hasProperty(property) && mutableState.getValue(property) != value) {
+				mutableState = mutableState.setValue(property, value);
 			}
 		}
 

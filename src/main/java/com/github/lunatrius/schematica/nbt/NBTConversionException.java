@@ -1,14 +1,14 @@
 package com.github.lunatrius.schematica.nbt;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class NBTConversionException extends Exception {
 	public NBTConversionException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
-	public NBTConversionException(TileEntity tileEntity, Throwable cause) {
+	public NBTConversionException(BlockEntity tileEntity, Throwable cause) {
 		super(String.valueOf(tileEntity), cause);
 	}
 

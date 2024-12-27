@@ -3,11 +3,11 @@ package com.github.lunatrius.schematica.nbt;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.world.WorldDummy;
-import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,11 +59,11 @@ public class NBTHelper {
 		return readEntitiesFromCompound(compound, null, new ArrayList<>());
 	}
 
-	public static List<Entity> readEntitiesFromCompound(CompoundTag compound, World world, List<Entity> entities) {
+	public static List<Entity> readEntitiesFromCompound(CompoundTag compound, Level level, List<Entity> entities) {
 		ListTag tagList = compound.getList(Names.NBT.ENTITIES, Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < tagList.size(); i++) {
 			CompoundTag entityCompound = tagList.getCompound(i);
-			Entity entity = readEntityFromCompound(entityCompound, world);
+			Entity entity = readEntityFromCompound(entityCompound, level);
 			if (entity != null) {
 				entities.add(entity);
 			}
@@ -72,12 +72,12 @@ public class NBTHelper {
 		return entities;
 	}
 
-	public static Entity readEntityFromCompound(CompoundTag nbtTagCompound, World world) {
-		return EntityType.loadEntityUnchecked(nbtTagCompound, world).orElse(null);
+	public static Entity readEntityFromCompound(CompoundTag nbtTagCompound, Level level) {
+		return EntityType.loadEntityUnchecked(nbtTagCompound, level).orElse(null);
 	}
 
-	public static List<Entity> readEntitiesFromCompound(CompoundTag compound, World world) {
-		return readEntitiesFromCompound(compound, world, new ArrayList<>());
+	public static List<Entity> readEntitiesFromCompound(CompoundTag compound, Level level) {
+		return readEntitiesFromCompound(compound, level, new ArrayList<>());
 	}
 
 	public static void readEntitiesFromCompound(CompoundTag compound, List<Entity> entities) {

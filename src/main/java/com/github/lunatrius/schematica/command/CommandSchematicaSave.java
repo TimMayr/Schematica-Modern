@@ -8,24 +8,20 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.ICommandSource;
-import net.minecraft.command.arguments.BlockPosArgument;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class CommandSchematicaSave extends CommandSchematicaBase {
 
-	public static ArgumentBuilder<CommandSource, ?> register() {
+	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		return Commands.literal(Names.Command.Save.NAME)
 		               .then(Commands.argument("from", BlockPosArgument.blockPos())
 		                             .then(Commands.argument("to", BlockPosArgument.blockPos())
@@ -44,9 +40,9 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 				                                                                       CommandSchematicaSave::execute)))));
 	}
 
-	private static int execute(CommandContext<CommandSource> commandContext) throws CommandSyntaxException {
-		CommandSource source = commandContext.getSource();
-		PlayerEntity player = source.asPlayer();
+	private static int execute(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+		CommandSourceStack source = commandContext.getSource();
+		Player player = source.getPlayerOrException();
 		BlockPos fromBlock = BlockPosArgument.getBlockPos(commandContext, "from");
 		BlockPos toBlock = BlockPosArgument.getBlockPos(commandContext, "to");
 		String name = StringArgumentType.getString(commandContext, "name");
@@ -54,18 +50,20 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 
 		try {
 			format = StringArgumentType.getString(commandContext, "format");
-		} catch (IllegalArgumentException ignored) {}
+		} catch (IllegalArgumentException ignored) {
+		}
 
 		if (Reference.proxy.isPlayerQuotaExceeded(player)) {
-			throw new CommandException(new TranslationTextComponent(Names.Command.Save.Message.QUOTA_EXCEEDED));
+			source.sendFailure(Component.translatable(Names.Command.Save.Message.QUOTA_EXCEEDED));
+			return -1;
 		}
 
 		MBlockPos from = new MBlockPos(fromBlock);
 		MBlockPos to = new MBlockPos(toBlock);
 
 		if (!SchematicFormat.FORMATS.containsKey(format)) {
-			throw new CommandException(new TranslationTextComponent(Names.Command.Save.Message.UNKNOWN_FORMAT,
-			                                                        format));
+			source.sendFailure(Component.translatable(Names.Command.Save.Message.UNKNOWN_FORMAT));
+			return -1;
 		}
 
 		String filename = name + SchematicFormat.getExtension(format);
@@ -75,31 +73,27 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 		if (schematicDirectory == null) {
 			//Chances are that if this is null, we could not retrieve their UUID.
 			Reference.logger.warn("Unable to" + " determine the schematic directory for " + "player {}", player);
-			throw new CommandException(
-					new TranslationTextComponent(Names.Command.Save.Message.PLAYER_SCHEMATIC_DIR_UNAVAILABLE));
+			source.sendFailure(Component.translatable(Names.Command.Save.Message.PLAYER_SCHEMATIC_DIR_UNAVAILABLE));
+			return -1;
 		}
 
 		if (!schematicDirectory.exists()) {
 			if (!schematicDirectory.mkdirs()) {
 				Reference.logger.warn("Could not create " + "player " + "schematic " + "directory " + "{}",
 				                      schematicDirectory.getAbsolutePath());
-				throw new CommandException(
-						new TranslationTextComponent(Names.Command.Save.Message.PLAYER_SCHEMATIC_DIR_UNAVAILABLE));
+				source.sendFailure(Component.translatable(Names.Command.Save.Message.PLAYER_SCHEMATIC_DIR_UNAVAILABLE));
+				return -1;
 			}
 		}
 
 		try {
-			Reference.proxy.saveSchematic(player, schematicDirectory, filename, player.getEntityWorld(), format, from,
-			                              to);
-			source.sendFeedback(new TranslationTextComponent(Names.Command.Save.Message.SAVE_SUCCESSFUL, name), true);
+			Reference.proxy.saveSchematic(player, schematicDirectory, filename, player.getCommandSenderWorld(), format,
+			                              from, to);
+			source.sendSuccess(() -> Component.translatable(Names.Command.Save.Message.SAVE_SUCCESSFUL, name), true);
 		} catch (Exception e) {
-			throw new CommandException(new TranslationTextComponent(Names.Command.Save.Message.SAVE_FAILED, name));
+			source.sendFailure(Component.translatable(Names.Command.Save.Message.SAVE_FAILED));
+			return -1;
 		}
 		return 0;
-	}
-
-	@Override
-	public String getUsage(ICommandSource sender) {
-		return Names.Command.Save.Message.USAGE;
 	}
 }

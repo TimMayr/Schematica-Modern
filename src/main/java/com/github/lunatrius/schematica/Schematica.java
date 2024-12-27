@@ -53,7 +53,7 @@ public class Schematica {
 		SchematicaClientConfig.populateExtraAirBlocks();
 		SchematicaClientConfig.normalizeSchematicPath();
 
-		for (KeyBinding keyBinding : InputHandler.KEY_BINDINGS) {
+		for (KeyB keyBinding : InputHandler.KEY_BINDINGS) {
 			ClientRegistry.registerKeyBinding(keyBinding);
 		}
 
