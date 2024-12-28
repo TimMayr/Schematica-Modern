@@ -1,9 +1,10 @@
 package com.github.lunatrius.schematica.block.state;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.IProperty;
-import net.minecraft.util.text.TextFormatting;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,15 +15,15 @@ public class BlockStateHelper {
 	public static List<String> getFormattedProperties(BlockState blockState) {
 		List<String> list = new ArrayList<>();
 
-		for (Map.Entry<IProperty<?>, Comparable<?>> entry : blockState.getBlockState().getValues().entrySet()) {
-			IProperty<?> key = entry.getKey();
+		for (Map.Entry<Property<?>, Comparable<?>> entry : blockState.getValues().entrySet()) {
+			Property<?> key = entry.getKey();
 			Comparable<?> value = entry.getValue();
 
 			String formattedValue = value.toString();
 			if (Boolean.TRUE.equals(value)) {
-				formattedValue = TextFormatting.GREEN + formattedValue + TextFormatting.RESET;
+				formattedValue = ChatFormatting.GREEN + formattedValue + ChatFormatting.RESET;
 			} else if (Boolean.FALSE.equals(value)) {
-				formattedValue = TextFormatting.RED + formattedValue + TextFormatting.RESET;
+				formattedValue = ChatFormatting.RED + formattedValue + ChatFormatting.RESET;
 			}
 
 			list.add(key.getName() + ": " + formattedValue);
@@ -32,8 +33,8 @@ public class BlockStateHelper {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static <T> Map<IProperty, T> getProperties(BlockState blockState) {
-		Map<IProperty, T> properties = new HashMap<>();
+	public static <T> Map<Property, T> getProperties(BlockState blockState) {
+		Map<Property, T> properties = new HashMap<>();
 
 		blockState.getProperties()
 		          .forEach(property -> properties.put(property, BlockStateHelper.getPropertyValue(blockState,
@@ -44,17 +45,17 @@ public class BlockStateHelper {
 
 	@SuppressWarnings("unchecked")
 	public static <T extends Comparable<T>> T getPropertyValue(BlockState blockState, String name) {
-		IProperty<T> property = getProperty(blockState, name);
+		Property<T> property = getProperty(blockState, name);
 		if (property == null) {
 			throw new IllegalArgumentException(name + " does not exist in " + blockState);
 		}
 
-		return blockState.getBlockState().get(property);
+		return blockState.getValue(property);
 	}
 
 	@SuppressWarnings({"rawtypes"})
-	public static IProperty getProperty(BlockState blockState, String name) {
-		for (IProperty prop : blockState.getProperties()) {
+	public static Property getProperty(BlockState blockState, String name) {
+		for (Property prop : blockState.getProperties()) {
 			if (prop.getName().equals(name)) {
 				return prop;
 			}

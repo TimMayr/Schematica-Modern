@@ -3,6 +3,7 @@ package com.github.lunatrius.schematica.nbt;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.world.WorldDummy;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.Entity;
@@ -29,8 +30,7 @@ public class NBTHelper {
 	}
 
 	public static BlockEntity readBlockEntityFromCompound(CompoundTag BlockEntityCompound) {
-
-		return BlockEntity. (BlockEntityCompound);
+		return BlockEntity.(BlockEntityCompound);
 	}
 
 	public static CompoundTag writeTileEntitiesToCompound(List<BlockEntity> tileEntities) {
@@ -49,9 +49,8 @@ public class NBTHelper {
 		return compound;
 	}
 
-	public static CompoundTag writeBlockEntityToCompound(BlockEntity BlockEntity) {
-		CompoundTag blockEntityCompound = new CompoundTag();
-		BlockEntity.saveWithFullMetadata(blockEntityCompound);
+	public static CompoundTag writeBlockEntityToCompound(BlockEntity blockEntity) {
+		CompoundTag blockEntityCompound = blockEntity.saveWithFullMetadata();
 		return blockEntityCompound;
 	}
 

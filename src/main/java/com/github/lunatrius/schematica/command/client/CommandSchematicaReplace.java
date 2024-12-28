@@ -27,7 +27,6 @@ public class CommandSchematicaReplace extends CommandSchematicaBase {
 			                             CommandSourceStack source = commandContext.getSource();
 			                             BlockState toReplace =
 					                             BlockStateArgument.getBlock(commandContext, "toReplace").getState();
-
 			                             BlockState with =
 					                             BlockStateArgument.getBlock(commandContext, "with").getState();
 

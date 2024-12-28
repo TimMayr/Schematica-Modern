@@ -4,10 +4,11 @@ import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.api.event.PostSchematicCaptureEvent;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.common.MinecraftForge;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.common.NeoForge;
 
 import javax.annotation.Nullable;
 import java.io.DataOutputStream;
@@ -36,7 +37,7 @@ public abstract class SchematicFormat {
 
 	public static ISchematic readFromFile(File file) {
 		try {
-			CompoundNBT tagCompound = SchematicUtil.readTagCompoundFromFile(file);
+			CompoundTag tagCompound = SchematicUtil.readTagCompoundFromFile(file);
 			String format = tagCompound.getString(Names.NBT.FORMAT);
 			SchematicFormat schematicFormat = FORMATS.get(format);
 
@@ -52,7 +53,7 @@ public abstract class SchematicFormat {
 		return null;
 	}
 
-	public abstract ISchematic readFromNBT(CompoundNBT tagCompound);
+	public abstract ISchematic readFromNBT(CompoundTag tagCompound);
 
 	/**
 	 * Writes the given schematic.
@@ -97,7 +98,7 @@ public abstract class SchematicFormat {
 			PostSchematicCaptureEvent event = new PostSchematicCaptureEvent(schematic);
 			NeoForge.EVENT_BUS.post(event);
 
-			CompoundNBT tagCompound = new CompoundNBT();
+			CompoundTag tagCompound = new CompoundTag();
 
 			FORMATS.get(format).writeToNBT(tagCompound, schematic);
 
@@ -114,7 +115,7 @@ public abstract class SchematicFormat {
 		return false;
 	}
 
-	public abstract void writeToNBT(CompoundNBT tagCompound, ISchematic schematic);
+	public abstract void writeToNBT(CompoundTag tagCompound, ISchematic schematic);
 
 	/**
 	 * Writes the given schematic, notifying the player when finished.
@@ -128,11 +129,13 @@ public abstract class SchematicFormat {
 	 * @param player
 	 * 		The player to notify
 	 */
-	public static void writeToFileAndNotify(File file, @Nullable String format, ISchematic schematic,
-	                                        PlayerEntity player) {
+	public static void writeToFileAndNotify(File file, @Nullable String format, ISchematic schematic, Player player) {
 		boolean success = writeToFile(file, format, schematic);
 		String message = success ? Names.Command.Save.Message.SAVE_SUCCESSFUL : Names.Command.Save.Message.SAVE_FAILED;
-		player.sendMessage(new TranslationTextComponent(message, file.getName()));
+		if (!player.isLocalPlayer()) {
+			((ServerPlayer) player).sendSystemMessage(Component.translatable(message, file.getName()));
+		}
+
 	}
 
 	/**

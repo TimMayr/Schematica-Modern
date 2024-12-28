@@ -5,10 +5,12 @@ import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.chunk.SchematicContainer;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -21,16 +23,11 @@ public class QueueTickHandler {
 	private QueueTickHandler() {}
 
 	@SubscribeEvent
-	public void onClientTick(TickEvent.ClientTickEvent event) {
-		if (event.phase == TickEvent.Phase.START) {
-			return;
-		}
-
+	public void onClientTick(ClientTickEvent.Post event) {
 		// TODO: find a better way... maybe?
 		try {
-			ClientPlayerEntity player = Minecraft.getInstance().player;
-			if (player != null && player.connection != null && !player.connection.getNetworkManager()
-			                                                                     .isLocalChannel()) {
+			LocalPlayer player = Minecraft.getInstance().player;
+			if (player != null && !player.connection.getConnection().isMemoryConnection()) {
 				processQueue();
 			}
 		} catch (Exception e) {
@@ -50,29 +47,27 @@ public class QueueTickHandler {
 
 		if (container.hasNext()) {
 			if (container.isFirst()) {
-				TranslationTextComponent component =
-						new TranslationTextComponent(Names.Command.Save.Message.SAVE_STARTED, container.chunkCount,
-						                             container.file.getName());
-				container.player.sendMessage(component);
+				Component component =
+						Component.translatable(Names.Command.Save.Message.SAVE_STARTED, container.chunkCount,
+						                       container.file.getName());
+				if (container.player != null && !container.player.isLocalPlayer()) {
+					((ServerPlayer) container.player).sendSystemMessage(component);
+				}
+
+				container.next();
 			}
 
-			container.next();
-		}
-
-		if (container.hasNext()) {
-			this.queue.offer(container);
-		} else {
-			SchematicFormat.writeToFileAndNotify(container.file, container.format, container.schematic,
-			                                     container.player);
+			if (container.hasNext()) {
+				this.queue.offer(container);
+			} else {
+				SchematicFormat.writeToFileAndNotify(container.file, container.format, container.schematic,
+				                                     container.player);
+			}
 		}
 	}
 
 	@SubscribeEvent
-	public void onServerTick(TickEvent.ServerTickEvent event) {
-		if (event.phase == TickEvent.Phase.START) {
-			return;
-		}
-
+	public void onServerTick(ServerTickEvent.Post event) {
 		processQueue();
 	}
 

@@ -20,7 +20,9 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 
 import java.lang.ref.WeakReference;
@@ -37,6 +39,16 @@ public class Schematica {
 
 		modContainer.registerConfig(ModConfig.Type.CLIENT, SchematicaConfig.clientSpec);
 		modContainer.registerConfig(ModConfig.Type.SERVER, SchematicaConfig.serverSpec);
+	}
+
+	@SubscribeEvent
+	public void registerCommands(RegisterCommandsEvent event) {
+		CommandSchematicaBase.register(event.getDispatcher());
+	}
+
+	@SubscribeEvent()
+	public void registerClientCommands(RegisterClientCommandsEvent event) {
+		CommandSchematicaBase.registerClient(event.getBuildContext());
 	}
 
 	@SubscribeEvent
@@ -69,7 +81,6 @@ public class Schematica {
 	@SubscribeEvent
 	public void serverStarting(ServerStartingEvent event) {
 		NeoForge.EVENT_BUS.register(PlayerHandler.INSTANCE);
-		CommandSchematicaBase.register(event.getServer().getCommands().getDispatcher());
 		ServerProxy.serverWeakReference = new WeakReference<>(event.getServer());
 	}
 }

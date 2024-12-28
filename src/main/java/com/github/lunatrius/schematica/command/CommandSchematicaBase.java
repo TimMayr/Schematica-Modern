@@ -8,6 +8,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -27,6 +28,8 @@ import java.util.concurrent.CompletableFuture;
 
 @ParametersAreNonnullByDefault
 public abstract class CommandSchematicaBase {
+	private static LiteralCommandNode<CommandSourceStack> mainNode;
+
 	protected static <T extends Component> T withStyle(T component, ChatFormatting formatting,
 	                                                   @Nullable String command) {
 		Style style = Style.EMPTY.applyFormat(formatting);
@@ -39,13 +42,16 @@ public abstract class CommandSchematicaBase {
 		return (T) component.copy().withStyle(style);
 	}
 
-	public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context) {
-		dispatcher.register(Commands.literal("schematica")
-		                            .then(CommandSchematicaDownload.register())
-		                            .then(CommandSchematicaList.register())
-		                            .then(CommandSchematicaSave.register())
-		                            .then(CommandSchematicaRemove.register())
-		                            .then(CommandSchematicaReplace.register(context)));
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+		mainNode = dispatcher.register(Commands.literal("schematica")
+		                                       .then(CommandSchematicaDownload.register())
+		                                       .then(CommandSchematicaList.register())
+		                                       .then(CommandSchematicaSave.register())
+		                                       .then(CommandSchematicaRemove.register()));
+	}
+
+	public static void registerClient(CommandBuildContext context) {
+		mainNode.addChild(CommandSchematicaReplace.register(context).build());
 	}
 
 	public static CompletableFuture<Suggestions> getSchematicNamesSuggestions(
