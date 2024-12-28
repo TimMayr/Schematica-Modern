@@ -74,6 +74,27 @@ public abstract class SchematicFormat {
 	}
 
 	/**
+	 * Writes the given schematic, notifying the player when finished.
+	 *
+	 * @param file
+	 * 		The file to write to
+	 * @param format
+	 * 		The format to use, or null for {@linkplain #FORMAT_DEFAULT the default}
+	 * @param schematic
+	 * 		The schematic to write
+	 * @param player
+	 * 		The player to notify
+	 */
+	public static void writeToFileAndNotify(File file, @Nullable String format, ISchematic schematic, Player player) {
+		boolean success = writeToFile(file, format, schematic);
+		String message = success ? Names.Command.Save.Message.SAVE_SUCCESSFUL : Names.Command.Save.Message.SAVE_FAILED;
+		if (!player.isLocalPlayer()) {
+			((ServerPlayer) player).sendSystemMessage(Component.translatable(message, file.getName()));
+		}
+
+	}
+
+	/**
 	 * Writes the given schematic.
 	 *
 	 * @param file
@@ -116,27 +137,6 @@ public abstract class SchematicFormat {
 	}
 
 	public abstract void writeToNBT(CompoundTag tagCompound, ISchematic schematic);
-
-	/**
-	 * Writes the given schematic, notifying the player when finished.
-	 *
-	 * @param file
-	 * 		The file to write to
-	 * @param format
-	 * 		The format to use, or null for {@linkplain #FORMAT_DEFAULT the default}
-	 * @param schematic
-	 * 		The schematic to write
-	 * @param player
-	 * 		The player to notify
-	 */
-	public static void writeToFileAndNotify(File file, @Nullable String format, ISchematic schematic, Player player) {
-		boolean success = writeToFile(file, format, schematic);
-		String message = success ? Names.Command.Save.Message.SAVE_SUCCESSFUL : Names.Command.Save.Message.SAVE_FAILED;
-		if (!player.isLocalPlayer()) {
-			((ServerPlayer) player).sendSystemMessage(Component.translatable(message, file.getName()));
-		}
-
-	}
 
 	/**
 	 * Gets a schematic format name translation key for the given format ID.

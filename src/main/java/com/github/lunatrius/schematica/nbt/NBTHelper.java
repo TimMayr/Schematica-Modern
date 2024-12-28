@@ -3,34 +3,40 @@ package com.github.lunatrius.schematica.nbt;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.world.WorldDummy;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class NBTHelper {
-	public static List<BlockEntity> readBlockEntitiesFromCompound(CompoundTag compound) {
-		return readBlockEntitiesFromCompound(compound, new ArrayList<>());
+	public static List<BlockEntity> readBlockEntitiesFromCompound(CompoundTag compound, LevelReader level) {
+		return readBlockEntitiesFromCompound(compound, level, new ArrayList<>());
 	}
 
-	public static List<BlockEntity> readBlockEntitiesFromCompound(CompoundTag compound, List<BlockEntity> tileEntities) {
+	public static List<BlockEntity> readBlockEntitiesFromCompound(CompoundTag compound, LevelReader level,
+	                                                              List<BlockEntity> tileEntities) {
 		ListTag tagList = compound.getList(Names.NBT.TILE_ENTITIES, Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < tagList.size(); i++) {
 			CompoundTag BlockEntityCompound = tagList.getCompound(i);
-			BlockEntity BlockEntity = readBlockEntityFromCompound(BlockEntityCompound);
+			BlockEntity BlockEntity = readBlockEntityFromCompound(BlockEntityCompound, level);
 			tileEntities.add(BlockEntity);
 		}
 
 		return tileEntities;
 	}
 
-	public static BlockEntity readBlockEntityFromCompound(CompoundTag BlockEntityCompound) {
-		return BlockEntity.(BlockEntityCompound);
+	public static BlockEntity readBlockEntityFromCompound(CompoundTag blockEntityCompound, LevelReader level) {
+		BlockPos pos = new BlockPos(blockEntityCompound.getShort("x"), blockEntityCompound.getShort("y"),
+		                            blockEntityCompound.getShort("z"));
+		return BlockEntity.loadStatic(pos, level.getBlockState(pos), blockEntityCompound, level.registryAccess());
 	}
 
 	public static CompoundTag writeTileEntitiesToCompound(List<BlockEntity> tileEntities) {
@@ -50,8 +56,7 @@ public class NBTHelper {
 	}
 
 	public static CompoundTag writeBlockEntityToCompound(BlockEntity blockEntity) {
-		CompoundTag blockEntityCompound = blockEntity.saveWithFullMetadata();
-		return blockEntityCompound;
+		return blockEntity.saveWithFullMetadata(blockEntity.getLevel().registryAccess());
 	}
 
 	public static List<Entity> readEntitiesFromCompound(CompoundTag compound) {
@@ -71,10 +76,6 @@ public class NBTHelper {
 		return entities;
 	}
 
-	public static Entity readEntityFromCompound(CompoundTag nbtTagCompound, Level level) {
-		return EntityType.loadEntityUnchecked(nbtTagCompound, level).orElse(null);
-	}
-
 	public static List<Entity> readEntitiesFromCompound(CompoundTag compound, Level level) {
 		return readEntitiesFromCompound(compound, level, new ArrayList<>());
 	}
@@ -91,7 +92,7 @@ public class NBTHelper {
 		ListTag tagList = new ListTag();
 		for (Entity entity : entities) {
 			CompoundTag entityCompound = new CompoundTag();
-			entity.writeUnlessPassenger(entityCompound);
+			entity.save(entityCompound);
 			tagList.add(entityCompound);
 		}
 
@@ -116,8 +117,7 @@ public class NBTHelper {
 				entity = readEntityFromCompound(entityCompound, WorldDummy.instance());
 
 				if (entity != null) {
-					entity.setPosition(entity.getPosX() - offsetX, entity.getPosY() - offsetY,
-					                   entity.getPosZ() - offsetZ);
+					entity.setPos(entity.getX() - offsetX, entity.getY() - offsetY, entity.getZ() - offsetZ);
 				}
 			}
 		} catch (Throwable t) {
@@ -127,9 +127,13 @@ public class NBTHelper {
 		return entity;
 	}
 
+	public static Entity readEntityFromCompound(CompoundTag nbtTagCompound, Level level) {
+		return EntityType.loadEntityRecursive(nbtTagCompound, level, EntitySpawnReason.LOAD, adapter -> adapter);
+	}
+
 	public static CompoundTag writeEntityToCompound(Entity entity) {
 		CompoundTag entityCompound = new CompoundTag();
-		if (entity.writeUnlessPassenger(entityCompound)) {
+		if (entity.save(entityCompound)) {
 			return entityCompound;
 		}
 

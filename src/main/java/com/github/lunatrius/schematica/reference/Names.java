@@ -221,4 +221,13 @@ public class Names {
 		public static final String SCHEMATIC = ".schematic";
 		public static final String STRUCTURE = ".nbt";
 	}
+
+	public static class Network {
+		public static final String CAPABILITIES_LOCATION = "capabilities";
+		public static final String DOWNLOAD_BEGIN_LOCATION = "download_begin";
+		public static final String DOWNLOAD_BEGIN_ACK_LOCATION = "download_begin_ack";
+		public static final String DOWNLOAD_CHUNK_LOCATION = "download_chunk";
+		public static final String DOWNLOAD_CHUNK_ACK_LOCATION = "download_chunk_ack";
+		public static final String DOWNLOAD_END_LOCATION = "download_end";
+	}
 }

@@ -115,21 +115,21 @@ public interface ISchematic {
 	 *
 	 * @return the schematic width
 	 */
-	int getWidth();
+	short getWidth();
 
 	/**
 	 * The length of the schematic
 	 *
 	 * @return the schematic length
 	 */
-	int getLength();
+	short getLength();
 
 	/**
 	 * The height of the schematic
 	 *
 	 * @return the schematic height
 	 */
-	int getHeight();
+	short getHeight();
 
 	/**
 	 * Gets the author of the schematic, or an empty String if unknown.

@@ -3,24 +3,31 @@ package com.github.lunatrius.schematica.network.message;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.network.PacketHandler;
+import com.github.lunatrius.schematica.reference.Names;
+import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.storage.Schematic;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Supplier;
 
-public class MessageDownloadBegin {
-	public final ItemStack icon;
-	public final int width;
-	public final int height;
-	public final int length;
+@MethodsReturnNonnullByDefault
+public record MessageDownloadBegin(ItemStack icon, short width, short height, short length)
+		implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<MessageDownloadBegin> TYPE = new CustomPacketPayload.Type<>(
+			ResourceLocation.fromNamespaceAndPath(Reference.MODID, Names.Network.DOWNLOAD_BEGIN_LOCATION));
+	public static final StreamCodec<ByteBuf, MessageDownloadBegin> STREAM_CODEC =
+			StreamCodec.composite(ItemStack.STREAM_CODEC, MessageDownloadBegin::icon, ByteBufCodecs.SHORT,
+			                      MessageDownloadBegin::width, ByteBufCodecs.SHORT, MessageDownloadBegin::height,
+			                      ByteBufCodecs.SHORT, MessageDownloadBegin::length, MessageDownloadBegin::new);
 
 	public MessageDownloadBegin(ISchematic schematic) {
-		this.icon = schematic.getIcon();
-		this.width = schematic.getWidth();
-		this.height = schematic.getHeight();
-		this.length = schematic.getLength();
+		this(schematic.getIcon(), schematic.getWidth(), schematic.getHeight(), schematic.getLength());
 	}
 
 	public static MessageDownloadBegin decode(PacketBuffer buf) {
@@ -41,5 +48,10 @@ public class MessageDownloadBegin {
 			PacketHandler.INSTANCE.sendToServer(new MessageDownloadBeginAck());
 		});
 		ctx.get().setPacketHandled(true);
+	}
+
+	@Override
+	public Type<? extends CustomPacketPayload> type() {
+		return null;
 	}
 }
