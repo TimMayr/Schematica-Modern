@@ -40,7 +40,7 @@ public class SchematicStructure extends SchematicFormat {
 
 						TileEntity tileEntity = NBTHelper.readTileEntityFromCompound(block.nbt);
 						if (tileEntity != null) {
-							schematic.setTileEntity(block.pos, tileEntity);
+							schematic.setBlockEntity(block.pos, tileEntity);
 						}
 					} catch (Exception e) {
 						Reference.logger.error("TileEntity failed to load properly!", e);

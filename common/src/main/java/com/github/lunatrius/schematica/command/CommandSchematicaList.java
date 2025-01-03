@@ -15,12 +15,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import org.apache.commons.io.FilenameUtils;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.LinkedList;
 
-@ParametersAreNonnullByDefault
 public class CommandSchematicaList extends CommandSchematicaBase {
 	private static final FileFilter FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
 
@@ -79,14 +77,14 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 					                                                          FilenameUtils.removeExtension(fileName)));
 
 					String removeCommand =
-							String.format("/%s %s", Reference.MODID + " " + Names.Command.Remove.NAME, fileName);
+							String.format("/%s %s", Reference.MOD_ID + " " + Names.Command.Remove.NAME, fileName);
 					Component removeLink =
 							withStyle(Component.translatable(Names.Command.List.Message.REMOVE), ChatFormatting.RED,
 							          removeCommand);
 					chatComponent = chatComponent.copy().append(removeLink).append("][");
 
 					String downloadCommand =
-							String.format("/%s %s", Reference.MODID + " " + Names.Command.Download.NAME, fileName);
+							String.format("/%s %s", Reference.MOD_ID + " " + Names.Command.Download.NAME, fileName);
 					Component downloadLink =
 							withStyle(Component.translatable(Names.Command.List.Message.DOWNLOAD),
 							          ChatFormatting.GREEN,

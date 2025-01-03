@@ -13,6 +13,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import com.github.lunatrius.core.util.FileUtils;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -45,7 +46,7 @@ public class CommandSchematicaDownload extends CommandSchematicaBase {
 			                             ISchematic schematic = SchematicFormat.readFromFile(directory, filename);
 
 			                             if (schematic != null) {
-				                             DownloadHandler.INSTANCE.transferMap.put(player,
+				                             DownloadHandler.INSTANCE.transferMap.put(player.getScoreboardName(),
 				                                                                      new SchematicTransfer(schematic,
 				                                                                                            filename));
 				                             source.sendSuccess(() -> Component.translatable(

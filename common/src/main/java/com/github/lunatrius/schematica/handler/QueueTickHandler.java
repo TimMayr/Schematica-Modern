@@ -1,38 +1,30 @@
 package com.github.lunatrius.schematica.handler;
 
 import com.github.lunatrius.schematica.reference.Names;
-import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.chunk.SchematicContainer;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
-import net.minecraft.client.Minecraft;
+import dev.architectury.event.events.common.TickEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
 
 public class QueueTickHandler {
 	public static final QueueTickHandler INSTANCE = new QueueTickHandler();
-
 	private final Queue<SchematicContainer> queue = new ArrayDeque<>();
 
-	private QueueTickHandler() {}
-
-	@SubscribeEvent
-	public void onClientTick(ClientTickEvent.Post event) {
-		// TODO: find a better way... maybe?
-		try {
-			LocalPlayer player = Minecraft.getInstance().player;
-			if (player != null && !player.connection.getConnection().isMemoryConnection()) {
-				processQueue();
+	private QueueTickHandler() {
+		TickEvent.PLAYER_POST.register((player) -> {
+			if (player instanceof LocalPlayer localPlayer) {
+				if (!localPlayer.connection.getConnection().isMemoryConnection()) {
+					processQueue();
+				}
 			}
-		} catch (Exception e) {
-			Reference.logger.error("Something went wrong...", e);
-		}
+		});
+
+		TickEvent.SERVER_POST.register((server) -> processQueue());
 	}
 
 	private void processQueue() {
@@ -64,11 +56,6 @@ public class QueueTickHandler {
 				                                     container.player);
 			}
 		}
-	}
-
-	@SubscribeEvent
-	public void onServerTick(ServerTickEvent.Post event) {
-		processQueue();
 	}
 
 	public void queueSchematic(SchematicContainer container) {

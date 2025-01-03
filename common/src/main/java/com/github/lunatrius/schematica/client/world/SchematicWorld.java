@@ -45,7 +45,7 @@ public class SchematicWorld extends ClientWorld {
 		      Minecraft.getInstance().getProfiler(), Minecraft.getInstance().worldRenderer);
 		this.schematic = schematic;
 
-		for (BlockEntity tileEntity : schematic.getTileEntities()) {
+		for (BlockEntity tileEntity : schematic.getBlockEntities()) {
 			initializeTileEntity(tileEntity);
 		}
 	}
@@ -170,7 +170,7 @@ public class SchematicWorld extends ClientWorld {
 	}
 
 	public List<BlockEntity> getTileEntities() {
-		return this.schematic.getTileEntities();
+		return this.schematic.getBlockEntities();
 	}
 
 	public boolean toggleRendering() {

@@ -16,12 +16,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.apache.commons.codec.digest.DigestUtils;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
 import java.io.FileFilter;
 
-
-@ParametersAreNonnullByDefault
 public class CommandSchematicaRemove extends CommandSchematicaBase {
 	private static final FileFilter FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
 
@@ -81,7 +78,7 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 		if (file.exists()) {
 			String hash = DigestUtils.md5Hex(name);
 			String confirmCommand =
-					String.format("/%s %s %s", Reference.MODID + " " + Names.Command.Remove.NAME, name, hash);
+					String.format("/%s %s %s", Reference.MOD_ID + " " + Names.Command.Remove.NAME, name, hash);
 			Component chatComponent = Component.translatable(Names.Command.Remove.Message.ARE_YOU_SURE_START, name)
 			                                   .append(withStyle(Component.literal("[")
 			                                                              .append(Component.translatable(

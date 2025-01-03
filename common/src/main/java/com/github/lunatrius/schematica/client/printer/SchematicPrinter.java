@@ -14,29 +14,17 @@ import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Reference;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.ClickType;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.BucketItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.network.play.client.CEntityActionPacket;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.fluids.IFluidBlock;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,7 +81,7 @@ public class SchematicPrinter {
 		this.syncBlacklist.clear();
 	}
 
-	public void print(ClientWorld world, ClientPlayerEntity player) {
+	public void print(ClientLevel world, LocalPlayer player) {
 		double dX = ClientProxy.playerPosition.x - this.schematic.position.x;
 		double dY = ClientProxy.playerPosition.y - this.schematic.position.y;
 		double dZ = ClientProxy.playerPosition.z - this.schematic.position.z;
@@ -113,8 +101,8 @@ public class SchematicPrinter {
 			return;
 		}
 
-		int slot = player.inventory.currentItem;
-		boolean isSneaking = player.isSneaking();
+		int slot = player.getInventory().selected;
+		boolean isSneaking = player.isCrouching();
 
 		switch (schematic.layerMode) {
 			case ALL:
@@ -134,10 +122,12 @@ public class SchematicPrinter {
 
 		syncSneaking(player, true);
 
-		double blockReachDistance = this.minecraft.playerController.getBlockReachDistance() - 0.1;
+		//TODO: Fix this as soon as the other discord replies
+		double blockReachDistance = this.minecraft.playercontroller.getBlockReachDistance() - 0.1;
 		double blockReachDistanceSq = blockReachDistance * blockReachDistance;
 		for (MBlockPos pos : BlockPosHelper.getAllInBoxXZY(minX, minY, minZ, maxX, maxY, maxZ)) {
-			if (pos.distanceSq(dX, dY, dZ, true) > blockReachDistanceSq) {
+			if (pos.distSqr(new Vec3i((int) Math.floor(dX), (int) Math.floor(dY), (int) Math.floor(dZ)))
+					> blockReachDistanceSq) {
 				continue;
 			}
 
@@ -156,13 +146,13 @@ public class SchematicPrinter {
 		syncSlotAndSneaking(player, slot, isSneaking, true);
 	}
 
-	private boolean syncSlotAndSneaking(ClientPlayerEntity player, int slot, boolean isSneaking, boolean success) {
-		player.inventory.currentItem = slot;
+	private boolean syncSlotAndSneaking(LocalPlayer player, int slot, boolean isSneaking, boolean success) {
+		player.getInventory().selected = slot;
 		syncSneaking(player, isSneaking);
 		return success;
 	}
 
-	private boolean placeBlock(ClientWorld world, ClientPlayerEntity player, BlockPos pos) {
+	private boolean placeBlock(ClientLevel world, LocalPlayer player, BlockPos pos) {
 		int x = pos.getX();
 		int y = pos.getY();
 		int z = pos.getZ();
@@ -205,9 +195,10 @@ public class SchematicPrinter {
 		}
 
 		if (SchematicaConfig.CLIENT.destroyBlocks.get()
-				&& !world.isAirBlock(realPos)
-				&& this.minecraft.playerController.isInCreativeMode()) {
-			this.minecraft.playerController.clickBlock(realPos, Direction.DOWN);
+				&& !world.getBlockState(realPos).isAir()
+				&& player.isCreative()) {
+			//TODO: Probably also discord
+			this.minecraft.gameMode.startDestroyBlock(realPos, Direction.DOWN);
 
 			this.timeout[x][y][z] = SchematicaConfig.CLIENT.timeout.get().byteValue();
 
@@ -280,7 +271,7 @@ public class SchematicPrinter {
 		return list;
 	}
 
-	private boolean placeBlock(ClientWorld world, ClientPlayerEntity player, BlockPos pos, BlockState blockState,
+	private boolean placeBlock(ClientLevel world, LocalPlayer player, BlockPos pos, BlockState blockState,
 	                           ItemStack itemStack) {
 		if (itemStack.getItem() instanceof BucketItem) {
 			return false;
@@ -329,8 +320,8 @@ public class SchematicPrinter {
 		return placeBlock(world, player, pos, direction, offsetX, offsetY, offsetZ, extraClicks);
 	}
 
-	private boolean placeBlock(ClientWorld world, ClientPlayerEntity player, BlockPos pos, Direction direction,
-	                           float offsetX, float offsetY, float offsetZ, int extraClicks) {
+	private boolean placeBlock(ClientLevel world, LocalPlayer player, BlockPos pos, Direction direction, float offsetX,
+	                           float offsetY, float offsetZ, int extraClicks) {
 		Hand hand = Hand.MAIN_HAND;
 		ItemStack itemStack = player.getHeldItem(hand);
 		boolean success;
@@ -357,7 +348,7 @@ public class SchematicPrinter {
 		return success;
 	}
 
-	private boolean placeBlock(ClientWorld world, PlayerEntity player, ItemStack itemStack, BlockPos pos,
+	private boolean placeBlock(ClientLevel world, PlayerEntity player, ItemStack itemStack, BlockPos pos,
 	                           Direction side, Vec3d hitVec, Hand hand) {
 		// FIXME: where did this event go?
         /*
@@ -381,7 +372,7 @@ public class SchematicPrinter {
 		return true;
 	}
 
-	private void syncSneaking(ClientPlayerEntity player, boolean isSneaking) {
+	private void syncSneaking(LocalPlayer player, boolean isSneaking) {
 		player.setSneaking(isSneaking);
 		player.connection.sendPacket(new CEntityActionPacket(player, isSneaking
 		                                                             ? CEntityActionPacket.Action.PRESS_SHIFT_KEY

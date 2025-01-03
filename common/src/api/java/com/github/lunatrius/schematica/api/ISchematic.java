@@ -5,7 +5,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -51,7 +50,7 @@ public interface ISchematic {
 	 *
 	 * @return all tile entities.
 	 */
-	List<BlockEntity> getTileEntities();
+	List<BlockEntity> getBlockEntities();
 
 	/**
 	 * Add or replace a tile entity to a block at the requested location. Does nothing if the location is out of
@@ -136,7 +135,6 @@ public interface ISchematic {
 	 *
 	 * @return The author of the schematic.
 	 */
-	@NotNull
 	String getAuthor();
 
 	/**
@@ -145,5 +143,5 @@ public interface ISchematic {
 	 * @param author
 	 * 		The new author of the schematic.
 	 */
-	void setAuthor(@NotNull String author);
+	void setAuthor(String author);
 }

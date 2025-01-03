@@ -60,11 +60,11 @@ public class FlipHelper {
 			schematicFlipped.setBlockState(flipPos(pos, axis, dimensionsFlipped, tmp), blockStateFlipped);
 		}
 
-		List<TileEntity> tileEntities = schematic.getTileEntities();
+		List<TileEntity> tileEntities = schematic.getBlockEntities();
 		for (TileEntity tileEntity : tileEntities) {
 			BlockPos pos = tileEntity.getPos();
 			tileEntity.setPos(new BlockPos(flipPos(pos, axis, dimensionsFlipped, tmp)));
-			schematicFlipped.setTileEntity(tileEntity.getPos(), tileEntity);
+			schematicFlipped.setBlockEntity(tileEntity.getPos(), tileEntity);
 		}
 
 		return schematicFlipped;

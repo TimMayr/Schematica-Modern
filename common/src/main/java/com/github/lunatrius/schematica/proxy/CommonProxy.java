@@ -17,8 +17,8 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -161,4 +161,6 @@ public abstract class CommonProxy {
 	public abstract boolean isPlayerQuotaExceeded(Player player);
 
 	public abstract File getPlayerSchematicDirectory(Player player, boolean privateDirectory);
+
+	public abstract void init();
 }

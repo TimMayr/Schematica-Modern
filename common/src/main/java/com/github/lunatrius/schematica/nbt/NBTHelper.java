@@ -17,11 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NBTHelper {
-	public static List<BlockEntity> readBlockEntitiesFromCompound(CompoundTag compound, LevelReader level) {
+	public static List<BlockEntity> readBlockEntitiesFromCompound(CompoundTag compound, Level level) {
 		return readBlockEntitiesFromCompound(compound, level, new ArrayList<>());
 	}
 
-	public static List<BlockEntity> readBlockEntitiesFromCompound(CompoundTag compound, LevelReader level,
+	public static List<BlockEntity> readBlockEntitiesFromCompound(CompoundTag compound, Level level,
 	                                                              List<BlockEntity> tileEntities) {
 		ListTag tagList = compound.getList(Names.NBT.TILE_ENTITIES, Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < tagList.size(); i++) {
@@ -39,11 +39,11 @@ public class NBTHelper {
 		return BlockEntity.loadStatic(pos, level.getBlockState(pos), blockEntityCompound, level.registryAccess());
 	}
 
-	public static CompoundTag writeTileEntitiesToCompound(List<BlockEntity> tileEntities) {
-		return writeTileEntitiesToCompound(tileEntities, new CompoundTag());
+	public static CompoundTag writeBlockEntitiesToCompound(List<BlockEntity> tileEntities) {
+		return writeBlockEntitiesToCompound(tileEntities, new CompoundTag());
 	}
 
-	public static CompoundTag writeTileEntitiesToCompound(List<BlockEntity> tileEntities, CompoundTag compound) {
+	public static CompoundTag writeBlockEntitiesToCompound(List<BlockEntity> tileEntities, CompoundTag compound) {
 		ListTag tagList = new ListTag();
 		for (BlockEntity BlockEntity : tileEntities) {
 			CompoundTag BlockEntityCompound = writeBlockEntityToCompound(BlockEntity);
@@ -92,10 +92,6 @@ public class NBTHelper {
 		return writeEntitiesToCompound(entities, new CompoundTag());
 	}
 
-	public static Entity reloadEntity(Entity entity) throws NBTConversionException {
-		return reloadEntity(entity, 0, 0, 0);
-	}
-
 	public static CompoundTag writeEntitiesToCompound(List<Entity> entities, CompoundTag compound) {
 		ListTag tagList = new ListTag();
 		for (Entity entity : entities) {
@@ -107,6 +103,10 @@ public class NBTHelper {
 		compound.put(Names.NBT.ENTITIES, tagList);
 
 		return compound;
+	}
+
+	public static Entity reloadEntity(Entity entity) throws NBTConversionException {
+		return reloadEntity(entity, 0, 0, 0);
 	}
 
 	public static Entity reloadEntity(Entity entity, int offsetX, int offsetY, int offsetZ)

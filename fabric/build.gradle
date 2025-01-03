@@ -26,7 +26,16 @@ configurations {
 
 dependencies {
 	modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+
+	// LunatriusCore
 	modImplementation files("../libs/lunatriuscore-fabric-${minecraft_version}-${lunatriuscore_version}.jar")
+
+	// NeoForge Config API Port
+	modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${forge_config_api_port_version}"
+
+	// Forge Config Screens
+	// TODO: Check for update
+//	modLocalRuntime "fuzs.forgeconfigscreens:forgeconfigscreens-fabric:<modVersion>"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"

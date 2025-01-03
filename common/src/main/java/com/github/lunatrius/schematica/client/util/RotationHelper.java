@@ -140,11 +140,11 @@ public class RotationHelper {
 			schematicRotated.setBlockState(rotatePos(pos, axis, dimensionsRotated, tmp), blockStateRotated);
 		}
 
-		List<TileEntity> tileEntities = schematic.getTileEntities();
+		List<TileEntity> tileEntities = schematic.getBlockEntities();
 		for (TileEntity tileEntity : tileEntities) {
 			BlockPos pos = tileEntity.getPos();
 			tileEntity.setPos(new BlockPos(rotatePos(pos, axis, dimensionsRotated, tmp)));
-			schematicRotated.setTileEntity(tileEntity.getPos(), tileEntity);
+			schematicRotated.setBlockEntity(tileEntity.getPos(), tileEntity);
 		}
 
 		return schematicRotated;

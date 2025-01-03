@@ -17,8 +17,10 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -120,7 +122,7 @@ public class SchematicAlpha extends SchematicFormat {
 
 		int count = 20;
 		ListNBT tileEntitiesList = new ListNBT();
-		for (TileEntity tileEntity : schematic.getTileEntities()) {
+		for (TileEntity tileEntity : schematic.getBlockEntities()) {
 			try {
 				CompoundNBT tileEntityTagCompound = NBTHelper.writeTileEntityToCompound(tileEntity);
 				tileEntitiesList.add(tileEntityTagCompound);

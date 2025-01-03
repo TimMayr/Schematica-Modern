@@ -3,6 +3,8 @@ package com.github.lunatrius.schematica.proxy;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.reference.Reference;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 
@@ -11,6 +13,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.UUID;
 
+@Environment(EnvType.SERVER)
 public class ServerProxy extends CommonProxy {
 	public static WeakReference<MinecraftServer> serverWeakReference = null;
 

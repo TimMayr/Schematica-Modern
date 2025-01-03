@@ -6,18 +6,23 @@ import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
+import com.github.lunatrius.schematica.handler.client.InputHandler;
+import com.github.lunatrius.schematica.handler.client.TickHandler;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
+import dev.architectury.event.events.client.ClientLifecycleEvent;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.HitResult;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.io.File;
 import java.io.IOException;
 
+@Environment(EnvType.CLIENT)
 public class ClientProxy extends CommonProxy {
 	public static final Vector3d playerPosition = new Vector3d();
 	public static final MBlockPos pointA = new MBlockPos();
@@ -161,7 +166,6 @@ public class ClientProxy extends CommonProxy {
 		SchematicPrinter.INSTANCE.setSchematic(null);
 	}
 
-	@OnlyIn(Dist.CLIENT)
 	@Override
 	public boolean loadSchematic(Player player, File directory, String filename) {
 		ISchematic schematic = SchematicFormat.readFromFile(directory, filename);
@@ -189,5 +193,25 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public File getPlayerSchematicDirectory(Player player, boolean privateDirectory) {
 		return SchematicaClientConfig.schematicDirectory;
+	}
+
+	@Override
+	public void init() {
+		ClientLifecycleEvent.CLIENT_SETUP.register(instance -> {
+			Reference.proxy.createFolders();
+			SchematicaClientConfig.populateExtraAirBlocks();
+			SchematicaClientConfig.normalizeSchematicPath();
+
+			for (KeyB keyBinding : InputHandler.KEY_BINDINGS) {
+				ClientRegistry.registerKeyBinding(keyBinding);
+			}
+
+//		NeoForge.EVENT_BUS.register(InputHandler.INSTANCE);
+//		NeoForge.EVENT_BUS.register(RenderTickHandler.INSTANCE);
+//		NeoForge.EVENT_BUS.register(GuiHandler.INSTANCE);
+//		NeoForge.EVENT_BUS.register(new OverlayHandler());
+//		NeoForge.EVENT_BUS.register(new WorldHandler());
+			Reference.proxy.resetSettings();
+		});
 	}
 }

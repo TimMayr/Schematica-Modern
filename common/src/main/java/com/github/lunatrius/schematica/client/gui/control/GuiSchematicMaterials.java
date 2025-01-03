@@ -101,7 +101,7 @@ public class GuiSchematicMaterials extends ScreenBase {
 		File dumps = Reference.proxy.getDirectory("dumps");
 		try {
 			try (FileOutputStream outputStream = new FileOutputStream(
-					new File(dumps, Reference.MODID + "-materials.txt"))) {
+					new File(dumps, Reference.MOD_ID + "-materials.txt"))) {
 				IOUtils.write(stringBuilder.toString(), outputStream, StandardCharsets.UTF_8);
 			}
 		} catch (Exception e) {

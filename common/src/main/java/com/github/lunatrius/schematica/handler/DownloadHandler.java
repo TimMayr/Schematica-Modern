@@ -8,36 +8,32 @@ import com.github.lunatrius.schematica.network.message.MessageDownloadEnd;
 import com.github.lunatrius.schematica.network.transfer.SchematicTransfer;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Reference;
+import dev.architectury.event.events.common.TickEvent;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Environment(EnvType.SERVER)
 public class DownloadHandler {
 	public static final DownloadHandler INSTANCE = new DownloadHandler();
-	public final Map<ServerPlayer, SchematicTransfer> transferMap = new LinkedHashMap<>();
+	public final Map<String, SchematicTransfer> transferMap = new LinkedHashMap<>();
 	public ISchematic schematic = null;
 
-	private DownloadHandler() {}
-
-	@SubscribeEvent
-	public void onServerTick(ServerTickEvent event) {
-		if (event.phase == TickEvent.Phase.START) {
-			return;
-		}
-
-		processQueue();
+	private DownloadHandler() {
+		TickEvent.SERVER_POST.register(this::processQueue);
 	}
 
-	private void processQueue() {
+	private void processQueue(MinecraftServer server) {
 		if (this.transferMap.isEmpty()) {
 			return;
 		}
 
-		ServerPlayer player = this.transferMap.keySet().iterator().next();
-		SchematicTransfer transfer = this.transferMap.remove(player);
+		ServerPlayer player = server.getPlayerList().getPlayerByName(this.transferMap.keySet().iterator().next());
+		SchematicTransfer transfer = this.transferMap.remove(player.getScoreboardName());
 
 		if (transfer == null) {
 			return;
@@ -67,7 +63,7 @@ public class DownloadHandler {
 			return;
 		}
 
-		this.transferMap.put(player, transfer);
+		this.transferMap.put(player.getScoreboardName(), transfer);
 	}
 
 	private void sendBegin(ServerPlayer player, SchematicTransfer transfer) {

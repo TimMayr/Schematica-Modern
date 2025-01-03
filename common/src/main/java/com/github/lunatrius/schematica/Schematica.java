@@ -2,85 +2,37 @@ package com.github.lunatrius.schematica;
 
 import com.github.lunatrius.schematica.command.CommandSchematicaBase;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
-import com.github.lunatrius.schematica.config.SchematicaConfig;
-import com.github.lunatrius.schematica.handler.DownloadHandler;
-import com.github.lunatrius.schematica.handler.PlayerHandler;
-import com.github.lunatrius.schematica.handler.QueueTickHandler;
-import com.github.lunatrius.schematica.handler.client.*;
+import com.github.lunatrius.schematica.handler.client.InputHandler;
 import com.github.lunatrius.schematica.network.PacketHandler;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.proxy.ServerProxy;
 import com.github.lunatrius.schematica.reference.Reference;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import com.google.common.base.Suppliers;
+import dev.architectury.event.events.client.ClientCommandRegistrationEvent;
+import dev.architectury.event.events.common.CommandRegistrationEvent;
+import dev.architectury.event.events.common.LifecycleEvent;
+import dev.architectury.registry.registries.RegistrarManager;
+import dev.architectury.utils.EnvExecutor;
 
 import java.lang.ref.WeakReference;
+import java.util.function.Supplier;
 
-@Mod(Reference.MODID)
 public class Schematica {
-	public static Schematica instance;
+	public static final Supplier<RegistrarManager> MANAGER =
+			Suppliers.memoize(() -> RegistrarManager.get(Reference.MOD_ID));
 
-	public Schematica(IEventBus modEventBus, ModContainer modContainer) {
-		instance = this;
-		NeoForge.EVENT_BUS.register(this);
-		Reference.proxy = FMLLoader.getDist() == Dist.CLIENT ? new ClientProxy() : new ServerProxy();
-		modEventBus.register(this);
+	public static void init() {
+		CommandRegistrationEvent.EVENT.register(
+				(dispatcher, context, selection) -> CommandSchematicaBase.register(dispatcher));
 
-		modContainer.registerConfig(ModConfig.Type.CLIENT, SchematicaConfig.clientSpec);
-		modContainer.registerConfig(ModConfig.Type.SERVER, SchematicaConfig.serverSpec);
-	}
+		ClientCommandRegistrationEvent.EVENT.register(
+				((dispatcher, context) -> CommandSchematicaBase.registerClient(context)));
 
-	@SubscribeEvent
-	public void registerCommands(RegisterCommandsEvent event) {
-		CommandSchematicaBase.register(event.getDispatcher());
-	}
+		LifecycleEvent.SERVER_STARTING.register((server) ->
+				                                        ServerProxy.serverWeakReference = new WeakReference<>(server));
 
-	@SubscribeEvent()
-	public void registerClientCommands(RegisterClientCommandsEvent event) {
-		CommandSchematicaBase.registerClient(event.getBuildContext());
-	}
-
-	@SubscribeEvent
-	public void commonSetup(FMLCommonSetupEvent event) {
+		Reference.proxy = EnvExecutor.getEnvSpecific(() -> ClientProxy::new, () -> ServerProxy::new);
+		Reference.proxy.init();
 		PacketHandler.init();
-
-		NeoForge.EVENT_BUS.register(QueueTickHandler.INSTANCE);
-		NeoForge.EVENT_BUS.register(DownloadHandler.INSTANCE);
-	}
-
-	@SubscribeEvent
-	public void clientSetup(FMLClientSetupEvent event) {
-		Reference.proxy.createFolders();
-		SchematicaClientConfig.populateExtraAirBlocks();
-		SchematicaClientConfig.normalizeSchematicPath();
-
-		for (KeyB keyBinding : InputHandler.KEY_BINDINGS) {
-			ClientRegistry.registerKeyBinding(keyBinding);
-		}
-
-		NeoForge.EVENT_BUS.register(InputHandler.INSTANCE);
-		NeoForge.EVENT_BUS.register(TickHandler.INSTANCE);
-		NeoForge.EVENT_BUS.register(RenderTickHandler.INSTANCE);
-		NeoForge.EVENT_BUS.register(GuiHandler.INSTANCE);
-		NeoForge.EVENT_BUS.register(new OverlayHandler());
-		NeoForge.EVENT_BUS.register(new WorldHandler());
-		Reference.proxy.resetSettings();
-	}
-
-	@SubscribeEvent
-	public void serverStarting(ServerStartingEvent event) {
-		NeoForge.EVENT_BUS.register(PlayerHandler.INSTANCE);
-		ServerProxy.serverWeakReference = new WeakReference<>(event.getServer());
 	}
 }
