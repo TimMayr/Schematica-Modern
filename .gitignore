@@ -37,3 +37,5 @@ classes/
 .vscode
 .settings
 .architectury-transformer
+**/build/
+**/.gradle/

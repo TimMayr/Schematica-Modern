@@ -2,6 +2,7 @@ package com.github.lunatrius.schematica.network;
 
 import com.github.lunatrius.schematica.network.message.*;
 import com.github.lunatrius.schematica.reference.Reference;
+import dev.architectury.networking.NetworkManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
@@ -18,6 +19,7 @@ public class PacketHandler {
 	@SuppressWarnings("UnusedAssignment")
 	public static void init() {
 		int disc = 0;
+		NetworkManager.registerReceiver(NetworkManager.Side.S2C, );
 		INSTANCE.registerMessage(disc++, MessageCapabilities.class, MessageCapabilities::encode,
 		                         MessageCapabilities::decode, MessageCapabilities::handle);
 		INSTANCE.registerMessage(disc++, MessageDownloadBegin.class, MessageDownloadBegin::encode,
