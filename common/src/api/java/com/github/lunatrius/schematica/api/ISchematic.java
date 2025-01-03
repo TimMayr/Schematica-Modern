@@ -1,13 +1,12 @@
 package com.github.lunatrius.schematica.api;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.extensions.IForgeBlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 public interface ISchematic {
@@ -34,7 +33,7 @@ public interface ISchematic {
 	 *
 	 * @return true if the block state was successfully set.
 	 */
-	boolean setBlockState(BlockPos pos, IForgeBlockState blockState);
+	boolean setBlockState(BlockPos pos, BlockState blockState);
 
 	/**
 	 * Gets the tile entity at the requested location. If no tile entity exists at that location, null will be
@@ -45,14 +44,14 @@ public interface ISchematic {
 	 *
 	 * @return the located tile entity.
 	 */
-	TileEntity getTileEntity(BlockPos pos);
+	BlockEntity getBlockEntity(BlockPos pos);
 
 	/**
 	 * Returns a list of all tile entities in the schematic.
 	 *
 	 * @return all tile entities.
 	 */
-	List<TileEntity> getTileEntities();
+	List<BlockEntity> getTileEntities();
 
 	/**
 	 * Add or replace a tile entity to a block at the requested location. Does nothing if the location is out of
@@ -60,10 +59,10 @@ public interface ISchematic {
 	 *
 	 * @param pos
 	 * 		the location in world space.
-	 * @param tileEntity
+	 * @param blockEntity
 	 * 		the tile entity to set.
 	 */
-	void setTileEntity(BlockPos pos, TileEntity tileEntity);
+	void setBlockEntity(BlockPos pos, BlockEntity blockEntity);
 
 	/**
 	 * Removes a tile entity from the specific location if it exists, otherwise it silently continues.
@@ -71,7 +70,7 @@ public interface ISchematic {
 	 * @param pos
 	 * 		the location in world space.
 	 */
-	void removeTileEntity(BlockPos pos);
+	void removeBlockEntity(BlockPos pos);
 
 	/**
 	 * Returns a list of all entities in the schematic.
@@ -116,28 +115,28 @@ public interface ISchematic {
 	 *
 	 * @return the schematic width
 	 */
-	int getWidth();
+	short getWidth();
 
 	/**
 	 * The length of the schematic
 	 *
 	 * @return the schematic length
 	 */
-	int getLength();
+	short getLength();
 
 	/**
 	 * The height of the schematic
 	 *
 	 * @return the schematic height
 	 */
-	int getHeight();
+	short getHeight();
 
 	/**
 	 * Gets the author of the schematic, or an empty String if unknown.
 	 *
 	 * @return The author of the schematic.
 	 */
-	@Nonnull
+	@NotNull
 	String getAuthor();
 
 	/**
@@ -146,5 +145,5 @@ public interface ISchematic {
 	 * @param author
 	 * 		The new author of the schematic.
 	 */
-	void setAuthor(@Nonnull String author);
+	void setAuthor(@NotNull String author);
 }

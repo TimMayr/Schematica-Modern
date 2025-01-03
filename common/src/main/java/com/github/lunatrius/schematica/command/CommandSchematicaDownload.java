@@ -1,6 +1,5 @@
 package com.github.lunatrius.schematica.command;
 
-import com.github.lunatrius.core.util.FileUtils;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.network.transfer.SchematicTransfer;
@@ -10,31 +9,26 @@ import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
-import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.ICommandSource;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
+import java.io.FileFilter;
 
-@MethodsReturnNonnullByDefault
-@ParametersAreNonnullByDefault
 public class CommandSchematicaDownload extends CommandSchematicaBase {
-	private static final FileFilterSchematic FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
+	private static final FileFilter FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
 
-	public static ArgumentBuilder<CommandSource, ?> register() {
+	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		return Commands.literal(Names.Command.Download.NAME)
 		               .then(Commands.argument("filename", StringArgumentType.string())
 		                             .suggests(
 				                             ((context, builder) -> CommandSchematicaBase.getSchematicNamesSuggestions(
 						                             context, builder, FILE_FILTER_SCHEMATIC)))
 		                             .executes((commandContext) -> {
-			                             CommandSource source = commandContext.getSource();
-			                             ServerPlayerEntity player = source.asPlayer();
+			                             CommandSourceStack source = commandContext.getSource();
+			                             ServerPlayer player = source.getPlayerOrException();
 
 			                             String filename = StringArgumentType.getString(commandContext, "filename");
 			                             File directory = Reference.proxy.getPlayerSchematicDirectory(player, true);
@@ -42,8 +36,10 @@ public class CommandSchematicaDownload extends CommandSchematicaBase {
 			                             if (!FileUtils.contains(directory, filename)) {
 				                             Reference.logger.error("{} has tried to download" + " the file " + "{}",
 				                                                    player.getName(), filename);
-				                             throw new CommandException(new TranslationTextComponent(
+
+				                             source.sendFailure(Component.translatable(
 						                             Names.Command.Download.Message.DOWNLOAD_FAILED));
+				                             return -1;
 			                             }
 
 			                             ISchematic schematic = SchematicFormat.readFromFile(directory, filename);
@@ -52,19 +48,15 @@ public class CommandSchematicaDownload extends CommandSchematicaBase {
 				                             DownloadHandler.INSTANCE.transferMap.put(player,
 				                                                                      new SchematicTransfer(schematic,
 				                                                                                            filename));
-				                             source.sendFeedback(new TranslationTextComponent(
+				                             source.sendSuccess(() -> Component.translatable(
 						                             Names.Command.Download.Message.DOWNLOAD_STARTED, filename), true);
 			                             } else {
-				                             throw new CommandException(new TranslationTextComponent(
+				                             source.sendFailure(Component.translatable(
 						                             Names.Command.Download.Message.DOWNLOAD_FAILED));
+				                             return -1;
 			                             }
 
 			                             return 0;
 		                             }));
-	}
-
-	@Override
-	public String getUsage(ICommandSource sender) {
-		return Names.Command.Download.Message.USAGE;
 	}
 }

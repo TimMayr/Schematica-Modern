@@ -6,12 +6,10 @@ import com.github.lunatrius.schematica.network.message.MessageCapabilities;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 public class PlayerHandler {
 	public static final PlayerHandler INSTANCE = new PlayerHandler();
@@ -20,7 +18,7 @@ public class PlayerHandler {
 
 	@SubscribeEvent
 	public void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
-		if (event.getPlayer() instanceof PlayerEntity) {
+		if (event.getEntity() instanceof Player) {
 			try {
 				PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) event.getPlayer()),
 				                            new MessageCapabilities(SchematicaConfig.SERVER.printerEnabled.get(),
@@ -34,16 +32,20 @@ public class PlayerHandler {
 
 	@SubscribeEvent
 	public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
-		if (event.getPlayer() instanceof PlayerEntity) {
-			DownloadHandler.INSTANCE.transferMap.remove(event.getPlayer());
+		if (event.getEntity() instanceof Player) {
+			DownloadHandler.INSTANCE.transferMap.remove(event.getEntity());
 		}
 	}
 
 	@SubscribeEvent
-	public void onRenderWorldLast(final RenderWorldLastEvent event) {
-		final PlayerEntity player = Minecraft.getInstance().player;
+	public void onRenderWorldLast(RenderLevelStageEvent event) {
+		if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) {
+			return;
+		}
+
+		Player player = Minecraft.getInstance().player;
 		if (player != null) {
-			ClientProxy.setPlayerData(player, event.getPartialTicks());
+			ClientProxy.setPlayerData(player, event.getPartialTick().getRealtimeDeltaTicks());
 		}
 	}
 }

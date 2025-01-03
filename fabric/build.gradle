@@ -26,6 +26,7 @@ configurations {
 
 dependencies {
 	modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+	modImplementation files("../libs/lunatriuscore-fabric-${minecraft_version}-${lunatriuscore_version}.jar")
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
@@ -60,4 +61,18 @@ shadowJar {
 
 remapJar {
 	inputFile.set shadowJar.archiveFile
+}
+
+sourceSets {
+	api {
+		java {
+			srcDirs = ['src/api/java']
+		}
+	}
+}
+
+tasks.register('apiJar', Jar) {
+	dependsOn 'classes'
+	from sourceSets.api.output
+	archiveClassifier = 'api'
 }

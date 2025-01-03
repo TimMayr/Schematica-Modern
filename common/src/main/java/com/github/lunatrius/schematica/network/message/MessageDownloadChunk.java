@@ -84,7 +84,7 @@ public class MessageDownloadChunk {
 
 		CompoundNBT compound = buf.readCompoundTag();
 		if (compound != null) {
-			NBTHelper.readTileEntitiesFromCompound(compound, msgTileEntities);
+			NBTHelper.readBlockEntitiesFromCompound(compound, msgTileEntities);
 		}
 
 		CompoundNBT compound2 = buf.readCompoundTag();

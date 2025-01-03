@@ -7,65 +7,51 @@ import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.mojang.brigadier.builder.ArgumentBuilder;
-import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.pattern.BlockStateMatcher;
-import net.minecraft.command.CommandException;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.ICommandSource;
-import net.minecraft.command.arguments.BlockStateArgument;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.blocks.BlockStateArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockStateMatchTest;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
-@MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class CommandSchematicaReplace extends CommandSchematicaBase {
-
-	public static ArgumentBuilder<CommandSource, ?> register() {
+	public static ArgumentBuilder<CommandSourceStack, ?> register(CommandBuildContext context) {
 		return Commands.literal(Names.Command.Replace.NAME)
-		               .then(Commands.argument("toReplace", BlockStateArgument.blockState())
-		                             .then(Commands.argument("with", BlockStateArgument.blockState())
-		                                           .executes((commandContext) -> {
-			                                           CommandSource source = commandContext.getSource();
-			                                           BlockState toReplace =
-					                                           BlockStateArgument.getBlockState(commandContext,
-					                                                                            "toReplace").getState();
+		               .then(Commands.argument("toReplace", BlockStateArgument.block(context))
+		                             .then(Commands.argument("with", BlockStateArgument.block(context)))
+		                             .executes((commandContext) -> {
+			                             CommandSourceStack source = commandContext.getSource();
+			                             BlockState toReplace =
+					                             BlockStateArgument.getBlock(commandContext, "toReplace").getState();
+			                             BlockState with =
+					                             BlockStateArgument.getBlock(commandContext, "with").getState();
 
-			                                           BlockState with =
-					                                           BlockStateArgument.getBlockState(commandContext, "with")
-					                                                             .getState();
+			                             SchematicWorld schematic = ClientProxy.schematic;
 
-			                                           SchematicWorld schematic = ClientProxy.schematic;
+			                             if (schematic == null) {
+				                             source.sendFailure(Component.translatable(
+						                             Names.Command.Replace.Message.NO_SCHEMATIC));
+				                             return -1;
+			                             }
 
-			                                           if (schematic == null) {
-				                                           throw new CommandException(new TranslationTextComponent(
-						                                           Names.Command.Replace.Message.NO_SCHEMATIC));
-			                                           }
+			                             try {
+				                             BlockStateMatchTest matcher = new BlockStateMatchTest(toReplace);
+				                             BlockStateReplacer replacer = BlockStateReplacer.forBlockState(with);
+				                             int count = schematic.replaceBlock(matcher, replacer);
 
-			                                           try {
-				                                           BlockStateMatcher matcher =
-						                                           BlockStateMatcher.forBlock(toReplace.getBlock());
-				                                           BlockStateReplacer replacer =
-						                                           BlockStateReplacer.forBlockState(with);
-				                                           int count = schematic.replaceBlock(matcher, replacer);
-
-				                                           source.sendFeedback(new TranslationTextComponent(
-						                                           Names.Command.Replace.Message.SUCCESS, count),
-				                                                               true);
-			                                           } catch (Exception e) {
-				                                           Reference.logger.error("Something went wrong!", e);
-				                                           throw new CommandException(
-						                                           new StringTextComponent(e.getMessage()));
-			                                           }
-			                                           return 0;
-		                                           })));
-	}
-
-	@Override
-	public String getUsage(ICommandSource sender) {
-		return Names.Command.Replace.Message.USAGE;
+				                             source.sendSuccess(
+						                             () -> Component.translatable(Names.Command.Replace.Message.SUCCESS,
+						                                                          count), true);
+			                             } catch (Exception e) {
+				                             Reference.logger.error("Something went wrong!", e);
+				                             source.sendFailure(Component.literal(e.getMessage()));
+				                             return -1;
+			                             }
+			                             return 0;
+		                             }));
 	}
 }

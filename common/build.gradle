@@ -10,6 +10,7 @@ dependencies {
 
 	// Architectury API. This is optional, and you can comment it out if you don't need it.
 	modImplementation "dev.architectury:architectury:$rootProject.architectury_api_version"
+	implementation 'org.jetbrains:annotations:24.1.0'
 }
 
 var generateReference = tasks.register("generateReference", ProcessResources) {
@@ -40,4 +41,23 @@ sourceSets {
 	}
 }
 
+sourceSets {
+	api {
+		java {
+			srcDirs = ['src/api/java']
+		}
+	}
+}
+
+tasks.register('apiJar', Jar) {
+	dependsOn 'classes'
+	from sourceSets.api.output
+	archiveClassifier = 'api'
+}
+
 compileJava.dependsOn generateReference
+
+artifacts {
+	archives sourcesJar
+	archives apiJar
+}

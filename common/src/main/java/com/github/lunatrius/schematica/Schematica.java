@@ -11,18 +11,19 @@ import com.github.lunatrius.schematica.network.PacketHandler;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.proxy.ServerProxy;
 import com.github.lunatrius.schematica.reference.Reference;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.client.event.RegisterClientCommandsEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
 
 import java.lang.ref.WeakReference;
 
@@ -30,22 +31,32 @@ import java.lang.ref.WeakReference;
 public class Schematica {
 	public static Schematica instance;
 
-	public Schematica() {
+	public Schematica(IEventBus modEventBus, ModContainer modContainer) {
 		instance = this;
-		MinecraftForge.EVENT_BUS.register(this);
-		Reference.proxy = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> ServerProxy::new);
-		FMLJavaModLoadingContext.get().getModEventBus().register(this);
+		NeoForge.EVENT_BUS.register(this);
+		Reference.proxy = FMLLoader.getDist() == Dist.CLIENT ? new ClientProxy() : new ServerProxy();
+		modEventBus.register(this);
+
+		modContainer.registerConfig(ModConfig.Type.CLIENT, SchematicaConfig.clientSpec);
+		modContainer.registerConfig(ModConfig.Type.SERVER, SchematicaConfig.serverSpec);
+	}
+
+	@SubscribeEvent
+	public void registerCommands(RegisterCommandsEvent event) {
+		CommandSchematicaBase.register(event.getDispatcher());
+	}
+
+	@SubscribeEvent()
+	public void registerClientCommands(RegisterClientCommandsEvent event) {
+		CommandSchematicaBase.registerClient(event.getBuildContext());
 	}
 
 	@SubscribeEvent
 	public void commonSetup(FMLCommonSetupEvent event) {
 		PacketHandler.init();
 
-		MinecraftForge.EVENT_BUS.register(QueueTickHandler.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(DownloadHandler.INSTANCE);
-
-		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, SchematicaConfig.clientSpec);
-		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SchematicaConfig.serverSpec);
+		NeoForge.EVENT_BUS.register(QueueTickHandler.INSTANCE);
+		NeoForge.EVENT_BUS.register(DownloadHandler.INSTANCE);
 	}
 
 	@SubscribeEvent
@@ -54,23 +65,22 @@ public class Schematica {
 		SchematicaClientConfig.populateExtraAirBlocks();
 		SchematicaClientConfig.normalizeSchematicPath();
 
-		for (KeyBinding keyBinding : InputHandler.KEY_BINDINGS) {
+		for (KeyB keyBinding : InputHandler.KEY_BINDINGS) {
 			ClientRegistry.registerKeyBinding(keyBinding);
 		}
 
-		MinecraftForge.EVENT_BUS.register(InputHandler.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(TickHandler.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(RenderTickHandler.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(GuiHandler.INSTANCE);
-		MinecraftForge.EVENT_BUS.register(new OverlayHandler());
-		MinecraftForge.EVENT_BUS.register(new WorldHandler());
+		NeoForge.EVENT_BUS.register(InputHandler.INSTANCE);
+		NeoForge.EVENT_BUS.register(TickHandler.INSTANCE);
+		NeoForge.EVENT_BUS.register(RenderTickHandler.INSTANCE);
+		NeoForge.EVENT_BUS.register(GuiHandler.INSTANCE);
+		NeoForge.EVENT_BUS.register(new OverlayHandler());
+		NeoForge.EVENT_BUS.register(new WorldHandler());
 		Reference.proxy.resetSettings();
 	}
 
 	@SubscribeEvent
-	public void serverStarting(FMLServerStartingEvent event) {
-		MinecraftForge.EVENT_BUS.register(PlayerHandler.INSTANCE);
-		CommandSchematicaBase.register(event.getCommandDispatcher());
+	public void serverStarting(ServerStartingEvent event) {
+		NeoForge.EVENT_BUS.register(PlayerHandler.INSTANCE);
 		ServerProxy.serverWeakReference = new WeakReference<>(event.getServer());
 	}
 }

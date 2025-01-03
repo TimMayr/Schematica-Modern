@@ -2,12 +2,11 @@ package com.github.lunatrius.schematica.world.schematic;
 
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,19 +20,19 @@ public class SchematicUtil {
 
 		String[] parts = iconName.split(",");
 		if (parts.length >= 1) {
-			rl = new ResourceLocation(parts[0]);
+			rl = ResourceLocation.parse(parts[0]);
 		}
 
 		if (rl == null) {
 			return DEFAULT_ICON.copy();
 		}
 
-		ItemStack block = new ItemStack(ForgeRegistries.BLOCKS.getValue(rl), 1, null);
+		ItemStack block = new ItemStack(BuiltInRegistries.BLOCK.getValue(rl), 1);
 		if (!block.isEmpty()) {
 			return block;
 		}
 
-		ItemStack item = new ItemStack(ForgeRegistries.ITEMS.getValue(rl), 1, null);
+		ItemStack item = new ItemStack(BuiltInRegistries.ITEM.getValue(rl), 1);
 		if (!item.isEmpty()) {
 			return item;
 		}
@@ -51,7 +50,7 @@ public class SchematicUtil {
 		return DEFAULT_ICON.copy();
 	}
 
-	public static CompoundNBT readTagCompoundFromFile(File file) throws IOException {
+	public static CompoundTag readTagCompoundFromFile(File file) throws IOException {
 		try {
 			return CompressedStreamTools.readCompressed(Files.newInputStream(file.toPath()));
 		} catch (Exception ex) {
@@ -60,10 +59,10 @@ public class SchematicUtil {
 		}
 	}
 
-	public static ItemStack getIconFromNBT(CompoundNBT tagCompound) {
+	public static ItemStack getIconFromNBT(CompoundTag tagCompound) {
 		ItemStack icon = DEFAULT_ICON.copy();
 
-		if (tagCompound != null && tagCompound.hasUniqueId(Names.NBT.ICON)) {
+		if (tagCompound != null && tagCompound.hasUUID(Names.NBT.ICON)) {
 			icon.deserializeNBT(tagCompound.getCompound(Names.NBT.ICON));
 
 			if (icon.isEmpty()) {

@@ -17,6 +17,10 @@ allprojects {
 			name = 'ParchmentMC'
 			url = 'https://maven.parchmentmc.org'
 		}
+
+		flatDir {
+			dirs("libs")
+		}
 	}
 }
 

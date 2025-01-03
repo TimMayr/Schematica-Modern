@@ -2,68 +2,68 @@ package com.github.lunatrius.schematica.command;
 
 import com.github.lunatrius.schematica.command.client.CommandSchematicaReplace;
 import com.github.lunatrius.schematica.reference.Reference;
-import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.ICommandSource;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-@MethodsReturnNonnullByDefault
-@ParametersAreNonnullByDefault
 public abstract class CommandSchematicaBase {
-	protected static <T extends ITextComponent> T withStyle(T component, TextFormatting formatting,
-	                                                        @Nullable String command) {
-		Style style = new Style();
-		style.setColor(formatting);
+	private static LiteralCommandNode<CommandSourceStack> mainNode;
+
+	protected static <T extends Component> T withStyle(T component, ChatFormatting formatting,
+	                                                   @Nullable String command) {
+		Style style = Style.EMPTY.applyFormat(formatting);
 
 		if (command != null) {
-			style.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
+			style = style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
 		}
 
-		component.setStyle(style);
-
-		return component;
+		//noinspection unchecked
+		return (T) component.copy().withStyle(style);
 	}
 
-	public static void register(CommandDispatcher<CommandSource> dispatcher) {
-		dispatcher.register(Commands.literal("schematica")
-		                            .then(CommandSchematicaDownload.register())
-		                            .then(CommandSchematicaList.register())
-		                            .then(CommandSchematicaSave.register())
-		                            .then(CommandSchematicaRemove.register())
-		                            .then(CommandSchematicaReplace.register()));
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+		mainNode = dispatcher.register(Commands.literal("schematica")
+		                                       .then(CommandSchematicaDownload.register())
+		                                       .then(CommandSchematicaList.register())
+		                                       .then(CommandSchematicaSave.register())
+		                                       .then(CommandSchematicaRemove.register()));
 	}
 
-	public static CompletableFuture<Suggestions> getSchematicNamesSuggestions(CommandContext<CommandSource> context,
-	                                                                          SuggestionsBuilder builder,
-	                                                                          FileFilterSchematic FILE_FILTER_SCHEMATIC) {
-		CommandSource source = context.getSource();
-		PlayerEntity player;
+	public static void registerClient(CommandBuildContext context) {
+		mainNode.addChild(CommandSchematicaReplace.register(context).build());
+	}
+
+	public static CompletableFuture<Suggestions> getSchematicNamesSuggestions(
+			CommandContext<CommandSourceStack> context, SuggestionsBuilder builder, FileFilter FILE_FILTER_SCHEMATIC) {
+		CommandSourceStack source = context.getSource();
+		Player player;
 		String name = "";
 		try {
 			name = StringArgumentType.getString(context, "name");
-		} catch (IllegalArgumentException ignored) {}
+		} catch (IllegalArgumentException ignored) {
+		}
 
 		try {
-			player = source.asPlayer();
+			player = source.getPlayerOrException();
 		} catch (CommandSyntaxException e) {
 			return builder.buildFuture();
 		}
@@ -85,6 +85,4 @@ public abstract class CommandSchematicaBase {
 
 		return builder.buildFuture();
 	}
-
-	public abstract String getUsage(ICommandSource sender);
 }

@@ -2,24 +2,21 @@ package com.github.lunatrius.schematica.network;
 
 import com.github.lunatrius.schematica.network.message.*;
 import com.github.lunatrius.schematica.reference.Reference;
-import dev.architectury.networking.NetworkManager;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import io.netty.channel.Channel;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.registration.NetworkRegistry;
 
 public class PacketHandler {
 	private static final String PROTOCOL_VERSION = Integer.toString(1);
-	public static final SimpleChannel INSTANCE =
+	public static final Channel INSTANCE = NetworkRegistry.
 			NetworkRegistry.ChannelBuilder.named(new ResourceLocation(Reference.MODID, "main_channel"))
 			                              .clientAcceptedVersions(PROTOCOL_VERSION::equals)
 			                              .serverAcceptedVersions(PROTOCOL_VERSION::equals)
 			                              .networkProtocolVersion(() -> PROTOCOL_VERSION)
 			                              .simpleChannel();
 
-	@SuppressWarnings("UnusedAssignment")
 	public static void init() {
 		int disc = 0;
-		NetworkManager.registerReceiver(NetworkManager.Side.S2C, );
 		INSTANCE.registerMessage(disc++, MessageCapabilities.class, MessageCapabilities::encode,
 		                         MessageCapabilities::decode, MessageCapabilities::handle);
 		INSTANCE.registerMessage(disc++, MessageDownloadBegin.class, MessageDownloadBegin::encode,

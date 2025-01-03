@@ -1,15 +1,15 @@
 package com.github.lunatrius.schematica.config;
 
 import com.github.lunatrius.schematica.reference.Names;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class SchematicaServerConfig {
-	public final ForgeConfigSpec.BooleanValue loadEnabled;
-	public final ForgeConfigSpec.IntValue playerQuotaKilobytes;
-	public final ForgeConfigSpec.BooleanValue printerEnabled;
-	public final ForgeConfigSpec.BooleanValue saveEnabled;
+	public final ModConfigSpec.BooleanValue loadEnabled;
+	public final ModConfigSpec.IntValue playerQuotaKilobytes;
+	public final ModConfigSpec.BooleanValue printerEnabled;
+	public final ModConfigSpec.BooleanValue saveEnabled;
 
-	SchematicaServerConfig(ForgeConfigSpec.Builder builder) {
+	SchematicaServerConfig(ModConfigSpec.Builder builder) {
 		builder.push(Names.Config.Category.SERVER);
 
 		loadEnabled = builder.comment(Names.Config.LOAD_ENABLED_DESC)

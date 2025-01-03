@@ -8,30 +8,19 @@ import com.github.lunatrius.schematica.block.state.pattern.BlockStateReplacer;
 import com.github.lunatrius.schematica.client.world.chunk.SchematicChunkProvider;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
-import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.pattern.BlockStateMatcher;
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.IProperty;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.GameType;
-import net.minecraft.world.LightType;
-import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.Biomes;
-import net.minecraft.world.chunk.AbstractChunkProvider;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.extensions.IForgeBlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockStateMatchTest;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -56,19 +45,19 @@ public class SchematicWorld extends ClientWorld {
 		      Minecraft.getInstance().getProfiler(), Minecraft.getInstance().worldRenderer);
 		this.schematic = schematic;
 
-		for (TileEntity tileEntity : schematic.getTileEntities()) {
+		for (BlockEntity tileEntity : schematic.getTileEntities()) {
 			initializeTileEntity(tileEntity);
 		}
 	}
 
-	public void initializeTileEntity(TileEntity tileEntity) {
+	public void initializeTileEntity(BlockEntity tileEntity) {
 		tileEntity.setWorldAndPos(this, tileEntity.getPos());
 		tileEntity.getBlockState().getBlock();
 		try {
 			tileEntity.remove();
 			tileEntity.validate();
 		} catch (Exception e) {
-			Reference.logger.error("TileEntity validation for {} failed!", tileEntity.getClass(), e);
+			Reference.logger.error("BlockEntity validation for {} failed!", tileEntity.getClass(), e);
 		}
 	}
 
@@ -88,7 +77,7 @@ public class SchematicWorld extends ClientWorld {
 
 	@Override
 	@Nullable
-	public TileEntity getTileEntity(BlockPos pos) {
+	public BlockEntity getTileEntity(BlockPos pos) {
 		if (!this.layerMode.shouldUseLayer(this, pos.getY())) {
 			return null;
 		}
@@ -97,7 +86,7 @@ public class SchematicWorld extends ClientWorld {
 	}
 
 	@Override
-	public void setTileEntity(BlockPos pos, @Nullable TileEntity tileEntity) {
+	public void setTileEntity(BlockPos pos, @Nullable BlockEntity tileEntity) {
 		if (tileEntity != null) {
 			this.schematic.setTileEntity(pos, tileEntity);
 			initializeTileEntity(tileEntity);
@@ -180,7 +169,7 @@ public class SchematicWorld extends ClientWorld {
 		this.schematic.setIcon(icon);
 	}
 
-	public List<TileEntity> getTileEntities() {
+	public List<BlockEntity> getTileEntities() {
 		return this.schematic.getTileEntities();
 	}
 
@@ -202,7 +191,7 @@ public class SchematicWorld extends ClientWorld {
 	}
 
 	@SuppressWarnings({"rawtypes"})
-	public int replaceBlock(BlockStateMatcher matcher, BlockStateReplacer replacer) {
+	public int replaceBlock(BlockStateMatchTest matcher, BlockStateReplacer replacer) {
 		int count = 0;
 
 		for (MBlockPos pos : BlockPosHelper.getAllInBox(0, 0, 0, getWidth(), getHeight(), getLength())) {
