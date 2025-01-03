@@ -28,3 +28,12 @@ runs
 run-data
 
 repo
+
+.classpath
+.project
+.idea/
+classes/
+.metadata
+.vscode
+.settings
+.architectury-transformer
