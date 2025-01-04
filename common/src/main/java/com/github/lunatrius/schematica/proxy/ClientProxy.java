@@ -39,9 +39,7 @@ public class ClientProxy extends CommonProxy {
 
 	public static void setPlayerData(Player player, float partialTicks) {
 		playerPosition.set(new Vector3d(player.getPosition(partialTicks)));
-
 		orientation = getOrientation(player);
-
 		rotationRender = (int) Math.floor(player.getYRot() / 90) & 3;
 	}
 

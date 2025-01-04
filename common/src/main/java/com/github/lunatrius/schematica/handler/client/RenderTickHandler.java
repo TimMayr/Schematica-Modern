@@ -2,20 +2,23 @@ package com.github.lunatrius.schematica.handler.client;
 
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
+import dev.architectury.event.events.client.ClientTickEvent;
+import dev.architectury.event.events.common.TickEvent;
+import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+
 
 public class RenderTickHandler {
 	public static final RenderTickHandler INSTANCE = new RenderTickHandler();
 
 	private final Minecraft minecraft = Minecraft.getInstance();
 
-	private RenderTickHandler() {}
+
+	private RenderTickHandler() {
+	}
 
 	@SubscribeEvent
 	public void onRenderTick(TickEvent.RenderTickEvent event) {
@@ -25,29 +28,30 @@ public class RenderTickHandler {
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private RayTraceResult rayTrace(SchematicWorld schematic, float partialTicks) {
-		Entity renderViewEntity = this.minecraft.getRenderViewEntity();
+	private HitResult rayTrace(SchematicWorld schematic, float partialTicks) {
+		Entity renderViewEntity = this.minecraft.getCameraEntity();
 		if (renderViewEntity == null) {
 			return null;
 		}
 
-		if (this.minecraft.playerController != null) {
-			double blockReachDistance = this.minecraft.playerController.getBlockReachDistance();
+		if (this.minecraft.gameMode != null) {
+			//TODO: This shit again
+			double blockReachDistance = this.minecraft.gameMode.getBlockReachDistance();
 
-			double posX = renderViewEntity.getPosX();
-			double posY = renderViewEntity.getPosY();
-			double posZ = renderViewEntity.getPosZ();
+			double posX = renderViewEntity.getX();
+			double posY = renderViewEntity.getY();
+			double posZ = renderViewEntity.getZ();
 
-			renderViewEntity.setPosition(renderViewEntity.getPosX() - schematic.position.x,
-			                             renderViewEntity.getPosY() - schematic.position.y,
-			                             renderViewEntity.getPosZ() - schematic.position.z);
+			renderViewEntity.setPos(posX - schematic.position.x,
+			                             posY - schematic.position.y,
+			                             posZ - schematic.position.z);
 
-			Vec3d vecPosition = renderViewEntity.getEyePosition(partialTicks);
-			Vec3d vecLook = renderViewEntity.getLook(partialTicks);
-			Vec3d vecExtendedLook = vecPosition.add(vecLook.x * blockReachDistance, vecLook.y * blockReachDistance,
+			Vec3 vecPosition = renderViewEntity.getEyePosition(partialTicks);
+			Vec3 vecLook = renderViewEntity.getLookAngle();
+			Vec3 vecExtendedLook = vecPosition.add(vecLook.x * blockReachDistance, vecLook.y * blockReachDistance,
 			                                        vecLook.z * blockReachDistance);
 
-			renderViewEntity.setPosition(posX, posY, posZ);
+			renderViewEntity.setPos(posX, posY, posZ);
 
 			return schematic.rayTraceBlocks(
 					new RayTraceContext(vecPosition, vecExtendedLook, RayTraceContext.BlockMode.OUTLINE,

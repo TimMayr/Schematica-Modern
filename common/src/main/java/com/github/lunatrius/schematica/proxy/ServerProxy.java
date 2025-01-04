@@ -77,4 +77,9 @@ public class ServerProxy extends CommonProxy {
 			return new File(playerDir, "public");
 		}
 	}
+
+	@Override
+	public void init() {
+
+	}
 }

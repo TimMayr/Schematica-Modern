@@ -2,7 +2,7 @@ package com.github.lunatrius.schematica.nbt;
 
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;
-import com.github.lunatrius.schematica.world.WorldDummy;
+import com.github.lunatrius.schematica.world.LevelDummy;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -118,7 +118,7 @@ public class NBTHelper {
 		try {
 			CompoundTag entityCompound = writeEntityToCompound(entity);
 			if (entityCompound != null) {
-				entity = readEntityFromCompound(entityCompound, WorldDummy.instance());
+				entity = readEntityFromCompound(entityCompound, LevelDummy.instance());
 
 				if (entity != null) {
 					entity.setPos(entity.getX() - offsetX, entity.getY() - offsetY, entity.getZ() - offsetZ);
