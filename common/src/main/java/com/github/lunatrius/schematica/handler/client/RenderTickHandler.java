@@ -2,9 +2,7 @@ package com.github.lunatrius.schematica.handler.client;
 
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
-import dev.architectury.event.events.client.ClientTickEvent;
 import dev.architectury.event.events.common.TickEvent;
-import net.fabricmc.loader.impl.lib.sat4j.core.Vec;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.HitResult;
@@ -43,8 +41,8 @@ public class RenderTickHandler {
 			double posZ = renderViewEntity.getZ();
 
 			renderViewEntity.setPos(posX - schematic.position.x,
-			                             posY - schematic.position.y,
-			                             posZ - schematic.position.z);
+			                        posY - schematic.position.y,
+			                        posZ - schematic.position.z);
 
 			Vec3 vecPosition = renderViewEntity.getEyePosition(partialTicks);
 			Vec3 vecLook = renderViewEntity.getLookAngle();

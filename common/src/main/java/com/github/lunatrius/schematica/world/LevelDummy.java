@@ -32,16 +32,15 @@ import java.util.Map;
 @MethodsReturnNonnullByDefault
 public class LevelDummy extends Level {
 	private static LevelDummy instance;
-
-	protected BlockGetter levelSource;
-	protected Level realLevel;
 	protected final Scoreboard scoreboard;
 	protected final boolean overrideBeLevel;
-
 	protected final FakeChunkSource chunkSource;
 	protected final FakeLevelLightEngine lightEngine;
+	protected BlockGetter levelSource;
+	protected Level realLevel;
 	protected FakeLevelEntityGetterAdapter levelEntityGetter = FakeLevelEntityGetterAdapter.EMPTY;
-	// TODO: this is currently manually filled by class user - ideally if not filled yet this should get constructed from levelSource
+	// TODO: this is currently manually filled by class user - ideally if not filled yet this should get constructed
+	//  from levelSource
 	// manually
 	protected Map<BlockPos, BlockEntity> blockEntities = Collections.emptyMap();
 
@@ -56,11 +55,11 @@ public class LevelDummy extends Level {
 	                   LevelRenderer levelRenderer, boolean isDebug, long biomeZoomSeed, int seaLevel) {
 		super(Minecraft.getInstance().getConnection(), new ClientLevelData(Difficulty.EASY, false, true),
 		      Level.OVERWORLD,
-		      , viewDistance, serverSimulationDistance,
-		      levelRenderer,
-		      isDebug,
-		      biomeZoomSeed,
-		      seaLevel);
+				, viewDistance, serverSimulationDistance,
+              levelRenderer,
+              isDebug,
+              biomeZoomSeed,
+              seaLevel);
 	}
 
 	protected LevelDummy(worldInfo, DimensionType dimensionType, IProfiler profiler) {
