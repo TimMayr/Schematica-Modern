@@ -4,44 +4,47 @@ import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
+import commonnetwork.networking.data.PacketContext;
+import commonnetwork.networking.data.Side;
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
 import java.io.File;
-import java.util.function.Supplier;
 
-public class MessageDownloadEnd {
-	public final String name;
+@MethodsReturnNonnullByDefault
+public record MessageDownloadEnd(String name) implements CustomPacketPayload {
+	public static final Type<MessageDownloadEnd> TYPE =
+			new Type<>(ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, Names.Network.DOWNLOAD_END_LOCATION));
 
-	public MessageDownloadEnd(String name) {
-		this.name = name;
-	}
+	public static final StreamCodec<RegistryFriendlyByteBuf, MessageDownloadEnd> STREAM_CODEC =
+			StreamCodec.composite(ByteBufCodecs.STRING_UTF8, MessageDownloadEnd::name, MessageDownloadEnd::new);
 
-	public static MessageDownloadEnd decode(PacketBuffer buf) {
-		return new MessageDownloadEnd(buf.readString());
-	}
-
-	public static void encode(MessageDownloadEnd msg, PacketBuffer buf) {
-		buf.writeString(msg.name);
-	}
-
-	public static void handle(MessageDownloadEnd msg, Supplier<NetworkEvent.Context> ctx) {
-		ctx.get().enqueueWork(() -> {
+	public static void handle(PacketContext<MessageDownloadEnd> ctx) {
+		if (ctx.side() == Side.CLIENT) {
 			File directory = Reference.proxy.getPlayerSchematicDirectory(null, true);
-			boolean success =
-					SchematicFormat.writeToFile(directory, msg.name, null, DownloadHandler.INSTANCE.schematic);
+			boolean success = SchematicFormat.writeToFile(directory, ctx.message().name, null,
+			                                              DownloadHandler.INSTANCE.schematic);
 
 			if (success) {
 				if (Minecraft.getInstance().player != null) {
-					Minecraft.getInstance().player.sendMessage(
-							new TranslationTextComponent(Names.Command.Download.Message.DOWNLOAD_SUCCEEDED, msg.name));
+					Minecraft.getInstance().player.displayClientMessage(
+							Component.translatable(Names.Command.Download.Message.DOWNLOAD_SUCCEEDED,
+							                       ctx.message().name), false);
 				}
 			}
 
 			DownloadHandler.INSTANCE.schematic = null;
-		});
-		ctx.get().setPacketHandled(true);
+		}
+	}
+
+	@Override
+	public Type<? extends CustomPacketPayload> type() {
+		return TYPE;
 	}
 }

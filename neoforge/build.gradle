@@ -39,6 +39,9 @@ dependencies {
 	// LunatriusCore
 	modImplementation files("../libs/lunatriuscore-neoforge-${minecraft_version}-${lunatriuscore_version}.jar")
 
+	// Common Networking
+	modImplementation 'mysticdrew:common-networking-neoforge:1.0.16-1.21'
+
 	// Forge Config Screen
 	// TODO: Check for update
 	// runtimeOnly "fuzs.forgeconfigscreens:forgeconfigscreens-neoforge:<modVersion>"

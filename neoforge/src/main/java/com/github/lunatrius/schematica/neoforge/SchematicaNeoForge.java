@@ -2,9 +2,7 @@ package com.github.lunatrius.schematica.neoforge;
 
 import com.github.lunatrius.schematica.Schematica;
 import com.github.lunatrius.schematica.config.SchematicaConfig;
-import com.github.lunatrius.schematica.handler.PlayerHandler;
 import com.github.lunatrius.schematica.neoforge.handler.PlayerHandlerNeo;
-import com.github.lunatrius.schematica.proxy.ServerProxy;
 import com.github.lunatrius.schematica.reference.Reference;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -13,8 +11,6 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
-
-import java.lang.ref.WeakReference;
 
 @Mod(Reference.MOD_ID)
 public final class SchematicaNeoForge {

@@ -3,7 +3,8 @@ package com.github.lunatrius.schematica.network.message;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
-import dev.architectury.networking.NetworkManager;
+import commonnetwork.networking.data.PacketContext;
+import commonnetwork.networking.data.Side;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -22,15 +23,16 @@ public record MessageCapabilities(boolean isPrinterEnabled, boolean isSaveEnable
 			                      MessageCapabilities::isSaveEnabled, ByteBufCodecs.BOOL,
 			                      MessageCapabilities::isLoadEnabled, MessageCapabilities::new);
 
-	public static void handle(MessageCapabilities msg, NetworkManager.PacketContext ctx) {
-		ctx.queue(() -> {
-			SchematicPrinter.INSTANCE.setEnabled(msg.isPrinterEnabled());
-			Reference.proxy.isSaveEnabled = msg.isSaveEnabled();
-			Reference.proxy.isLoadEnabled = msg.isLoadEnabled();
+	public static void handle(PacketContext<MessageCapabilities> ctx) {
+		if (ctx.side() == Side.CLIENT) {
+			SchematicPrinter.INSTANCE.setEnabled(ctx.message().isPrinterEnabled());
+			Reference.proxy.isSaveEnabled = ctx.message().isSaveEnabled();
+			Reference.proxy.isLoadEnabled = ctx.message().isLoadEnabled();
 
-			Reference.logger.info("Server capabilities{printer={}, save={}, load={}}", msg.isPrinterEnabled(),
-			                      msg.isSaveEnabled(), msg.isLoadEnabled());
-		});
+			Reference.logger.info("Server capabilities{printer={}, save={}, load={}}",
+			                      ctx.message().isPrinterEnabled(),
+			                      ctx.message().isSaveEnabled(), ctx.message().isLoadEnabled());
+		}
 	}
 
 	@Override

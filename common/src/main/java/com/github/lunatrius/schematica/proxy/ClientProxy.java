@@ -7,7 +7,6 @@ import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.handler.client.InputHandler;
-import com.github.lunatrius.schematica.handler.client.TickHandler;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
@@ -17,7 +16,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.HitResult;
-import net.neoforged.neoforge.common.NeoForge;
 
 import java.io.File;
 import java.io.IOException;

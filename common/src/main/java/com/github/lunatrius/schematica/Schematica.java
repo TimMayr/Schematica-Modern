@@ -1,8 +1,6 @@
 package com.github.lunatrius.schematica;
 
 import com.github.lunatrius.schematica.command.CommandSchematicaBase;
-import com.github.lunatrius.schematica.config.SchematicaClientConfig;
-import com.github.lunatrius.schematica.handler.client.InputHandler;
 import com.github.lunatrius.schematica.network.PacketHandler;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.proxy.ServerProxy;

@@ -1,5 +1,6 @@
 package com.github.lunatrius.schematica.command;
 
+import com.github.lunatrius.core.util.FileUtils;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.network.transfer.SchematicTransfer;
@@ -13,7 +14,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import com.github.lunatrius.core.util.FileUtils;
 
 import java.io.File;
 import java.io.FileFilter;

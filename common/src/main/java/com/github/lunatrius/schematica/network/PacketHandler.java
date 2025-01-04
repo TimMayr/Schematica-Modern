@@ -1,34 +1,23 @@
 package com.github.lunatrius.schematica.network;
 
 import com.github.lunatrius.schematica.network.message.*;
-import com.github.lunatrius.schematica.reference.Reference;
-import dev.architectury.networking.NetworkManager;
-import io.netty.channel.Channel;
-import net.minecraft.resources.ResourceLocation;
+import commonnetwork.api.Network;
 
-//TODO: Fix as soon as I get a reply in the discord
 public class PacketHandler {
-	private static final String PROTOCOL_VERSION = Integer.toString(1);
-	public static final Channel INSTANCE =
-			NetworkRegistry.ChannelBuilder.named(new ResourceLocation(Reference.MOD_ID, "main_channel"))
-			                              .clientAcceptedVersions(PROTOCOL_VERSION::equals)
-			                              .serverAcceptedVersions(PROTOCOL_VERSION::equals)
-			                              .networkProtocolVersion(() -> PROTOCOL_VERSION)
-			                              .simpleChannel();
-
 	public static void init() {
-		NetworkManager.registerS2CPayloadType(MessageCapabilities.TYPE,MessageCapabilities.STREAM_CODEC);
-		INSTANCE.registerMessage(disc++, MessageCapabilities.class, MessageCapabilities::encode,
-		                         MessageCapabilities::decode, MessageCapabilities::handle);
-		INSTANCE.registerMessage(disc++, MessageDownloadBegin.class, MessageDownloadBegin::encode,
-		                         MessageDownloadBegin::decode, MessageDownloadBegin::handle);
-		INSTANCE.registerMessage(disc++, MessageDownloadBeginAck.class, MessageDownloadBeginAck::encode,
-		                         MessageDownloadBeginAck::decode, MessageDownloadBeginAck::handle);
-		INSTANCE.registerMessage(disc++, MessageDownloadChunk.class, MessageDownloadChunk::encode,
-		                         MessageDownloadChunk::decode, MessageDownloadChunk::handle);
-		INSTANCE.registerMessage(disc++, MessageDownloadChunkAck.class, MessageDownloadChunkAck::encode,
-		                         MessageDownloadChunkAck::decode, MessageDownloadChunkAck::handle);
-		INSTANCE.registerMessage(disc++, MessageDownloadEnd.class, MessageDownloadEnd::encode,
-		                         MessageDownloadEnd::decode, MessageDownloadEnd::handle);
+		Network.registerPacket(MessageCapabilities.TYPE, MessageCapabilities.class, MessageCapabilities.STREAM_CODEC,
+		                       MessageCapabilities::handle);
+		Network.registerPacket(MessageDownloadBegin.TYPE, MessageDownloadBegin.class,
+		                       MessageDownloadBegin.STREAM_CODEC,
+		                       MessageDownloadBegin::handle);
+		Network.registerPacket(MessageDownloadBeginAck.TYPE, MessageDownloadBeginAck.class,
+		                       MessageDownloadBeginAck.STREAM_CODEC, MessageDownloadBeginAck::handle);
+		Network.registerPacket(MessageDownloadChunk.TYPE, MessageDownloadChunk.class,
+		                       MessageDownloadChunk.STREAM_CODEC,
+		                       MessageDownloadChunk::handle);
+		Network.registerPacket(MessageDownloadChunkAck.TYPE, MessageDownloadChunkAck.class,
+		                       MessageDownloadChunkAck.STREAM_CODEC, MessageDownloadChunkAck::handle);
+		Network.registerPacket(MessageDownloadEnd.TYPE, MessageDownloadEnd.class, MessageDownloadEnd.STREAM_CODEC,
+		                       MessageDownloadEnd::handle);
 	}
 }

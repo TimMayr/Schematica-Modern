@@ -1,13 +1,13 @@
 package com.github.lunatrius.schematica.handler;
 
 import com.github.lunatrius.schematica.api.ISchematic;
-import com.github.lunatrius.schematica.network.PacketHandler;
 import com.github.lunatrius.schematica.network.message.MessageDownloadBegin;
 import com.github.lunatrius.schematica.network.message.MessageDownloadChunk;
 import com.github.lunatrius.schematica.network.message.MessageDownloadEnd;
 import com.github.lunatrius.schematica.network.transfer.SchematicTransfer;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Reference;
+import commonnetwork.api.Dispatcher;
 import dev.architectury.event.events.common.TickEvent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -70,7 +70,7 @@ public class DownloadHandler {
 		transfer.setState(SchematicTransfer.State.BEGIN);
 
 		MessageDownloadBegin message = new MessageDownloadBegin(transfer.schematic);
-		PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), message);
+		Dispatcher.sendToClient(message, player);
 	}
 
 	private void sendChunk(ServerPlayer player, SchematicTransfer transfer) {
@@ -79,11 +79,11 @@ public class DownloadHandler {
 		Reference.logger.trace("Sending chunk {},{},{}", transfer.baseX, transfer.baseY, transfer.baseZ);
 		MessageDownloadChunk message =
 				new MessageDownloadChunk(transfer.schematic, transfer.baseX, transfer.baseY, transfer.baseZ);
-		PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), message);
+		Dispatcher.sendToClient(message, player);
 	}
 
 	private void sendEnd(ServerPlayer player, SchematicTransfer transfer) {
 		MessageDownloadEnd message = new MessageDownloadEnd(transfer.name);
-		PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), message);
+		Dispatcher.sendToClient(message, player);
 	}
 }

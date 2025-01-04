@@ -4,11 +4,12 @@ import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.nbt.NBTHelper;
-import com.github.lunatrius.schematica.network.PacketHandler;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
-import dev.architectury.networking.NetworkManager;
+import commonnetwork.api.Dispatcher;
+import commonnetwork.networking.data.PacketContext;
+import commonnetwork.networking.data.Side;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
@@ -30,7 +31,7 @@ public class MessageDownloadChunk implements CustomPacketPayload {
 	public static final CustomPacketPayload.Type<MessageCapabilities> TYPE = new CustomPacketPayload.Type<>(
 			ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, Names.Network.DOWNLOAD_CHUNK_LOCATION));
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, MessageDownloadChunk> CODEC = new StreamCodec<>() {
+	public static final StreamCodec<RegistryFriendlyByteBuf, MessageDownloadChunk> STREAM_CODEC = new StreamCodec<>() {
 		public @NotNull MessageDownloadChunk decode(RegistryFriendlyByteBuf buf) {
 			int msgBaseX = buf.readInt();
 			int msgBaseY = buf.readInt();
@@ -127,12 +128,13 @@ public class MessageDownloadChunk implements CustomPacketPayload {
 		this.entities = entities;
 	}
 
-	public static void handle(MessageDownloadChunk msg, NetworkManager.PacketContext ctx) {
-		ctx.queue(() -> {
-			msg.copyToSchematic(DownloadHandler.INSTANCE.schematic);
-			PacketHandler.INSTANCE.sendToServer(
-					new MessageDownloadChunkAck(msg.getBaseX(), msg.getBaseY(), msg.getBaseZ()));
-		});
+	public static void handle(PacketContext<MessageDownloadChunk> ctx) {
+		if (ctx.side() == Side.CLIENT) {
+			ctx.message().copyToSchematic(DownloadHandler.INSTANCE.schematic);
+			Dispatcher.sendToServer(
+					new MessageDownloadChunkAck(true, ctx.message().getBaseX(), ctx.message().getBaseY(),
+					                            ctx.message().getBaseZ()));
+		}
 	}
 
 	private void copyToSchematic(ISchematic schematic) {
