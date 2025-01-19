@@ -39,7 +39,7 @@ public class Constants {
 		public static final int LENGTH = 16;
 	}
 
-	public static class World {
+	public static class Level {
 		public static final int MINIMUM_COORD = -30000000;
 		public static final int MAXIMUM_COORD = 30000000;
 	}

@@ -1,17 +1,14 @@
 package com.github.lunatrius.schematica.client.printer.nbtsync;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.network.play.ClientPlayNetHandler;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.INetHandler;
-import net.minecraft.network.IPacket;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 public abstract class NBTSync {
 	protected final Minecraft minecraft = Minecraft.getInstance();
 
-	public abstract boolean execute(PlayerEntity player, World schematic, BlockPos pos, World mcWorld, BlockPos mcPos);
+	public abstract boolean execute(Player player, Level schematic, BlockPos pos, Level mcWorld, BlockPos mcPos);
 
 	public <T extends INetHandler> boolean sendPacket(IPacket<T> packet) {
 		ClientPlayNetHandler connection = this.minecraft.getConnection();

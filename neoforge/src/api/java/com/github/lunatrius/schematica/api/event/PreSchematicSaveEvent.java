@@ -23,11 +23,6 @@ public class PreSchematicSaveEvent extends Event {
 	public final CompoundTag extendedMetadata;
 	private final Map<String, Block> mappings;
 
-	@Deprecated
-	public PreSchematicSaveEvent(Map<String, Block> mappings) {
-		this(null, mappings);
-	}
-
 	public PreSchematicSaveEvent(ISchematic schematic, Map<String, Block> mappings) {
 		this.schematic = schematic;
 		this.mappings = mappings;

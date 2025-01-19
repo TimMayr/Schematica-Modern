@@ -8,8 +8,8 @@ public class NBTConversionException extends Exception {
 		super(message, cause);
 	}
 
-	public NBTConversionException(BlockEntity tileEntity, Throwable cause) {
-		super(String.valueOf(tileEntity), cause);
+	public NBTConversionException(BlockEntity blockEntity, Throwable cause) {
+		super(String.valueOf(blockEntity), cause);
 	}
 
 	public NBTConversionException(Entity entity, Throwable cause) {

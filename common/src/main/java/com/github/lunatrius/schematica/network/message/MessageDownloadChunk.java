@@ -57,7 +57,7 @@ public class MessageDownloadChunk implements CustomPacketPayload {
 			}
 
 			CompoundTag entitiesTag = buf.readNbt();
-			NBTHelper.readEntitiesFromCompound(entitiesTag, msgEntities);
+			NBTHelper.readEntitiesFromCompound(entitiesTag, msgEntities, Minecraft.getInstance().level);
 
 			return new MessageDownloadChunk(msgBaseX, msgBaseY, msgBaseZ, msgBlocks, msgBlockEntities, msgEntities);
 
@@ -110,9 +110,7 @@ public class MessageDownloadChunk implements CustomPacketPayload {
 					BlockState blockState = schematic.getBlockState(pos);
 					this.blocks[x][y][z] = blockState;
 					BlockEntity blockEntity = schematic.getBlockEntity(pos);
-					if (blockEntity != null) {
-						this.blockEntities.add(blockEntity);
-					}
+					this.blockEntities.add(blockEntity);
 				}
 			}
 		}

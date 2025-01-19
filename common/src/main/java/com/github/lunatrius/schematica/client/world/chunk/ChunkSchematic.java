@@ -1,40 +1,35 @@
 package com.github.lunatrius.schematica.client.world.chunk;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeContainer;
-import net.minecraft.world.chunk.Chunk;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.ParametersAreNonnullByDefault;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ChunkSchematic extends Chunk {
-	private final World world;
+	private final Level world;
 
-	public ChunkSchematic(World world, int x, int z, BiomeContainer biomeContainer) {
+	public ChunkSchematic(Level world, int x, int z, BiomeContainer biomeContainer) {
 		super(world, new ChunkPos(x, z), biomeContainer);
 		this.world = world;
 	}
 
 	@Override
-	@Nonnull
+	@NotNull
 	public BlockState getBlockState(@Nullable BlockPos pos) {
 		if (pos != null) {
 			return this.world.getBlockState(pos);
 		}
 
-		return Blocks.AIR.getDefaultState();
+		return Blocks.AIR.defaultBlockState();
 	}
 
-	@Override
-	@ParametersAreNonnullByDefault
-	public TileEntity getTileEntity(BlockPos pos, CreateEntityType createEntityType) {
-		return this.world.getTileEntity(pos);
+	public BlockEntity getBlockEntity(BlockPos pos, CreateEntityType createEntityType) {
+		return this.world.getBlockEntity(pos);
 	}
 
 	@Override

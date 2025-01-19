@@ -43,7 +43,9 @@ public class CommandSchematicaDownload extends CommandSchematicaBase {
 				                             return -1;
 			                             }
 
-			                             ISchematic schematic = SchematicFormat.readFromFile(directory, filename);
+			                             ISchematic schematic = SchematicFormat.readFromFile(directory, filename,
+			                                                                                 Reference.proxy.getLevel(
+					                                                                                 player));
 
 			                             if (schematic != null) {
 				                             DownloadHandler.INSTANCE.transferMap.put(player.getScoreboardName(),

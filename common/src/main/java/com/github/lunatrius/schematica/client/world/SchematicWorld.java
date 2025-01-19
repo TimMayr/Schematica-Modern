@@ -21,8 +21,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockStateMatchTest;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.List;
 import java.util.Map;
@@ -45,19 +45,19 @@ public class SchematicWorld extends ClientWorld {
 		      Minecraft.getInstance().getProfiler(), Minecraft.getInstance().worldRenderer);
 		this.schematic = schematic;
 
-		for (BlockEntity tileEntity : schematic.getBlockEntities()) {
-			initializeTileEntity(tileEntity);
+		for (BlockEntity blockEntity : schematic.getBlockEntities()) {
+			initializeBlockEntity(blockEntity);
 		}
 	}
 
-	public void initializeTileEntity(BlockEntity tileEntity) {
-		tileEntity.setWorldAndPos(this, tileEntity.getPos());
-		tileEntity.getBlockState().getBlock();
+	public void initializeBlockEntity(BlockEntity blockEntity) {
+		blockEntity.setWorldAndPos(this, blockEntity.getPos());
+		blockEntity.getBlockState().getBlock();
 		try {
-			tileEntity.remove();
-			tileEntity.validate();
+			blockEntity.remove();
+			blockEntity.validate();
 		} catch (Exception e) {
-			Reference.logger.error("BlockEntity validation for {} failed!", tileEntity.getClass(), e);
+			Reference.logger.error("BlockEntity validation for {} failed!", blockEntity.getClass(), e);
 		}
 	}
 
@@ -75,27 +75,24 @@ public class SchematicWorld extends ClientWorld {
 		return this.schematic.getBlockState(pos);
 	}
 
-	@Override
 	@Nullable
-	public BlockEntity getTileEntity(BlockPos pos) {
+	public BlockEntity getBlockEntity(BlockPos pos) {
 		if (!this.layerMode.shouldUseLayer(this, pos.getY())) {
 			return null;
 		}
 
-		return this.schematic.getTileEntity(pos);
+		return this.schematic.getBlockEntity(pos);
 	}
 
-	@Override
-	public void setTileEntity(BlockPos pos, @Nullable BlockEntity tileEntity) {
-		if (tileEntity != null) {
-			this.schematic.setTileEntity(pos, tileEntity);
-			initializeTileEntity(tileEntity);
+	public void setBlockEntity(BlockPos pos, @Nullable BlockEntity blockEntity) {
+		if (blockEntity != null) {
+			this.schematic.setBlockEntity(pos, blockEntity);
+			initializeBlockEntity(blockEntity);
 		}
 	}
 
-	@Override
-	public void removeTileEntity(BlockPos pos) {
-		this.schematic.removeTileEntity(pos);
+	public void removeBlockEntity(BlockPos pos) {
+		this.schematic.removeBlockEntity(pos);
 	}
 
 	@Override
@@ -169,7 +166,7 @@ public class SchematicWorld extends ClientWorld {
 		this.schematic.setIcon(icon);
 	}
 
-	public List<BlockEntity> getTileEntities() {
+	public List<BlockEntity> getBlockEntities() {
 		return this.schematic.getBlockEntities();
 	}
 
@@ -183,11 +180,11 @@ public class SchematicWorld extends ClientWorld {
 	}
 
 	public int getWidth() {
-		return this.schematic.getWidth();
+		return this.schematic.getSizeX();
 	}
 
 	public int getLength() {
-		return this.schematic.getLength();
+		return this.schematic.getSizeZ();
 	}
 
 	@SuppressWarnings({"rawtypes"})

@@ -2,36 +2,34 @@ package com.github.lunatrius.schematica.world.schematic;
 
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
-import com.github.lunatrius.schematica.api.event.PreSchematicSaveEvent;
 import com.github.lunatrius.schematica.nbt.NBTHelper;
+import com.github.lunatrius.schematica.proxy.PlatformProxy;
+import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.storage.Schematic;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.neoforged.neoforge.common.NeoForge;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class SchematicAlpha extends SchematicFormat {
 	@Override
-	public ISchematic readFromNBT(CompoundNBT tagCompound) {
+	public ISchematic readFromNBT(CompoundTag tagCompound, Level level) {
 		ItemStack icon = SchematicUtil.getIconFromNBT(tagCompound);
 
-		List<BlockState> localBlockList = Arrays.stream(tagCompound.getIntArray(Names.NBT.BLOCKS))
-		                                        .mapToObj(Block::getStateById)
-		                                        .collect(Collectors.toList());
+		List<BlockState> localBlockList =
+				Arrays.stream(tagCompound.getIntArray(Names.NBT.BLOCKS)).mapToObj(Block::stateById).toList();
 		BlockState[] localBlocks = localBlockList.toArray(new BlockState[] {});
 
 		int width = tagCompound.getInt(Names.NBT.WIDTH);
@@ -40,12 +38,12 @@ public class SchematicAlpha extends SchematicFormat {
 
 		Block id;
 		Map<ResourceLocation, Block> oldToNew = new HashMap<>();
-		if (tagCompound.hasUniqueId(Names.NBT.MAPPING_SCHEMATICA)) {
-			CompoundNBT mapping = tagCompound.getCompound(Names.NBT.MAPPING_SCHEMATICA);
-			Set<String> names = mapping.keySet();
+		if (tagCompound.hasUUID(Names.NBT.MAPPING_SCHEMATICA)) {
+			CompoundTag mapping = tagCompound.getCompound(Names.NBT.MAPPING_SCHEMATICA);
+			Set<String> names = mapping.getAllKeys();
 			for (String name : names) {
-				oldToNew.put(ResourceLocation.tryCreate(mapping.getString(name)),
-				             ForgeRegistries.BLOCKS.getValue(new ResourceLocation(name)));
+				ResourceLocation location = ResourceLocation.tryParse(mapping.getString(name));
+				oldToNew.put(location, BuiltInRegistries.BLOCK.getValue(location));
 			}
 		}
 
@@ -57,8 +55,9 @@ public class SchematicAlpha extends SchematicFormat {
 					int index = x + (y * length + z) * width;
 					BlockState blockstate = localBlocks[index];
 
-					if ((id = oldToNew.get(blockstate.getBlock().getRegistryName())) != null) {
-						blockstate = id.getDefaultState();
+					id = oldToNew.get(blockstate.getBlock().arch$registryName());
+					if (id != null) {
+						blockstate = id.defaultBlockState();
 					}
 
 					pos.set(x, y, z);
@@ -66,22 +65,37 @@ public class SchematicAlpha extends SchematicFormat {
 						schematic.setBlockState(pos, blockstate);
 					} catch (Exception e) {
 						Reference.logger.error("Could not set block state at {} to {} with blockstate {}", pos,
-						                       blockstate.getBlock().getRegistryName(), blockstate, e);
+						                       blockstate.getBlock().arch$registryName(), blockstate, e);
 					}
 				}
 			}
 		}
 
-		ListNBT tileEntitiesList = tagCompound.getList(Names.NBT.TILE_ENTITIES, Constants.NBT.TAG_COMPOUND);
+		ListTag blockEntitiesList = tagCompound.getList(Names.NBT.BLOCK_ENTITIES, Constants.NBT.TAG_COMPOUND);
 
-		for (int i = 0; i < tileEntitiesList.size(); i++) {
+		for (int i = 0; i < blockEntitiesList.size(); i++) {
 			try {
-				TileEntity tileEntity = NBTHelper.readTileEntityFromCompound(tileEntitiesList.getCompound(i));
-				if (tileEntity != null) {
-					schematic.setTileEntity(tileEntity.getPos(), tileEntity);
+				BlockEntity blockEntity =
+						NBTHelper.readBlockEntityFromCompound(blockEntitiesList.getCompound(i), level);
+				if (blockEntity != null) {
+					schematic.setBlockEntity(blockEntity.getBlockPos(), blockEntity);
 				}
 			} catch (Exception e) {
-				Reference.logger.error("TileEntity failed to load properly!", e);
+				Reference.logger.error("BlockEntity failed to load properly!", e);
+			}
+		}
+
+		ListTag entitiesList = tagCompound.getList(Names.NBT.ENTITIES, Constants.NBT.TAG_COMPOUND);
+
+		for (int i = 0; i < entitiesList.size(); i++) {
+			try {
+				Entity entity = NBTHelper.readEntityFromCompound(entitiesList.getCompound(i), level);
+
+				if (entity != null) {
+					schematic.addEntity(entity);
+				}
+			} catch (Exception e) {
+				Reference.logger.error("Entity failed to load properly!", e);
 			}
 		}
 
@@ -89,29 +103,29 @@ public class SchematicAlpha extends SchematicFormat {
 	}
 
 	@Override
-	public void writeToNBT(CompoundNBT tagCompoundIn, ISchematic schematic) {
-		CompoundNBT tagCompound = new CompoundNBT();
-		CompoundNBT tagCompoundIcon = new CompoundNBT();
+	public void writeToNBT(CompoundTag tagCompoundIn, ISchematic schematic) {
+		CompoundTag tagCompound = new CompoundTag();
+		CompoundTag tagCompoundIcon = new CompoundTag();
 		ItemStack icon = schematic.getIcon();
-		icon.write(tagCompoundIcon);
+		icon.save(Reference.proxy.getRegistryAccess(), tagCompoundIcon);
 		tagCompound.put(Names.NBT.ICON, tagCompoundIcon);
 
-		tagCompound.putInt(Names.NBT.WIDTH, schematic.getWidth());
-		tagCompound.putInt(Names.NBT.LENGTH, schematic.getLength());
+		tagCompound.putInt(Names.NBT.WIDTH, schematic.getSizeX());
+		tagCompound.putInt(Names.NBT.LENGTH, schematic.getSizeZ());
 		tagCompound.putInt(Names.NBT.HEIGHT, schematic.getHeight());
 
-		int size = schematic.getWidth() * schematic.getLength() * schematic.getHeight();
+		int size = schematic.getSizeX() * schematic.getSizeZ() * schematic.getHeight();
 		BlockState[] localBlocks = new BlockState[size];
 
 		MBlockPos pos = new MBlockPos();
 		Map<String, Block> mappings = new HashMap<>();
-		for (int x = 0; x < schematic.getWidth(); x++) {
+		for (int x = 0; x < schematic.getSizeX(); x++) {
 			for (int y = 0; y < schematic.getHeight(); y++) {
-				for (int z = 0; z < schematic.getLength(); z++) {
-					int index = x + (y * schematic.getLength() + z) * schematic.getWidth();
+				for (int z = 0; z < schematic.getSizeZ(); z++) {
+					int index = x + (y * schematic.getSizeZ() + z) * schematic.getSizeX();
 					BlockState blockState = schematic.getBlockState(pos.set(x, y, z));
 					localBlocks[index] = blockState;
-					String name = String.valueOf(blockState.getBlock().getRegistryName());
+					String name = String.valueOf(blockState.getBlock().arch$registryName());
 					if (!mappings.containsKey(name)) {
 						mappings.put(name, blockState.getBlock());
 					}
@@ -120,33 +134,31 @@ public class SchematicAlpha extends SchematicFormat {
 		}
 
 		int count = 20;
-		ListNBT tileEntitiesList = new ListNBT();
-		for (TileEntity tileEntity : schematic.getBlockEntities()) {
+		ListTag blockEntities = new ListTag();
+		for (BlockEntity blockEntity : schematic.getBlockEntities()) {
 			try {
-				CompoundNBT tileEntityTagCompound = NBTHelper.writeTileEntityToCompound(tileEntity);
-				tileEntitiesList.add(tileEntityTagCompound);
+				CompoundTag blockEntityCompoundTag = NBTHelper.writeBlockEntityToCompound(blockEntity);
+				blockEntities.add(blockEntityCompoundTag);
 			} catch (Exception e) {
-				BlockPos tePos = tileEntity.getPos();
-				int index =
-						tePos.getX() + (tePos.getY() * schematic.getLength() + tePos.getZ()) * schematic.getWidth();
+				BlockPos tePos = blockEntity.getBlockPos();
+				int index = tePos.getX() + (tePos.getY() * schematic.getSizeZ() + tePos.getZ()) * schematic.getSizeX();
 				if (--count > 0) {
 					BlockState blockState = schematic.getBlockState(tePos);
 					Block block = blockState.getBlock();
-					Reference.logger.error("Block {}[{}] with TileEntity {} failed to save! Replacing with bedrock...",
-					                       block, ForgeRegistries.BLOCKS.getKey(block),
-					                       tileEntity.getClass().getName(),
-					                       e);
+					Reference.logger.error(
+							"Block {}[{}] with BlockEntity {} failed to save! Replacing with bedrock." + "..", block,
+							BuiltInRegistries.BLOCK.getKey(block), blockEntity.getClass().getName(), e);
 				}
 
-				localBlocks[index] = Blocks.BEDROCK.getDefaultState();
+				localBlocks[index] = Blocks.BEDROCK.defaultBlockState();
 			}
 		}
 
-		ListNBT entityList = new ListNBT();
+		ListTag entityList = new ListTag();
 		List<Entity> entities = schematic.getEntities();
 		for (Entity entity : entities) {
 			try {
-				CompoundNBT entityCompound = NBTHelper.writeEntityToCompound(entity);
+				CompoundTag entityCompound = NBTHelper.writeEntityToCompound(entity);
 				if (entityCompound != null) {
 					entityList.add(entityCompound);
 				}
@@ -155,18 +167,17 @@ public class SchematicAlpha extends SchematicFormat {
 			}
 		}
 
-		PreSchematicSaveEvent event = new PreSchematicSaveEvent(schematic, mappings);
-		NeoForge.EVENT_BUS.post(event);
+		PlatformProxy.createAndPostPreSchematicSaveEvent(schematic, mappings);
 
-		CompoundNBT nbtMapping = new CompoundNBT();
+		CompoundTag nbtMapping = new CompoundTag();
 		for (Map.Entry<String, Block> entry : mappings.entrySet()) {
-			nbtMapping.putString(entry.getKey(), entry.getValue().getRegistryName().toString());
+			nbtMapping.putString(entry.getKey(), entry.getValue().arch$registryName().toString());
 		}
 
 		tagCompound.putString(Names.NBT.FORMAT, Names.NBT.FORMAT_ALPHA);
-		tagCompound.putIntArray(Names.NBT.BLOCKS, Arrays.stream(localBlocks).mapToInt(Block::getStateId).toArray());
+		tagCompound.putIntArray(Names.NBT.BLOCKS, Arrays.stream(localBlocks).mapToInt(Block::getId).toArray());
 		tagCompound.put(Names.NBT.ENTITIES, entityList);
-		tagCompound.put(Names.NBT.TILE_ENTITIES, tileEntitiesList);
+		tagCompound.put(Names.NBT.BLOCK_ENTITIES, blockEntities);
 		tagCompound.put(Names.NBT.MAPPING_SCHEMATICA, nbtMapping);
 		tagCompoundIn.put("root", tagCompound);
 	}

@@ -1,10 +1,10 @@
 package com.github.lunatrius.schematica.client.printer.registry;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.Player;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.Level;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -90,7 +90,7 @@ public class PlacementData {
 		return 0;
 	}
 
-	public boolean isValidPlayerFacing(BlockState blockState, PlayerEntity player, BlockPos pos, World world) {
+	public boolean isValidPlayerFacing(BlockState blockState, Player player, BlockPos pos, Level world) {
 		return this.validPlayerFacing == null || this.validPlayerFacing.isValid(blockState, player, pos, world);
 	}
 

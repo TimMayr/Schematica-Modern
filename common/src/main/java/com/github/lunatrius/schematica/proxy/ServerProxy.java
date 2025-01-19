@@ -5,8 +5,10 @@ import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.reference.Reference;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,6 +30,11 @@ public class ServerProxy extends CommonProxy {
 			Reference.logger.warn("Could not canonize path!", e);
 		}
 		return file;
+	}
+
+	@Override
+	public RegistryAccess getRegistryAccess() {
+		return serverWeakReference.get().registryAccess();
 	}
 
 	@Override
@@ -81,5 +88,14 @@ public class ServerProxy extends CommonProxy {
 	@Override
 	public void init() {
 
+	}
+
+	@Override
+	public Level getLevel(Player player) {
+		try (Level level = player.level()) {
+			return serverWeakReference.get().getLevel(level.dimension());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

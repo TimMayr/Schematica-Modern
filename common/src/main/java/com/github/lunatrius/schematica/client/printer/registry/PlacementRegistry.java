@@ -1,7 +1,7 @@
 package com.github.lunatrius.schematica.client.printer.registry;
 
 import net.minecraft.block.*;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.Player;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.properties.AttachFace;
@@ -11,7 +11,7 @@ import net.minecraft.state.properties.SlabType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import net.minecraft.world.Level;
 
 import java.util.*;
 
@@ -32,19 +32,19 @@ public class PlacementRegistry {
 		this.itemPlacementMap.clear();
 
 		IValidPlayerFacing playerFacingEntity =
-				(BlockState blockState, PlayerEntity player, BlockPos pos, World world) -> {
+				(BlockState blockState, Player player, BlockPos pos, Level world) -> {
 					Direction facing = blockState.get(BlockStateProperties.HORIZONTAL_FACING);
 					return facing == player.getHorizontalFacing();
 				};
 
 		IValidPlayerFacing playerFacingEntityOpposite =
-				(BlockState blockState, PlayerEntity player, BlockPos pos, World world) -> {
+				(BlockState blockState, Player player, BlockPos pos, Level world) -> {
 					Direction facing = blockState.get(BlockStateProperties.FACING);
 					return facing == player.getHorizontalFacing().getOpposite();
 				};
 
 		IValidPlayerFacing playerFacingPiston =
-				(BlockState blockState, PlayerEntity player, BlockPos pos, World world) -> {
+				(BlockState blockState, Player player, BlockPos pos, Level world) -> {
 					Direction facing = blockState.get(BlockStateProperties.FACING);
 					return facing == Direction.getFacingFromVector((float) player.getPosX() - pos.getX(),
 					                                               (float) player.getPosY() - pos.getY(),
@@ -52,7 +52,7 @@ public class PlacementRegistry {
 				};
 
 		IValidPlayerFacing playerFacingObserver =
-				(BlockState blockState, PlayerEntity player, BlockPos pos, World world) -> {
+				(BlockState blockState, Player player, BlockPos pos, Level world) -> {
 					Direction facing = blockState.get(BlockStateProperties.FACING);
 					return facing == Direction.getFacingFromVector((float) player.getPosX() - pos.getX(),
 					                                               (float) player.getPosY() - pos.getY(),
@@ -60,13 +60,13 @@ public class PlacementRegistry {
 				};
 
 		IValidPlayerFacing playerFacingRotateY =
-				(BlockState blockState, PlayerEntity player, BlockPos pos, World world) -> {
+				(BlockState blockState, Player player, BlockPos pos, Level world) -> {
 					Direction facing = blockState.get(BlockStateProperties.FACING);
 					return facing == player.getHorizontalFacing().rotateY();
 				};
 
 		IValidPlayerFacing playerFacingLever =
-				(BlockState blockState, PlayerEntity player, BlockPos pos, World world) -> {
+				(BlockState blockState, Player player, BlockPos pos, Level world) -> {
 					AttachFace face = blockState.get(BlockStateProperties.FACE);
 					Direction facing = blockState.get(BlockStateProperties.HORIZONTAL_FACING);
 					return !facing.getAxis().isVertical() || (face == AttachFace.WALL
@@ -76,14 +76,14 @@ public class PlacementRegistry {
 				};
 
 		IValidPlayerFacing playerFacingStandingSign =
-				(BlockState blockState, PlayerEntity player, BlockPos pos, World world) -> {
+				(BlockState blockState, Player player, BlockPos pos, Level world) -> {
 					int value = blockState.get(BlockStateProperties.ROTATION_0_15);
 					int facing = MathHelper.floor((player.rotationYaw + 180.0) * 16.0 / 360.0 + 0.5) & 15;
 					return value == facing;
 				};
 
 		IValidPlayerFacing playerFacingIgnore =
-				(BlockState state, PlayerEntity player, BlockPos pos, World world) -> false;
+				(BlockState state, Player player, BlockPos pos, Level world) -> false;
 
 		IOffset offsetSlab = (BlockState blockState) -> {
 			if (!(blockState.get(BlockStateProperties.SLAB_TYPE) == SlabType.DOUBLE)) {

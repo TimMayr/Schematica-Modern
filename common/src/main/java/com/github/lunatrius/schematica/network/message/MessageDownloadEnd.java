@@ -28,8 +28,8 @@ public record MessageDownloadEnd(String name) implements CustomPacketPayload {
 	public static void handle(PacketContext<MessageDownloadEnd> ctx) {
 		if (ctx.side() == Side.CLIENT) {
 			File directory = Reference.proxy.getPlayerSchematicDirectory(null, true);
-			boolean success = SchematicFormat.writeToFile(directory, ctx.message().name, null,
-			                                              DownloadHandler.INSTANCE.schematic);
+			boolean success =
+					SchematicFormat.writeToFile(directory, ctx.message().name, DownloadHandler.INSTANCE.schematic);
 
 			if (success) {
 				if (Minecraft.getInstance().player != null) {

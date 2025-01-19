@@ -22,10 +22,10 @@ dependencies {
 
 var generateReference = tasks.register("generateReference", ProcessResources) {
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-	var replaceProperties = [mod_id: archives_name]
+	var replaceProperties = [mod_id: mod_id]
 	inputs.properties replaceProperties
 	expand replaceProperties
-	from "src/main/java/${maven_group.replaceAll('\\.', '/')}/reference"
+	from "src/main/java/${maven_group.replaceAll('\\.', '/')}/reference/Reference.java"
 	into "build/generated/sources/reference"
 }
 

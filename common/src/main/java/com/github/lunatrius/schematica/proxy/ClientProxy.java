@@ -14,7 +14,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 
 import java.io.File;
@@ -163,8 +165,13 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
+	public RegistryAccess getRegistryAccess() {
+		return Minecraft.getInstance().level.registryAccess();
+	}
+
+	@Override
 	public boolean loadSchematic(Player player, File directory, String filename) {
-		ISchematic schematic = SchematicFormat.readFromFile(directory, filename);
+		ISchematic schematic = SchematicFormat.readFromFile(directory, filename, Reference.proxy.getLevel(player));
 		if (schematic == null) {
 			return false;
 		}
@@ -209,5 +216,10 @@ public class ClientProxy extends CommonProxy {
 //		NeoForge.EVENT_BUS.register(new WorldHandler());
 			Reference.proxy.resetSettings();
 		});
+	}
+
+	@Override
+	public Level getLevel(Player player) {
+		return Minecraft.getInstance().level;
 	}
 }

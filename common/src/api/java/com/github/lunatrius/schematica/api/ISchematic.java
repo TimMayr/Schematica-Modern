@@ -1,25 +1,35 @@
 package com.github.lunatrius.schematica.api;
 
+import net.minecraft.CrashReportCategory;
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Function;
 
-public interface ISchematic {
+@MethodsReturnNonnullByDefault
+public interface ISchematic extends BlockGetter {
 	/**
-	 * Gets a block state at a given location within the schematic. Requesting a block state outside of those bounds
-	 * returns the default block state for air.
+	 * Gets the block entity at the requested location. If no block entity exists at that location, null will be
+	 * returned.
 	 *
 	 * @param pos
 	 * 		the location in world space.
 	 *
-	 * @return the block at the requested location.
+	 * @return the located block entity.
 	 */
-
-	BlockState getBlockState(BlockPos pos);
+	@Nullable
+	BlockEntity getBlockEntity(@NotNull BlockPos pos);
 
 	/**
 	 * Sets the block state at the given location. Attempting to set a block state outside of the schematic
@@ -35,41 +45,45 @@ public interface ISchematic {
 	boolean setBlockState(BlockPos pos, BlockState blockState);
 
 	/**
-	 * Gets the tile entity at the requested location. If no tile entity exists at that location, null will be
-	 * returned.
+	 * Gets a block state at a given location within the schematic. Requesting a block state outside of those bounds
+	 * returns the default block state for air.
 	 *
 	 * @param pos
 	 * 		the location in world space.
 	 *
-	 * @return the located tile entity.
+	 * @return the block at the requested location.
 	 */
-	BlockEntity getBlockEntity(BlockPos pos);
+
+	BlockState getBlockState(@NotNull BlockPos pos);
+
+	@Override
+	default FluidState getFluidState(@NotNull BlockPos pos) {
+		return isPosInside(pos) ? getBlockState(pos).getFluidState() : Fluids.EMPTY.defaultFluidState();
+	}
 
 	/**
-	 * Returns a list of all tile entities in the schematic.
-	 *
-	 * @return all tile entities.
-	 */
-	List<BlockEntity> getBlockEntities();
-
-	/**
-	 * Add or replace a tile entity to a block at the requested location. Does nothing if the location is out of
-	 * bounds.
-	 *
 	 * @param pos
-	 * 		the location in world space.
-	 * @param blockEntity
-	 * 		the tile entity to set.
+	 * 		tested pos
+	 *
+	 * @return true if inside aabb
+	 *
+	 * @see #isOutsideBuildHeight(BlockPos) extension of
 	 */
-	void setBlockEntity(BlockPos pos, BlockEntity blockEntity);
+	default boolean isPosInside(BlockPos pos) {
+		return getMinX() <= pos.getX()
+				&& pos.getX() < getMaxX()
+				&& getMinY() <= pos.getY()
+				&& pos.getY() < getMaxY()
+				&& getMinZ() <= pos.getZ()
+				&& pos.getZ() < getMaxZ();
+	}
 
 	/**
-	 * Removes a tile entity from the specific location if it exists, otherwise it silently continues.
-	 *
-	 * @param pos
-	 * 		the location in world space.
+	 * @return min X coord inclusive
 	 */
-	void removeBlockEntity(BlockPos pos);
+	default int getMinX() {
+		return 0;
+	}
 
 	/**
 	 * Returns a list of all entities in the schematic.
@@ -110,25 +124,25 @@ public interface ISchematic {
 	void setIcon(ItemStack icon);
 
 	/**
+	 * @return min Z coord inclusive
+	 */
+	default int getMinZ() {
+		return 0;
+	}
+
+	/**
+	 * @return max X coord exclusive
+	 */
+	default int getMaxX() {
+		return getMinX() + getSizeX();
+	}
+
+	/**
 	 * The width of the schematic
 	 *
 	 * @return the schematic width
 	 */
-	short getWidth();
-
-	/**
-	 * The length of the schematic
-	 *
-	 * @return the schematic length
-	 */
-	short getLength();
-
-	/**
-	 * The height of the schematic
-	 *
-	 * @return the schematic height
-	 */
-	short getHeight();
+	int getSizeX();
 
 	/**
 	 * Gets the author of the schematic, or an empty String if unknown.
@@ -144,4 +158,93 @@ public interface ISchematic {
 	 * 		The new author of the schematic.
 	 */
 	void setAuthor(String author);
+
+	/**
+	 * @return max Z coord exclusive
+	 */
+	default int getMaxZ() {
+		return getMinZ() + getSizeZ();
+	}
+
+	/**
+	 * The length of the schematic
+	 *
+	 * @return the schematic length
+	 */
+	int getSizeZ();
+
+	/**
+	 * Returns a list of all block entities in the schematic.
+	 *
+	 * @return all block entities.
+	 */
+	List<BlockEntity> getBlockEntities();
+
+	/**
+	 * Add or replace a block entity to a block at the requested location. Does nothing if the location is out of
+	 * bounds.
+	 *
+	 * @param pos
+	 * 		the location in world space.
+	 * @param blockEntity
+	 * 		the block entity to set.
+	 */
+	void setBlockEntity(BlockPos pos, BlockEntity blockEntity);
+
+	/**
+	 * Removes a block entity from the specific location if it exists, otherwise it silently continues.
+	 *
+	 * @param pos
+	 * 		the location in world space.
+	 */
+	void removeBlockEntity(BlockPos pos);
+
+	/**
+	 * The height of the schematic
+	 *
+	 * @return the schematic height
+	 */
+	int getHeight();
+
+	default int getMinY() {return 0;}
+
+	/**
+	 * @param pos
+	 * 		tested pos
+	 *
+	 * @return true if outside aabb
+	 *
+	 * @see #isOutsideBuildHeight(BlockPos) extension of
+	 */
+	default boolean isPosOutside(BlockPos pos) {
+		return !isPosInside(pos);
+	}
+
+	/**
+	 * To show who is this fake level in level crashes
+	 */
+	default void describeSelfInCrashReport(CrashReportCategory ignoredCategory) {}
+
+	/**
+	 * @return function useful temporary insert into existing world
+	 *
+	 * @see #getRawBlockState(BlockPos)
+	 */
+	default Function<BlockPos, @Nullable BlockState> getRawBlockStateFunction() {
+		return this::getRawBlockState;
+	}
+
+	/**
+	 * @return null if pos is outside of aabb
+	 */
+	default BlockState getRawBlockState(BlockPos pos) {
+		return isPosInside(pos) ? getBlockState(pos) : null;
+	}
+
+	/**
+	 * @return aabb with end being blockpos-wise exclusive
+	 */
+	default AABB getAABB() {
+		return new AABB(getMinX(), getMinY(), getMinZ(), getMaxX(), getMaxY(), getMaxZ());
+	}
 }

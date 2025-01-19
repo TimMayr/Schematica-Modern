@@ -1,16 +1,16 @@
 package com.github.lunatrius.schematica.world.schematic;
 
 import com.github.lunatrius.schematica.api.ISchematic;
-import com.github.lunatrius.schematica.api.event.PostSchematicCaptureEvent;
+import com.github.lunatrius.schematica.proxy.PlatformProxy;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.common.NeoForge;
+import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.nio.file.Files;
@@ -31,11 +31,11 @@ public abstract class SchematicFormat {
 		FORMAT_DEFAULT = Names.NBT.FORMAT_ALPHA;
 	}
 
-	public static ISchematic readFromFile(File directory, String filename) {
-		return readFromFile(new File(directory, filename));
+	public static ISchematic readFromFile(File directory, String filename, Level level) {
+		return readFromFile(new File(directory, filename), level);
 	}
 
-	public static ISchematic readFromFile(File file) {
+	public static ISchematic readFromFile(File file, Level level) {
 		try {
 			CompoundTag tagCompound = SchematicUtil.readTagCompoundFromFile(file);
 			String format = tagCompound.getString(Names.NBT.FORMAT);
@@ -45,7 +45,7 @@ public abstract class SchematicFormat {
 				throw new UnsupportedFormatException(format);
 			}
 
-			return schematicFormat.readFromNBT(tagCompound);
+			return schematicFormat.readFromNBT(tagCompound, level);
 		} catch (Exception ex) {
 			Reference.logger.error("Failed to read schematic!", ex);
 		}
@@ -53,7 +53,7 @@ public abstract class SchematicFormat {
 		return null;
 	}
 
-	public abstract ISchematic readFromNBT(CompoundTag tagCompound);
+	public abstract ISchematic readFromNBT(CompoundTag tagCompound, Level level);
 
 	/**
 	 * Writes the given schematic.
@@ -91,7 +91,6 @@ public abstract class SchematicFormat {
 		if (!player.isLocalPlayer()) {
 			((ServerPlayer) player).sendSystemMessage(Component.translatable(message, file.getName()));
 		}
-
 	}
 
 	/**
@@ -116,8 +115,7 @@ public abstract class SchematicFormat {
 				throw new UnsupportedFormatException(format);
 			}
 
-			PostSchematicCaptureEvent event = new PostSchematicCaptureEvent(schematic);
-			NeoForge.EVENT_BUS.post(event);
+			PlatformProxy.createAndPostPostSchematicCaptureEvent(schematic);
 
 			CompoundTag tagCompound = new CompoundTag();
 
@@ -126,6 +124,7 @@ public abstract class SchematicFormat {
 			try (DataOutputStream dataOutputStream = new DataOutputStream(
 					new GZIPOutputStream(Files.newOutputStream(file.toPath())))) {
 				tagCompound.write(dataOutputStream);
+				PlatformProxy.createAndPostPostSchematicSaveEvent(file);
 			}
 
 			return true;

@@ -252,8 +252,8 @@ public class GuiSchematicSave extends ScreenBase {
 	}
 
 	private void setMinMax(NumericFieldWidget numericField) {
-		numericField.setMinimum(Constants.World.MINIMUM_COORD);
-		numericField.setMaximum(Constants.World.MAXIMUM_COORD);
+		numericField.setMinimum(Constants.Level.MINIMUM_COORD);
+		numericField.setMaximum(Constants.Level.MAXIMUM_COORD);
 	}
 
 	private void setPoint(NumericFieldWidget numX, NumericFieldWidget numY, NumericFieldWidget numZ, BlockPos point) {

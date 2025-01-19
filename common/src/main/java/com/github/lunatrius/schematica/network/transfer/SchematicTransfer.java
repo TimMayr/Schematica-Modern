@@ -20,9 +20,9 @@ public class SchematicTransfer {
 		this.schematic = schematic;
 		this.name = name;
 
-		this.width = schematic.getWidth();
+		this.width = schematic.getSizeX();
 		this.height = schematic.getHeight();
-		this.length = schematic.getLength();
+		this.length = schematic.getSizeZ();
 	}
 
 	public void confirmChunk(int chunkX, int chunkY, int chunkZ) {

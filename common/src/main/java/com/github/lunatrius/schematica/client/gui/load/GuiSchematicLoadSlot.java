@@ -2,11 +2,7 @@ package com.github.lunatrius.schematica.client.gui.load;
 
 import com.github.lunatrius.core.client.gui.GuiHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.SlotGui;
-import net.minecraft.client.renderer.Tessellator;
 import org.apache.commons.io.FilenameUtils;
-
-import javax.annotation.Nonnull;
 
 public class GuiSchematicLoadSlot extends SlotGui {
 	private final Minecraft minecraft = Minecraft.getInstance();

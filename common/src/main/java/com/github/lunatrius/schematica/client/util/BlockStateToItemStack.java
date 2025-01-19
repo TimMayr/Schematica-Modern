@@ -2,18 +2,18 @@ package com.github.lunatrius.schematica.client.util;
 
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.reference.Reference;
-import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 
 @MethodsReturnNonnullByDefault
 public class BlockStateToItemStack {
-	public static ItemStack getItemStack(BlockState blockState, RayTraceResult rayTraceResult, SchematicWorld world,
-	                                     BlockPos pos, PlayerEntity player) {
+	public static ItemStack getItemStack(BlockState blockState, BlockHitResult rayTraceResult, SchematicWorld world,
+	                                     BlockPos pos, Player player) {
 		Block block = blockState.getBlock();
 
 		try {

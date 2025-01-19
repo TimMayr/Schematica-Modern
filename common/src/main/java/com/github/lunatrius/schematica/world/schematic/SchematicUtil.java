@@ -4,10 +4,13 @@ import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtIo;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -52,10 +55,10 @@ public class SchematicUtil {
 
 	public static CompoundTag readTagCompoundFromFile(File file) throws IOException {
 		try {
-			return CompressedStreamTools.readCompressed(Files.newInputStream(file.toPath()));
+			return NbtIo.readCompressed(Files.newInputStream(file.toPath()), NbtAccounter.unlimitedHeap());
 		} catch (Exception ex) {
 			Reference.logger.warn("Failed compressed read, trying normal read...", ex);
-			return CompressedStreamTools.read(file);
+			return NbtIo.read(new DataInputStream(Files.newInputStream(file.toPath())), NbtAccounter.unlimitedHeap());
 		}
 	}
 
@@ -63,7 +66,8 @@ public class SchematicUtil {
 		ItemStack icon = DEFAULT_ICON.copy();
 
 		if (tagCompound != null && tagCompound.hasUUID(Names.NBT.ICON)) {
-			icon.deserializeNBT(tagCompound.getCompound(Names.NBT.ICON));
+			icon = ItemStack.parseOptional(Reference.proxy.getRegistryAccess(),
+			                               tagCompound.getCompound(Names.NBT.ICON));
 
 			if (icon.isEmpty()) {
 				icon = DEFAULT_ICON.copy();

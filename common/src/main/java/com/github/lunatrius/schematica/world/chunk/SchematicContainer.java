@@ -4,14 +4,14 @@ import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.File;
 
 public class SchematicContainer {
 	public final ISchematic schematic;
 	public final Player player;
-	public final Level world;
+	public final Level level;
 	public final File file;
 
 	@Nullable
@@ -33,11 +33,11 @@ public class SchematicContainer {
 	public int curChunkZ;
 	public int processedChunks;
 
-	public SchematicContainer(ISchematic schematic, Player player, Level world, File file,
-	                          @Nullable String format, int minX, int maxX, int minY, int maxY, int minZ, int maxZ) {
+	public SchematicContainer(ISchematic schematic, Player player, Level level, File file, @Nullable String format,
+	                          int minX, int maxX, int minY, int maxY, int minZ, int maxZ) {
 		this.schematic = schematic;
 		this.player = player;
-		this.world = world;
+		this.level = level;
 		this.file = file;
 		this.format = format;
 
@@ -66,7 +66,7 @@ public class SchematicContainer {
 
 		Reference.logger.debug("Copying chunk at [{},{}] into {}", this.curChunkX, this.curChunkZ,
 		                       this.file.getName());
-		Reference.proxy.copyChunkToSchematic(this.schematic, this.world, this.curChunkX, this.curChunkZ, this.minX,
+		Reference.proxy.copyChunkToSchematic(this.schematic, this.level, this.curChunkX, this.curChunkZ, this.minX,
 		                                     this.maxX, this.minY, this.maxY, this.minZ, this.maxZ);
 
 		this.processedChunks++;

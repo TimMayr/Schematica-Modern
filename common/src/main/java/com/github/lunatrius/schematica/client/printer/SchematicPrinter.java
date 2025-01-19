@@ -234,7 +234,23 @@ public class SchematicPrinter {
 		return false;
 	}
 
-	private boolean isSolid(World world, BlockPos pos, Direction side, PlayerEntity player) {
+	private List<Direction> getSolidSides(Level world, BlockPos pos, Player player) {
+		if (!SchematicaConfig.CLIENT.placeAdjacent.get()) {
+			return Arrays.asList(Direction.values());
+		}
+
+		List<Direction> list = new ArrayList<>();
+
+		for (Direction side : Direction.values()) {
+			if (isSolid(world, pos, side, player)) {
+				list.add(side);
+			}
+		}
+
+		return list;
+	}
+
+	private boolean isSolid(Level world, BlockPos pos, Direction side, Player player) {
 		BlockPos offset = pos.offset(side);
 
 		BlockState blockState = world.getBlockState(offset);
@@ -253,22 +269,6 @@ public class SchematicPrinter {
 		                                                                                                    Direction.UP,
 		                                                                                                    offset,
 		                                                                                                    false))));
-	}
-
-	private List<Direction> getSolidSides(World world, BlockPos pos, PlayerEntity player) {
-		if (!SchematicaConfig.CLIENT.placeAdjacent.get()) {
-			return Arrays.asList(Direction.values());
-		}
-
-		List<Direction> list = new ArrayList<>();
-
-		for (Direction side : Direction.values()) {
-			if (isSolid(world, pos, side, player)) {
-				list.add(side);
-			}
-		}
-
-		return list;
 	}
 
 	private boolean placeBlock(ClientLevel world, LocalPlayer player, BlockPos pos, BlockState blockState,
@@ -348,7 +348,7 @@ public class SchematicPrinter {
 		return success;
 	}
 
-	private boolean placeBlock(ClientLevel world, PlayerEntity player, ItemStack itemStack, BlockPos pos,
+	private boolean placeBlock(ClientLevel world, Player player, ItemStack itemStack, BlockPos pos,
 	                           Direction side, Vec3d hitVec, Hand hand) {
 		// FIXME: where did this event go?
         /*

@@ -41,7 +41,7 @@ subprojects {
 
 	base {
 		// Set up a suffixed format for the mod jar names, e.g. `example-fabric`.
-		archivesName = "$rootProject.archives_name-$project.name"
+		archivesName = "$rootProject.mod_id-$project.name"
 	}
 
 	repositories {
@@ -63,6 +63,11 @@ subprojects {
 				setNameSyntheticMembers(false)
 			}
 			parchment("org.parchmentmc.data:parchment-${minecraft_version}:${mapping_version}@zip")
+		}
+
+		dependencies {
+			// LunatriusCore
+			modImplementation files("../libs/lunatriuscore-common-${minecraft_version}-${lunatriuscore_version}.jar")
 		}
 	}
 
@@ -95,6 +100,14 @@ subprojects {
 			// Notice: This block does NOT have the same function as the block in the top level.
 			// The repositories here will be used for publishing your artifact, not for
 			// retrieving dependencies.
+		}
+	}
+
+	sourceSets {
+		main {
+			java {
+				srcDirs = ['src/api/java', 'src/main/java']
+			}
 		}
 	}
 }

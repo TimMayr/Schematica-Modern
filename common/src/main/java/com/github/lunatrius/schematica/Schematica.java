@@ -32,6 +32,7 @@ public class Schematica {
 		LifecycleEvent.SERVER_STARTING.register(
 				(server) -> ServerProxy.serverWeakReference = new WeakReference<>(server));
 
+
 		Reference.proxy = EnvExecutor.getEnvSpecific(() -> ClientProxy::new, () -> ServerProxy::new);
 		Reference.proxy.init();
 		PacketHandler.init();

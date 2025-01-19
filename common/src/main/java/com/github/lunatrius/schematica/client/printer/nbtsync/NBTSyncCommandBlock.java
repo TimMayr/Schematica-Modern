@@ -1,26 +1,26 @@
 package com.github.lunatrius.schematica.client.printer.nbtsync;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.play.client.CUpdateCommandBlockPacket;
-import net.minecraft.tileentity.CommandBlockLogic;
-import net.minecraft.tileentity.CommandBlockTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.CommandBlockEntity;
+
 
 public class NBTSyncCommandBlock extends NBTSync {
 	@Override
-	public boolean execute(PlayerEntity player, World schematic, BlockPos pos, World mcWorld, BlockPos mcPos) {
-		TileEntity tileEntity = schematic.getTileEntity(pos);
-		TileEntity mcTileEntity = mcWorld.getTileEntity(mcPos);
+	public boolean execute(Player player, Level schematic, BlockPos pos, Level level, BlockPos mcPos) {
+		BlockEntity blockEntity = schematic.getBlockEntity(pos);
+		BlockEntity mcBlockEntity = level.getBlockEntity(mcPos);
 
-		if (tileEntity instanceof CommandBlockTileEntity && mcTileEntity instanceof CommandBlockTileEntity) {
-			CommandBlockLogic commandBlockLogic = ((CommandBlockTileEntity) tileEntity).getCommandBlockLogic();
-			CommandBlockLogic mcCommandBlockLogic = ((CommandBlockTileEntity) mcTileEntity).getCommandBlockLogic();
+		if (blockEntity instanceof CommandBlockEntity && mcBlockEntity instanceof CommandBlockEntity) {
+			CommandBlockLogic commandBlockLogic = ((CommandBlockEntity) blockEntity).getCommandBlockLogic();
+			CommandBlockLogic mcCommandBlockLogic = ((CommandBlockEntity) mcBlockEntity).getCommandBlockLogic();
 
 			if (!commandBlockLogic.getCommand().equals(mcCommandBlockLogic.getCommand())) {
 				return sendPacket(new CUpdateCommandBlockPacket(pos, mcCommandBlockLogic.getCommand(),
-				                                                ((CommandBlockTileEntity) mcTileEntity).getMode(),
+				                                                ((CommandBlockEntity) mcBlockEntity).getMode(),
 				                                                mcCommandBlockLogic.shouldTrackOutput(), false,
 				                                                false));
 			}

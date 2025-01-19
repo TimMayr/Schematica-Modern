@@ -7,15 +7,15 @@ import com.github.lunatrius.schematica.block.state.BlockStateHelper;
 import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.storage.Schematic;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.EnumProperty;
-import net.minecraft.state.IProperty;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3i;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 
 import java.util.List;
 
@@ -83,8 +83,8 @@ public class RotationHelper {
 
 			world.setSchematic(schematicRotated);
 
-			for (TileEntity tileEntity : world.getTileEntities()) {
-				world.initializeTileEntity(tileEntity);
+			for (BlockEntity blockEntity : world.getBlockEntities()) {
+				world.initializeBlockEntity(blockEntity);
 			}
 
 			return true;
@@ -127,106 +127,86 @@ public class RotationHelper {
 
 	public Schematic rotate(ISchematic schematic, Direction axis, boolean forced) throws RotationException {
 		Vec3i dimensionsRotated =
-				rotateDimensions(axis, schematic.getWidth(), schematic.getHeight(), schematic.getLength());
+				rotateDimensions(axis, schematic.getSizeX(), schematic.getHeight(), schematic.getSizeZ());
 		Schematic schematicRotated =
 				new Schematic(schematic.getIcon(), dimensionsRotated.getX(), dimensionsRotated.getY(),
 				              dimensionsRotated.getZ(), schematic.getAuthor());
 		MBlockPos tmp = new MBlockPos();
 
-		for (MBlockPos pos : BlockPosHelper.getAllInBox(0, 0, 0, schematic.getWidth() - 1, schematic.getHeight() - 1,
-		                                                schematic.getLength() - 1)) {
+		for (MBlockPos pos : BlockPosHelper.getAllInBox(0, 0, 0, schematic.getSizeX() - 1, schematic.getHeight() - 1,
+		                                                schematic.getSizeZ() - 1)) {
 			BlockState blockState = schematic.getBlockState(pos);
 			BlockState blockStateRotated = rotateBlock(blockState, axis, forced);
 			schematicRotated.setBlockState(rotatePos(pos, axis, dimensionsRotated, tmp), blockStateRotated);
 		}
 
-		List<TileEntity> tileEntities = schematic.getBlockEntities();
-		for (TileEntity tileEntity : tileEntities) {
-			BlockPos pos = tileEntity.getPos();
-			tileEntity.setPos(new BlockPos(rotatePos(pos, axis, dimensionsRotated, tmp)));
-			schematicRotated.setBlockEntity(tileEntity.getPos(), tileEntity);
+		List<BlockEntity> blockEntities = schematic.getBlockEntities();
+		for (BlockEntity blockEntity : blockEntities) {
+			BlockPos pos = blockEntity.getBlockPos();
+			schematicRotated.setBlockEntity(new BlockPos(rotatePos(pos, axis, dimensionsRotated, tmp)), blockEntity);
 		}
 
 		return schematicRotated;
 	}
 
-	private Vec3i rotateDimensions(Direction axis, int width, int height, int length) throws RotationException {
-		switch (axis) {
-			case DOWN:
-			case UP:
-				return new Vec3i(length, height, width);
+	@SuppressWarnings("SuspiciousNameCombination")
+	private Vec3i rotateDimensions(Direction axis, int width, int height, int length) {
+		return switch (axis) {
+			case DOWN, UP -> new Vec3i(length, height, width);
+			case NORTH, SOUTH -> new Vec3i(height, width, length);
+			case WEST, EAST -> new Vec3i(width, length, height);
+		};
 
-			case NORTH:
-			case SOUTH:
-				return new Vec3i(height, width, length);
-
-			case WEST:
-			case EAST:
-				return new Vec3i(width, length, height);
-		}
-
-		throw new RotationException("'%s' is not a valid axis!", axis.getName());
 	}
 
-	private BlockPos rotatePos(BlockPos pos, Direction axis, Vec3i dimensions, MBlockPos rotated)
-			throws RotationException {
-		switch (axis) {
-			case DOWN:
-				return rotated.set(pos.getZ(), pos.getY(), dimensions.getZ() - 1 - pos.getX());
+	private BlockPos rotatePos(BlockPos pos, Direction axis, Vec3i dimensions, MBlockPos rotated) {
+		return switch (axis) {
+			case DOWN -> rotated.set(pos.getZ(), pos.getY(), dimensions.getZ() - 1 - pos.getX());
+			case UP -> rotated.set(dimensions.getX() - 1 - pos.getZ(), pos.getY(), pos.getX());
+			case NORTH -> rotated.set(dimensions.getX() - 1 - pos.getY(), pos.getX(), pos.getZ());
+			case SOUTH -> rotated.set(pos.getY(), dimensions.getY() - 1 - pos.getX(), pos.getZ());
+			case WEST -> rotated.set(pos.getX(), dimensions.getY() - 1 - pos.getZ(), pos.getY());
+			case EAST -> rotated.set(pos.getX(), pos.getZ(), dimensions.getZ() - 1 - pos.getY());
+		};
 
-			case UP:
-				return rotated.set(dimensions.getX() - 1 - pos.getZ(), pos.getY(), pos.getX());
-
-			case NORTH:
-				return rotated.set(dimensions.getX() - 1 - pos.getY(), pos.getX(), pos.getZ());
-
-			case SOUTH:
-				return rotated.set(pos.getY(), dimensions.getY() - 1 - pos.getX(), pos.getZ());
-
-			case WEST:
-				return rotated.set(pos.getX(), dimensions.getY() - 1 - pos.getZ(), pos.getY());
-
-			case EAST:
-				return rotated.set(pos.getX(), pos.getZ(), dimensions.getZ() - 1 - pos.getY());
-		}
-
-		throw new RotationException("'%s' is not a valid axis!", axis.getName());
 	}
 
-	@SuppressWarnings({"rawtypes", "unchecked"})
+	@SuppressWarnings({"rawtypes"})
 	private BlockState rotateBlock(BlockState blockState, Direction axisRotation, boolean forced)
 			throws RotationException {
-		IProperty propertyFacing = BlockStateHelper.getProperty(blockState, "facing");
-		if (propertyFacing instanceof DirectionProperty) {
-			Comparable value = blockState.get(propertyFacing);
+		Property<?> propertyFacingPotentially = BlockStateHelper.getProperty(blockState, "facing");
+		if (propertyFacingPotentially.getPossibleValues().stream().allMatch(Direction.class::isInstance)) {
+			EnumProperty<Direction> propertyFacing = BlockStateProperties.FACING;
+			Comparable value = blockState.getValue(propertyFacing);
 			if (value instanceof Direction) {
 				Direction facing = getRotatedFacing(axisRotation, (Direction) value);
-				if (propertyFacing.getAllowedValues().contains(facing)) {
-					return blockState.with(propertyFacing, facing);
+				if (propertyFacing.getPossibleValues().contains(facing)) {
+					return blockState.setValue(propertyFacing, facing);
 				}
 			}
-		} else if (propertyFacing != null) {
+		} else {
 			Reference.logger.error("'{}': found 'facing' property with unknown type {}",
-			                       ForgeRegistries.BLOCKS.getKey(blockState.getBlock()),
-			                       propertyFacing.getClass().getSimpleName());
+			                       BuiltInRegistries.BLOCK.getKey(blockState.getBlock()),
+			                       propertyFacingPotentially.getClass().getSimpleName());
 		}
 
-		IProperty propertyAxis = BlockStateHelper.getProperty(blockState, "axis");
-		if (propertyAxis instanceof EnumProperty) {
+		Property<?> property = BlockStateHelper.getProperty(blockState, "axis");
+		if (property.getPossibleValues().stream().allMatch(Direction.Axis.class::isInstance)) {
+			EnumProperty<Direction.Axis> propertyAxis = BlockStateProperties.AXIS;
 			if (Direction.Axis.class.isAssignableFrom(propertyAxis.getValueClass())) {
-				Direction.Axis axis = (Direction.Axis) blockState.get(propertyAxis);
+				Direction.Axis axis = blockState.getValue(propertyAxis);
 				Direction.Axis axisRotated = getRotatedAxis(axisRotation, axis);
-				return blockState.with(propertyAxis, axisRotated);
+				return blockState.setValue(propertyAxis, axisRotated);
 			}
-		} else if (propertyAxis != null) {
+		} else {
 			Reference.logger.error("'{}': found 'axis' property with unknown type {}",
-			                       ForgeRegistries.BLOCKS.getKey(blockState.getBlock()),
-			                       propertyAxis.getClass().getSimpleName());
+			                       BuiltInRegistries.BLOCK.getKey(blockState.getBlock()),
+			                       property.getClass().getSimpleName());
 		}
 
-		if (!forced && (propertyFacing != null || propertyAxis != null)) {
+		if (!forced) {
 			throw new RotationException("'%s' cannot be rotated around '%s'",
-			                            ForgeRegistries.BLOCKS.getKey(blockState.getBlock()), axisRotation);
+			                            BuiltInRegistries.BLOCK.getKey(blockState.getBlock()), axisRotation);
 		}
 
 		return blockState;

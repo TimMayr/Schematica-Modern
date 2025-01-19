@@ -1,27 +1,29 @@
 package com.github.lunatrius.schematica.client.printer.nbtsync;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.play.client.CUpdateSignPacket;
-import net.minecraft.tileentity.SignTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.World;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
 
 import java.util.Arrays;
 
 public class NBTSyncSign extends NBTSync {
 	@Override
-	public boolean execute(PlayerEntity player, World schematic, BlockPos pos, World mcWorld, BlockPos mcPos) {
-		TileEntity tileEntity = schematic.getTileEntity(pos);
-		TileEntity mcTileEntity = mcWorld.getTileEntity(mcPos);
+	public boolean execute(Player player, Level schematic, BlockPos pos, Level level, BlockPos mcPos) {
+		BlockEntity blockEntity = schematic.getBlockEntity(pos);
+		BlockEntity mcBlockEntity = level.getBlockEntity(mcPos);
 
-		if (tileEntity instanceof SignTileEntity && mcTileEntity instanceof SignTileEntity) {
-			ITextComponent[] signText = ((SignTileEntity) tileEntity).signText;
-			ITextComponent[] mcSignText = ((SignTileEntity) mcTileEntity).signText;
+		if (blockEntity instanceof SignBlockEntity && mcBlockEntity instanceof SignBlockEntity) {
+			Component[] frontText = ((SignBlockEntity) blockEntity).getFrontText().getMessages(false);
+			Component[] backText = ((SignBlockEntity) blockEntity).getBackText().getMessages(false);
+			Component[] mcFrontText = ((SignBlockEntity) mcBlockEntity).getFrontText().getMessages(false);
+			Component[] mcBackText = ((SignBlockEntity) mcBlockEntity).getBackText().getMessages(false);
 
-			if (!Arrays.equals(signText, mcSignText)) {
-				return sendPacket(new CUpdateSignPacket(mcPos, signText[0], signText[1], signText[2], signText[3]));
+			if (!Arrays.equals(backText, mcBackText) && !Arrays.equals(frontText, mcFrontText)) {
+				return sendPacket(new CUpdateSignPacket(mcPos, backText[0], backText[1], backText[2], backText[3]));
 			}
 		}
 

@@ -17,19 +17,19 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 @MethodsReturnNonnullByDefault
-public record MessageDownloadBegin(ItemStack icon, short width, short height, short length)
+public record MessageDownloadBegin(ItemStack icon, int width, int height, int length)
 		implements CustomPacketPayload {
 
 	public static final CustomPacketPayload.Type<MessageDownloadBegin> TYPE = new CustomPacketPayload.Type<>(
 			ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, Names.Network.DOWNLOAD_BEGIN_LOCATION));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, MessageDownloadBegin> STREAM_CODEC =
-			StreamCodec.composite(ItemStack.STREAM_CODEC, MessageDownloadBegin::icon, ByteBufCodecs.SHORT,
-			                      MessageDownloadBegin::width, ByteBufCodecs.SHORT, MessageDownloadBegin::height,
-			                      ByteBufCodecs.SHORT, MessageDownloadBegin::length, MessageDownloadBegin::new);
+			StreamCodec.composite(ItemStack.STREAM_CODEC, MessageDownloadBegin::icon, ByteBufCodecs.INT,
+			                      MessageDownloadBegin::width, ByteBufCodecs.INT, MessageDownloadBegin::height,
+			                      ByteBufCodecs.INT, MessageDownloadBegin::length, MessageDownloadBegin::new);
 
 	public MessageDownloadBegin(ISchematic schematic) {
-		this(schematic.getIcon(), schematic.getWidth(), schematic.getHeight(), schematic.getLength());
+		this(schematic.getIcon(), schematic.getSizeX(), schematic.getHeight(), schematic.getSizeZ());
 	}
 
 	public static void handle(PacketContext<MessageDownloadBegin> ctx) {

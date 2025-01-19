@@ -9,6 +9,7 @@ import com.github.lunatrius.schematica.world.chunk.SchematicContainer;
 import com.github.lunatrius.schematica.world.schematic.SchematicUtil;
 import com.github.lunatrius.schematica.world.storage.Schematic;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -156,6 +157,8 @@ public abstract class CommonProxy {
 		return false;
 	}
 
+	public abstract RegistryAccess getRegistryAccess();
+
 	public abstract boolean loadSchematic(Player player, File directory, String filename);
 
 	public abstract boolean isPlayerQuotaExceeded(Player player);
@@ -163,4 +166,6 @@ public abstract class CommonProxy {
 	public abstract File getPlayerSchematicDirectory(Player player, boolean privateDirectory);
 
 	public abstract void init();
+
+	public abstract Level getLevel(Player player);
 }
