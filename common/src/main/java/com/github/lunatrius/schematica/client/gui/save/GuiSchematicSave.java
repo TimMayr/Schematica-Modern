@@ -8,22 +8,25 @@ import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.PlainTextButton;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 
 import java.io.File;
 import java.util.Iterator;
 
 public class GuiSchematicSave extends ScreenBase {
-	private final String strSaveSelection = I18n.format(Names.Gui.Save.SAVE_SELECTION);
-	private final String strX = I18n.format(Names.Gui.X);
-	private final String strY = I18n.format(Names.Gui.Y);
-	private final String strZ = I18n.format(Names.Gui.Z);
-	private final String strOn = I18n.format(Names.Gui.ON);
-	private final String strOff = I18n.format(Names.Gui.OFF);
+	private final Component strSaveSelection = Component.translatable(Names.Gui.Save.SAVE_SELECTION);
+	private final Component strX = Component.translatable(Names.Gui.X);
+	private final Component strY = Component.translatable(Names.Gui.Y);
+	private final Component strZ = Component.translatable(Names.Gui.Z);
+	private final Component strOn = Component.translatable(Names.Gui.ON);
+	private final Component strOff = Component.translatable(Names.Gui.OFF);
 	private int centerX = 0;
 	private int centerY = 0;
 	private NumericFieldWidget numericAX = null;
@@ -35,7 +38,7 @@ public class GuiSchematicSave extends ScreenBase {
 	private Button btnEnable = null;
 	private Button btnFormat = null;
 	private Button btnSave = null;
-	private TextFieldWidget tfFilename = null;
+	private EditBox editBox = null;
 	private String filename = "";
 	/**
 	 * The currently selected format
@@ -48,8 +51,8 @@ public class GuiSchematicSave extends ScreenBase {
 	 */
 	private Iterator<String> formatIterator = null;
 
-	public GuiSchematicSave(Screen guiScreen) {
-		super(guiScreen);
+	public GuiSchematicSave(Screen screen) {
+		super(screen);
 		this.format = nextFormat();
 	}
 
@@ -77,45 +80,46 @@ public class GuiSchematicSave extends ScreenBase {
 	}
 
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks) {
-		drawString(this.minecraft.fontRenderer, this.strSaveSelection, this.width - 205, this.height - 70, 0xFFFFFF);
-
-		drawString(this.minecraft.fontRenderer, this.strX, this.centerX - 145, this.centerY - 24, 0xFFFFFF);
-		drawString(this.minecraft.fontRenderer, Integer.toString(ClientProxy.pointA.x), this.centerX - 25,
-		           this.centerY - 24, 0xFFFFFF);
-
-		drawString(this.minecraft.fontRenderer, this.strY, this.centerX - 145, this.centerY + 1, 0xFFFFFF);
-		drawString(this.minecraft.fontRenderer, Integer.toString(ClientProxy.pointA.y), this.centerX - 25,
-		           this.centerY + 1, 0xFFFFFF);
-
-		drawString(this.minecraft.fontRenderer, this.strZ, this.centerX - 145, this.centerY + 26, 0xFFFFFF);
-		drawString(this.minecraft.fontRenderer, Integer.toString(ClientProxy.pointA.z), this.centerX - 25,
-		           this.centerY + 26, 0xFFFFFF);
-
-		drawString(this.minecraft.fontRenderer, this.strX, this.centerX + 15, this.centerY - 24, 0xFFFFFF);
-		drawString(this.minecraft.fontRenderer, Integer.toString(ClientProxy.pointB.x), this.centerX + 135,
-		           this.centerY - 24, 0xFFFFFF);
-
-		drawString(this.minecraft.fontRenderer, this.strY, this.centerX + 15, this.centerY + 1, 0xFFFFFF);
-		drawString(this.minecraft.fontRenderer, Integer.toString(ClientProxy.pointB.y), this.centerX + 135,
-		           this.centerY + 1, 0xFFFFFF);
-
-		drawString(this.minecraft.fontRenderer, this.strZ, this.centerX + 15, this.centerY + 26, 0xFFFFFF);
-		drawString(this.minecraft.fontRenderer, Integer.toString(ClientProxy.pointB.z), this.centerX + 135,
-		           this.centerY + 26, 0xFFFFFF);
-
-		super.render(mouseX, mouseY, partialTicks);
-	}
-
-	@Override
 	public boolean charTyped(char character, int code) {
-		this.filename = this.tfFilename.getText();
+		this.filename = this.editBox.getValue();
 		return super.charTyped(character, code);
 	}
 
 	@Override
+	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		guiGraphics.drawString(this.minecraft.font, this.strSaveSelection, this.width - 205, this.height - 70,
+		                       0xFFFFFF);
+
+		guiGraphics.drawString(this.minecraft.font, this.strX, this.centerX - 145, this.centerY - 24, 0xFFFFFF);
+		guiGraphics.drawString(this.minecraft.font, Integer.toString(ClientProxy.pointA.x), this.centerX - 25,
+		                       this.centerY - 24, 0xFFFFFF);
+
+		guiGraphics.drawString(this.minecraft.font, this.strY, this.centerX - 145, this.centerY + 1, 0xFFFFFF);
+		guiGraphics.drawString(this.minecraft.font, Integer.toString(ClientProxy.pointA.y), this.centerX - 25,
+		                       this.centerY + 1, 0xFFFFFF);
+
+		guiGraphics.drawString(this.minecraft.font, this.strZ, this.centerX - 145, this.centerY + 26, 0xFFFFFF);
+		guiGraphics.drawString(this.minecraft.font, Integer.toString(ClientProxy.pointA.z), this.centerX - 25,
+		                       this.centerY + 26, 0xFFFFFF);
+
+		guiGraphics.drawString(this.minecraft.font, this.strX, this.centerX + 15, this.centerY - 24, 0xFFFFFF);
+		guiGraphics.drawString(this.minecraft.font, Integer.toString(ClientProxy.pointB.x), this.centerX + 135,
+		                       this.centerY - 24, 0xFFFFFF);
+
+		guiGraphics.drawString(this.minecraft.font, this.strY, this.centerX + 15, this.centerY + 1, 0xFFFFFF);
+		guiGraphics.drawString(this.minecraft.font, Integer.toString(ClientProxy.pointB.y), this.centerX + 135,
+		                       this.centerY + 1, 0xFFFFFF);
+
+		guiGraphics.drawString(this.minecraft.font, this.strZ, this.centerX + 15, this.centerY + 26, 0xFFFFFF);
+		guiGraphics.drawString(this.minecraft.font, Integer.toString(ClientProxy.pointB.z), this.centerX + 135,
+		                       this.centerY + 26, 0xFFFFFF);
+
+		super.render(guiGraphics, mouseX, mouseY, partialTicks);
+	}
+
+	@Override
 	public boolean keyPressed(int character, int code, int modifiers) {
-		this.filename = this.tfFilename.getText();
+		this.filename = this.editBox.getValue();
 		return super.keyPressed(character, code, modifiers);
 	}
 
@@ -124,121 +128,107 @@ public class GuiSchematicSave extends ScreenBase {
 		this.centerX = this.width / 2;
 		this.centerY = this.height / 2;
 
-		this.buttons.clear();
+		this.clearWidgets();
 
-		Button btnPointA =
-				new Button(this.centerX - 130, this.centerY - 55, 100, 20, I18n.format(Names.Gui.Save.POINT_RED),
-				           (button) -> {
-					           ClientProxy.movePointToPlayer(ClientProxy.pointA);
-					           ClientProxy.updatePoints();
-					           setPoint(this.numericAX, this.numericAY, this.numericAZ, ClientProxy.pointA);
-				           });
-		this.buttons.add(btnPointA);
+		Button btnPointA = new PlainTextButton(this.centerX - 130, this.centerY - 55, 100, 20,
+		                                       Component.translatable(Names.Gui.Save.POINT_RED), (button) -> {
+			ClientProxy.movePointToPlayer(ClientProxy.pointA);
+			ClientProxy.updatePoints();
+			setPoint(this.numericAX, this.numericAY, this.numericAZ, ClientProxy.pointA);
+		}, this.font);
+		this.addRenderableWidget(btnPointA);
 
-		this.numericAX =
-				new NumericFieldWidget(this.minecraft.fontRenderer, this.centerX - 130, this.centerY - 30,
-				                       (button) -> {
-					ClientProxy.pointA.x = this.numericAX.getValue();
-					ClientProxy.updatePoints();
-				});
-		this.buttons.add(this.numericAX);
+		this.numericAX = new NumericFieldWidget(this.centerX - 130, this.centerY - 30, (button) -> {
+			ClientProxy.pointA.x = this.numericAX.getValue();
+			ClientProxy.updatePoints();
+		});
+		this.addRenderableWidget(this.numericAX);
 
-		this.numericAY =
-				new NumericFieldWidget(this.minecraft.fontRenderer, this.centerX - 130, this.centerY - 5, (button) -> {
-					ClientProxy.pointA.y = this.numericAY.getValue();
-					ClientProxy.updatePoints();
-				});
-		this.buttons.add(this.numericAY);
+		this.numericAY = new NumericFieldWidget(this.centerX - 130, this.centerY - 5, (button) -> {
+			ClientProxy.pointA.y = this.numericAY.getValue();
+			ClientProxy.updatePoints();
+		});
+		this.addRenderableWidget(this.numericAY);
 
-		this.numericAZ =
-				new NumericFieldWidget(this.minecraft.fontRenderer, this.centerX - 130, this.centerY + 20,
-				                       (button) -> {
-					ClientProxy.pointA.z = this.numericAZ.getValue();
-					ClientProxy.updatePoints();
-				});
-		this.buttons.add(this.numericAZ);
+		this.numericAZ = new NumericFieldWidget(this.centerX - 130, this.centerY + 20, (button) -> {
+			ClientProxy.pointA.z = this.numericAZ.getValue();
+			ClientProxy.updatePoints();
+		});
+		this.addRenderableWidget(this.numericAZ);
 
-		Button btnPointB =
-				new Button(this.centerX + 30, this.centerY - 55, 100, 20, I18n.format(Names.Gui.Save.POINT_BLUE),
-				           (button) -> {
-					           ClientProxy.movePointToPlayer(ClientProxy.pointB);
-					           ClientProxy.updatePoints();
-					           setPoint(this.numericBX, this.numericBY, this.numericBZ, ClientProxy.pointB);
-				           });
-		this.buttons.add(btnPointB);
+		Button btnPointB = new PlainTextButton(this.centerX + 30, this.centerY - 55, 100, 20,
+		                                       Component.translatable(Names.Gui.Save.POINT_BLUE), (button) -> {
+			ClientProxy.movePointToPlayer(ClientProxy.pointB);
+			ClientProxy.updatePoints();
+			setPoint(this.numericBX, this.numericBY, this.numericBZ, ClientProxy.pointB);
+		}, this.font);
+		this.addRenderableWidget(btnPointB);
 
-		this.numericBX =
-				new NumericFieldWidget(this.minecraft.fontRenderer, this.centerX + 30, this.centerY - 30, (button) -> {
-					ClientProxy.pointB.x = this.numericBX.getValue();
-					ClientProxy.updatePoints();
-				});
-		this.buttons.add(this.numericBX);
+		this.numericBX = new NumericFieldWidget(this.centerX + 30, this.centerY - 30, (button) -> {
+			ClientProxy.pointB.x = this.numericBX.getValue();
+			ClientProxy.updatePoints();
+		});
+		this.addRenderableWidget(this.numericBX);
 
-		this.numericBY =
-				new NumericFieldWidget(this.minecraft.fontRenderer, this.centerX + 30, this.centerY - 5, (button) -> {
-					ClientProxy.pointB.y = this.numericBY.getValue();
-					ClientProxy.updatePoints();
-				});
-		this.buttons.add(this.numericBY);
+		this.numericBY = new NumericFieldWidget(this.centerX + 30, this.centerY - 5, (button) -> {
+			ClientProxy.pointB.y = this.numericBY.getValue();
+			ClientProxy.updatePoints();
+		});
+		this.addRenderableWidget(this.numericBY);
 
-		this.numericBZ =
-				new NumericFieldWidget(this.minecraft.fontRenderer, this.centerX + 30, this.centerY + 20, (button) -> {
-					ClientProxy.pointB.z = this.numericBZ.getValue();
-					ClientProxy.updatePoints();
-				});
-		this.buttons.add(this.numericBZ);
+		this.numericBZ = new NumericFieldWidget(this.centerX + 30, this.centerY + 20, (button) -> {
+			ClientProxy.pointB.z = this.numericBZ.getValue();
+			ClientProxy.updatePoints();
+		});
+		this.addRenderableWidget(this.numericBZ);
 
-		this.btnEnable = new Button(this.width - 210, this.height - 55, 50, 20,
-		                            ClientProxy.isRenderingGuide && Reference.proxy.isSaveEnabled
-		                            ? this.strOn
-		                            : this.strOff, (button) -> {
+		this.btnEnable = new PlainTextButton(this.width - 210, this.height - 55, 50, 20,
+		                                     ClientProxy.isRenderingGuide && Reference.proxy.isSaveEnabled
+		                                     ? this.strOn
+		                                     : this.strOff, (button) -> {
 			ClientProxy.isRenderingGuide = !ClientProxy.isRenderingGuide && Reference.proxy.isSaveEnabled;
 			this.btnEnable.setMessage(ClientProxy.isRenderingGuide ? this.strOn : this.strOff);
 			this.btnSave.active = ClientProxy.isRenderingGuide || ClientProxy.schematic != null;
 			this.btnFormat.active = ClientProxy.isRenderingGuide || ClientProxy.schematic != null;
-		});
-		this.buttons.add(this.btnEnable);
+		}, this.font);
+		this.addRenderableWidget(this.btnEnable);
 
-		this.tfFilename =
-				new TextFieldWidget(this.minecraft.fontRenderer, this.width - 209, this.height - 29, 153, 18, "");
-		this.textFields.add(this.tfFilename);
+		this.editBox = new EditBox(this.minecraft.font, this.width - 209, this.height - 29, 153, 18,
+		                           Component.empty());
+		this.addRenderableWidget(this.editBox);
 
-		this.btnSave =
-				new Button(this.width - 50, this.height - 30, 40, 20, I18n.format(Names.Gui.Save.SAVE), (button) -> {
-					String path = this.tfFilename.getText() + SchematicFormat.getExtension(this.format);
-					if (ClientProxy.isRenderingGuide) {
-						if (Reference.proxy.saveSchematic(this.minecraft.player,
-						                                  SchematicaClientConfig.schematicDirectory, path,
-						                                  this.minecraft.world, this.format, ClientProxy.pointMin,
-						                                  ClientProxy.pointMax)) {
-							this.tfFilename.setText(this.filename);
-							this.minecraft.displayGuiScreen(this.parentScreen);
-						}
-					} else {
-						SchematicFormat.writeToFileAndNotify(new File(SchematicaClientConfig.schematicDirectory, path),
-						                                     this.format, ClientProxy.schematic.getSchematic(),
-						                                     this.minecraft.player);
-					}
-				});
+		this.btnSave = new PlainTextButton(this.width - 50, this.height - 30, 40, 20,
+		                                   Component.translatable(Names.Gui.Save.SAVE), (button) -> {
+			String path = this.editBox.getValue() + SchematicFormat.getExtension(this.format);
+			if (ClientProxy.isRenderingGuide) {
+				if (Reference.proxy.saveSchematic(this.minecraft.player, SchematicaClientConfig.schematicDirectory,
+				                                  path, this.minecraft.level, this.format, ClientProxy.pointMin,
+				                                  ClientProxy.pointMax)) {
+					this.editBox.setValue(this.filename);
+					this.minecraft.setScreen(this.parentScreen);
+				}
+			} else {
+				SchematicFormat.writeToFileAndNotify(new File(SchematicaClientConfig.schematicDirectory, path),
+				                                     this.format, ClientProxy.schematic, this.minecraft.player);
+			}
+		}, this.font);
 		this.btnSave.active =
 				ClientProxy.isRenderingGuide && Reference.proxy.isSaveEnabled || ClientProxy.schematic != null;
-		this.buttons.add(this.btnSave);
+		this.addRenderableWidget(this.btnSave);
 
-		this.btnFormat = new Button(this.width - 155, this.height - 55, 145, 20, I18n.format(Names.Gui.Save.FORMAT,
-		                                                                                     I18n.format(
-				                                                                                     SchematicFormat.getFormatName(
-						                                                                                     this.format))),
-		                            (button) -> {
-			                            this.format = nextFormat();
-			                            this.btnFormat.setMessage(I18n.format(Names.Gui.Save.FORMAT, I18n.format(
-					                            SchematicFormat.getFormatName(this.format))));
-		                            });
+		this.btnFormat = new PlainTextButton(this.width - 155, this.height - 55, 145, 20,
+		                                     Component.translatable(Names.Gui.Save.FORMAT, I18n.get(
+				                                     SchematicFormat.getFormatName(this.format))), (button) -> {
+			this.format = nextFormat();
+			this.btnFormat.setMessage(Component.translatable(Names.Gui.Save.FORMAT,
+			                                                 I18n.get(SchematicFormat.getFormatName(this.format))));
+		}, this.font);
 		this.btnFormat.active =
 				ClientProxy.isRenderingGuide && Reference.proxy.isSaveEnabled || ClientProxy.schematic != null;
-		this.buttons.add(this.btnFormat);
+		this.addRenderableWidget(this.btnFormat);
 
-		this.tfFilename.setMaxStringLength(1024);
-		this.tfFilename.setText(this.filename);
+		this.editBox.setMaxLength(1024);
+		this.editBox.setValue(this.filename);
 
 		setMinMax(this.numericAX);
 		setMinMax(this.numericAY);

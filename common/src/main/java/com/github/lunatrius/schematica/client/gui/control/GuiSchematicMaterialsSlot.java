@@ -5,66 +5,66 @@ import com.github.lunatrius.schematica.client.util.BlockList;
 import com.github.lunatrius.schematica.reference.Names;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.SlotGui;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractSelectionList;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
 
-import javax.annotation.Nonnull;
-
-class GuiSchematicMaterialsSlot extends SlotGui {
-	protected final int selectedIndex;
+class GuiSchematicMaterialsSlot extends AbstractSelectionList<GuiSchematicMaterialsSlot.ItemEntry> {
 	private final Minecraft minecraft = Minecraft.getInstance();
 	private final GuiSchematicMaterials guiSchematicMaterials;
-	private final String strMaterialAvailable = I18n.format(Names.Gui.Control.MATERIAL_AVAILABLE);
-	private final String strMaterialMissing = I18n.format(Names.Gui.Control.MATERIAL_MISSING);
 
-	public GuiSchematicMaterialsSlot(GuiSchematicMaterials parent) {
-		super(Minecraft.getInstance(), parent.width, parent.height, 16, parent.height - 34, 24);
-		this.guiSchematicMaterials = parent;
-		this.selectedIndex = -1;
+	public GuiSchematicMaterialsSlot(Minecraft minecraft, int width, int height, int y, int itemHeight,
+	                                 GuiSchematicMaterials guiSchematicMaterials) {
+		super(minecraft, width, height, y, itemHeight);
+		this.guiSchematicMaterials = guiSchematicMaterials;
 	}
 
 	@Override
-	protected int getItemCount() {
-		return this.guiSchematicMaterials.blockList.size();
-	}
+	protected void updateWidgetNarration(@NotNull NarrationElementOutput narrationElementOutput) {}
 
-	@Override
-	protected boolean isSelectedItem(int index) {
-		return index == this.selectedIndex;
-	}
+	static class ItemEntry extends AbstractSelectionList.Entry<ItemEntry> {
+		private final GuiSchematicMaterialsSlot parent;
 
-	@Override
-	protected void renderBackground() {
-	}
+		private final Component strMaterialAvailable = Component.translatable(Names.Gui.Control.MATERIAL_AVAILABLE);
+		private final Component strMaterialMissing = Component.translatable(Names.Gui.Control.MATERIAL_MISSING);
 
-	@Override
-	protected void renderItem(int index, int x, int y, int par4, int mouseX, int mouseY, float partialTicks) {
-		BlockList.WrappedItemStack wrappedItemStack = this.guiSchematicMaterials.blockList.get(index);
-		ItemStack itemStack = wrappedItemStack.itemStack;
-
-		String itemName = wrappedItemStack.getItemStackDisplayName().getFormattedText();
-		String amount = wrappedItemStack.getFormattedAmount();
-		String amountMissing = wrappedItemStack.getFormattedAmountMissing(strMaterialAvailable, strMaterialMissing);
-
-		GuiHelper.drawItemStackWithSlot(this.minecraft.getTextureManager(), itemStack, x, y);
-
-		this.guiSchematicMaterials.drawString(this.minecraft.fontRenderer, itemName, x + 24, y + 6, 0xFFFFFF);
-		this.guiSchematicMaterials.drawString(this.minecraft.fontRenderer, amount,
-		                                      x + 215 - this.minecraft.fontRenderer.getStringWidth(amount), y + 1,
-		                                      0xFFFFFF);
-		this.guiSchematicMaterials.drawString(this.minecraft.fontRenderer, amountMissing,
-		                                      x + 215 - this.minecraft.fontRenderer.getStringWidth(amountMissing),
-		                                      y + 11, 0xFFFFFF);
-
-		if (mouseX > x && mouseY > y && mouseX <= x + 18 && mouseY <= y + 18) {
-			this.guiSchematicMaterials.renderTooltip(this.guiSchematicMaterials.getTooltipFromItem(itemStack), x, y);
-			RenderSystem.disableLighting();
+		public ItemEntry(GuiSchematicMaterialsSlot parent) {
+			this.parent = parent;
 		}
-	}
 
-	@Override
-	protected void drawContainerBackground(@Nonnull Tessellator tessellator) {
+		@Override
+		public void render(GuiGraphics graphics, int index, int x, int y, int width, int height, int mouseX,
+		                   int mouseY,
+		                   boolean isHovered, float partialTicks) {
+			BlockList.WrappedItemStack wrappedItemStack = parent.guiSchematicMaterials.blockList.get(index);
+			ItemStack itemStack = wrappedItemStack.itemStack;
+
+			String itemName = wrappedItemStack.getItemStackDisplayName().getString();
+			String amount = wrappedItemStack.getFormattedAmount();
+			String amountMissing = wrappedItemStack.getFormattedAmountMissing(strMaterialAvailable.getString(),
+			                                                                  strMaterialMissing.getString());
+
+			GuiHelper.drawItemStackWithSlot(parent.minecraft.getTextureManager(), itemStack, x, y);
+
+			graphics.drawString(parent.minecraft.font, itemName, x + 24, y + 6, 0xFFFFFF);
+			graphics.drawString(parent.minecraft.font, amount, x + 215 - parent.minecraft.font.width(amount), y + 1,
+			                    0xFFFFFF);
+			graphics.drawString(parent.minecraft.font, amountMissing,
+			                    x + 215 - parent.minecraft.font.width(amountMissing), y + 11, 0xFFFFFF);
+
+			if (mouseX > x && mouseY > y && mouseX <= x + 18 && mouseY <= y + 18) {
+				parent.guiSchematicMaterials.setTooltipForNextRenderPass(
+						Screen.getTooltipFromItem(parent.minecraft, itemStack)
+						      .stream()
+						      .reduce(Component.empty(), MutableComponent::append, MutableComponent::append));
+				RenderSystem.setupGuiFlatDiffuseLighting(new Vector3f(), new Vector3f());
+			}
+		}
 	}
 }

@@ -4,11 +4,15 @@ import com.github.lunatrius.core.entity.EntityHelper;
 import com.github.lunatrius.core.util.math.BlockPosHelper;
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.block.state.BlockStateHelper;
-import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.world.FakeLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -18,31 +22,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BlockList {
-	public List<WrappedItemStack> getList(Player player, SchematicWorld world, Level mcWorld) {
+	public List<WrappedItemStack> getList(Player player, FakeLevel world, Level mcWorld) {
 		List<WrappedItemStack> blockList = new ArrayList<>();
 
 		if (world == null) {
 			return blockList;
 		}
 
-		RayTraceResult rtr = new EntityRayTraceResult(player);
 		MBlockPos mcPos = new MBlockPos();
 
 		for (MBlockPos pos : BlockPosHelper.getAllInBox(BlockPos.ZERO,
-		                                                new BlockPos(world.getWidth() - 1, world.getHeight() - 1,
-		                                                             world.getLength() - 1))) {
-			if (!world.layerMode.shouldUseLayer(world, pos.getY())) {
+		                                                new BlockPos(world.getLevelSource().getMaxX() - 1,
+		                                                             world.getHeight() - 1,
+		                                                             world.getLevelSource().getMaxZ() - 1))) {
+			if (!world.shouldUseLayer(pos.getY())) {
 				continue;
 			}
 
 			BlockState blockState = world.getBlockState(pos);
 			Block block = blockState.getBlock();
 
-			if (world.isAirBlock(pos)) {
+			if (world.getBlockState(pos).isAir()) {
 				continue;
 			}
 
-			mcPos.set(world.position.add(pos));
+			mcPos.set(world.getWorldPos().offset(pos));
 
 			BlockState mcBlockState = mcWorld.getBlockState(mcPos);
 			boolean isPlaced = BlockStateHelper.areBlockStatesEqual(blockState, mcBlockState);
@@ -50,19 +54,14 @@ public class BlockList {
 			ItemStack stack = ItemStack.EMPTY;
 
 			try {
-				stack = block.getPickBlock(blockState, rtr, world, pos, player);
+				stack = blockState.getCloneItemStack(world, pos, false);
 			} catch (Exception e) {
 				Reference.logger.warn("Could not get the pick block for: {}", blockState, e);
 			}
 
-			if (block instanceof IFluidBlock || block instanceof FlowingFluidBlock) {
-				stack = new ItemStack(((FlowingFluidBlock) block).getFluid().getFilledBucket());
-			}
 
-			if (stack == null) {
-				Reference.logger.error("Could not find the item for: {} (getPickBlock() returned null, this is a bug)",
-				                       blockState);
-				continue;
+			if (block instanceof LiquidBlock) {
+				stack = new ItemStack(((LiquidBlock) block).arch$getFluid().getBucket());
 			}
 
 			if (stack.isEmpty()) {
@@ -74,7 +73,7 @@ public class BlockList {
 
 			// TODO: this has to be generalized for all blocks; just a temporary "fix"
 			if (block instanceof SlabBlock) {
-				if (blockState.get(BlockStateProperties.SLAB_TYPE) == SlabType.DOUBLE) {
+				if (blockState.getValue(BlockStateProperties.SLAB_TYPE) == SlabType.DOUBLE) {
 					count = 2;
 				}
 			}
@@ -90,9 +89,9 @@ public class BlockList {
 			if (player.isCreative()) {
 				wrappedItemStack.inventory = -1;
 			} else {
-				wrappedItemStack.inventory =
-						EntityHelper.getItemCountInInventory(player.inventory, wrappedItemStack.itemStack.getItem(),
-						                                     wrappedItemStack.itemStack.getDamage());
+				wrappedItemStack.inventory = EntityHelper.getItemCountInInventory(player.getInventory(),
+				                                                                  wrappedItemStack.itemStack.getItem(),
+				                                                                  wrappedItemStack.itemStack.getDamageValue());
 			}
 		}
 
@@ -101,7 +100,7 @@ public class BlockList {
 
 	private WrappedItemStack findOrCreateWrappedItemStackFor(List<WrappedItemStack> blockList, ItemStack itemStack) {
 		for (WrappedItemStack wrappedItemStack : blockList) {
-			if (wrappedItemStack.itemStack.isItemEqual(itemStack)) {
+			if (wrappedItemStack.itemStack.is(itemStack.getItem())) {
 				return wrappedItemStack;
 			}
 		}
@@ -127,8 +126,8 @@ public class BlockList {
 			this.total = total;
 		}
 
-		public ITextComponent getItemStackDisplayName() {
-			return this.itemStack.getItem().getDisplayName(this.itemStack);
+		public Component getItemStackDisplayName() {
+			return this.itemStack.getItem().getName(this.itemStack);
 		}
 
 		public String getFormattedAmount() {

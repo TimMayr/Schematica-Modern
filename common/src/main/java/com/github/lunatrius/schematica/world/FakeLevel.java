@@ -1,6 +1,8 @@
 package com.github.lunatrius.schematica.world;
 
+import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.world.chunk.FakeChunk;
 import com.github.lunatrius.schematica.world.chunk.FakeChunkSource;
 import net.minecraft.CrashReport;
@@ -98,13 +100,16 @@ public class FakeLevel extends Level {
 	public int lastX;
 	public int lastZ;
 	public ChunkAccess lastChunk = null;
-	protected ISchematic levelSource;
+	public LayerMode layerMode = LayerMode.ALL;
+	public int renderLayer;
 	protected Level realLevel;
 	protected FakeLevelEntityGetterAdapter levelEntityGetter = FakeLevelEntityGetterAdapter.EMPTY;
 	/**
 	 * Current rendering worldPos so we can use client level real info
 	 */
-	protected BlockPos worldPos = BlockPos.ZERO;
+	protected MBlockPos worldPos = new MBlockPos();
+	private ISchematic levelSource;
+	private boolean isRendering;
 
 	/**
 	 * @param levelSource
@@ -125,7 +130,7 @@ public class FakeLevel extends Level {
 		super(new FakeLevelData(clientLevel()::getLevelData, lightProvider), clientLevel().dimension(),
 		      clientLevel().registryAccess(), clientLevel().dimensionTypeRegistration(), clientLevel().isClientSide(),
 		      clientLevel().isDebug(), 0, 0);
-		this.levelSource = levelSource;
+		this.setLevelSource(levelSource);
 		this.lightProvider = lightProvider;
 		this.realLevel = clientLevel();
 		this.scoreboard = scoreboard;
@@ -145,10 +150,6 @@ public class FakeLevel extends Level {
 		return Minecraft.getInstance().level;
 	}
 
-	// ========================================
-	// ========== FAKE LEVEL METHODS ==========
-	// ========================================
-
 	public void setRealLevel(Level realLevel) {
 		if (Objects.equals(this.realLevel, realLevel)) {
 			return;
@@ -161,6 +162,10 @@ public class FakeLevel extends Level {
 
 		this.realLevel = realLevel;
 	}
+
+	// ========================================
+	// ========== FAKE LEVEL METHODS ==========
+	// ========================================
 
 	public Level realLevel() {
 		return realLevel;
@@ -186,16 +191,9 @@ public class FakeLevel extends Level {
 	}
 
 	/**
-	 * @return current data source
-	 */
-	public ISchematic getLevelSource() {
-		return levelSource;
-	}
-
-	/**
 	 * @return anchor in vanilla client level
 	 */
-	public BlockPos getWorldPos() {
+	public MBlockPos getWorldPos() {
 		return worldPos;
 	}
 
@@ -203,7 +201,7 @@ public class FakeLevel extends Level {
 	 * @param worldPos
 	 * 		where is fake level anchor when querying current client level data
 	 */
-	public void setWorldPos(BlockPos worldPos) {
+	public void setWorldPos(MBlockPos worldPos) {
 		this.worldPos = worldPos;
 	}
 
@@ -221,7 +219,19 @@ public class FakeLevel extends Level {
 
 	@Override
 	public boolean isInWorldBounds(@NotNull BlockPos pos) {
-		return levelSource.isPosInside(pos);
+		return getLevelSource().isPosInside(pos);
+	}
+
+	/**
+	 * @return current data source
+	 */
+	public ISchematic getLevelSource() {
+		return levelSource;
+	}
+
+	public FakeLevel setLevelSource(ISchematic levelSource) {
+		this.levelSource = levelSource;
+		return this;
 	}
 
 	// ========================================
@@ -280,18 +290,18 @@ public class FakeLevel extends Level {
 
 	@Override
 	public int getHeight(@NotNull Types heightmapType, int x, int z) {
-		final MutableBlockPos pos = new MutableBlockPos(x, levelSource.getMinY(), z);
+		final MutableBlockPos pos = new MutableBlockPos(x, getLevelSource().getMinY(), z);
 
-		if (levelSource.isPosInside(pos)) {
-			for (int y = levelSource.getMaxY() - 1; y >= levelSource.getMinY(); y--) {
+		if (getLevelSource().isPosInside(pos)) {
+			for (int y = getLevelSource().getMaxY() - 1; y >= getLevelSource().getMinY(); y--) {
 				pos.setY(y);
-				if (heightmapType.isOpaque().test(levelSource.getBlockState(pos))) {
+				if (heightmapType.isOpaque().test(getLevelSource().getBlockState(pos))) {
 					return y;
 				}
 			}
 		}
 
-		return levelSource.getMinY();
+		return getLevelSource().getMinY();
 	}
 
 	@Override
@@ -301,12 +311,13 @@ public class FakeLevel extends Level {
 
 	@Override
 	public BlockState getBlockState(@NotNull BlockPos pos) {
-		return levelSource.isPosInside(pos) ? levelSource.getBlockState(pos) : Blocks.AIR.defaultBlockState();
+		return getLevelSource().isPosInside(pos) ? getLevelSource().getBlockState(pos) :
+		       Blocks.AIR.defaultBlockState();
 	}
 
 	@Override
 	public FluidState getFluidState(@NotNull BlockPos pos) {
-		return levelSource.getFluidState(pos);
+		return getLevelSource().getFluidState(pos);
 	}
 
 	@Override
@@ -363,14 +374,14 @@ public class FakeLevel extends Level {
 
 	@Override
 	public String gatherChunkSourceStats() {
-		return "Fake level for: " + levelSource;
+		return "Fake level for: " + getLevelSource();
 	}
 
 	@Nullable
 	@Override
 	public BlockEntity getBlockEntity(@NotNull BlockPos pos) {
 		final BlockEntity blockEntity =
-				blockEntities.isEmpty() ? levelSource.getBlockEntity(pos) : blockEntities.get(pos);
+				blockEntities.isEmpty() ? getLevelSource().getBlockEntity(pos) : blockEntities.get(pos);
 		if (blockEntity != null && blockEntity.getLevel() != this && (overrideBeLevel || !blockEntity.hasLevel())) {
 			blockEntity.setLevel(this);
 		}
@@ -479,7 +490,7 @@ public class FakeLevel extends Level {
 	@Override
 	public CrashReportCategory fillReportDetails(CrashReport report) {
 		CrashReportCategory crashreportcategory = report.addCategory("Schematica fake level");
-		levelSource.describeSelfInCrashReport(crashreportcategory);
+		getLevelSource().describeSelfInCrashReport(crashreportcategory);
 		return crashreportcategory;
 	}
 
@@ -636,10 +647,10 @@ public class FakeLevel extends Level {
 	public boolean hasChunk(int chunkX, int chunkZ) {
 		final int posX = SectionPos.sectionToBlockCoord(chunkX);
 		final int posZ = SectionPos.sectionToBlockCoord(chunkZ);
-		return levelSource.getMinX() <= posX
-				&& posX < levelSource.getMaxX()
-				&& levelSource.getMinZ() <= posZ
-				&& posZ < levelSource.getMaxZ();
+		return getLevelSource().getMinX() <= posX
+				&& posX < getLevelSource().getMaxX()
+				&& getLevelSource().getMinZ() <= posZ
+				&& posZ < getLevelSource().getMaxZ();
 	}
 
 	@Override
@@ -718,12 +729,12 @@ public class FakeLevel extends Level {
 
 	@Override
 	public int getMinY() {
-		return levelSource.getMinY();
+		return getLevelSource().getMinY();
 	}
 
 	@Override
 	public int getHeight() {
-		return levelSource.getHeight();
+		return getLevelSource().getHeight();
 	}
 
 	@Override
@@ -745,5 +756,57 @@ public class FakeLevel extends Level {
 	public LevelTickAccess<Fluid> getFluidTicks() {
 		// Noop
 		return BlackholeTickAccess.emptyLevelList();
+	}
+
+	public boolean isRendering() {
+		return isRendering;
+	}
+
+	public FakeLevel setRendering(boolean rendering) {
+		isRendering = rendering;
+		return this;
+	}
+
+	public boolean shouldUseLayer(int y) {
+		return layerMode.shouldUseLayer(this, y);
+	}
+
+	public boolean toggleRendering() {
+		this.isRendering = !isRendering;
+		return this.isRendering;
+	}
+
+	public enum LayerMode {
+		ALL(Names.Gui.Control.MODE_ALL) {
+			@Override
+			public boolean shouldUseLayer(FakeLevel world, int layer) {
+				return true;
+			}
+		},
+		SINGLE_LAYER(Names.Gui.Control.MODE_LAYERS) {
+			@Override
+			public boolean shouldUseLayer(FakeLevel world, int layer) {
+				return layer == world.renderLayer;
+			}
+		},
+		ALL_BELOW(Names.Gui.Control.MODE_BELOW) {
+			@Override
+			public boolean shouldUseLayer(FakeLevel world, int layer) {
+				return layer <= world.renderLayer;
+			}
+		};
+
+		public final String name;
+
+		LayerMode(String name) {
+			this.name = name;
+		}
+
+		public static LayerMode next(LayerMode mode) {
+			LayerMode[] values = values();
+			return values[(mode.ordinal() + 1) % values.length];
+		}
+
+		public abstract boolean shouldUseLayer(FakeLevel world, int layer);
 	}
 }

@@ -1,23 +1,18 @@
 package com.github.lunatrius.schematica.client.util;
 
-import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.BlockHitResult;
 
 @MethodsReturnNonnullByDefault
 public class BlockStateToItemStack {
-	public static ItemStack getItemStack(BlockState blockState, BlockHitResult rayTraceResult, SchematicWorld world,
-	                                     BlockPos pos, Player player) {
-		Block block = blockState.getBlock();
-
+	public static ItemStack getItemStack(BlockState blockState, Level world,
+	                                     BlockPos pos) {
 		try {
-			ItemStack itemStack = block.getPickBlock(blockState, rayTraceResult, world, pos, player);
+			ItemStack itemStack = blockState.getCloneItemStack(world, pos, false);
 			if (!itemStack.isEmpty()) {
 				return itemStack;
 			}

@@ -4,10 +4,10 @@ import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.core.util.vector.Vector3d;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
-import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.handler.client.InputHandler;
 import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.world.FakeLevel;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
 import net.fabricmc.api.EnvType;
@@ -34,7 +34,7 @@ public class ClientProxy extends CommonProxy {
 	public static boolean isPendingReset = false;
 	public static Direction orientation = null;
 	public static int rotationRender = 0;
-	public static SchematicWorld schematic = null;
+	public static ISchematic schematic = null;
 	public static Direction axisFlip = Direction.UP;
 	public static Direction axisRotation = Direction.UP;
 	public static HitResult objectMouseOver = null;
@@ -91,25 +91,25 @@ public class ClientProxy extends CommonProxy {
 		}
 	}
 
-	public static void moveSchematicToPlayer(SchematicWorld schematic) {
-		if (schematic != null) {
-			MBlockPos position = schematic.position;
+	public static void moveSchematicToPlayer(FakeLevel level) {
+		if (level != null) {
+			MBlockPos position = new MBlockPos(level.getWorldPos());
 			position.x = (int) Math.floor(playerPosition.x);
 			position.y = (int) Math.floor(playerPosition.y);
 			position.z = (int) Math.floor(playerPosition.z);
 
 			switch (rotationRender) {
 				case 0:
-					position.x -= schematic.getWidth();
+					position.x -= level.getLevelSource().getMaxX();
 					position.z += 1;
 					break;
 				case 1:
-					position.x -= schematic.getWidth();
-					position.z -= schematic.getLength();
+					position.x -= level.getLevelSource().getMaxX();
+					position.z -= level.getLevelSource().getMaxZ();
 					break;
 				case 2:
 					position.x += 1;
-					position.z -= schematic.getLength();
+					position.z -= level.getLevelSource().getMaxZ();
 					break;
 				case 3:
 					position.x += 1;
@@ -176,14 +176,15 @@ public class ClientProxy extends CommonProxy {
 			return false;
 		}
 
-		SchematicWorld world = new SchematicWorld(schematic);
+		FakeLevel world = FakeLevel.of(schematic);
 
-		Reference.logger.debug("Loaded {} [w:{},h:{},l:{}]", filename, world.getWidth(), world.getHeight(),
-		                       world.getLength());
+		Reference.logger.debug("Loaded {} [w:{},h:{},l:{}]", filename, world.getLevelSource().getMaxX(),
+		                       world.getHeight(),
+		                       world.getLevelSource().getMaxZ());
 
-		ClientProxy.schematic = world;
+		ClientProxy.schematic = world.getLevelSource();
 		SchematicPrinter.INSTANCE.setSchematic(world);
-		world.isRendering = true;
+		world.setRendering(true);
 
 		return true;
 	}

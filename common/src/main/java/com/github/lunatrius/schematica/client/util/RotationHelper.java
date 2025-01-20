@@ -4,8 +4,8 @@ import com.github.lunatrius.core.util.math.BlockPosHelper;
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.block.state.BlockStateHelper;
-import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.world.FakeLevel;
 import com.github.lunatrius.schematica.world.storage.Schematic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -70,22 +70,18 @@ public class RotationHelper {
 				new Direction.Axis[] {Direction.Axis.Y, Direction.Axis.X, Direction.Axis.Z};
 	}
 
-	public boolean rotate(SchematicWorld world, Direction axis, boolean forced) {
+	public boolean rotate(FakeLevel world, Direction axis, boolean forced) {
 		if (world == null) {
 			return false;
 		}
 
 		try {
-			ISchematic schematic = world.getSchematic();
+			ISchematic schematic = world.getLevelSource();
 			Schematic schematicRotated = rotate(schematic, axis, forced);
 
 			updatePosition(world, axis);
 
-			world.setSchematic(schematicRotated);
-
-			for (BlockEntity blockEntity : world.getBlockEntities()) {
-				world.initializeBlockEntity(blockEntity);
-			}
+			world.setLevelSource(schematicRotated);
 
 			return true;
 		} catch (RotationException re) {
@@ -97,29 +93,26 @@ public class RotationHelper {
 		return false;
 	}
 
-	private void updatePosition(SchematicWorld world, Direction axis) {
+	private void updatePosition(FakeLevel world, Direction axis) {
 		switch (axis) {
 			case DOWN:
 			case UP: {
-				int offset = (world.getWidth() - world.getLength()) / 2;
-				world.position.x += offset;
-				world.position.z -= offset;
+				int offset = (world.getLevelSource().getMaxX() - world.getLevelSource().getMaxZ()) / 2;
+				world.getWorldPos().offset(offset, 0, offset);
 				break;
 			}
 
 			case NORTH:
 			case SOUTH: {
-				int offset = (world.getWidth() - world.getHeight()) / 2;
-				world.position.x += offset;
-				world.position.y -= offset;
+				int offset = (world.getLevelSource().getMaxX() - world.getHeight()) / 2;
+				world.getWorldPos().offset(offset, offset, 0);
 				break;
 			}
 
 			case WEST:
 			case EAST: {
-				int offset = (world.getHeight() - world.getLength()) / 2;
-				world.position.y += offset;
-				world.position.z -= offset;
+				int offset = (world.getHeight() - world.getLevelSource().getMaxZ()) / 2;
+				world.getWorldPos().offset(0, offset, offset);
 				break;
 			}
 		}

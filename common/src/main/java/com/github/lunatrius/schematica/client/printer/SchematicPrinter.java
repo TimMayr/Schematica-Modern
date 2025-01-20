@@ -8,12 +8,12 @@ import com.github.lunatrius.schematica.client.printer.nbtsync.SyncRegistry;
 import com.github.lunatrius.schematica.client.printer.registry.PlacementData;
 import com.github.lunatrius.schematica.client.printer.registry.PlacementRegistry;
 import com.github.lunatrius.schematica.client.util.BlockStateToItemStack;
-import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.world.FakeLevel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -38,7 +38,7 @@ public class SchematicPrinter {
 	private final HashMap<BlockPos, Integer> syncBlacklist = new HashMap<>();
 	private boolean isEnabled = true;
 	private boolean isPrinting = false;
-	private SchematicWorld schematic = null;
+	private FakeLevel schematic = null;
 	private byte[][][] timeout = null;
 
 	public boolean isEnabled() {
@@ -62,11 +62,11 @@ public class SchematicPrinter {
 		this.isPrinting = isPrinting;
 	}
 
-	public SchematicWorld getSchematic() {
+	public FakeLevel getSchematic() {
 		return this.schematic;
 	}
 
-	public void setSchematic(SchematicWorld schematic) {
+	public void setSchematic(FakeLevel schematic) {
 		this.isPrinting = false;
 		this.schematic = schematic;
 		refresh();
@@ -218,8 +218,8 @@ public class SchematicPrinter {
 		}
 
 		ItemStack itemStack =
-				BlockStateToItemStack.getItemStack(blockState, new EntityRayTraceResult(player), this.schematic, pos,
-				                                   player);
+				BlockStateToItemStack.getItemStack(blockState, new EntityRayTraceResult(player), this.schematic, pos
+				                                  );
 		if (itemStack.isEmpty()) {
 			Reference.logger.debug("{} is missing a mapping!", blockState);
 			return false;

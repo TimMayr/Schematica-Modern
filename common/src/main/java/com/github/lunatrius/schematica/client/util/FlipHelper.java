@@ -4,8 +4,8 @@ import com.github.lunatrius.core.util.math.BlockPosHelper;
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.block.state.BlockStateHelper;
-import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.world.FakeLevel;
 import com.github.lunatrius.schematica.world.storage.Schematic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,21 +22,16 @@ import java.util.List;
 public class FlipHelper {
 	public static final FlipHelper INSTANCE = new FlipHelper();
 
-	public boolean flip(SchematicWorld world, Direction axis, boolean forced) {
+	public boolean flip(FakeLevel world, Direction axis, boolean forced) {
 		if (world == null) {
 			return false;
 		}
 
 		try {
-			ISchematic schematic = world.getSchematic();
+			ISchematic schematic = world.getLevelSource();
 			Schematic schematicFlipped = flip(schematic, axis, forced);
 
-			world.setSchematic(schematicFlipped);
-
-			for (BlockEntity blockEntity : world.getBlockEntities()) {
-				world.initializeBlockEntity(blockEntity);
-			}
-
+			world.setLevelSource(schematicFlipped);
 			return true;
 		} catch (FlipException fe) {
 			Reference.logger.error(fe.getMessage());
