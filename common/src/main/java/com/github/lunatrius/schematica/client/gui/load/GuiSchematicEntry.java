@@ -1,15 +1,17 @@
 package com.github.lunatrius.schematica.client.gui.load;
 
-import net.minecraft.block.Block;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.NotNull;
 
 public class GuiSchematicEntry {
 	private final String name;
 	private final ItemStack itemStack;
 	private final boolean isDirectory;
 
-	public GuiSchematicEntry(String name, ItemStack itemStack, boolean isDirectory) {
+	public GuiSchematicEntry(String name, @NotNull ItemStack itemStack, boolean isDirectory) {
 		this(name, itemStack.getItem(), isDirectory);
 	}
 

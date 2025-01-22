@@ -16,6 +16,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.Iterator;
@@ -57,7 +58,7 @@ public class GuiSchematicSave extends ScreenBase {
 	}
 
 	/**
-	 * Advances the format iterator, reseting it as needed.
+	 * Advances the format iterator, resetting it as needed.
 	 * If the format iterator is null, initializes it to the default format.
 	 *
 	 * @return The next format value
@@ -86,7 +87,7 @@ public class GuiSchematicSave extends ScreenBase {
 	}
 
 	@Override
-	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+	public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		guiGraphics.drawString(this.minecraft.font, this.strSaveSelection, this.width - 205, this.height - 70,
 		                       0xFFFFFF);
 
@@ -209,7 +210,8 @@ public class GuiSchematicSave extends ScreenBase {
 				}
 			} else {
 				SchematicFormat.writeToFileAndNotify(new File(SchematicaClientConfig.schematicDirectory, path),
-				                                     this.format, ClientProxy.schematic, this.minecraft.player);
+				                                     this.format, ClientProxy.schematic.getLevelSource(),
+				                                     this.minecraft.player);
 			}
 		}, this.font);
 		this.btnSave.active =
@@ -241,12 +243,13 @@ public class GuiSchematicSave extends ScreenBase {
 		setPoint(this.numericBX, this.numericBY, this.numericBZ, ClientProxy.pointB);
 	}
 
-	private void setMinMax(NumericFieldWidget numericField) {
+	private void setMinMax(@NotNull NumericFieldWidget numericField) {
 		numericField.setMinimum(Constants.Level.MINIMUM_COORD);
 		numericField.setMaximum(Constants.Level.MAXIMUM_COORD);
 	}
 
-	private void setPoint(NumericFieldWidget numX, NumericFieldWidget numY, NumericFieldWidget numZ, BlockPos point) {
+	private void setPoint(@NotNull NumericFieldWidget numX, @NotNull NumericFieldWidget numY,
+	                      @NotNull NumericFieldWidget numZ, @NotNull BlockPos point) {
 		numX.setValue(point.getX());
 		numY.setValue(point.getY());
 		numZ.setValue(point.getZ());

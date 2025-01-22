@@ -1,17 +1,21 @@
 package com.github.lunatrius.schematica.client.printer.registry;
 
-import net.minecraft.block.*;
-import net.minecraft.entity.player.Player;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.properties.AttachFace;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.state.properties.Half;
-import net.minecraft.state.properties.SlabType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.Level;
+import com.github.lunatrius.core.util.math.MathHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.piston.PistonBaseBlock;
+import net.minecraft.world.level.block.piston.PistonHeadBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.AttachFace;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.Half;
+import net.minecraft.world.level.block.state.properties.SlabType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -31,63 +35,57 @@ public class PlacementRegistry {
 		this.blockPlacementMap.clear();
 		this.itemPlacementMap.clear();
 
-		IValidPlayerFacing playerFacingEntity =
-				(BlockState blockState, Player player, BlockPos pos, Level world) -> {
-					Direction facing = blockState.get(BlockStateProperties.HORIZONTAL_FACING);
-					return facing == player.getHorizontalFacing();
-				};
+		IValidPlayerFacing playerFacingEntity = (BlockState blockState, Player player, BlockPos pos, Level world) -> {
+			Direction facing = blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
+			return facing == player.getDirection();
+		};
 
 		IValidPlayerFacing playerFacingEntityOpposite =
 				(BlockState blockState, Player player, BlockPos pos, Level world) -> {
-					Direction facing = blockState.get(BlockStateProperties.FACING);
-					return facing == player.getHorizontalFacing().getOpposite();
+					Direction facing = blockState.getValue(BlockStateProperties.FACING);
+					return facing == player.getDirection().getOpposite();
 				};
 
-		IValidPlayerFacing playerFacingPiston =
-				(BlockState blockState, Player player, BlockPos pos, Level world) -> {
-					Direction facing = blockState.get(BlockStateProperties.FACING);
-					return facing == Direction.getFacingFromVector((float) player.getPosX() - pos.getX(),
-					                                               (float) player.getPosY() - pos.getY(),
-					                                               (float) player.getPosZ() - pos.getZ());
-				};
+		IValidPlayerFacing playerFacingPiston = (BlockState blockState, Player player, BlockPos pos, Level world) -> {
+			Direction facing = blockState.getValue(BlockStateProperties.FACING);
+			return facing == Direction.getApproximateNearest((float) player.getX() - pos.getX(),
+			                                                 (float) player.getY() - pos.getY(),
+			                                                 (float) player.getZ() - pos.getZ());
+		};
 
 		IValidPlayerFacing playerFacingObserver =
 				(BlockState blockState, Player player, BlockPos pos, Level world) -> {
-					Direction facing = blockState.get(BlockStateProperties.FACING);
-					return facing == Direction.getFacingFromVector((float) player.getPosX() - pos.getX(),
-					                                               (float) player.getPosY() - pos.getY(),
-					                                               (float) player.getPosZ() - pos.getZ()).getOpposite();
-				};
+			Direction facing = blockState.getValue(BlockStateProperties.FACING);
+			return facing == Direction.getApproximateNearest((float) player.getX() - pos.getX(),
+			                                                 (float) player.getY() - pos.getY(),
+			                                                 (float) player.getZ() - pos.getZ()).getOpposite();
+		};
 
-		IValidPlayerFacing playerFacingRotateY =
-				(BlockState blockState, Player player, BlockPos pos, Level world) -> {
-					Direction facing = blockState.get(BlockStateProperties.FACING);
-					return facing == player.getHorizontalFacing().rotateY();
-				};
+		IValidPlayerFacing playerFacingRotateY = (BlockState blockState, Player player, BlockPos pos, Level world) -> {
+			Direction facing = blockState.getValue(BlockStateProperties.FACING);
+			return facing == player.getDirection();
+		};
 
-		IValidPlayerFacing playerFacingLever =
-				(BlockState blockState, Player player, BlockPos pos, Level world) -> {
-					AttachFace face = blockState.get(BlockStateProperties.FACE);
-					Direction facing = blockState.get(BlockStateProperties.HORIZONTAL_FACING);
-					return !facing.getAxis().isVertical() || (face == AttachFace.WALL
-							                                          && facing == player.getHorizontalFacing()) || (
-							face != AttachFace.WALL
-									&& facing == player.getHorizontalFacing().getOpposite());
-				};
+		IValidPlayerFacing playerFacingLever = (BlockState blockState, Player player, BlockPos pos, Level world) -> {
+			AttachFace face = blockState.getValue(BlockStateProperties.ATTACH_FACE);
+			Direction facing = blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
+			return !facing.getAxis().isVertical() || (face == AttachFace.WALL && facing == player.getDirection()) || (
+					face != AttachFace.WALL
+							&& facing == player.getDirection().getOpposite());
+		};
 
 		IValidPlayerFacing playerFacingStandingSign =
 				(BlockState blockState, Player player, BlockPos pos, Level world) -> {
-					int value = blockState.get(BlockStateProperties.ROTATION_0_15);
-					int facing = MathHelper.floor((player.rotationYaw + 180.0) * 16.0 / 360.0 + 0.5) & 15;
+					int value = blockState.getValue(BlockStateProperties.ROTATION_16);
+					int facing = MathHelper.floor((float) ((player.yHeadRot + 180.0) * 16.0 / 360.0 + 0.5)) & 15;
 					return value == facing;
 				};
 
-		IValidPlayerFacing playerFacingIgnore =
-				(BlockState state, Player player, BlockPos pos, Level world) -> false;
+		IValidPlayerFacing playerFacingIgnore = (BlockState state, Player player, BlockPos pos, Level world) -> false;
 
 		IOffset offsetSlab = (BlockState blockState) -> {
-			if (!(blockState.get(BlockStateProperties.SLAB_TYPE) == SlabType.DOUBLE)) {
-				SlabType half = blockState.get(BlockStateProperties.SLAB_TYPE);
+			if (!(blockState.getValue(BlockStateProperties.SLAB_TYPE) == SlabType.DOUBLE)) {
+				SlabType half = blockState.getValue(BlockStateProperties.SLAB_TYPE);
 				return half == SlabType.TOP ? 1 : 0;
 			}
 
@@ -95,14 +93,14 @@ public class PlacementRegistry {
 		};
 
 		IOffset offsetHalfBlock = (BlockState blockState) -> {
-			Half half = blockState.get(BlockStateProperties.HALF);
+			Half half = blockState.getValue(BlockStateProperties.HALF);
 			return half == Half.TOP ? 1 : 0;
 		};
 
 		IValidBlockFacing blockFacingAxis = (List<Direction> solidSides, BlockState blockState) -> {
 			List<Direction> list = new ArrayList<>();
 
-			Direction.Axis axis = blockState.get(BlockStateProperties.AXIS);
+			Direction.Axis axis = blockState.getValue(BlockStateProperties.AXIS);
 			for (Direction side : solidSides) {
 				if (axis != side.getAxis()) {
 					continue;
@@ -117,7 +115,7 @@ public class PlacementRegistry {
 		IValidBlockFacing blockFacingOpposite = (List<Direction> solidSides, BlockState blockState) -> {
 			List<Direction> list = new ArrayList<>();
 
-			Direction facing = blockState.get(BlockStateProperties.HORIZONTAL_FACING);
+			Direction facing = blockState.getValue(BlockStateProperties.HORIZONTAL_FACING);
 			for (Direction side : solidSides) {
 				if (facing.getOpposite() != side) {
 					continue;
@@ -132,7 +130,7 @@ public class PlacementRegistry {
 		IValidBlockFacing blockFacingSame = (List<Direction> solidSides, BlockState blockState) -> {
 			List<Direction> list = new ArrayList<>();
 
-			Direction facing = blockState.get(BlockStateProperties.FACING);
+			Direction facing = blockState.getValue(BlockStateProperties.FACING);
 			for (Direction side : solidSides) {
 				if (facing != side) {
 					continue;
@@ -145,10 +143,12 @@ public class PlacementRegistry {
 		};
 
 		IExtraClick extraClickDoubleSlab =
-				(BlockState blockState) -> (blockState.get(BlockStateProperties.SLAB_TYPE) == SlabType.DOUBLE) ? 1 : 0;
+				(BlockState blockState) -> (blockState.getValue(BlockStateProperties.SLAB_TYPE) == SlabType.DOUBLE)
+				                           ? 1
+				                           : 0;
 
-		addPlacementMapping(LogBlock.class, new PlacementData(blockFacingAxis));
-		addPlacementMapping(AbstractButtonBlock.class, new PlacementData(blockFacingOpposite));
+
+		addPlacementMapping(FaceAttachedHorizontalDirectionalBlock.class, new PlacementData(blockFacingOpposite));
 		addPlacementMapping(ChestBlock.class, new PlacementData(playerFacingEntityOpposite));
 		addPlacementMapping(DispenserBlock.class, new PlacementData(playerFacingPiston));
 		addPlacementMapping(DoorBlock.class, new PlacementData(playerFacingEntity));
@@ -158,12 +158,12 @@ public class PlacementRegistry {
 		addPlacementMapping(FurnaceBlock.class, new PlacementData(playerFacingEntityOpposite));
 		addPlacementMapping(HopperBlock.class, new PlacementData(blockFacingSame));
 		addPlacementMapping(ObserverBlock.class, new PlacementData(playerFacingObserver));
-		addPlacementMapping(PistonBlock.class, new PlacementData(playerFacingPiston));
+		addPlacementMapping(PistonBaseBlock.class, new PlacementData(playerFacingPiston));
 		addPlacementMapping(CarvedPumpkinBlock.class, new PlacementData(playerFacingEntityOpposite));
 		addPlacementMapping(RotatedPillarBlock.class, new PlacementData(blockFacingAxis));
 		addPlacementMapping(SlabBlock.class,
 		                    new PlacementData().setOffsetY(offsetSlab).setExtraClick(extraClickDoubleSlab));
-		addPlacementMapping(StairsBlock.class, new PlacementData(playerFacingEntity).setOffsetY(offsetHalfBlock));
+		addPlacementMapping(StairBlock.class, new PlacementData(playerFacingEntity).setOffsetY(offsetHalfBlock));
 		addPlacementMapping(TorchBlock.class, new PlacementData(blockFacingOpposite));
 		addPlacementMapping(TrapDoorBlock.class, new PlacementData(blockFacingOpposite).setOffsetY(offsetHalfBlock));
 		addPlacementMapping(StandingSignBlock.class, new PlacementData(playerFacingStandingSign));
@@ -174,7 +174,7 @@ public class PlacementRegistry {
 		addPlacementMapping(EndPortalFrameBlock.class, new PlacementData(playerFacingEntityOpposite));
 		addPlacementMapping(LadderBlock.class, new PlacementData(blockFacingOpposite));
 		addPlacementMapping(LeverBlock.class, new PlacementData(playerFacingLever, blockFacingOpposite));
-		addPlacementMapping(RedstoneDiodeBlock.class, new PlacementData(playerFacingEntityOpposite));
+		addPlacementMapping(DiodeBlock.class, new PlacementData(playerFacingEntityOpposite));
 		addPlacementMapping(BedBlock.class, new PlacementData(playerFacingIgnore));
 		addPlacementMapping(PistonHeadBlock.class, new PlacementData(playerFacingIgnore));
 		addPlacementMapping(EndPortalBlock.class, new PlacementData(playerFacingIgnore));
@@ -212,7 +212,7 @@ public class PlacementRegistry {
 		return this.itemPlacementMap.put(item, data);
 	}
 
-	public PlacementData getPlacementData(BlockState blockState, ItemStack itemStack) {
+	public PlacementData getPlacementData(BlockState blockState, @NotNull ItemStack itemStack) {
 		Item item = itemStack.getItem();
 
 		PlacementData placementDataItem = this.itemPlacementMap.get(item);

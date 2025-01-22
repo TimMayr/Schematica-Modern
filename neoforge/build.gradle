@@ -54,17 +54,20 @@ dependencies {
 }
 
 processResources {
-	var replaceProperties = [version                 : project.version,
-	                         mod_id: mod_id,
-	                         mod_name                : mod_name,
-	                         neoforge_version        : neoforge_version,
-	                         minecraft_version       : minecraft_version,
-	                         architectury_api_version: architectury_api_version]
+	var replaceProperties = [
+			version                 : project.version,
+			mod_id                  : mod_id,
+			mod_name                : mod_name,
+			neoforge_version        : neoforge_version,
+			minecraft_version       : minecraft_version,
+			architectury_api_version: architectury_api_version
+	]
 
 	inputs.properties replaceProperties
 
+	// Apply substitution to the specific file
 	filesMatching('META-INF/neoforge.mods.toml') {
-		expand version: project.version
+		expand(replaceProperties)  // Apply property replacement here
 	}
 }
 
@@ -80,7 +83,7 @@ remapJar {
 sourceSets {
 	api {
 		java {
-			srcDirs = ['src/api/java']
+			srcDirs = ['src/main/java/com/github/lunatrius/schematica/api/api']
 		}
 	}
 }

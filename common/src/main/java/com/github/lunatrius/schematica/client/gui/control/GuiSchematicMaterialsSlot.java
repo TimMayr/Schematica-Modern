@@ -28,7 +28,15 @@ class GuiSchematicMaterialsSlot extends AbstractSelectionList<GuiSchematicMateri
 	@Override
 	protected void updateWidgetNarration(@NotNull NarrationElementOutput narrationElementOutput) {}
 
-	static class ItemEntry extends AbstractSelectionList.Entry<ItemEntry> {
+	public Minecraft getMinecraft() {
+		return minecraft;
+	}
+
+	public GuiSchematicMaterials getGuiSchematicMaterials() {
+		return guiSchematicMaterials;
+	}
+
+	public static class ItemEntry extends AbstractSelectionList.Entry<ItemEntry> {
 		private final GuiSchematicMaterialsSlot parent;
 
 		private final Component strMaterialAvailable = Component.translatable(Names.Gui.Control.MATERIAL_AVAILABLE);
@@ -39,10 +47,10 @@ class GuiSchematicMaterialsSlot extends AbstractSelectionList<GuiSchematicMateri
 		}
 
 		@Override
-		public void render(GuiGraphics graphics, int index, int x, int y, int width, int height, int mouseX,
+		public void render(@NotNull GuiGraphics graphics, int index, int x, int y, int width, int height, int mouseX,
 		                   int mouseY,
 		                   boolean isHovered, float partialTicks) {
-			BlockList.WrappedItemStack wrappedItemStack = parent.guiSchematicMaterials.blockList.get(index);
+			BlockList.WrappedItemStack wrappedItemStack = parent.getGuiSchematicMaterials().getUnmodifiableBlocklist().get(index);
 			ItemStack itemStack = wrappedItemStack.itemStack;
 
 			String itemName = wrappedItemStack.getItemStackDisplayName().getString();
@@ -50,17 +58,17 @@ class GuiSchematicMaterialsSlot extends AbstractSelectionList<GuiSchematicMateri
 			String amountMissing = wrappedItemStack.getFormattedAmountMissing(strMaterialAvailable.getString(),
 			                                                                  strMaterialMissing.getString());
 
-			GuiHelper.drawItemStackWithSlot(parent.minecraft.getTextureManager(), itemStack, x, y);
+			GuiHelper.drawItemStackWithSlot(parent.getMinecraft().getTextureManager(), itemStack, x, y);
 
-			graphics.drawString(parent.minecraft.font, itemName, x + 24, y + 6, 0xFFFFFF);
-			graphics.drawString(parent.minecraft.font, amount, x + 215 - parent.minecraft.font.width(amount), y + 1,
+			graphics.drawString(parent.getMinecraft().font, itemName, x + 24, y + 6, 0xFFFFFF);
+			graphics.drawString(parent.getMinecraft().font, amount, x + 215 - parent.getMinecraft().font.width(amount), y + 1,
 			                    0xFFFFFF);
-			graphics.drawString(parent.minecraft.font, amountMissing,
-			                    x + 215 - parent.minecraft.font.width(amountMissing), y + 11, 0xFFFFFF);
+			graphics.drawString(parent.getMinecraft().font, amountMissing,
+			                    x + 215 - parent.getMinecraft().font.width(amountMissing), y + 11, 0xFFFFFF);
 
 			if (mouseX > x && mouseY > y && mouseX <= x + 18 && mouseY <= y + 18) {
-				parent.guiSchematicMaterials.setTooltipForNextRenderPass(
-						Screen.getTooltipFromItem(parent.minecraft, itemStack)
+				parent.getGuiSchematicMaterials().setTooltipForNextRenderPass(
+						Screen.getTooltipFromItem(parent.getMinecraft(), itemStack)
 						      .stream()
 						      .reduce(Component.empty(), MutableComponent::append, MutableComponent::append));
 				RenderSystem.setupGuiFlatDiffuseLighting(new Vector3f(), new Vector3f());

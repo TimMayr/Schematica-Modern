@@ -65,7 +65,7 @@ public class FlipHelper {
 		return schematicFlipped;
 	}
 
-	private BlockPos flipPos(BlockPos pos, Direction axis, Vec3i dimensions, MBlockPos flipped) throws FlipException {
+	private BlockPos flipPos(BlockPos pos, Direction axis, Vec3i dimensions, MBlockPos flipped) {
 		return switch (axis) {
 			case DOWN, UP -> flipped.set(pos.getX(), dimensions.getY() - 1 - pos.getY(), pos.getZ());
 			case NORTH, SOUTH -> flipped.set(pos.getX(), pos.getY(), dimensions.getZ() - 1 - pos.getZ());

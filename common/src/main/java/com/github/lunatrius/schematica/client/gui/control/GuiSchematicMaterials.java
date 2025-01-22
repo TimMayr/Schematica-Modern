@@ -1,7 +1,6 @@
 package com.github.lunatrius.schematica.client.gui.control;
 
 import com.github.lunatrius.core.client.gui.ScreenBase;
-import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.client.util.BlockList;
 import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
@@ -21,11 +20,12 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
 
 public class GuiSchematicMaterials extends ScreenBase {
-	protected final List<BlockList.WrappedItemStack> blockList;
+	private final List<BlockList.WrappedItemStack> blockList;
 	private final Component strMaterialName = Component.translatable(Names.Gui.Control.MATERIAL_NAME);
 	private final Component strMaterialAmount = Component.translatable(Names.Gui.Control.MATERIAL_AMOUNT);
 	private GuiSchematicMaterialsSlot guiSchematicMaterialsSlot;
@@ -35,9 +35,13 @@ public class GuiSchematicMaterials extends ScreenBase {
 	public GuiSchematicMaterials(Screen guiScreen) {
 		super(guiScreen);
 		Minecraft minecraft = Minecraft.getInstance();
-		ISchematic schematic = ClientProxy.schematic;
-		this.blockList = new BlockList().getList(minecraft.player, FakeLevel.of(schematic), minecraft.level);
-		this.sortType.sort(this.blockList);
+		FakeLevel level = ClientProxy.schematic;
+		this.blockList = new BlockList().getList(minecraft.player, level, minecraft.level);
+		this.sortType.sort(this.getUnmodifiableBlocklist());
+	}
+
+	public List<BlockList.WrappedItemStack> getUnmodifiableBlocklist() {
+		return Collections.unmodifiableList(blockList);
 	}
 
 	@Override
@@ -56,7 +60,7 @@ public class GuiSchematicMaterials extends ScreenBase {
 		                                   Component.translatable(Names.Gui.Control.SORT_PREFIX + this.sortType.label)
 		                                            .append(" " + this.sortType.glyph), (button) -> {
 			this.sortType = this.sortType.next();
-			this.sortType.sort(this.blockList);
+			this.sortType.sort(this.getUnmodifiableBlocklist());
 			this.btnSort.setMessage(Component.translatable(Names.Gui.Control.SORT_PREFIX + this.sortType.label)
 			                                 .append(" " + this.sortType.glyph));
 		}, this.font);
@@ -64,7 +68,7 @@ public class GuiSchematicMaterials extends ScreenBase {
 
 		Button btnDump = new PlainTextButton(this.width / 2 - 50, this.height - 30, 100, 20,
 		                                     Component.translatable(Names.Gui.Control.DUMP),
-		                                     (button) -> dumpMaterialList(this.blockList), this.font);
+		                                     (button) -> dumpMaterialList(this.getUnmodifiableBlocklist()), this.font);
 		this.addRenderableWidget(btnDump);
 
 		Button btnDone = new PlainTextButton(this.width / 2 + 54, this.height - 30, 100, 20,
@@ -75,7 +79,7 @@ public class GuiSchematicMaterials extends ScreenBase {
 		this.guiSchematicMaterialsSlot = new GuiSchematicMaterialsSlot(this.minecraft, 800, 1000, 0, 50, this);
 	}
 
-	private void dumpMaterialList(List<BlockList.WrappedItemStack> blockList) {
+	private void dumpMaterialList(@NotNull List<BlockList.WrappedItemStack> blockList) {
 		if (blockList.isEmpty()) {
 			return;
 		}
@@ -100,8 +104,8 @@ public class GuiSchematicMaterials extends ScreenBase {
 		}
 	}
 
-	private static @NotNull StringBuilder formatBockList(List<BlockList.WrappedItemStack> blockList, int maxSize,
-	                                                     int maxLengthName) {
+	private static @NotNull StringBuilder formatBockList(@NotNull List<BlockList.WrappedItemStack> blockList,
+	                                                     int maxSize, int maxLengthName) {
 		int maxLengthSize = String.valueOf(maxSize).length();
 		String formatName = "%-" + maxLengthName + "s";
 		String formatSize = "%" + maxLengthSize + "d";

@@ -1,31 +1,40 @@
 package com.github.lunatrius.schematica.client.gui.load;
 
 import com.github.lunatrius.core.client.gui.ScreenBase;
-import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.util.FileFilterSchematic;
+import com.github.lunatrius.schematica.world.FakeLevel;
 import com.github.lunatrius.schematica.world.schematic.SchematicUtil;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.PlainTextButton;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class GuiSchematicLoad extends ScreenBase {
-	private static final FileFilterSchematic FILE_FILTER_FOLDER = new FileFilterSchematic(true);
-	private static final FileFilterSchematic FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
-	protected final List<GuiSchematicEntry> schematicFiles = new ArrayList<>();
-	private final String strTitle = I18n.format(Names.Gui.Load.TITLE);
-	private final String strFolderInfo = I18n.format(Names.Gui.Load.FOLDER_INFO);
-	private final String strNoSchematic = I18n.format(Names.Gui.Load.NO_SCHEMATIC);
+	private static final FileFilter FILE_FILTER_FOLDER = new FileFilterSchematic(true);
+	private static final FileFilter FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
+	private final List<GuiSchematicEntry> schematicFiles = new ArrayList<>();
+	private final Component strTitle = Component.translatable(Names.Gui.Load.TITLE);
+	private final Component strFolderInfo = Component.translatable(Names.Gui.Load.FOLDER_INFO);
+	private final Component strNoSchematic = Component.translatable(Names.Gui.Load.NO_SCHEMATIC);
 	protected File currentDirectory = SchematicaClientConfig.schematicDirectory;
 	private GuiSchematicLoadSlot guiSchematicLoadSlot;
 
@@ -40,37 +49,36 @@ public class GuiSchematicLoad extends ScreenBase {
 	}
 
 	@Override
-	public void render(int x, int y, float partialTicks) {
-		this.guiSchematicLoadSlot.render(x, y, partialTicks);
+	public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		this.guiSchematicLoadSlot.render(graphics, mouseX, mouseY, partialTicks);
 
-		drawCenteredString(this.minecraft.fontRenderer, this.strTitle, this.width / 2, 4, 0x00FFFFFF);
-		drawCenteredString(this.minecraft.fontRenderer, this.strFolderInfo, this.width / 2 - 78, this.height - 12,
-		                   0x00808080);
+		graphics.drawCenteredString(this.minecraft.font, this.strTitle, this.width / 2, 4, 0x00FFFFFF);
+		graphics.drawCenteredString(this.minecraft.font, this.strFolderInfo, this.width / 2 - 78, this.height - 12,
+		                            0x00808080);
 
-		super.render(x, y, partialTicks);
+		super.render(graphics, mouseX, mouseY, partialTicks);
 	}
 
 	@Override
 	public void init() {
-		Button btnOpenDir =
-				new Button(this.width / 2 - 154, this.height - 36, 150, 20, I18n.format(Names.Gui.Load.OPEN_FOLDER),
-				           (event) -> {
-					           try {
-						           Util.getOSType().openFile(SchematicaClientConfig.schematicDirectory);
-					           } catch (Throwable e) {
-						           System.out.println("Desktop actions are not supported on this platform.");
-					           }
-				           });
-		this.buttons.add(btnOpenDir);
+		Button btnOpenDir = new PlainTextButton(this.width / 2 - 154, this.height - 36, 150, 20,
+		                                        Component.translatable(Names.Gui.Load.OPEN_FOLDER), (event) -> {
+			try {
+				Util.getPlatform().openFile(SchematicaClientConfig.schematicDirectory);
+			} catch (Throwable e) {
+				System.out.println("Desktop actions are not supported on this platform.");
+			}
+		}, this.font);
+		this.addRenderableWidget(btnOpenDir);
 
-		Button btnDone =
-				new Button(this.width / 2 + 4, this.height - 36, 150, 20, I18n.format(Names.Gui.DONE), (event) -> {
-					if (Reference.proxy.isLoadEnabled) {
-						loadSchematic();
-					}
-					this.minecraft.displayGuiScreen(this.parentScreen);
-				});
-		this.buttons.add(btnDone);
+		Button btnDone = new PlainTextButton(this.width / 2 + 4, this.height - 36, 150, 20,
+		                                     Component.translatable(Names.Gui.DONE), (event) -> {
+			if (Reference.proxy.isLoadEnabled) {
+				loadSchematic();
+			}
+			this.minecraft.setScreen(this.parentScreen);
+		}, this.font);
+		this.addRenderableWidget(btnDone);
 
 		this.guiSchematicLoadSlot = new GuiSchematicLoadSlot(this);
 
@@ -81,12 +89,12 @@ public class GuiSchematicLoad extends ScreenBase {
 		String name;
 		Item item;
 
-		this.schematicFiles.clear();
+		this.getUnmodifiableSchematicFiles().clear();
 
 		try {
 			if (!this.currentDirectory.getCanonicalPath()
 			                          .equals(SchematicaClientConfig.schematicDirectory.getCanonicalPath())) {
-				this.schematicFiles.add(new GuiSchematicEntry("..", Items.LAVA_BUCKET, true));
+				this.getUnmodifiableSchematicFiles().add(new GuiSchematicEntry("..", Items.LAVA_BUCKET, true));
 			}
 		} catch (IOException e) {
 			Reference.logger.error("Failed to add GuiSchematicEntry!", e);
@@ -107,35 +115,36 @@ public class GuiSchematicLoad extends ScreenBase {
 				File[] files = file.listFiles();
 				item = (files == null || files.length == 0) ? Items.BUCKET : Items.WATER_BUCKET;
 
-				this.schematicFiles.add(new GuiSchematicEntry(name, item, file.isDirectory()));
+				this.getUnmodifiableSchematicFiles().add(new GuiSchematicEntry(name, item, file.isDirectory()));
 			}
 		}
 
 		File[] filesSchematics = this.currentDirectory.listFiles(FILE_FILTER_SCHEMATIC);
 		if (filesSchematics == null || filesSchematics.length == 0) {
-			this.schematicFiles.add(new GuiSchematicEntry(this.strNoSchematic, Blocks.DIRT, false));
+			this.getUnmodifiableSchematicFiles()
+			    .add(new GuiSchematicEntry(this.strNoSchematic.getString(), Blocks.DIRT, false));
 		} else {
 			Arrays.sort(filesSchematics, (File a, File b) -> a.getName().compareToIgnoreCase(b.getName()));
 			for (File file : filesSchematics) {
 				name = file.getName();
 
-				this.schematicFiles.add(
-						new GuiSchematicEntry(name, SchematicUtil.getIconFromFile(file), file.isDirectory()));
+				this.getUnmodifiableSchematicFiles()
+				    .add(new GuiSchematicEntry(name, SchematicUtil.getIconFromFile(file), file.isDirectory()));
 			}
 		}
 	}
 
 	private void loadSchematic() {
-		int selectedIndex = this.guiSchematicLoadSlot.selectedIndex;
+		int selectedIndex = this.guiSchematicLoadSlot.getSelectedIndex();
 
 		try {
-			if (selectedIndex >= 0 && selectedIndex < this.schematicFiles.size()) {
-				GuiSchematicEntry schematicEntry = this.schematicFiles.get(selectedIndex);
+			if (selectedIndex >= 0 && selectedIndex < this.getUnmodifiableSchematicFiles().size()) {
+				GuiSchematicEntry schematicEntry = this.getUnmodifiableSchematicFiles().get(selectedIndex);
 				if (Reference.proxy.loadSchematic(Minecraft.getInstance().player, this.currentDirectory,
 				                                  schematicEntry.getName())) {
-					SchematicWorld schematic = ClientProxy.schematic;
-					if (schematic != null) {
-						ClientProxy.moveSchematicToPlayer(schematic);
+					FakeLevel level = ClientProxy.schematic;
+					if (level != null) {
+						ClientProxy.moveSchematicToPlayer(level);
 					}
 				}
 			}
@@ -144,10 +153,8 @@ public class GuiSchematicLoad extends ScreenBase {
 		}
 	}
 
-	@Override
-	public boolean mouseScrolled(double d1, double d2, double direction) {
-		this.guiSchematicLoadSlot.scroll((int) (d2 * direction * -1));
-		return super.mouseScrolled(d1, d2, direction);
+	public List<GuiSchematicEntry> getUnmodifiableSchematicFiles() {
+		return Collections.unmodifiableList(schematicFiles);
 	}
 
 	protected void changeDirectory(String directory) {

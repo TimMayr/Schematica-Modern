@@ -20,16 +20,34 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
+import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Input;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+
+import static net.minecraft.world.entity.ai.attributes.Attributes.ENTITY_INTERACTION_RANGE;
 
 public class SchematicPrinter {
 	public static final SchematicPrinter INSTANCE = new SchematicPrinter();
@@ -74,28 +92,30 @@ public class SchematicPrinter {
 
 	public void refresh() {
 		if (this.schematic != null) {
-			this.timeout = new byte[this.schematic.getWidth()][this.schematic.getHeight()][this.schematic.getLength()];
+			this.timeout = new byte[this.schematic.getLevelSource()
+			                                      .getMaxX()][this.schematic.getHeight()][this.schematic.getLevelSource()
+			                                                                                            .getMaxZ()];
 		} else {
 			this.timeout = null;
 		}
 		this.syncBlacklist.clear();
 	}
 
-	public void print(ClientLevel world, LocalPlayer player) {
-		double dX = ClientProxy.playerPosition.x - this.schematic.position.x;
-		double dY = ClientProxy.playerPosition.y - this.schematic.position.y;
-		double dZ = ClientProxy.playerPosition.z - this.schematic.position.z;
+	public void print(ClientLevel level, LocalPlayer player) {
+		double dX = ClientProxy.playerPosition.x - this.schematic.getWorldPos().x;
+		double dY = ClientProxy.playerPosition.y - this.schematic.getWorldPos().y;
+		double dZ = ClientProxy.playerPosition.z - this.schematic.getWorldPos().z;
 		int x = (int) Math.floor(dX);
 		int y = (int) Math.floor(dY);
 		int z = (int) Math.floor(dZ);
 		int range = SchematicaConfig.CLIENT.placeDistance.get();
 
 		int minX = Math.max(0, x - range);
-		int maxX = Math.min(this.schematic.getWidth() - 1, x + range);
+		int maxX = Math.min(this.schematic.getLevelSource().getMaxX() - 1, x + range);
 		int minY = Math.max(0, y - range);
 		int maxY = Math.min(this.schematic.getHeight() - 1, y + range);
 		int minZ = Math.max(0, z - range);
-		int maxZ = Math.min(this.schematic.getLength() - 1, z + range);
+		int maxZ = Math.min(this.schematic.getLevelSource().getMaxZ() - 1, z + range);
 
 		if (minX > maxX || minY > maxY || minZ > maxZ) {
 			return;
@@ -108,22 +128,20 @@ public class SchematicPrinter {
 			case ALL:
 				break;
 			case SINGLE_LAYER:
-				if (schematic.renderingLayer > maxY) {
+				if (schematic.renderLayer > maxY) {
 					return;
 				}
-				//$FALL-THROUGH$
 			case ALL_BELOW:
-				if (schematic.renderingLayer < minY) {
+				if (schematic.renderLayer < minY) {
 					return;
 				}
-				maxY = schematic.renderingLayer;
+				maxY = schematic.renderLayer;
 				break;
 		}
 
 		syncSneaking(player, true);
 
-		//TODO: Fix this as soon as the other discord replies
-		double blockReachDistance = this.minecraft.playercontroller.getBlockReachDistance() - 0.1;
+		double blockReachDistance = this.minecraft.player.getAttributeValue(ENTITY_INTERACTION_RANGE);
 		double blockReachDistanceSq = blockReachDistance * blockReachDistance;
 		for (MBlockPos pos : BlockPosHelper.getAllInBoxXZY(minX, minY, minZ, maxX, maxY, maxZ)) {
 			if (pos.distSqr(new Vec3i((int) Math.floor(dX), (int) Math.floor(dY), (int) Math.floor(dZ)))
@@ -132,7 +150,7 @@ public class SchematicPrinter {
 			}
 
 			try {
-				if (placeBlock(world, player, pos)) {
+				if (placeBlock(level, player, pos)) {
 					syncSlotAndSneaking(player, slot, isSneaking, true);
 					return;
 				}
@@ -146,13 +164,12 @@ public class SchematicPrinter {
 		syncSlotAndSneaking(player, slot, isSneaking, true);
 	}
 
-	private boolean syncSlotAndSneaking(LocalPlayer player, int slot, boolean isSneaking, boolean success) {
+	private void syncSlotAndSneaking(@NotNull LocalPlayer player, int slot, boolean isSneaking, boolean success) {
 		player.getInventory().selected = slot;
 		syncSneaking(player, isSneaking);
-		return success;
 	}
 
-	private boolean placeBlock(ClientLevel world, LocalPlayer player, BlockPos pos) {
+	private boolean placeBlock(ClientLevel level, LocalPlayer player, @NotNull BlockPos pos) {
 		int x = pos.getX();
 		int y = pos.getY();
 		int z = pos.getZ();
@@ -161,13 +178,13 @@ public class SchematicPrinter {
 			return false;
 		}
 
-		int wx = this.schematic.position.x + x;
-		int wy = this.schematic.position.y + y;
-		int wz = this.schematic.position.z + z;
+		int wx = this.schematic.getWorldPos().x + x;
+		int wy = this.schematic.getWorldPos().y + y;
+		int wz = this.schematic.getWorldPos().z + z;
 		BlockPos realPos = new BlockPos(wx, wy, wz);
 
 		BlockState blockState = this.schematic.getBlockState(pos);
-		BlockState realBlockState = world.getBlockState(realPos);
+		BlockState realBlockState = level.getBlockState(realPos);
 		Block realBlock = realBlockState.getBlock();
 
 		if (BlockStateHelper.areBlockStatesEqual(blockState, realBlockState)) {
@@ -183,7 +200,7 @@ public class SchematicPrinter {
 				}
 
 				Reference.logger.trace("Trying to sync block at {} {}", realPos, tries);
-				boolean success = handler.execute(player, this.schematic, pos, world, realPos);
+				boolean success = handler.execute(player, this.schematic, pos, level, realPos);
 				if (success) {
 					this.syncBlacklist.put(realPos, tries + 1);
 				}
@@ -195,7 +212,7 @@ public class SchematicPrinter {
 		}
 
 		if (SchematicaConfig.CLIENT.destroyBlocks.get()
-				&& !world.getBlockState(realPos).isAir()
+				&& !level.getBlockState(realPos).isAir()
 				&& player.isCreative()) {
 			//TODO: Probably also discord
 			this.minecraft.gameMode.startDestroyBlock(realPos, Direction.DOWN);
@@ -205,27 +222,25 @@ public class SchematicPrinter {
 			return !SchematicaConfig.CLIENT.destroyInstantly.get();
 		}
 
-		if (this.schematic.isAirBlock(pos)) {
+		if (this.schematic.getLevelSource().getBlockState(pos).isAir()) {
 			return false;
 		}
 
-		if (!realBlockState.isReplaceable(new BlockItemUseContext(new ItemUseContext(player, Hand.MAIN_HAND,
-		                                                                             new BlockRayTraceResult(Vec3d.ZERO,
-		                                                                                                     Direction.UP,
-		                                                                                                     realPos,
-		                                                                                                     false))))) {
+		if (!realBlockState.canBeReplaced(new BlockPlaceContext(new UseOnContext(player, InteractionHand.MAIN_HAND,
+		                                                                         new BlockHitResult(Vec3.ZERO,
+		                                                                                            Direction.UP,
+		                                                                                            realPos,
+		                                                                                            false))))) {
 			return false;
 		}
 
-		ItemStack itemStack =
-				BlockStateToItemStack.getItemStack(blockState, new EntityRayTraceResult(player), this.schematic, pos
-				                                  );
+		ItemStack itemStack = BlockStateToItemStack.getItemStack(blockState, this.schematic, pos);
 		if (itemStack.isEmpty()) {
 			Reference.logger.debug("{} is missing a mapping!", blockState);
 			return false;
 		}
 
-		if (placeBlock(world, player, realPos, blockState, itemStack)) {
+		if (placeBlock(level, player, realPos, blockState, itemStack)) {
 			this.timeout[x][y][z] = SchematicaConfig.CLIENT.timeout.get().byteValue();
 
 			return !SchematicaConfig.CLIENT.placeInstantly.get();
@@ -234,7 +249,7 @@ public class SchematicPrinter {
 		return false;
 	}
 
-	private List<Direction> getSolidSides(Level world, BlockPos pos, Player player) {
+	private @NotNull List<Direction> getSolidSides(Level level, BlockPos pos, Player player) {
 		if (!SchematicaConfig.CLIENT.placeAdjacent.get()) {
 			return Arrays.asList(Direction.values());
 		}
@@ -242,7 +257,7 @@ public class SchematicPrinter {
 		List<Direction> list = new ArrayList<>();
 
 		for (Direction side : Direction.values()) {
-			if (isSolid(world, pos, side, player)) {
+			if (isSolid(level, pos, side, player)) {
 				list.add(side);
 			}
 		}
@@ -250,39 +265,39 @@ public class SchematicPrinter {
 		return list;
 	}
 
-	private boolean isSolid(Level world, BlockPos pos, Direction side, Player player) {
-		BlockPos offset = pos.offset(side);
+	private boolean isSolid(@NotNull Level level, @NotNull BlockPos pos, @NotNull Direction side, Player player) {
+		BlockPos offset = pos.offset(side.getUnitVec3i());
 
-		BlockState blockState = world.getBlockState(offset);
+		BlockState blockState = level.getBlockState(offset);
 		Block block = blockState.getBlock();
 
-		if (block.isAir(blockState, world, offset)) {
+		if (blockState.isAir()) {
 			return false;
 		}
 
-		if (block instanceof IFluidBlock) {
+		if (block instanceof LiquidBlock) {
 			return false;
 		}
 
-		return !blockState.isReplaceable(new BlockItemUseContext(new ItemUseContext(player, Hand.MAIN_HAND,
-		                                                                            new BlockRayTraceResult(Vec3d.ZERO,
-		                                                                                                    Direction.UP,
-		                                                                                                    offset,
-		                                                                                                    false))));
+		return !blockState.canBeReplaced(new BlockPlaceContext(new UseOnContext(player, InteractionHand.MAIN_HAND,
+		                                                                        new BlockHitResult(Vec3.ZERO,
+		                                                                                           Direction.UP,
+		                                                                                           offset,
+		                                                                                           false))));
 	}
 
-	private boolean placeBlock(ClientLevel world, LocalPlayer player, BlockPos pos, BlockState blockState,
-	                           ItemStack itemStack) {
+	private boolean placeBlock(ClientLevel level, LocalPlayer player, BlockPos pos, BlockState blockState,
+	                           @NotNull ItemStack itemStack) {
 		if (itemStack.getItem() instanceof BucketItem) {
 			return false;
 		}
 
 		PlacementData data = PlacementRegistry.INSTANCE.getPlacementData(blockState, itemStack);
-		if (data != null && !data.isValidPlayerFacing(blockState, player, pos, world)) {
+		if (data != null && !data.isValidPlayerFacing(blockState, player, pos, level)) {
 			return false;
 		}
 
-		List<Direction> solidSides = getSolidSides(world, pos, player);
+		List<Direction> solidSides = getSolidSides(level, pos, player);
 
 		if (solidSides.isEmpty()) {
 			return false;
@@ -300,111 +315,104 @@ public class SchematicPrinter {
 				return false;
 			}
 
-			direction = validDirections.get(0);
+			direction = validDirections.getFirst();
 			offsetX = data.getOffsetX(blockState);
 			offsetY = data.getOffsetY(blockState);
 			offsetZ = data.getOffsetZ(blockState);
 			extraClicks = data.getExtraClicks(blockState);
 		} else {
-			direction = solidSides.get(0);
+			direction = solidSides.getFirst();
 			offsetX = 0.5f;
 			offsetY = 0.5f;
 			offsetZ = 0.5f;
 			extraClicks = 0;
 		}
 
-		if (!swapToItem(player.inventory, itemStack)) {
+		if (!swapToItem(player.getInventory(), itemStack)) {
 			return false;
 		}
 
-		return placeBlock(world, player, pos, direction, offsetX, offsetY, offsetZ, extraClicks);
+		return placeBlock(level, player, pos, direction, offsetX, offsetY, offsetZ, extraClicks);
 	}
 
-	private boolean placeBlock(ClientLevel world, LocalPlayer player, BlockPos pos, Direction direction, float offsetX,
+	private boolean placeBlock(ClientLevel level, LocalPlayer player, BlockPos pos, Direction direction, float offsetX,
 	                           float offsetY, float offsetZ, int extraClicks) {
-		Hand hand = Hand.MAIN_HAND;
-		ItemStack itemStack = player.getHeldItem(hand);
+		InteractionHand hand = InteractionHand.MAIN_HAND;
+		ItemStack itemStack = player.getItemInHand(hand);
 		boolean success;
 
-		if (!this.minecraft.playerController.isInCreativeMode()
-				&& !itemStack.isEmpty()
-				&& itemStack.getCount() <= extraClicks) {
+		if (!this.minecraft.player.isCreative() && !itemStack.isEmpty() && itemStack.getCount() <= extraClicks) {
 			return false;
 		}
 
-		BlockPos offset = pos.offset(direction);
+		BlockPos offset = pos.offset(direction.getUnitVec3i());
 		Direction side = direction.getOpposite();
-		Vec3d hitVec = new Vec3d(offset.getX() + offsetX, offset.getY() + offsetY, offset.getZ() + offsetZ);
+		Vec3 hitVec = new Vec3(offset.getX() + offsetX, offset.getY() + offsetY, offset.getZ() + offsetZ);
 
-		success = placeBlock(world, player, itemStack, offset, side, hitVec, hand);
+		success = placeBlock(level, player, itemStack, offset, side, hitVec, hand);
 		for (int i = 0; success && i < extraClicks; i++) {
-			success = placeBlock(world, player, itemStack, offset, side, hitVec, hand);
+			success = placeBlock(level, player, itemStack, offset, side, hitVec, hand);
 		}
 
 		if (itemStack.getCount() == 0 && success) {
-			player.inventory.mainInventory.set(player.inventory.currentItem, ItemStack.EMPTY);
+			player.getInventory().items.set(player.getInventory().selected, ItemStack.EMPTY);
 		}
 
 		return success;
 	}
 
-	private boolean placeBlock(ClientLevel world, Player player, ItemStack itemStack, BlockPos pos,
-	                           Direction side, Vec3d hitVec, Hand hand) {
-		// FIXME: where did this event go?
-        /*
-        if (ForgeEventFactory.onPlayerInteract(player, Action.RIGHT_CLICK_BLOCK, world, pos, side, hitVec).isCanceled
-        ()) {
-            return false;
-        }
-        */
+	private boolean placeBlock(ClientLevel level, Player player, ItemStack itemStack, BlockPos pos, Direction side,
+	                           Vec3 hitVec, InteractionHand hand) {
+		if (itemStack.getItem() instanceof BlockItem blockItem) {
+			BlockHitResult hitResult = new BlockHitResult(hitVec, side, pos, false);
 
-		// FIXME: when an adjacent block is not required the blocks should be placed 1 block away from the actual
-		// position (because air is replaceable)
-		ActionResultType result = ForgeHooks.onPlaceItemIntoWorld(new BlockItemUseContext(
-				new ItemUseContext(player, Hand.MAIN_HAND,
-				                   new BlockRayTraceResult(Vec3d.ZERO, Direction.UP, pos.offset(side), false))));
+			// Create a BlockItemUseContext
+			BlockPlaceContext context = new BlockPlaceContext(new UseOnContext(player, hand, hitResult));
 
-		if ((result != ActionResultType.SUCCESS)) {
-			return false;
+			// Use the BlockItem's place method to try to place the block
+			InteractionResult result = blockItem.place(context);
+
+			if (result != InteractionResult.SUCCESS) {
+				return false;
+			}
+
+			// Perform a swing animation to match the player action (optional)
+			player.swing(hand);
+			return true;
 		}
 
-		player.swingArm(hand);
-		return true;
+		return false;
 	}
 
-	private void syncSneaking(LocalPlayer player, boolean isSneaking) {
-		player.setSneaking(isSneaking);
-		player.connection.sendPacket(new CEntityActionPacket(player, isSneaking
-		                                                             ? CEntityActionPacket.Action.PRESS_SHIFT_KEY
-		                                                             : CEntityActionPacket.Action.RELEASE_SHIFT_KEY));
+	private void syncSneaking(@NotNull LocalPlayer player, boolean isSneaking) {
+		player.setShiftKeyDown(isSneaking);
+		player.connection.send(
+				new ServerboundPlayerInputPacket(new Input(false, false, false, false, false, isSneaking, false)));
 	}
 
-	private boolean swapToItem(PlayerInventory inventory, ItemStack itemStack) {
+	private boolean swapToItem(Inventory inventory, ItemStack itemStack) {
 		return swapToItem(inventory, itemStack, true);
 	}
 
-	private boolean swapToItem(PlayerInventory inventory, ItemStack itemStack, boolean swapSlots) {
+	private boolean swapToItem(Inventory inventory, ItemStack itemStack, boolean swapSlots) {
 		int slot = getInventorySlotWithItem(inventory, itemStack);
 
-		if (this.minecraft.playerController != null
-				&& this.minecraft.playerController.isInCreativeMode()
-				&& (slot
-						    < Constants.Inventory.InventoryOffset.HOTBAR
+		if (this.minecraft.player.isCreative()
+				&& (slot < Constants.Inventory.InventoryOffset.HOTBAR
 						    || slot
-				>= Constants.Inventory.InventoryOffset.HOTBAR
-				+ Constants.Inventory.Size.HOTBAR)
+				>= Constants.Inventory.InventoryOffset.HOTBAR + Constants.Inventory.Size.HOTBAR)
 				&& !SchematicaClientConfig.swapSlotsQueue.isEmpty()) {
-			inventory.currentItem = getNextSlot();
-			inventory.setInventorySlotContents(inventory.currentItem, itemStack.copy());
-			this.minecraft.playerController.sendSlotPacket(inventory.getStackInSlot(inventory.currentItem),
-			                                               Constants.Inventory.SlotOffset.HOTBAR
-					                                               + inventory.currentItem);
+			inventory.selected = getNextSlot();
+			inventory.setItem(inventory.selected, itemStack.copy());
+			this.minecraft.player.connection.send(
+					new ServerboundSetCreativeModeSlotPacket(Constants.Inventory.SlotOffset.HOTBAR + inventory.selected,
+					                                         inventory.getItem(inventory.selected)));
 			return true;
 		}
 
 		if (slot >= Constants.Inventory.InventoryOffset.HOTBAR
 				&& slot < Constants.Inventory.InventoryOffset.HOTBAR + Constants.Inventory.Size.HOTBAR) {
-			inventory.currentItem = slot;
+			inventory.selected = slot;
 			return true;
 		} else if (swapSlots
 				&& slot >= Constants.Inventory.InventoryOffset.INVENTORY
@@ -417,9 +425,9 @@ public class SchematicPrinter {
 		return false;
 	}
 
-	private int getInventorySlotWithItem(PlayerInventory inventory, ItemStack itemStack) {
-		for (int i = 0; i < inventory.mainInventory.size(); i++) {
-			if (inventory.mainInventory.get(i).isItemEqual(itemStack)) {
+	private int getInventorySlotWithItem(@NotNull Inventory inventory, ItemStack itemStack) {
+		for (int i = 0; i < inventory.items.size(); i++) {
+			if (inventory.items.get(i).is(itemStack.getItem())) {
 				return i;
 			}
 		}
@@ -437,7 +445,6 @@ public class SchematicPrinter {
 		return false;
 	}
 
-	@SuppressWarnings("DataFlowIssue")
 	private int getNextSlot() {
 		int slot = SchematicaClientConfig.swapSlotsQueue.poll() % Constants.Inventory.Size.HOTBAR;
 		SchematicaClientConfig.swapSlotsQueue.offer(slot);
@@ -445,7 +452,7 @@ public class SchematicPrinter {
 	}
 
 	private void swapSlots(int from, int to) {
-		this.minecraft.playerController.windowClick(this.minecraft.player.container.windowId, from, to, ClickType.SWAP,
-		                                            this.minecraft.player);
+		AbstractContainerMenu container = this.minecraft.player.containerMenu;
+		container.clicked(from, to, ClickType.SWAP, this.minecraft.player);
 	}
 }

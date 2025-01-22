@@ -34,7 +34,7 @@ public class ClientProxy extends CommonProxy {
 	public static boolean isPendingReset = false;
 	public static Direction orientation = null;
 	public static int rotationRender = 0;
-	public static ISchematic schematic = null;
+	public static FakeLevel schematic = null;
 	public static Direction axisFlip = Direction.UP;
 	public static Direction axisRotation = Direction.UP;
 	public static HitResult objectMouseOver = null;
@@ -182,7 +182,7 @@ public class ClientProxy extends CommonProxy {
 		                       world.getHeight(),
 		                       world.getLevelSource().getMaxZ());
 
-		ClientProxy.schematic = world.getLevelSource();
+		ClientProxy.schematic = world;
 		SchematicPrinter.INSTANCE.setSchematic(world);
 		world.setRendering(true);
 

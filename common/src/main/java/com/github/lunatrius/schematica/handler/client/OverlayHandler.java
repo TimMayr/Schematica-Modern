@@ -1,67 +1,71 @@
 package com.github.lunatrius.schematica.handler.client;
 
+import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.block.state.BlockStateHelper;
-import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
-import net.minecraft.block.BlockState;
+import com.github.lunatrius.schematica.world.FakeLevel;
+import dev.architectury.event.events.client.ClientGuiEvent;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.registries.ForgeRegistries;
-
-import java.util.ArrayList;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.HitResult;
+import org.jetbrains.annotations.NotNull;
 
 public class OverlayHandler {
 	private static final String SCHEMATICA_PREFIX =
-			"[" + TextFormatting.GOLD + "Schematica" + TextFormatting.RESET + "] ";
-	private static final String SCHEMATICA_SUFFIX = " [" + TextFormatting.GOLD + "S" + TextFormatting.RESET + "]";
+			"[" + ChatFormatting.GOLD + "Schematica" + ChatFormatting.RESET + "] ";
+	private static final String SCHEMATICA_SUFFIX = " [" + ChatFormatting.GOLD + "S" + ChatFormatting.RESET + "]";
+	private static final OverlayHandler INSTANCE = new OverlayHandler();
 	private final Minecraft minecraft = Minecraft.getInstance();
 
-	@SubscribeEvent
-	public void onText(RenderGameOverlayEvent.Text event) {
-		if (this.minecraft.gameSettings.showDebugInfo && SchematicaConfig.CLIENT.showDebugInfo.get()) {
-			SchematicWorld schematic = ClientProxy.schematic;
-			if (schematic != null && schematic.isRendering) {
-				ArrayList<String> left = event.getLeft();
-				ArrayList<String> right = event.getRight();
+	private OverlayHandler() {
+		ClientGuiEvent.DEBUG_TEXT_LEFT.register(strings -> {
+			if (SchematicaConfig.CLIENT.showDebugInfo.get()) {
+				FakeLevel level = ClientProxy.schematic;
+				if (level != null && level.isRendering()) {
+					HitResult rtr = ClientProxy.objectMouseOver;
 
-				left.add("");
-				left.add(SCHEMATICA_PREFIX + schematic.getDebugDimensions());
-//				left.add(SCHEMATICA_PREFIX + RenderSchematic.getINSTANCE().getDebugInfoTileEntities());
-//				left.add(SCHEMATICA_PREFIX + RenderSchematic.getINSTANCE().getDebugInfoRenders());
+					if (rtr != null && rtr.getType() == HitResult.Type.BLOCK) {
+						BlockPos pos = new MBlockPos(rtr.getLocation());
+						BlockPos offsetPos = pos.offset(level.getWorldPos());
+						String lookMessage = getLookMessage(pos, offsetPos);
 
-				RayTraceResult rtr = ClientProxy.objectMouseOver;
-				if (rtr != null && rtr.getType() == RayTraceResult.Type.BLOCK) {
-					BlockPos pos = new BlockPos(rtr.getHitVec());
-					BlockState blockState = schematic.getBlockState(pos);
-
-					right.add("");
-					right.add(ForgeRegistries.BLOCKS.getKey(blockState.getBlock()) + SCHEMATICA_SUFFIX);
-
-					for (String formattedProperty : BlockStateHelper.getFormattedProperties(blockState)) {
-						right.add(formattedProperty + SCHEMATICA_SUFFIX);
+						strings.add(SCHEMATICA_PREFIX + lookMessage);
 					}
-
-					BlockPos offsetPos = pos.add(schematic.position);
-					String lookMessage = getLookMessage(pos, offsetPos);
-
-					left.add(SCHEMATICA_PREFIX + lookMessage);
 				}
 			}
-		}
+		});
+
+		ClientGuiEvent.DEBUG_TEXT_RIGHT.register(strings -> {
+			if (SchematicaConfig.CLIENT.showDebugInfo.get()) {
+				FakeLevel level = ClientProxy.schematic;
+				if (level != null && level.isRendering()) {
+					HitResult rtr = ClientProxy.objectMouseOver;
+
+					if (rtr != null && rtr.getType() == HitResult.Type.BLOCK) {
+						BlockPos pos = new MBlockPos(rtr.getLocation());
+						BlockState blockState = level.getBlockState(pos);
+						strings.add("");
+						strings.add(BuiltInRegistries.BLOCK.getKey(blockState.getBlock()) + SCHEMATICA_SUFFIX);
+
+						for (String formattedProperty : BlockStateHelper.getFormattedProperties(blockState)) {
+							strings.add(formattedProperty + SCHEMATICA_SUFFIX);
+						}
+					}
+				}
+			}
+		});
 	}
 
-	private String getLookMessage(BlockPos pos, BlockPos offsetPos) {
+	private String getLookMessage(@NotNull BlockPos pos, @NotNull BlockPos offsetPos) {
 		String lookMessage =
 				String.format("Looking at: %d %d %d (%d %d %d)", pos.getX(), pos.getY(), pos.getZ(), offsetPos.getX(),
 				              offsetPos.getY(), offsetPos.getZ());
-		if (this.minecraft.objectMouseOver != null
-				&& this.minecraft.objectMouseOver.getType() == RayTraceResult.Type.BLOCK) {
-			BlockPos origPos = new BlockPos(this.minecraft.objectMouseOver.getHitVec());
+		if (this.minecraft.hitResult != null && this.minecraft.hitResult.getType() == HitResult.Type.BLOCK) {
+			BlockPos origPos = new MBlockPos(this.minecraft.hitResult.getLocation());
 			if (offsetPos.equals(origPos)) {
 				lookMessage += " (matches)";
 			}

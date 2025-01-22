@@ -1,5 +1,6 @@
 package com.github.lunatrius.schematica.api;
 
+import com.github.lunatrius.schematica.block.state.pattern.BlockStateReplacer;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
@@ -8,6 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockStateMatchTest;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
@@ -28,21 +30,7 @@ public interface ISchematic extends BlockGetter {
 	 *
 	 * @return the located block entity.
 	 */
-	@Nullable
-	BlockEntity getBlockEntity(@NotNull BlockPos pos);
-
-	/**
-	 * Sets the block state at the given location. Attempting to set a block state outside of the schematic
-	 * boundaries or with an invalid block state will result in no change being made and this method will return false.
-	 *
-	 * @param pos
-	 * 		the location in world space.
-	 * @param blockState
-	 * 		the block state to set
-	 *
-	 * @return true if the block state was successfully set.
-	 */
-	boolean setBlockState(BlockPos pos, BlockState blockState);
+	@Nullable BlockEntity getBlockEntity(@NotNull BlockPos pos);
 
 	/**
 	 * Gets a block state at a given location within the schematic. Requesting a block state outside of those bounds
@@ -86,6 +74,54 @@ public interface ISchematic extends BlockGetter {
 	}
 
 	/**
+	 * @return min Z coord inclusive
+	 */
+	default int getMinZ() {
+		return 0;
+	}
+
+	/**
+	 * @return max X coord exclusive
+	 */
+	default int getMaxX() {
+		return getMinX() + getSizeX();
+	}
+
+	/**
+	 * The width of the schematic
+	 *
+	 * @return the schematic width
+	 */
+	int getSizeX();
+
+	/**
+	 * @return max Z coord exclusive
+	 */
+	default int getMaxZ() {
+		return getMinZ() + getSizeZ();
+	}
+
+	/**
+	 * The length of the schematic
+	 *
+	 * @return the schematic length
+	 */
+	int getSizeZ();
+
+	/**
+	 * Sets the block state at the given location. Attempting to set a block state outside of the schematic
+	 * boundaries or with an invalid block state will result in no change being made and this method will return false.
+	 *
+	 * @param pos
+	 * 		the location in world space.
+	 * @param blockState
+	 * 		the block state to set
+	 *
+	 * @return true if the block state was successfully set.
+	 */
+	boolean setBlockState(BlockPos pos, BlockState blockState);
+
+	/**
 	 * Returns a list of all entities in the schematic.
 	 *
 	 * @return all entities.
@@ -124,27 +160,6 @@ public interface ISchematic extends BlockGetter {
 	void setIcon(ItemStack icon);
 
 	/**
-	 * @return min Z coord inclusive
-	 */
-	default int getMinZ() {
-		return 0;
-	}
-
-	/**
-	 * @return max X coord exclusive
-	 */
-	default int getMaxX() {
-		return getMinX() + getSizeX();
-	}
-
-	/**
-	 * The width of the schematic
-	 *
-	 * @return the schematic width
-	 */
-	int getSizeX();
-
-	/**
 	 * Gets the author of the schematic, or an empty String if unknown.
 	 *
 	 * @return The author of the schematic.
@@ -158,20 +173,6 @@ public interface ISchematic extends BlockGetter {
 	 * 		The new author of the schematic.
 	 */
 	void setAuthor(String author);
-
-	/**
-	 * @return max Z coord exclusive
-	 */
-	default int getMaxZ() {
-		return getMinZ() + getSizeZ();
-	}
-
-	/**
-	 * The length of the schematic
-	 *
-	 * @return the schematic length
-	 */
-	int getSizeZ();
 
 	/**
 	 * Returns a list of all block entities in the schematic.
@@ -237,6 +238,7 @@ public interface ISchematic extends BlockGetter {
 	/**
 	 * @return null if pos is outside of aabb
 	 */
+	@Nullable
 	default BlockState getRawBlockState(BlockPos pos) {
 		return isPosInside(pos) ? getBlockState(pos) : null;
 	}

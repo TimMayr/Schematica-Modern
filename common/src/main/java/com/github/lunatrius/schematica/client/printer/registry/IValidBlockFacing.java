@@ -1,7 +1,7 @@
 package com.github.lunatrius.schematica.client.printer.registry;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 

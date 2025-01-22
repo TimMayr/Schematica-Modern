@@ -4,21 +4,21 @@ import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.world.FakeLevel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
+import org.jetbrains.annotations.Nullable;
+
+import static net.minecraft.world.entity.ai.attributes.Attributes.ENTITY_INTERACTION_RANGE;
 
 
 public class RenderTickHandlerNeo {
 	public static final RenderTickHandlerNeo INSTANCE = new RenderTickHandlerNeo();
-
 	private final Minecraft minecraft = Minecraft.getInstance();
 
-
-	private RenderTickHandlerNeo() {
-
-	}
+	private RenderTickHandlerNeo() {}
 
 	@SubscribeEvent
 	public void onRenderTick(RenderFrameEvent.Post event) {
@@ -27,23 +27,21 @@ public class RenderTickHandlerNeo {
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private HitResult rayTrace(FakeLevel schematic, float partialTicks) {
+	private @Nullable HitResult rayTrace(FakeLevel schematic, float partialTicks) {
 		Entity renderViewEntity = this.minecraft.getCameraEntity();
 		if (renderViewEntity == null) {
 			return null;
 		}
 
 		if (this.minecraft.gameMode != null) {
-			//TODO: This shit again
-			double blockReachDistance = this.minecraft.gameMode.getBlockReachDistance();
+			double blockReachDistance = this.minecraft.player.getAttributeValue(ENTITY_INTERACTION_RANGE);
 
 			double posX = renderViewEntity.getX();
 			double posY = renderViewEntity.getY();
 			double posZ = renderViewEntity.getZ();
 
-			renderViewEntity.setPos(posX - schematic.position.x,
-			                        posY - schematic.position.y,
-			                        posZ - schematic.position.z);
+			renderViewEntity.setPos(posX - schematic.getWorldPos().x, posY - schematic.getWorldPos().y,
+			                        posZ - schematic.getWorldPos().z);
 
 			Vec3 vecPosition = renderViewEntity.getEyePosition(partialTicks);
 			Vec3 vecLook = renderViewEntity.getLookAngle();
@@ -52,9 +50,9 @@ public class RenderTickHandlerNeo {
 
 			renderViewEntity.setPos(posX, posY, posZ);
 
-			return schematic.rayTraceBlocks(
-					new RayTraceContext(vecPosition, vecExtendedLook, RayTraceContext.BlockMode.OUTLINE,
-					                    RayTraceContext.FluidMode.NONE, renderViewEntity));
+			return schematic.clip(
+					new ClipContext(vecPosition, vecExtendedLook, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE,
+					                renderViewEntity));
 		}
 
 		throw new IllegalStateException("Error rendering Schematic");

@@ -12,11 +12,14 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class NBTHelper {
-	public static void readBlockEntitiesFromCompound(CompoundTag compound, Level level,
+	public static void readBlockEntitiesFromCompound(@NotNull CompoundTag compound, Level level,
 	                                                 List<BlockEntity> blockEntities) {
 		ListTag tagList = compound.getList(Names.NBT.BLOCK_ENTITIES, Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < tagList.size(); i++) {
@@ -26,7 +29,8 @@ public class NBTHelper {
 		}
 	}
 
-	public static BlockEntity readBlockEntityFromCompound(CompoundTag blockEntityCompound, Level level) {
+	public static BlockEntity readBlockEntityFromCompound(@NotNull CompoundTag blockEntityCompound,
+	                                                      @NotNull Level level) {
 		BlockPos pos = new BlockPos(blockEntityCompound.getShort("x"), blockEntityCompound.getShort("y"),
 		                            blockEntityCompound.getShort("z"));
 		return readBlockEntityFromCompound(pos, blockEntityCompound, level.getBlockState(pos));
@@ -37,17 +41,20 @@ public class NBTHelper {
 		return BlockEntity.loadStatic(pos, state, blockEntityCompound, Reference.proxy.getRegistryAccess());
 	}
 
-	public static BlockEntity readBlockEntityFromCompound(CompoundTag blockEntityCompound, BlockState state) {
+	public static BlockEntity readBlockEntityFromCompound(@NotNull CompoundTag blockEntityCompound, BlockState state) {
 		BlockPos pos = new BlockPos(blockEntityCompound.getShort("x"), blockEntityCompound.getShort("y"),
 		                            blockEntityCompound.getShort("z"));
 		return BlockEntity.loadStatic(pos, state, blockEntityCompound, Reference.proxy.getRegistryAccess());
 	}
 
-	public static CompoundTag writeBlockEntitiesToCompound(List<BlockEntity> blockEntities) {
+	@Contract("_ -> new")
+	public static @NotNull CompoundTag writeBlockEntitiesToCompound(List<BlockEntity> blockEntities) {
 		return writeBlockEntitiesToCompound(blockEntities, new CompoundTag());
 	}
 
-	public static CompoundTag writeBlockEntitiesToCompound(List<BlockEntity> blockEntities, CompoundTag compound) {
+	@Contract("_, _ -> param2")
+	public static @NotNull CompoundTag writeBlockEntitiesToCompound(@NotNull List<BlockEntity> blockEntities,
+	                                                                CompoundTag compound) {
 		ListTag tagList = new ListTag();
 		for (BlockEntity BlockEntity : blockEntities) {
 			CompoundTag BlockEntityCompound = writeBlockEntityToCompound(BlockEntity);
@@ -59,7 +66,7 @@ public class NBTHelper {
 		return compound;
 	}
 
-	public static CompoundTag writeBlockEntityToCompound(BlockEntity blockEntity) {
+	public static @NotNull CompoundTag writeBlockEntityToCompound(@NotNull BlockEntity blockEntity) {
 		return blockEntity.saveWithFullMetadata(blockEntity.getLevel().registryAccess());
 	}
 
@@ -67,7 +74,7 @@ public class NBTHelper {
 		readEntitiesFromCompound(compound, level, entities);
 	}
 
-	public static void readEntitiesFromCompound(CompoundTag compound, Level level, List<Entity> entities) {
+	public static void readEntitiesFromCompound(@NotNull CompoundTag compound, Level level, List<Entity> entities) {
 		ListTag tagList = compound.getList(Names.NBT.ENTITIES, Constants.NBT.TAG_COMPOUND);
 		for (int i = 0; i < tagList.size(); i++) {
 			CompoundTag entityCompound = tagList.getCompound(i);
@@ -82,11 +89,13 @@ public class NBTHelper {
 		return EntityType.loadEntityRecursive(nbtTagCompound, level, EntitySpawnReason.LOAD, adapter -> adapter);
 	}
 
-	public static CompoundTag writeEntitiesToCompound(List<Entity> entities) {
+	@Contract("_ -> new")
+	public static @NotNull CompoundTag writeEntitiesToCompound(List<Entity> entities) {
 		return writeEntitiesToCompound(entities, new CompoundTag());
 	}
 
-	public static CompoundTag writeEntitiesToCompound(List<Entity> entities, CompoundTag compound) {
+	@Contract("_, _ -> param2")
+	public static @NotNull CompoundTag writeEntitiesToCompound(@NotNull List<Entity> entities, CompoundTag compound) {
 		ListTag tagList = new ListTag();
 		for (Entity entity : entities) {
 			CompoundTag entityCompound = new CompoundTag();
@@ -99,7 +108,7 @@ public class NBTHelper {
 		return compound;
 	}
 
-	public static CompoundTag writeEntityToCompound(Entity entity) {
+	public static @Nullable CompoundTag writeEntityToCompound(@NotNull Entity entity) {
 		CompoundTag entityCompound = new CompoundTag();
 		if (entity.save(entityCompound)) {
 			return entityCompound;

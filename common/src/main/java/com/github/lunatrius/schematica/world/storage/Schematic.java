@@ -1,18 +1,27 @@
 package com.github.lunatrius.schematica.world.storage;
 
+import com.github.lunatrius.core.util.math.BlockPosHelper;
+import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.block.state.BlockStateHelper;
+import com.github.lunatrius.schematica.block.state.pattern.BlockStateReplacer;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockStateMatchTest;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @MethodsReturnNonnullByDefault
 public class Schematic implements ISchematic {
@@ -42,6 +51,7 @@ public class Schematic implements ISchematic {
 	}
 
 	@Override
+	@Nullable
 	public BlockEntity getBlockEntity(@NotNull BlockPos pos) {
 		for (BlockEntity blockEntity : this.blockEntities) {
 			if (blockEntity.getBlockPos().equals(pos)) {
@@ -52,7 +62,7 @@ public class Schematic implements ISchematic {
 		return null;
 	}
 
-	private boolean isValid(BlockPos pos) {
+	private boolean isValid(@NotNull BlockPos pos) {
 		int x = pos.getX();
 		int y = pos.getY();
 		int z = pos.getZ();

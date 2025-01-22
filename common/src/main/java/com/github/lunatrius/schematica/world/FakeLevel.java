@@ -1,7 +1,10 @@
 package com.github.lunatrius.schematica.world;
 
+import com.github.lunatrius.core.util.math.BlockPosHelper;
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.block.state.BlockStateHelper;
+import com.github.lunatrius.schematica.block.state.pattern.BlockStateReplacer;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.world.chunk.FakeChunk;
 import com.github.lunatrius.schematica.world.chunk.FakeChunkSource;
@@ -18,6 +21,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.AbortableIterationConsumer.Continuation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.TickRateManager;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
@@ -38,6 +42,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.FuelValues;
 import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
@@ -48,6 +53,7 @@ import net.minecraft.world.level.entity.LevelEntityGetter;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.GameEvent.Context;
 import net.minecraft.world.level.levelgen.Heightmap.Types;
+import net.minecraft.world.level.levelgen.structure.templatesystem.BlockStateMatchTest;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
@@ -239,6 +245,7 @@ public class FakeLevel extends Level {
 	// ========================================
 	// Note: must have null check because super ctor
 
+	@Nullable
 	@Override
 	public ChunkAccess getChunk(int x, int z, @NotNull ChunkStatus requiredStatus, boolean nonnull) {
 		if (lastX == x && lastZ == z && lastChunk != null) {
@@ -488,7 +495,7 @@ public class FakeLevel extends Level {
 	}
 
 	@Override
-	public CrashReportCategory fillReportDetails(CrashReport report) {
+	public CrashReportCategory fillReportDetails(@NotNull CrashReport report) {
 		CrashReportCategory crashreportcategory = report.addCategory("Schematica fake level");
 		getLevelSource().describeSelfInCrashReport(crashreportcategory);
 		return crashreportcategory;
@@ -590,7 +597,7 @@ public class FakeLevel extends Level {
 	 * @param entities
 	 * 		all entities, their level should be this fake level instance. Reset with empty collection
 	 */
-	public void setEntities(Collection<? extends Entity> entities) {
+	public void setEntities(@NotNull Collection<? extends Entity> entities) {
 		levelEntityGetter = entities.isEmpty()
 		                    ? FakeLevelEntityGetterAdapter.EMPTY
 		                    : FakeLevelEntityGetterAdapter.ofEntities(entities);
@@ -776,6 +783,37 @@ public class FakeLevel extends Level {
 		return this.isRendering;
 	}
 
+	@SuppressWarnings("rawtypes")
+	public int replaceBlock(BlockStateMatchTest matcher, BlockStateReplacer replacer) {
+		int count = 0;
+
+		for (MBlockPos pos : BlockPosHelper.getAllInBox(0, 0, 0, getLevelSource().getMaxX(), getHeight(),
+		                                                getLevelSource().getMaxZ())) {
+			BlockState blockState = this.getBlockState(pos);
+
+			// TODO: add support for tile entities?
+			if (blockState.hasBlockEntity()) {
+				continue;
+			}
+
+			if (matcher.test(blockState, RandomSource.create())) {
+				Map<Property, Comparable> properties = BlockStateHelper.getProperties(blockState);
+				BlockState replacement = replacer.getReplacement(properties);
+
+				// TODO: add support for tile entities?
+				if (replacement.hasBlockEntity()) {
+					continue;
+				}
+
+				if (this.setBlockAndUpdate(pos, replacement)) {
+					count++;
+				}
+			}
+		}
+
+		return count;
+	}
+
 	public enum LayerMode {
 		ALL(Names.Gui.Control.MODE_ALL) {
 			@Override
@@ -802,7 +840,7 @@ public class FakeLevel extends Level {
 			this.name = name;
 		}
 
-		public static LayerMode next(LayerMode mode) {
+		public static LayerMode next(@NotNull LayerMode mode) {
 			LayerMode[] values = values();
 			return values[(mode.ordinal() + 1) % values.length];
 		}

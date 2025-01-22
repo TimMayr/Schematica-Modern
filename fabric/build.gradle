@@ -52,9 +52,9 @@ dependencies {
 
 processResources {
 	var replaceProperties = [version                 : project.version,
-	                         mod_id: mod_id,
+	                         mod_id                  : mod_id,
 	                         mod_name                : mod_name,
-	                         fabric_loader_version   : fabric_loader_version,
+	                         fabric_version          : fabric_loader_version,
 	                         fabric_api_version      : fabric_api_version,
 	                         minecraft_version       : minecraft_version,
 	                         architectury_api_version: architectury_api_version]
@@ -78,7 +78,7 @@ remapJar {
 sourceSets {
 	api {
 		java {
-			srcDirs = ['src/api/java']
+			srcDirs = ['src/main/java/com/github/lunatrius/schematica/api/api']
 		}
 	}
 }

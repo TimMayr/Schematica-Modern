@@ -1,11 +1,11 @@
 package com.github.lunatrius.schematica.command.client;
 
 import com.github.lunatrius.schematica.block.state.pattern.BlockStateReplacer;
-import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.command.CommandSchematicaBase;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.world.FakeLevel;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -27,7 +27,7 @@ public class CommandSchematicaReplace extends CommandSchematicaBase {
 			                             BlockState with =
 					                             BlockStateArgument.getBlock(commandContext, "with").getState();
 
-			                             SchematicWorld schematic = ClientProxy.schematic;
+			                             FakeLevel schematic = ClientProxy.schematic;
 
 			                             if (schematic == null) {
 				                             source.sendFailure(Component.translatable(

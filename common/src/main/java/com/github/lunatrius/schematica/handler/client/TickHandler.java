@@ -1,10 +1,10 @@
 package com.github.lunatrius.schematica.handler.client;
 
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
-import com.github.lunatrius.schematica.client.world.SchematicWorld;
 import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.world.FakeLevel;
 import dev.architectury.event.events.client.ClientTickEvent;
 import dev.architectury.event.events.common.PlayerEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -30,8 +30,8 @@ public class TickHandler {
 			Profiler.get().push("schematica");
 			ClientLevel world = instance.level;
 			LocalPlayer player = instance.player;
-			SchematicWorld schematic = ClientProxy.schematic;
-			if (world != null && player != null && schematic != null && schematic.isRendering) {
+			FakeLevel schematic = ClientProxy.schematic;
+			if (world != null && player != null && schematic != null && schematic.isRendering()) {
 				Profiler.get().push("printer");
 				SchematicPrinter printer = SchematicPrinter.INSTANCE;
 				if (printer.isEnabled() && printer.isPrinting() && this.ticks-- < 0) {

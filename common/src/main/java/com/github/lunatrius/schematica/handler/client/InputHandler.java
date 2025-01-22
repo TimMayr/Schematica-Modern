@@ -6,10 +6,9 @@ import com.github.lunatrius.schematica.client.gui.control.GuiSchematicControl;
 import com.github.lunatrius.schematica.client.gui.load.GuiSchematicLoad;
 import com.github.lunatrius.schematica.client.gui.save.GuiSchematicSave;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
-import com.github.lunatrius.schematica.client.world.SchematicWorld;
-import com.github.lunatrius.schematica.client.world.SchematicWorld.LayerMode;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Names;
+import com.github.lunatrius.schematica.world.FakeLevel;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.serialization.Codec;
 import dev.architectury.event.events.client.ClientTickEvent;
@@ -70,33 +69,33 @@ public class InputHandler {
 				}
 
 				if (KEY_BINDING_LAYER_INC.isDown()) {
-					SchematicWorld schematic = ClientProxy.schematic;
-					if (schematic != null && schematic.layerMode != LayerMode.ALL) {
+					FakeLevel schematic = ClientProxy.schematic;
+					if (schematic != null && schematic.layerMode != FakeLevel.LayerMode.ALL) {
 
-						schematic.renderingLayer =
-								MathHelper.clamp(schematic.renderingLayer + 1, 0, schematic.getHeight() - 1);
+						schematic.renderLayer =
+								MathHelper.clamp(schematic.renderLayer + 1, 0, schematic.getHeight() - 1);
 					}
 				}
 
 				if (KEY_BINDING_LAYER_DEC.isDown()) {
-					SchematicWorld schematic = ClientProxy.schematic;
-					if (schematic != null && schematic.layerMode != LayerMode.ALL) {
-						schematic.renderingLayer =
-								MathHelper.clamp(schematic.renderingLayer - 1, 0, schematic.getHeight() - 1);
+					FakeLevel schematic = ClientProxy.schematic;
+					if (schematic != null && schematic.layerMode != FakeLevel.LayerMode.ALL) {
+						schematic.renderLayer =
+								MathHelper.clamp(schematic.renderLayer - 1, 0, schematic.getHeight() - 1);
 					}
 				}
 
 				if (KEY_BINDING_LAYER_TOGGLE.isDown()) {
-					SchematicWorld schematic = ClientProxy.schematic;
+					FakeLevel schematic = ClientProxy.schematic;
 					if (schematic != null) {
-						schematic.layerMode = LayerMode.next(schematic.layerMode);
+						schematic.layerMode = FakeLevel.LayerMode.next(schematic.layerMode);
 					}
 				}
 
 				if (KEY_BINDING_RENDER_TOGGLE.isDown()) {
-					SchematicWorld schematic = ClientProxy.schematic;
+					FakeLevel schematic = ClientProxy.schematic;
 					if (schematic != null) {
-						schematic.isRendering = !schematic.isRendering;
+						schematic.setRendering(!schematic.isRendering());
 					}
 				}
 
@@ -113,15 +112,15 @@ public class InputHandler {
 				}
 
 				if (KEY_BINDING_MOVE_HERE.isDown()) {
-					SchematicWorld schematic = ClientProxy.schematic;
+					FakeLevel schematic = ClientProxy.schematic;
 					if (schematic != null) {
 						ClientProxy.moveSchematicToPlayer(schematic);
 					}
 				}
 
 				if (KEY_BINDING_PICK_BLOCK.isDown()) {
-					SchematicWorld schematic = ClientProxy.schematic;
-					if (schematic != null && schematic.isRendering) {
+					FakeLevel schematic = ClientProxy.schematic;
+					if (schematic != null && schematic.isRendering()) {
 						pickBlock(schematic, ClientProxy.objectMouseOver, instance);
 					}
 				}
@@ -129,7 +128,7 @@ public class InputHandler {
 		});
 	}
 
-	private void pickBlock(SchematicWorld schematic, HitResult objectMouseOver, Minecraft instance) {
+	private void pickBlock(FakeLevel schematic, HitResult objectMouseOver, Minecraft instance) {
 		if (objectMouseOver == null) {
 			return;
 		}
@@ -139,10 +138,6 @@ public class InputHandler {
 		}
 
 		LocalPlayer player = instance.player;
-
-		if (player != null) {
-
-		}
 
 		if (player != null && player.isCreative()) {
 			int slot = player.getInventory().items.size() - 10 + player.getInventory().selected;

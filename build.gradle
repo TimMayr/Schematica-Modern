@@ -67,7 +67,7 @@ subprojects {
 
 		dependencies {
 			// LunatriusCore
-			modImplementation files("../libs/lunatriuscore-common-${minecraft_version}-${lunatriuscore_version}.jar")
+			implementation 'org.jetbrains:annotations:24.1.0'
 		}
 	}
 
@@ -106,7 +106,7 @@ subprojects {
 	sourceSets {
 		main {
 			java {
-				srcDirs = ['src/api/java', 'src/main/java']
+				srcDirs = ['src/main/java']
 			}
 		}
 	}

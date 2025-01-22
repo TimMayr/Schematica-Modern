@@ -17,6 +17,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
 
 public class GuiSchematicControl extends ScreenBase {
 	private final FakeLevel schematic;
@@ -42,18 +43,16 @@ public class GuiSchematicControl extends ScreenBase {
 	private Button btnLayerMode = null;
 	private NumericFieldWidget nfLayer = null;
 	private Button btnHide = null;
-	private Button btnFlip = null;
-	private Button btnRotate = null;
 	private Button btnPrint = null;
 
 	public GuiSchematicControl(Screen Screen) {
 		super(Screen);
-		this.schematic = FakeLevel.of(ClientProxy.schematic);
+		this.schematic = ClientProxy.schematic;
 		this.printer = SchematicPrinter.INSTANCE;
 	}
 
 	@Override
-	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+	public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
 		// drawDefaultBackground();
 
 		graphics.drawCenteredString(this.font, this.strMoveSchematic, this.centerX, this.centerY - 45, 0xFFFFFF);
@@ -101,9 +100,7 @@ public class GuiSchematicControl extends ScreenBase {
 
 		this.btnLayerMode = new PlainTextButton(this.width - 90, this.height - 150 - 25, 80, 20,
 		                                        Component.translatable(
-				                                        (this.schematic != null
-				                                         ? this.schematic.layerMode
-				                                         : FakeLevel.LayerMode.ALL).name), (button) -> {
+				(this.schematic != null ? this.schematic.layerMode : FakeLevel.LayerMode.ALL).name), (button) -> {
 			this.schematic.layerMode = FakeLevel.LayerMode.next(this.schematic.layerMode);
 			this.btnLayerMode.setMessage(Component.translatable(this.schematic.layerMode.name));
 			this.nfLayer.setActive(this.schematic.layerMode != FakeLevel.LayerMode.ALL);
@@ -146,17 +143,18 @@ public class GuiSchematicControl extends ScreenBase {
 		                                              }, this.font);
 		this.addRenderableWidget(btnFlipDirection);
 
-		this.btnFlip = new PlainTextButton(this.width - 90, this.height - 55, 80, 20, Component.literal("↔ " + " ")
-		                                                                                       .append(Component.translatable(
-				                                                                                       Names.Gui.Control.FLIP)),
-		                                   (button) -> {
-			                                   if (FlipHelper.INSTANCE.flip(this.schematic, ClientProxy.axisFlip,
-			                                                                hasShiftDown())) {
-				                                   //				RenderSchematic.getINSTANCE().refresh();
-				                                   SchematicPrinter.INSTANCE.refresh();
-			                                   }
-		                                   }, this.font);
-		this.addRenderableWidget(this.btnFlip);
+		//				RenderSchematic.getINSTANCE().refresh();
+		Button btnFlip = new PlainTextButton(this.width - 90, this.height - 55, 80, 20, Component.literal("↔ " + " ")
+		                                                                                         .append(Component.translatable(
+				                                                                                         Names.Gui.Control.FLIP)),
+		                                     (button) -> {
+			                                     if (FlipHelper.INSTANCE.flip(this.schematic, ClientProxy.axisFlip,
+			                                                                  hasShiftDown())) {
+				                                     //				RenderSchematic.getINSTANCE().refresh();
+				                                     SchematicPrinter.INSTANCE.refresh();
+			                                     }
+		                                     }, this.font);
+		this.addRenderableWidget(btnFlip);
 
 		Button btnRotateDirection = new PlainTextButton(this.width - 180, this.height - 30, 80, 20,
 		                                                Component.translatable(Names.Gui.Control.TRANSFORM_PREFIX
@@ -172,20 +170,21 @@ public class GuiSchematicControl extends ScreenBase {
 		                                                }, this.font);
 		this.addRenderableWidget(btnRotateDirection);
 
-		this.btnRotate = new PlainTextButton(this.width - 90, this.height - 30, 80, 20, Component.literal("↻ " + " ")
-		                                                                                         .append(Component.translatable(
-				                                                                                         Names.Gui.Control.ROTATE)),
-		                                     (button) -> {
-			                                     if (RotationHelper.INSTANCE.rotate(this.schematic,
-			                                                                        ClientProxy.axisRotation,
-			                                                                        hasShiftDown())) {
-				                                     setPoint(this.numericX, this.numericY, this.numericZ,
-				                                              this.schematic.getWorldPos());
-				                                     //				RenderSchematic.getINSTANCE().refresh();
-				                                     SchematicPrinter.INSTANCE.refresh();
-			                                     }
-		                                     }, this.font);
-		this.addRenderableWidget(this.btnRotate);
+		//				RenderSchematic.getINSTANCE().refresh();
+		Button btnRotate = new PlainTextButton(this.width - 90, this.height - 30, 80, 20, Component.literal("↻ " + " ")
+		                                                                                           .append(Component.translatable(
+				                                                                                           Names.Gui.Control.ROTATE)),
+		                                       (button) -> {
+			                                       if (RotationHelper.INSTANCE.rotate(this.schematic,
+			                                                                          ClientProxy.axisRotation,
+			                                                                          hasShiftDown())) {
+				                                       setPoint(this.numericX, this.numericY, this.numericZ,
+				                                                this.schematic.getWorldPos());
+				                                       //				RenderSchematic.getINSTANCE().refresh();
+				                                       SchematicPrinter.INSTANCE.refresh();
+			                                       }
+		                                       }, this.font);
+		this.addRenderableWidget(btnRotate);
 
 		Button btnMaterials = new PlainTextButton(10, this.height - 70, 80, 20, this.strMaterials,
 		                                          (button) -> this.minecraft.setScreen(
@@ -211,9 +210,9 @@ public class GuiSchematicControl extends ScreenBase {
 		this.btnHide.active = this.schematic != null;
 		btnMove.active = this.schematic != null;
 		btnFlipDirection.active = this.schematic != null;
-		this.btnFlip.active = this.schematic != null;
+		btnFlip.active = this.schematic != null;
 		btnRotateDirection.active = this.schematic != null;
-		this.btnRotate.active = this.schematic != null;
+		btnRotate.active = this.schematic != null;
 		btnMaterials.active = this.schematic != null;
 		this.btnPrint.active = this.schematic != null && this.printer.isEnabled();
 
@@ -232,12 +231,13 @@ public class GuiSchematicControl extends ScreenBase {
 		}
 	}
 
-	private void setMinMax(NumericFieldWidget numericField) {
+	private void setMinMax(@NotNull NumericFieldWidget numericField) {
 		numericField.setMinimum(Constants.Level.MINIMUM_COORD);
 		numericField.setMaximum(Constants.Level.MAXIMUM_COORD);
 	}
 
-	private void setPoint(NumericFieldWidget numX, NumericFieldWidget numY, NumericFieldWidget numZ, BlockPos point) {
+	private void setPoint(@NotNull NumericFieldWidget numX, @NotNull NumericFieldWidget numY,
+	                      @NotNull NumericFieldWidget numZ, @NotNull BlockPos point) {
 		numX.setValue(point.getX());
 		numY.setValue(point.getY());
 		numZ.setValue(point.getZ());
