@@ -10,8 +10,10 @@ import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
+import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
@@ -206,14 +208,10 @@ public class ClientProxy extends CommonProxy {
 			SchematicaClientConfig.populateExtraAirBlocks();
 			SchematicaClientConfig.normalizeSchematicPath();
 
-			for (KeyB keyBinding : InputHandler.KEY_BINDINGS) {
-				ClientRegistry.registerKeyBinding(keyBinding);
+			for (KeyMapping keyMapping : InputHandler.KEY_BINDINGS) {
+				KeyMappingRegistry.register(keyMapping);
 			}
 
-//		NeoForge.EVENT_BUS.register(InputHandler.INSTANCE);
-//		NeoForge.EVENT_BUS.register(RenderTickHandler.INSTANCE);
-//		NeoForge.EVENT_BUS.register(GuiHandler.INSTANCE);
-//		NeoForge.EVENT_BUS.register(new OverlayHandler());
 //		NeoForge.EVENT_BUS.register(new WorldHandler());
 			Reference.proxy.resetSettings();
 		});

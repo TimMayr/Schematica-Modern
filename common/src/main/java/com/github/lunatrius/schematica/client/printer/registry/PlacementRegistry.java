@@ -1,6 +1,5 @@
 package com.github.lunatrius.schematica.client.printer.registry;
 
-import com.github.lunatrius.core.util.math.MathHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
@@ -77,7 +76,7 @@ public class PlacementRegistry {
 		IValidPlayerFacing playerFacingStandingSign =
 				(BlockState blockState, Player player, BlockPos pos, Level world) -> {
 					int value = blockState.getValue(BlockStateProperties.ROTATION_16);
-					int facing = MathHelper.floor((float) ((player.yHeadRot + 180.0) * 16.0 / 360.0 + 0.5)) & 15;
+					int facing = (int) (Math.floor((float) ((player.yHeadRot + 180.0) * 16.0 / 360.0 + 0.5))) & 15;
 					return value == facing;
 				};
 

@@ -60,7 +60,7 @@ subprojects {
 		minecraft "net.minecraft:minecraft:$rootProject.minecraft_version"
 		mappings loom.layered() {
 			officialMojangMappings() {
-				setNameSyntheticMembers(false)
+				setNameSyntheticMembers(true)
 			}
 			parchment("org.parchmentmc.data:parchment-${minecraft_version}:${mapping_version}@zip")
 		}
