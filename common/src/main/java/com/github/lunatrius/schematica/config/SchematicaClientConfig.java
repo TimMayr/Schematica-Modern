@@ -17,7 +17,7 @@ public class SchematicaClientConfig {
 	public static final Queue<Integer> swapSlotsQueue = new ArrayDeque<>();
 	public static final String SCHEMATIC_DEFAULT_FOLDER = "./schematics";
 	private static final Set<Block> extraAirBlockList = new HashSet<>();
-	public static File schematicDirectory = new File(Reference.proxy.getDataDirectory(), SCHEMATIC_DEFAULT_FOLDER);
+	public static File schematicDirectory = null;
 	public final ModConfigSpec.ConfigValue<List<? extends String>> extraAirBlocks;
 	public final ModConfigSpec.ConfigValue<String> schematicDirectoryPath;
 	public final ModConfigSpec.EnumValue<ItemStackSortType> sortType;

@@ -14,7 +14,7 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
@@ -28,16 +28,15 @@ import java.util.concurrent.CompletableFuture;
 public abstract class CommandSchematicaBase {
 	private static LiteralCommandNode<CommandSourceStack> mainNode;
 
-	protected static <T extends Component> T withStyle(T component, ChatFormatting formatting,
-	                                                   @Nullable String command) {
+	protected static MutableComponent withStyle(MutableComponent component, ChatFormatting formatting,
+	                                            @Nullable String command) {
 		Style style = Style.EMPTY.applyFormat(formatting);
 
 		if (command != null) {
 			style = style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
 		}
 
-		//noinspection unchecked
-		return (T) component.copy().withStyle(style);
+		return component.copy().withStyle(style);
 	}
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {

@@ -50,7 +50,7 @@ class GuiSchematicMaterialsSlot extends AbstractSelectionList<GuiSchematicMateri
 		public void render(@NotNull GuiGraphics graphics, int index, int x, int y, int width, int height, int mouseX,
 		                   int mouseY,
 		                   boolean isHovered, float partialTicks) {
-			BlockList.WrappedItemStack wrappedItemStack = parent.getGuiSchematicMaterials().getUnmodifiableBlocklist().get(index);
+			BlockList.WrappedItemStack wrappedItemStack = parent.getGuiSchematicMaterials().getBlockList().get(index);
 			ItemStack itemStack = wrappedItemStack.itemStack;
 
 			String itemName = wrappedItemStack.getItemStackDisplayName().getString();

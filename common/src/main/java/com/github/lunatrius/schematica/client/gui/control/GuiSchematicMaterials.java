@@ -37,11 +37,11 @@ public class GuiSchematicMaterials extends ScreenBase {
 		Minecraft minecraft = Minecraft.getInstance();
 		FakeLevel level = ClientProxy.schematic;
 		this.blockList = new BlockList().getList(minecraft.player, level, minecraft.level);
-		this.sortType.sort(this.getUnmodifiableBlocklist());
+		this.sortType.sort(this.getBlockList());
 	}
 
-	public List<BlockList.WrappedItemStack> getUnmodifiableBlocklist() {
-		return Collections.unmodifiableList(blockList);
+	public List<BlockList.WrappedItemStack> getBlockList() {
+		return blockList;
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class GuiSchematicMaterials extends ScreenBase {
 		                                   Component.translatable(Names.Gui.Control.SORT_PREFIX + this.sortType.label)
 		                                            .append(" " + this.sortType.glyph), (button) -> {
 			this.sortType = this.sortType.next();
-			this.sortType.sort(this.getUnmodifiableBlocklist());
+			this.sortType.sort(this.getBlockList());
 			this.btnSort.setMessage(Component.translatable(Names.Gui.Control.SORT_PREFIX + this.sortType.label)
 			                                 .append(" " + this.sortType.glyph));
 		}, this.font);
@@ -68,7 +68,7 @@ public class GuiSchematicMaterials extends ScreenBase {
 
 		Button btnDump = new PlainTextButton(this.width / 2 - 50, this.height - 30, 100, 20,
 		                                     Component.translatable(Names.Gui.Control.DUMP),
-		                                     (button) -> dumpMaterialList(this.getUnmodifiableBlocklist()), this.font);
+		                                     (button) -> dumpMaterialList(this.getBlockList()), this.font);
 		this.addRenderableWidget(btnDump);
 
 		Button btnDone = new PlainTextButton(this.width / 2 + 54, this.height - 30, 100, 20,

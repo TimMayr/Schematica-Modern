@@ -61,7 +61,7 @@ public class BlockList {
 
 
 			if (block instanceof LiquidBlock) {
-				stack = new ItemStack(((LiquidBlock) block).arch$getFluid());
+				stack = new ItemStack(((LiquidBlock) block).arch$getFluid().getBucket());
 			}
 
 			if (stack.isEmpty()) {

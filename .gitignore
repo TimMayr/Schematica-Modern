@@ -39,4 +39,6 @@ classes/
 .architectury-transformer
 **/build/
 **/.gradle/
-/lib/
+fabric/run/
+neoforge/run/
+lib/

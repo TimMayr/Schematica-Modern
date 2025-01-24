@@ -17,20 +17,6 @@ allprojects {
 			name = 'ParchmentMC'
 			url = 'https://maven.parchmentmc.org'
 		}
-
-		flatDir {
-			dirs("libs")
-		}
-
-		maven {
-			name = "Fuzs Mod Resources"
-			url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
-		}
-
-		maven {
-			name = "Common Network"
-			url = "https://jm.gserv.me/repository/maven-public/"
-		}
 	}
 }
 
@@ -50,6 +36,20 @@ subprojects {
 		// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 		// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 		// for more information about repositories.
+
+		flatDir {
+			dirs("libs")
+		}
+
+		maven {
+			name = "Fuzs Mod Resources"
+			url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
+		}
+
+		maven {
+			name = "Common Network"
+			url = "https://jm.gserv.me/repository/maven-public/"
+		}
 	}
 
 	loom {
@@ -65,10 +65,7 @@ subprojects {
 			parchment("org.parchmentmc.data:parchment-${minecraft_version}:${mapping_version}@zip")
 		}
 
-		dependencies {
-			// LunatriusCore
-			implementation 'org.jetbrains:annotations:24.1.0'
-		}
+		implementation 'org.jetbrains:annotations:24.1.0'
 	}
 
 	java {

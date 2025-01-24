@@ -26,7 +26,7 @@ public class GuiSchematicLoadSlot extends AbstractSelectionList<GuiSchematicLoad
 
 	@Override
 	protected int getItemCount() {
-		return this.getGuiSchematicLoad().getUnmodifiableSchematicFiles().size();
+		return this.getGuiSchematicLoad().getSchematicFiles().size();
 	}
 
 	@Override
@@ -57,7 +57,7 @@ public class GuiSchematicLoadSlot extends AbstractSelectionList<GuiSchematicLoad
 			return true;
 		}
 
-		GuiSchematicEntry schematic = this.getGuiSchematicLoad().getUnmodifiableSchematicFiles().get(index);
+		GuiSchematicEntry schematic = this.getGuiSchematicLoad().getSchematicFiles().get(index);
 		if (schematic.isDirectory()) {
 			this.getGuiSchematicLoad().changeDirectory(schematic.getName());
 			this.selectedIndex = -1;
@@ -84,11 +84,11 @@ public class GuiSchematicLoadSlot extends AbstractSelectionList<GuiSchematicLoad
 		@Override
 		public void render(@NotNull GuiGraphics graphics, int index, int x, int y, int width, int height, int mouseX,
 		                   int mouseY, boolean isHovered, float partialTicks) {
-			if (index < 0 || index >= parent.getGuiSchematicLoad().getUnmodifiableSchematicFiles().size()) {
+			if (index < 0 || index >= parent.getGuiSchematicLoad().getSchematicFiles().size()) {
 				return;
 			}
 
-			GuiSchematicEntry schematic = parent.getGuiSchematicLoad().getUnmodifiableSchematicFiles().get(index);
+			GuiSchematicEntry schematic = parent.getGuiSchematicLoad().getSchematicFiles().get(index);
 			String schematicName = schematic.getName();
 
 			if (schematic.isDirectory()) {

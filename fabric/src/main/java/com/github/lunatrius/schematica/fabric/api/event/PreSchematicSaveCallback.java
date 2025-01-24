@@ -1,6 +1,7 @@
-package com.github.lunatrius.schematica.api.event;
+package com.github.lunatrius.schematica.fabric.api.event;
 
 import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.api.event.DuplicateMappingException;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.nbt.CompoundTag;

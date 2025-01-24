@@ -2,6 +2,10 @@ architectury {
 	common rootProject.enabled_platforms.split(',')
 }
 
+loom {
+	accessWidenerPath = file("src/main/resources/META-INF/schematica.accesswidener")
+}
+
 dependencies {
 	// We depend on Fabric Loader here to use the Fabric @Environment annotations,
 	// which get remapped to the correct annotations on each platform.
@@ -18,9 +22,6 @@ dependencies {
 	modImplementation "dev.architectury:architectury:$rootProject.architectury_api_version"
 
 	modImplementation files("../libs/lunatriuscore-common-${minecraft_version}-${lunatriuscore_version}.jar")
-
-	api "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
-	api "dev.architectury:architectury:$rootProject.architectury_api_version"
 }
 
 var generateReference = tasks.register("generateReference", ProcessResources) {

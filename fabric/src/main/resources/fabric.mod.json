@@ -24,9 +24,6 @@
 			"com.github.lunatrius.schematica.fabric.client.SchematicaFabricClient"
 		]
 	},
-	"mixins": [
-		"schematica.mixins.json"
-	],
 	"depends": {
 		"fabricloader": ">=${fabric_version}",
 		"minecraft": "~${minecraft_version}",

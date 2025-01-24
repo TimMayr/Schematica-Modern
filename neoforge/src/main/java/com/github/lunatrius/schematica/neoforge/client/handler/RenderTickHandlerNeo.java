@@ -7,13 +7,15 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
 import org.jetbrains.annotations.Nullable;
 
 import static net.minecraft.world.entity.ai.attributes.Attributes.ENTITY_INTERACTION_RANGE;
 
-
+@OnlyIn(Dist.CLIENT)
 public class RenderTickHandlerNeo {
 	public static final RenderTickHandlerNeo INSTANCE = new RenderTickHandlerNeo();
 	private final Minecraft minecraft = Minecraft.getInstance();

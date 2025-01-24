@@ -1,6 +1,7 @@
-package com.github.lunatrius.schematica.api.event;
+package com.github.lunatrius.schematica.neoforge.api.event;
 
 import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.api.event.DuplicateMappingException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.Event;

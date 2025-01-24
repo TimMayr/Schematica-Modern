@@ -29,23 +29,20 @@ public class SchematicStructure extends SchematicFormat {
 		for (StructureTemplate.Palette palette : template.palettes) {
 			for (StructureTemplate.StructureBlockInfo block : palette.blocks()) {
 				schematic.setBlockState(block.pos(), block.state());
-				if (block.nbt() != null) {
-					try {
-						// This position isn't included by default
-						block.nbt().putInt("x", block.pos().getX());
-						block.nbt().putInt("y", block.pos().getY());
-						block.nbt().putInt("z", block.pos().getZ());
+				try {
+					// This position isn't included by default
+					block.nbt().putInt("x", block.pos().getX());
+					block.nbt().putInt("y", block.pos().getY());
+					block.nbt().putInt("z", block.pos().getZ());
 
-						BlockEntity blockEntity = NBTHelper.readBlockEntityFromCompound(block.nbt(), block.state());
-						if (blockEntity != null) {
-							schematic.setBlockEntity(block.pos(), blockEntity);
-						}
-					} catch (Exception e) {
-						Reference.logger.error("BlockEntity failed to load properly!", e);
+					BlockEntity blockEntity = NBTHelper.readBlockEntityFromCompound(block.nbt(), block.state());
+					if (blockEntity != null) {
+						schematic.setBlockEntity(block.pos(), blockEntity);
 					}
+				} catch (Exception e) {
+					Reference.logger.error("BlockEntity failed to load properly!", e);
 				}
 			}
-
 		}
 
 		for (StructureTemplate.StructureEntityInfo entityInfo : template.entityInfoList) {

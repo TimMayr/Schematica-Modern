@@ -163,7 +163,7 @@ public class PlacementRegistry {
 		addPlacementMapping(SlabBlock.class,
 		                    new PlacementData().setOffsetY(offsetSlab).setExtraClick(extraClickDoubleSlab));
 		addPlacementMapping(StairBlock.class, new PlacementData(playerFacingEntity).setOffsetY(offsetHalfBlock));
-		addPlacementMapping(TorchBlock.class, new PlacementData(blockFacingOpposite));
+		addPlacementMapping(BaseTorchBlock.class, new PlacementData(blockFacingOpposite));
 		addPlacementMapping(TrapDoorBlock.class, new PlacementData(blockFacingOpposite).setOffsetY(offsetHalfBlock));
 		addPlacementMapping(StandingSignBlock.class, new PlacementData(playerFacingStandingSign));
 		addPlacementMapping(WallSignBlock.class, new PlacementData(playerFacingStandingSign));

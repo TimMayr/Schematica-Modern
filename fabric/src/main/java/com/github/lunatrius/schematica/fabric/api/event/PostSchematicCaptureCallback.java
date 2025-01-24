@@ -1,4 +1,4 @@
-package com.github.lunatrius.schematica.api.event;
+package com.github.lunatrius.schematica.fabric.api.event;
 
 import com.github.lunatrius.schematica.api.ISchematic;
 import net.fabricmc.fabric.api.event.Event;

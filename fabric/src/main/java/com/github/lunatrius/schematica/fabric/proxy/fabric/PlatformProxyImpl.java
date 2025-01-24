@@ -1,10 +1,10 @@
 package com.github.lunatrius.schematica.fabric.proxy.fabric;
 
 import com.github.lunatrius.schematica.api.ISchematic;
-import com.github.lunatrius.schematica.api.event.PostSchematicCaptureCallback;
-import com.github.lunatrius.schematica.api.event.PostSchematicSaveCallback;
-import com.github.lunatrius.schematica.api.event.PreSchematicCaptureCallback;
-import com.github.lunatrius.schematica.api.event.PreSchematicSaveCallback;
+import com.github.lunatrius.schematica.fabric.api.event.PostSchematicCaptureCallback;
+import com.github.lunatrius.schematica.fabric.api.event.PostSchematicSaveCallback;
+import com.github.lunatrius.schematica.fabric.api.event.PreSchematicCaptureCallback;
+import com.github.lunatrius.schematica.fabric.api.event.PreSchematicSaveCallback;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.AABB;
 
