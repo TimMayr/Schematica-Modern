@@ -1,0 +1,4 @@
+accessWidener v2 named
+
+accessible field net/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplate palettes Ljava/util/List;
+accessible field net/minecraft/world/level/levelgen/structure/templatesystem/StructureTemplate entityInfoList Ljava/util/List;
