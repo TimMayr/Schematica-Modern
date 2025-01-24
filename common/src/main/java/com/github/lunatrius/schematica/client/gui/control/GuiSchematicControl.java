@@ -12,7 +12,6 @@ import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.PlainTextButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -92,20 +91,19 @@ public class GuiSchematicControl extends ScreenBase {
 		});
 		this.addRenderableWidget(this.numericZ);
 
-		Button btnUnload = new PlainTextButton(this.width - 90, this.height - 200, 80, 20, strUnload, (button) -> {
+		Button btnUnload = Button.builder(strUnload, (button) -> {
 			Reference.proxy.unloadSchematic();
 			this.minecraft.setScreen(this.parentScreen);
-		}, this.font);
+		}).pos(this.width - 90, this.height - 200).size(80, 20).build();
 		this.addRenderableWidget(btnUnload);
 
-		this.btnLayerMode = new PlainTextButton(this.width - 90, this.height - 150 - 25, 80, 20,
-		                                        Component.translatable(
+		this.btnLayerMode = Button.builder(Component.translatable(
 				(this.schematic != null ? this.schematic.layerMode : FakeLevel.LayerMode.ALL).name), (button) -> {
 			this.schematic.layerMode = FakeLevel.LayerMode.next(this.schematic.layerMode);
 			this.btnLayerMode.setMessage(Component.translatable(this.schematic.layerMode.name));
 			this.nfLayer.setActive(this.schematic.layerMode != FakeLevel.LayerMode.ALL);
 			//			RenderSchematic.getINSTANCE().refresh();
-		}, this.font);
+		}).bounds(this.width - 90, this.height - 150 - 25, 80, 20).build();
 		this.addRenderableWidget(this.btnLayerMode);
 
 		this.nfLayer = new NumericFieldWidget(this.width - 90, this.height - 150, 80, 20, (button) -> {
@@ -114,89 +112,77 @@ public class GuiSchematicControl extends ScreenBase {
 		});
 		this.addRenderableWidget(this.nfLayer);
 
-		this.btnHide = new PlainTextButton(this.width - 90, this.height - 105, 80, 20,
-		                                   this.schematic != null && this.schematic.isRendering()
-		                                   ? this.strHide
-		                                   : this.strShow, (button) -> this.btnHide.setMessage(
-				this.schematic.toggleRendering() ? this.strHide : this.strShow), this.font);
+		this.btnHide =
+				Button.builder(this.schematic != null && this.schematic.isRendering() ? this.strHide : this.strShow,
+				               (button) -> this.btnHide.setMessage(
+						               this.schematic.toggleRendering() ? this.strHide : this.strShow))
+				      .bounds(this.width - 90, this.height - 105, 80, 20)
+				      .build();
 		this.addRenderableWidget(this.btnHide);
 
-		Button btnMove = new PlainTextButton(this.width - 90, this.height - 80, 80, 20,
-		                                     Component.translatable(Names.Gui.Control.MOVE_HERE), (button) -> {
+		Button btnMove = Button.builder(Component.translatable(Names.Gui.Control.MOVE_HERE), (button) -> {
 			ClientProxy.moveSchematicToPlayer(this.schematic);
 			//RenderSchematic.getINSTANCE().refresh();
 			setPoint(this.numericX, this.numericY, this.numericZ, this.schematic.getWorldPos());
-		}, this.font);
+		}).bounds(this.width - 90, this.height - 80, 80, 20).build();
 		this.addRenderableWidget(btnMove);
 
-		Button btnFlipDirection = new PlainTextButton(this.width - 180, this.height - 55, 80, 20,
-		                                              Component.translatable(Names.Gui.Control.TRANSFORM_PREFIX
-				                                                                     + ClientProxy.axisFlip.getName()),
-		                                              (button) -> {
-			                                              Direction[] values = Direction.values();
-			                                              ClientProxy.axisFlip =
-					                                              values[((ClientProxy.axisFlip.ordinal() + 2)
-							                                                      % values.length)];
-			                                              button.setMessage(Component.translatable(
-					                                              Names.Gui.Control.TRANSFORM_PREFIX
-							                                              + ClientProxy.axisFlip.getName()));
-		                                              }, this.font);
+		Button btnFlipDirection = Button.builder(
+				Component.translatable(Names.Gui.Control.TRANSFORM_PREFIX + ClientProxy.axisFlip.getName()),
+				(button) -> {
+					Direction[] values = Direction.values();
+					ClientProxy.axisFlip = values[((ClientProxy.axisFlip.ordinal() + 2) % values.length)];
+					button.setMessage(Component.translatable(
+							Names.Gui.Control.TRANSFORM_PREFIX + ClientProxy.axisFlip.getName()));
+				}).bounds(this.width - 180, this.height - 55, 80, 20).build();
 		this.addRenderableWidget(btnFlipDirection);
 
 		//				RenderSchematic.getINSTANCE().refresh();
-		Button btnFlip = new PlainTextButton(this.width - 90, this.height - 55, 80, 20, Component.literal("↔ " + " ")
-		                                                                                         .append(Component.translatable(
-				                                                                                         Names.Gui.Control.FLIP)),
-		                                     (button) -> {
-			                                     if (FlipHelper.INSTANCE.flip(this.schematic, ClientProxy.axisFlip,
-			                                                                  hasShiftDown())) {
-				                                     //				RenderSchematic.getINSTANCE().refresh();
-				                                     SchematicPrinter.INSTANCE.refresh();
-			                                     }
-		                                     }, this.font);
+		Button btnFlip =
+				Button.builder(Component.literal("↔ " + " ").append(Component.translatable(Names.Gui.Control.FLIP)),
+				               (button) -> {
+					               if (FlipHelper.INSTANCE.flip(this.schematic, ClientProxy.axisFlip,
+					                                            hasShiftDown())) {
+						               //				RenderSchematic.getINSTANCE().refresh();
+						               SchematicPrinter.INSTANCE.refresh();
+					               }
+				               }).bounds(this.width - 90, this.height - 55, 80, 20).build();
 		this.addRenderableWidget(btnFlip);
 
-		Button btnRotateDirection = new PlainTextButton(this.width - 180, this.height - 30, 80, 20,
-		                                                Component.translatable(Names.Gui.Control.TRANSFORM_PREFIX
-				                                                                       + ClientProxy.axisRotation.getName()),
-		                                                (button) -> {
-			                                                Direction[] values = Direction.values();
-			                                                ClientProxy.axisRotation =
-					                                                values[((ClientProxy.axisRotation.ordinal() + 1)
-							                                                        % values.length)];
-			                                                button.setMessage(Component.translatable(
-					                                                Names.Gui.Control.TRANSFORM_PREFIX
-							                                                + ClientProxy.axisRotation.getName()));
-		                                                }, this.font);
+		Button btnRotateDirection = Button.builder(
+				Component.translatable(Names.Gui.Control.TRANSFORM_PREFIX + ClientProxy.axisRotation.getName()),
+				(button) -> {
+					Direction[] values = Direction.values();
+					ClientProxy.axisRotation = values[((ClientProxy.axisRotation.ordinal() + 1) % values.length)];
+					button.setMessage(Component.translatable(
+							Names.Gui.Control.TRANSFORM_PREFIX + ClientProxy.axisRotation.getName()));
+				}).bounds(this.width - 180, this.height - 30, 80, 20).build();
 		this.addRenderableWidget(btnRotateDirection);
 
 		//				RenderSchematic.getINSTANCE().refresh();
-		Button btnRotate = new PlainTextButton(this.width - 90, this.height - 30, 80, 20, Component.literal("↻ " + " ")
-		                                                                                           .append(Component.translatable(
-				                                                                                           Names.Gui.Control.ROTATE)),
-		                                       (button) -> {
-			                                       if (RotationHelper.INSTANCE.rotate(this.schematic,
-			                                                                          ClientProxy.axisRotation,
-			                                                                          hasShiftDown())) {
-				                                       setPoint(this.numericX, this.numericY, this.numericZ,
-				                                                this.schematic.getWorldPos());
-				                                       //				RenderSchematic.getINSTANCE().refresh();
-				                                       SchematicPrinter.INSTANCE.refresh();
-			                                       }
-		                                       }, this.font);
+		Button btnRotate =
+				Button.builder(Component.literal("↻ " + " ").append(Component.translatable(Names.Gui.Control.ROTATE)),
+				               (button) -> {
+					               if (RotationHelper.INSTANCE.rotate(this.schematic, ClientProxy.axisRotation,
+					                                                  hasShiftDown())) {
+						               setPoint(this.numericX, this.numericY, this.numericZ,
+						                        this.schematic.getWorldPos());
+						               //				RenderSchematic.getINSTANCE().refresh();
+						               SchematicPrinter.INSTANCE.refresh();
+					               }
+				               }).bounds(this.width - 90, this.height - 30, 80, 20).build();
 		this.addRenderableWidget(btnRotate);
 
-		Button btnMaterials = new PlainTextButton(10, this.height - 70, 80, 20, this.strMaterials,
-		                                          (button) -> this.minecraft.setScreen(
-				                                          new GuiSchematicMaterials(screen)), this.font);
+		Button btnMaterials = Button.builder(this.strMaterials,
+		                                     (button) -> this.minecraft.setScreen(new GuiSchematicMaterials(screen)))
+		                            .bounds(10, this.height - 70, 80, 20)
+		                            .build();
 		this.addRenderableWidget(btnMaterials);
 
-		this.btnPrint =
-				new PlainTextButton(10, this.height - 30, 80, 20, this.printer.isPrinting() ? this.strOn : this.strOff,
-				                    (button) -> {
-					                    boolean isPrinting = this.printer.togglePrinting();
-					                    this.btnPrint.setMessage(isPrinting ? this.strOn : this.strOff);
-				                    }, this.font);
+		this.btnPrint = Button.builder(this.printer.isPrinting() ? this.strOn : this.strOff, (button) -> {
+			boolean isPrinting = this.printer.togglePrinting();
+			this.btnPrint.setMessage(isPrinting ? this.strOn : this.strOff);
+		}).bounds(10, this.height - 30, 80, 20).build();
 		this.addRenderableWidget(this.btnPrint);
 
 		this.numericX.setActive(this.schematic != null);

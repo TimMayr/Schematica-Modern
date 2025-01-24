@@ -11,7 +11,6 @@ import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.PlainTextButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
@@ -131,12 +130,11 @@ public class GuiSchematicSave extends ScreenBase {
 
 		this.clearWidgets();
 
-		Button btnPointA = new PlainTextButton(this.centerX - 130, this.centerY - 55, 100, 20,
-		                                       Component.translatable(Names.Gui.Save.POINT_RED), (button) -> {
+		Button btnPointA = Button.builder(Component.translatable(Names.Gui.Save.POINT_RED), (button) -> {
 			ClientProxy.movePointToPlayer(ClientProxy.pointA);
 			ClientProxy.updatePoints();
 			setPoint(this.numericAX, this.numericAY, this.numericAZ, ClientProxy.pointA);
-		}, this.font);
+		}).bounds(this.centerX - 130, this.centerY - 55, 100, 20).build();
 		this.addRenderableWidget(btnPointA);
 
 		this.numericAX = new NumericFieldWidget(this.centerX - 130, this.centerY - 30, (button) -> {
@@ -157,12 +155,11 @@ public class GuiSchematicSave extends ScreenBase {
 		});
 		this.addRenderableWidget(this.numericAZ);
 
-		Button btnPointB = new PlainTextButton(this.centerX + 30, this.centerY - 55, 100, 20,
-		                                       Component.translatable(Names.Gui.Save.POINT_BLUE), (button) -> {
+		Button btnPointB = Button.builder(Component.translatable(Names.Gui.Save.POINT_BLUE), (button) -> {
 			ClientProxy.movePointToPlayer(ClientProxy.pointB);
 			ClientProxy.updatePoints();
 			setPoint(this.numericBX, this.numericBY, this.numericBZ, ClientProxy.pointB);
-		}, this.font);
+		}).bounds(this.centerX + 30, this.centerY - 55, 100, 20).build();
 		this.addRenderableWidget(btnPointB);
 
 		this.numericBX = new NumericFieldWidget(this.centerX + 30, this.centerY - 30, (button) -> {
@@ -183,23 +180,24 @@ public class GuiSchematicSave extends ScreenBase {
 		});
 		this.addRenderableWidget(this.numericBZ);
 
-		this.btnEnable = new PlainTextButton(this.width - 210, this.height - 55, 50, 20,
-		                                     ClientProxy.isRenderingGuide && Reference.proxy.isSaveEnabled
-		                                     ? this.strOn
-		                                     : this.strOff, (button) -> {
-			ClientProxy.isRenderingGuide = !ClientProxy.isRenderingGuide && Reference.proxy.isSaveEnabled;
-			this.btnEnable.setMessage(ClientProxy.isRenderingGuide ? this.strOn : this.strOff);
-			this.btnSave.active = ClientProxy.isRenderingGuide || ClientProxy.schematic != null;
-			this.btnFormat.active = ClientProxy.isRenderingGuide || ClientProxy.schematic != null;
-		}, this.font);
+		this.btnEnable =
+				Button.builder(ClientProxy.isRenderingGuide && Reference.proxy.isSaveEnabled ? this.strOn :
+				               this.strOff,
+				               (button) -> {
+					               ClientProxy.isRenderingGuide =
+							               !ClientProxy.isRenderingGuide && Reference.proxy.isSaveEnabled;
+					               this.btnEnable.setMessage(ClientProxy.isRenderingGuide ? this.strOn : this.strOff);
+					               this.btnSave.active = ClientProxy.isRenderingGuide || ClientProxy.schematic != null;
+					               this.btnFormat.active =
+							               ClientProxy.isRenderingGuide || ClientProxy.schematic != null;
+				               }).bounds(this.width - 210, this.height - 55, 50, 20).build();
 		this.addRenderableWidget(this.btnEnable);
 
 		this.editBox = new EditBox(this.minecraft.font, this.width - 209, this.height - 29, 153, 18,
 		                           Component.empty());
 		this.addRenderableWidget(this.editBox);
 
-		this.btnSave = new PlainTextButton(this.width - 50, this.height - 30, 40, 20,
-		                                   Component.translatable(Names.Gui.Save.SAVE), (button) -> {
+		this.btnSave = Button.builder(Component.translatable(Names.Gui.Save.SAVE), (button) -> {
 			String path = this.editBox.getValue() + SchematicFormat.getExtension(this.format);
 			if (ClientProxy.isRenderingGuide) {
 				if (Reference.proxy.saveSchematic(this.minecraft.player, SchematicaClientConfig.schematicDirectory,
@@ -213,18 +211,18 @@ public class GuiSchematicSave extends ScreenBase {
 				                                     this.format, ClientProxy.schematic.getLevelSource(),
 				                                     this.minecraft.player);
 			}
-		}, this.font);
+		}).bounds(this.width - 50, this.height - 30, 40, 20).build();
 		this.btnSave.active =
 				ClientProxy.isRenderingGuide && Reference.proxy.isSaveEnabled || ClientProxy.schematic != null;
 		this.addRenderableWidget(this.btnSave);
 
-		this.btnFormat = new PlainTextButton(this.width - 155, this.height - 55, 145, 20,
-		                                     Component.translatable(Names.Gui.Save.FORMAT, I18n.get(
-				                                     SchematicFormat.getFormatName(this.format))), (button) -> {
-			this.format = nextFormat();
-			this.btnFormat.setMessage(Component.translatable(Names.Gui.Save.FORMAT,
-			                                                 I18n.get(SchematicFormat.getFormatName(this.format))));
-		}, this.font);
+		this.btnFormat = Button.builder(
+				Component.translatable(Names.Gui.Save.FORMAT, I18n.get(SchematicFormat.getFormatName(this.format))),
+				(button) -> {
+					this.format = nextFormat();
+					this.btnFormat.setMessage(Component.translatable(Names.Gui.Save.FORMAT, I18n.get(
+							SchematicFormat.getFormatName(this.format))));
+				}).bounds(this.width - 155, this.height - 55, 145, 20).build();
 		this.btnFormat.active =
 				ClientProxy.isRenderingGuide && Reference.proxy.isSaveEnabled || ClientProxy.schematic != null;
 		this.addRenderableWidget(this.btnFormat);

@@ -12,7 +12,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.PlainTextButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
@@ -71,13 +70,12 @@ public class GuiSchematicLoad extends ScreenBase {
 		}).size(150, 20).pos(this.width / 2 - 154, this.height - 36).build();
 		this.addRenderableWidget(btnOpenDir);
 
-		Button btnDone = new PlainTextButton(this.width / 2 + 4, this.height - 36, 150, 20,
-		                                     Component.translatable(Names.Gui.DONE), (event) -> {
+		Button btnDone = Button.builder(Component.translatable(Names.Gui.DONE), (event) -> {
 			if (Reference.proxy.isLoadEnabled) {
 				loadSchematic();
 			}
 			this.minecraft.setScreen(this.parentScreen);
-		}, this.font);
+		}).bounds(this.width / 2 + 4, this.height - 36, 150, 20).build();
 		this.addRenderableWidget(btnDone);
 
 		this.guiSchematicLoadSlot = new GuiSchematicLoadSlot(this);

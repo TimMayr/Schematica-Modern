@@ -11,7 +11,6 @@ import com.github.lunatrius.schematica.world.FakeLevel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.PlainTextButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.apache.commons.io.IOUtils;
@@ -20,7 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
 
@@ -56,24 +54,25 @@ public class GuiSchematicMaterials extends ScreenBase {
 
 	@Override
 	public void init() {
-		this.btnSort = new PlainTextButton(this.width / 2 - 154, this.height - 30, 100, 20,
-		                                   Component.translatable(Names.Gui.Control.SORT_PREFIX + this.sortType.label)
-		                                            .append(" " + this.sortType.glyph), (button) -> {
+		this.btnSort = Button.builder(Component.translatable(Names.Gui.Control.SORT_PREFIX + this.sortType.label)
+		                                       .append(" " + this.sortType.glyph), (button) -> {
 			this.sortType = this.sortType.next();
 			this.sortType.sort(this.getBlockList());
 			this.btnSort.setMessage(Component.translatable(Names.Gui.Control.SORT_PREFIX + this.sortType.label)
 			                                 .append(" " + this.sortType.glyph));
-		}, this.font);
+		}).bounds(this.width / 2 - 154, this.height - 30, 100, 20).build();
 		this.addRenderableWidget(this.btnSort);
 
-		Button btnDump = new PlainTextButton(this.width / 2 - 50, this.height - 30, 100, 20,
-		                                     Component.translatable(Names.Gui.Control.DUMP),
-		                                     (button) -> dumpMaterialList(this.getBlockList()), this.font);
+		Button btnDump = Button.builder(Component.translatable(Names.Gui.Control.DUMP),
+		                                (button) -> dumpMaterialList(this.getBlockList()))
+		                       .bounds(this.width / 2 - 50, this.height - 30, 100, 20)
+		                       .build();
 		this.addRenderableWidget(btnDump);
 
-		Button btnDone = new PlainTextButton(this.width / 2 + 54, this.height - 30, 100, 20,
-		                                     Component.translatable(Names.Gui.DONE),
-		                                     (button) -> this.minecraft.setScreen(this.parentScreen), this.font);
+		Button btnDone = Button.builder(Component.translatable(Names.Gui.DONE),
+		                                (button) -> this.minecraft.setScreen(this.parentScreen))
+		                       .bounds(this.width / 2 + 54, this.height - 30, 100, 20)
+		                       .build();
 		this.addRenderableWidget(btnDone);
 
 		this.guiSchematicMaterialsSlot = new GuiSchematicMaterialsSlot(this.minecraft, 800, 1000, 0, 50, this);
