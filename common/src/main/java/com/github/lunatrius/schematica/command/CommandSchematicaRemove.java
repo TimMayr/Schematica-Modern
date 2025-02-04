@@ -15,6 +15,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -62,7 +63,7 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 		return 0;
 	}
 
-	private static int showDeleteConfirmation(CommandContext<CommandSourceStack> commandContext)
+	private static int showDeleteConfirmation(@NotNull CommandContext<CommandSourceStack> commandContext)
 			throws CommandSyntaxException {
 		CommandSourceStack source = commandContext.getSource();
 		ServerPlayer player = source.getPlayerOrException();
@@ -94,7 +95,7 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 		}
 	}
 
-	private static File getSchematicFile(Player player, String name) {
+	private static @NotNull File getSchematicFile(Player player, String name) {
 		File schematicDirectory = Reference.proxy.getPlayerSchematicDirectory(player, true);
 		File file = new File(schematicDirectory, name);
 

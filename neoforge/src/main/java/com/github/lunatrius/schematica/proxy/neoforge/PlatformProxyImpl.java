@@ -1,4 +1,4 @@
-package com.github.lunatrius.schematica.neoforge.proxy.neoforge;
+package com.github.lunatrius.schematica.proxy.neoforge;
 
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.neoforge.api.event.PostSchematicCaptureEvent;

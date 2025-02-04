@@ -14,6 +14,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import org.apache.commons.io.FilenameUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -29,7 +30,7 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 		                             .executes(CommandSchematicaList::printList));
 	}
 
-	private static int printList(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+	private static int printList(@NotNull CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
 		CommandSourceStack source = commandContext.getSource();
 		ServerPlayer player = source.getPlayerOrException();
 		int page = 0;

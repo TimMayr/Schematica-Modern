@@ -145,6 +145,9 @@ public abstract class CommonProxy {
 
 			ISchematic schematic = new Schematic(SchematicUtil.getIconFromName(iconName), width, height, length,
 			                                     player.getScoreboardName());
+
+			PlatformProxy.createAndPostPreSchematicCaptureEvent(new AABB(minX, minY, minZ, maxX, maxY, maxZ));
+
 			SchematicContainer container =
 					new SchematicContainer(schematic, player, level, new File(directory, filename), format, minX, maxX,
 					                       minY, maxY, minZ, maxZ);

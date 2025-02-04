@@ -60,7 +60,7 @@ public class SchematicContainer {
 	}
 
 	public void next() {
-		if (!hasNext()) {
+		if (!hasNextChunk()) {
 			return;
 		}
 
@@ -77,11 +77,11 @@ public class SchematicContainer {
 		}
 	}
 
-	public boolean hasNext() {
+	public boolean hasNextChunk() {
 		return this.curChunkX <= this.maxChunkX && this.curChunkZ <= this.maxChunkZ;
 	}
 
-	public boolean isFirst() {
+	public boolean isFirstChunk() {
 		return this.curChunkX == this.minChunkX && this.curChunkZ == this.minChunkZ;
 	}
 }
