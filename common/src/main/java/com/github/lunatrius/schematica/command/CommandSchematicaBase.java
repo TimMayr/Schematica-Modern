@@ -17,6 +17,7 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -28,8 +29,8 @@ import java.util.concurrent.CompletableFuture;
 public abstract class CommandSchematicaBase {
 	private static LiteralCommandNode<CommandSourceStack> mainNode;
 
-	protected static MutableComponent withStyle(MutableComponent component, ChatFormatting formatting,
-	                                            @Nullable String command) {
+	protected static @NotNull MutableComponent withStyle(MutableComponent component, ChatFormatting formatting,
+	                                                     @Nullable String command) {
 		Style style = Style.EMPTY.applyFormat(formatting);
 
 		if (command != null) {
@@ -39,7 +40,7 @@ public abstract class CommandSchematicaBase {
 		return component.copy().withStyle(style);
 	}
 
-	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+	public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
 		mainNode = dispatcher.register(Commands.literal("schematica")
 		                                       .then(CommandSchematicaDownload.register())
 		                                       .then(CommandSchematicaList.register())
@@ -52,7 +53,8 @@ public abstract class CommandSchematicaBase {
 	}
 
 	public static CompletableFuture<Suggestions> getSchematicNamesSuggestions(
-			CommandContext<CommandSourceStack> context, SuggestionsBuilder builder, FileFilter FILE_FILTER_SCHEMATIC) {
+			@NotNull CommandContext<CommandSourceStack> context, SuggestionsBuilder builder,
+			FileFilter FILE_FILTER_SCHEMATIC) {
 		CommandSourceStack source = context.getSource();
 		Player player;
 		String name = "";

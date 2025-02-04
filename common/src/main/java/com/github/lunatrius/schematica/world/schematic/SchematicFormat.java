@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.DataOutputStream;
@@ -35,7 +36,7 @@ public abstract class SchematicFormat {
 		return readFromFile(new File(directory, filename), level);
 	}
 
-	public static ISchematic readFromFile(File file, Level level) {
+	public static @Nullable ISchematic readFromFile(File file, Level level) {
 		try {
 			CompoundTag tagCompound = SchematicUtil.readTagCompoundFromFile(file);
 			String format = tagCompound.getString(Names.NBT.FORMAT);
@@ -85,7 +86,8 @@ public abstract class SchematicFormat {
 	 * @param player
 	 * 		The player to notify
 	 */
-	public static void writeToFileAndNotify(File file, @Nullable String format, ISchematic schematic, Player player) {
+	public static void writeToFileAndNotify(File file, @Nullable String format, ISchematic schematic,
+	                                        @NotNull Player player) {
 		boolean success = writeToFile(file, format, schematic);
 		String message = success ? Names.Command.Save.Message.SAVE_SUCCESSFUL : Names.Command.Save.Message.SAVE_FAILED;
 		if (!player.isLocalPlayer()) {

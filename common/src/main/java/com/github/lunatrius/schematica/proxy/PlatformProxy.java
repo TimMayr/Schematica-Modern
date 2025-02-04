@@ -15,8 +15,9 @@ public class PlatformProxy {
 	}
 
 	@ExpectPlatform
-	public static void createAndPostPreSchematicSaveEvent(ISchematic schematic,
-	                                                      Map<String, Block> mappings) {throw new AssertionError();}
+	public static void createAndPostPreSchematicSaveEvent(ISchematic schematic, Map<String, Block> mappings) {
+		throw new AssertionError();
+	}
 
 	@ExpectPlatform
 	public static void createAndPostPreSchematicCaptureEvent(AABB aabb) {
@@ -24,5 +25,7 @@ public class PlatformProxy {
 	}
 
 	@ExpectPlatform
-	public static void createAndPostPostSchematicSaveEvent(File file) {throw new AssertionError();}
+	public static void createAndPostPostSchematicSaveEvent(File file) {
+		throw new AssertionError();
+	}
 }

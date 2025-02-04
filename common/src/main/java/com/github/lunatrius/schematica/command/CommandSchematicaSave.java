@@ -14,11 +14,11 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 
 public class CommandSchematicaSave extends CommandSchematicaBase {
-
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		return Commands.literal(Names.Command.Save.NAME)
 		               .then(Commands.argument("from", BlockPosArgument.blockPos())
@@ -38,7 +38,8 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 				                                                                       CommandSchematicaSave::execute)))));
 	}
 
-	private static int execute(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+	private static int execute(@NotNull CommandContext<CommandSourceStack> commandContext)
+			throws CommandSyntaxException {
 		CommandSourceStack source = commandContext.getSource();
 		Player player = source.getPlayerOrException();
 		BlockPos fromBlock = BlockPosArgument.getBlockPos(commandContext, "from");
@@ -87,7 +88,6 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 		try {
 			Reference.proxy.saveSchematic(player, schematicDirectory, filename, player.getCommandSenderWorld(), format,
 			                              from, to);
-			source.sendSuccess(() -> Component.translatable(Names.Command.Save.Message.SAVE_SUCCESSFUL, name), true);
 		} catch (Exception e) {
 			source.sendFailure(Component.translatable(Names.Command.Save.Message.SAVE_FAILED));
 			return -1;

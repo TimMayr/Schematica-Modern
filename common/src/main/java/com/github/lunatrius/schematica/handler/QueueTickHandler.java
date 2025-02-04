@@ -37,19 +37,19 @@ public class QueueTickHandler {
 			return;
 		}
 
-		if (container.hasNext()) {
-			if (container.isFirst()) {
+		if (container.hasNextChunk()) {
+			if (container.isFirstChunk()) {
 				Component component =
 						Component.translatable(Names.Command.Save.Message.SAVE_STARTED, container.chunkCount,
 						                       container.file.getName());
 				if (container.player != null && !container.player.isLocalPlayer()) {
 					((ServerPlayer) container.player).sendSystemMessage(component);
 				}
-
-				container.next();
 			}
 
-			if (container.hasNext()) {
+			container.next();
+
+			if (container.hasNextChunk()) {
 				this.queue.offer(container);
 			} else {
 				SchematicFormat.writeToFileAndNotify(container.file, container.format, container.schematic,
