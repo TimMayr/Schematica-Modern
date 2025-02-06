@@ -34,7 +34,7 @@ dependencies {
 	modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${forge_config_api_port_version}"
 
 	// Common Networking
-	modImplementation 'mysticdrew:common-networking-fabric:1.0.16-1.21'
+	modImplementation "mysticdrew:common-networking-fabric:$rootProject.common_networking_version"
 
 	// Forge Config Screens
 	// TODO: Check for update

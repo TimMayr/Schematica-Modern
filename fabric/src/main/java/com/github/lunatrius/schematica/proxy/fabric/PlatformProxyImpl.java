@@ -1,4 +1,4 @@
-package com.github.lunatrius.schematica.fabric.proxy.fabric;
+package com.github.lunatrius.schematica.proxy.fabric;
 
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.fabric.api.event.PostSchematicCaptureCallback;

@@ -34,7 +34,7 @@ public class GuiSchematicLoad extends ScreenBase {
 	private final Component strFolderInfo = Component.translatable(Names.Gui.Load.FOLDER_INFO);
 	private final Component strNoSchematic = Component.translatable(Names.Gui.Load.NO_SCHEMATIC);
 	protected File currentDirectory = SchematicaClientConfig.schematicDirectory;
-	private GuiSchematicLoadSlot guiSchematicLoadSlot;
+	private GuiSchematicLoadList guiSchematicLoadList;
 
 	public GuiSchematicLoad(Screen Screen) {
 		super(Screen);
@@ -43,13 +43,13 @@ public class GuiSchematicLoad extends ScreenBase {
 	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int button) {
 		super.mouseClicked(mouseX, mouseY, button);
-		return this.guiSchematicLoadSlot.mouseClicked(mouseX, mouseY, button);
+		return this.guiSchematicLoadList.mouseClicked(mouseX, mouseY, button);
 	}
 
 	@Override
 	public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
 		if (!schematicFiles.isEmpty()) {
-			this.guiSchematicLoadSlot.render(graphics, mouseX, mouseY, partialTicks);
+			this.guiSchematicLoadList.render(graphics, mouseX, mouseY, partialTicks);
 
 			graphics.drawCenteredString(this.minecraft.font, this.strTitle, this.width / 2, 4, 0x00FFFFFF);
 			graphics.drawCenteredString(this.minecraft.font, this.strFolderInfo, this.width / 2 - 78, this.height - 12,
@@ -61,6 +61,8 @@ public class GuiSchematicLoad extends ScreenBase {
 
 	@Override
 	public void init() {
+		reloadSchematics();
+
 		Button btnOpenDir = Button.builder(Component.translatable(Names.Gui.Load.OPEN_FOLDER), (event) -> {
 			try {
 				Util.getPlatform().openFile(SchematicaClientConfig.schematicDirectory);
@@ -78,9 +80,7 @@ public class GuiSchematicLoad extends ScreenBase {
 		}).bounds(this.width / 2 + 4, this.height - 36, 150, 20).build();
 		this.addRenderableWidget(btnDone);
 
-		this.guiSchematicLoadSlot = new GuiSchematicLoadSlot(this);
-
-		reloadSchematics();
+		this.guiSchematicLoadList = new GuiSchematicLoadList(this);
 	}
 
 	protected void reloadSchematics() {
@@ -132,7 +132,7 @@ public class GuiSchematicLoad extends ScreenBase {
 	}
 
 	private void loadSchematic() {
-		int selectedIndex = this.guiSchematicLoadSlot.getSelectedIndex();
+		int selectedIndex = this.guiSchematicLoadList.getSelectedIndex();
 
 		try {
 			if (selectedIndex >= 0 && selectedIndex < this.getSchematicFiles().size()) {

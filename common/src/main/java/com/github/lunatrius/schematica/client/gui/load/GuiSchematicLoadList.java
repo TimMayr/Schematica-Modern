@@ -10,23 +10,26 @@ import net.minecraft.network.chat.Component;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 
-public class GuiSchematicLoadSlot extends AbstractSelectionList<GuiSchematicLoadSlot.SchematicListEntry> {
+public class GuiSchematicLoadList extends AbstractSelectionList<GuiSchematicLoadList.SchematicLoadListSlot> {
 	private final Minecraft minecraft = Minecraft.getInstance();
 
-	private final GuiSchematicLoad guiSchematicLoad;
+	private final GuiSchematicLoad parent;
 
 	private int selectedIndex = -1;
 	private long lastClick = 0;
 
-	public GuiSchematicLoadSlot(@NotNull GuiSchematicLoad guiSchematicLoad) {
-		super(Minecraft.getInstance(), guiSchematicLoad.width, guiSchematicLoad.height, 16,
-		      guiSchematicLoad.height - 40, 24);
-		this.guiSchematicLoad = guiSchematicLoad;
+	public GuiSchematicLoadList(@NotNull GuiSchematicLoad parent) {
+		super(Minecraft.getInstance(), parent.width, parent.height, 16,
+		      parent.height - 40, 24);
+		this.parent = parent;
+		for (int i = 0; i < this.getItemCount(); i++) {
+			this.addEntry(new SchematicLoadListSlot(this));
+		}
 	}
 
 	@Override
 	protected int getItemCount() {
-		return this.getGuiSchematicLoad().getSchematicFiles().size();
+		return this.getParent().getSchematicFiles().size();
 	}
 
 	@Override
@@ -38,8 +41,8 @@ public class GuiSchematicLoadSlot extends AbstractSelectionList<GuiSchematicLoad
 		return selectedIndex;
 	}
 
-	public GuiSchematicLoad getGuiSchematicLoad() {
-		return guiSchematicLoad;
+	public GuiSchematicLoad getParent() {
+		return parent;
 	}
 
 	public Minecraft getMinecraft() {
@@ -57,9 +60,9 @@ public class GuiSchematicLoadSlot extends AbstractSelectionList<GuiSchematicLoad
 			return true;
 		}
 
-		GuiSchematicEntry schematic = this.getGuiSchematicLoad().getSchematicFiles().get(index);
+		GuiSchematicEntry schematic = this.getParent().getSchematicFiles().get(index);
 		if (schematic.isDirectory()) {
-			this.getGuiSchematicLoad().changeDirectory(schematic.getName());
+			this.getParent().changeDirectory(schematic.getName());
 			this.selectedIndex = -1;
 		} else {
 			this.selectedIndex = index;
@@ -71,24 +74,22 @@ public class GuiSchematicLoadSlot extends AbstractSelectionList<GuiSchematicLoad
 	@Override
 	protected void updateWidgetNarration(@NotNull NarrationElementOutput narrationElementOutput) {}
 
-	public static class SchematicListEntry
-			extends AbstractSelectionList.Entry<GuiSchematicLoadSlot.SchematicListEntry> {
-		private final GuiSchematicLoadSlot parent;
-		private final Component strMaterialAvailable = Component.translatable(Names.Gui.Control.MATERIAL_AVAILABLE);
-		private final Component strMaterialMissing = Component.translatable(Names.Gui.Control.MATERIAL_MISSING);
+	public static class SchematicLoadListSlot
+			extends AbstractSelectionList.Entry<SchematicLoadListSlot> {
+		private final GuiSchematicLoadList parent;
 
-		public SchematicListEntry(GuiSchematicLoadSlot parent) {
+		public SchematicLoadListSlot(GuiSchematicLoadList parent) {
 			this.parent = parent;
 		}
 
 		@Override
 		public void render(@NotNull GuiGraphics graphics, int index, int x, int y, int width, int height, int mouseX,
 		                   int mouseY, boolean isHovered, float partialTicks) {
-			if (index < 0 || index >= parent.getGuiSchematicLoad().getSchematicFiles().size()) {
+			if (index < 0 || index >= parent.getParent().getSchematicFiles().size()) {
 				return;
 			}
 
-			GuiSchematicEntry schematic = parent.getGuiSchematicLoad().getSchematicFiles().get(index);
+			GuiSchematicEntry schematic = parent.getParent().getSchematicFiles().get(index);
 			String schematicName = schematic.getName();
 
 			if (schematic.isDirectory()) {

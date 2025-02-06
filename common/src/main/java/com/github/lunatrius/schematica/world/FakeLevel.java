@@ -81,16 +81,6 @@ import java.util.*;
  * <li>primitive chunk and entity management</li>
  * <li>basic heightmap support (not fully working yet)</li>
  * <li><b>Few unsafe NPEs methods :)</b></li>
- * </ul>
- * <p>
- * <p>
- * Porting info:
- * <ol>
- * <li>uncomment last method section</li>
- * <li>fix compile errors</li>
- * <li>add override for remaining methods and sort/implement them accordingly</li>
- * <li>comment last method section</li>
- * </ol><p>
  * <p>
  * TODO: extend from client level
  */
