@@ -1,7 +1,7 @@
 package com.github.lunatrius.schematica.client.gui.control;
 
 import com.github.lunatrius.core.client.gui.NumericFieldWidget;
-import com.github.lunatrius.core.client.gui.ScreenBase;
+import com.github.lunatrius.schematica.client.gui.load.ScreenBaseTest;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.client.util.FlipHelper;
 import com.github.lunatrius.schematica.client.util.RotationHelper;
@@ -18,7 +18,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
-public class GuiSchematicControl extends ScreenBase {
+public class GuiSchematicControl extends ScreenBaseTest {
 	private final FakeLevel schematic;
 	private final SchematicPrinter printer;
 	private final Component strMoveSchematic = Component.translatable(Names.Gui.Control.MOVE_SCHEMATIC);
@@ -51,19 +51,19 @@ public class GuiSchematicControl extends ScreenBase {
 	}
 
 	@Override
-	public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+	public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		// drawDefaultBackground();
 
-		graphics.drawCenteredString(this.font, this.strMoveSchematic, this.centerX, this.centerY - 45, 0xFFFFFF);
-		graphics.drawCenteredString(this.font, this.strMaterials, 50, this.height - 85, 0xFFFFFF);
-		graphics.drawCenteredString(this.font, this.strPrinter, 50, this.height - 45, 0xFFFFFF);
-		graphics.drawCenteredString(this.font, this.strOperations, this.width - 50, this.height - 120, 0xFFFFFF);
+		guiGraphics.drawCenteredString(this.font, this.strMoveSchematic, this.centerX, this.centerY - 45, 0xFFFFFF);
+		guiGraphics.drawCenteredString(this.font, this.strMaterials, 50, this.height - 85, 0xFFFFFF);
+		guiGraphics.drawCenteredString(this.font, this.strPrinter, 50, this.height - 45, 0xFFFFFF);
+		guiGraphics.drawCenteredString(this.font, this.strOperations, this.width - 50, this.height - 120, 0xFFFFFF);
 
-		graphics.drawString(this.font, this.strX, this.centerX - 65, this.centerY - 24, 0xFFFFFF);
-		graphics.drawString(this.font, this.strY, this.centerX - 65, this.centerY + 1, 0xFFFFFF);
-		graphics.drawString(this.font, this.strZ, this.centerX - 65, this.centerY + 26, 0xFFFFFF);
+		guiGraphics.drawString(this.font, this.strX, this.centerX - 65, this.centerY - 24, 0xFFFFFF);
+		guiGraphics.drawString(this.font, this.strY, this.centerX - 65, this.centerY + 1, 0xFFFFFF);
+		guiGraphics.drawString(this.font, this.strZ, this.centerX - 65, this.centerY + 26, 0xFFFFFF);
 
-		super.render(graphics, mouseX, mouseY, partialTicks);
+		super.render(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 
 	@Override

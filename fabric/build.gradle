@@ -25,26 +25,22 @@ configurations {
 }
 
 dependencies {
-	modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+	modImplementation "net.fabricmc:fabric-loader:${project.fabric_loader_version}"
 
 	// LunatriusCore
-	modImplementation files("../libs/lunatriuscore-fabric-${minecraft_version}-${lunatriuscore_version}.jar")
+	modImplementation files("../libs/lunatriuscore-fabric-${project.minecraft_version}-${project.lunatriuscore_version}.jar")
 
 	// NeoForge Config API Port
 	modApi "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${forge_config_api_port_version}"
 
 	// Common Networking
-	modImplementation "mysticdrew:common-networking-fabric:$rootProject.common_networking_version"
-
-	// Forge Config Screens
-	// TODO: Check for update
-//	modLocalRuntime "fuzs.forgeconfigscreens:forgeconfigscreens-fabric:<modVersion>"
+	modImplementation "mysticdrew:common-networking-fabric:${project.common_networking_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
 	// Architectury API. This is optional, and you can comment it out if you don't need it.
-	modImplementation "dev.architectury:architectury-fabric:$rootProject.architectury_api_version"
+	modImplementation "dev.architectury:architectury-fabric:${project.architectury_api_version}"
 
 	common(project(path: ':common', configuration: 'namedElements')) { transitive false }
 	shadowBundle project(path: ':common', configuration: 'transformProductionFabric')

@@ -1,6 +1,6 @@
 package com.github.lunatrius.schematica.client.gui.control;
 
-import com.github.lunatrius.core.client.gui.ScreenBase;
+import com.github.lunatrius.schematica.client.gui.load.ScreenBaseTest;
 import com.github.lunatrius.schematica.client.util.BlockList;
 import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Formatter;
 import java.util.List;
 
-public class GuiSchematicMaterials extends ScreenBase {
+public class GuiSchematicMaterials extends ScreenBaseTest {
 	private final List<BlockList.WrappedItemStack> blockList;
 	private final Component strMaterialName = Component.translatable(Names.Gui.Control.MATERIAL_NAME);
 	private final Component strMaterialAmount = Component.translatable(Names.Gui.Control.MATERIAL_AMOUNT);
@@ -43,13 +43,13 @@ public class GuiSchematicMaterials extends ScreenBase {
 	}
 
 	@Override
-	public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-		this.guiSchematicMaterialsSlot.render(graphics, mouseX, mouseY, partialTicks);
+	public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		this.guiSchematicMaterialsSlot.render(guiGraphics, mouseX, mouseY, partialTicks);
 
-		graphics.drawString(this.minecraft.font, this.strMaterialName, this.width / 2 - 108, 4, 0x00FFFFFF);
-		graphics.drawString(this.minecraft.font, this.strMaterialAmount,
+		guiGraphics.drawString(this.minecraft.font, this.strMaterialName, this.width / 2 - 108, 4, 0x00FFFFFF);
+		guiGraphics.drawString(this.minecraft.font, this.strMaterialAmount,
 		                    this.width / 2 + 108 - this.minecraft.font.width(this.strMaterialAmount), 4, 0x00FFFFFF);
-		super.render(graphics, mouseX, mouseY, partialTicks);
+		super.render(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 
 	@Override

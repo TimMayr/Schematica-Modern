@@ -1,7 +1,7 @@
 package com.github.lunatrius.schematica.client.gui.save;
 
 import com.github.lunatrius.core.client.gui.NumericFieldWidget;
-import com.github.lunatrius.core.client.gui.ScreenBase;
+import com.github.lunatrius.schematica.client.gui.load.ScreenBaseTest;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Constants;
@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.util.Iterator;
 
-public class GuiSchematicSave extends ScreenBase {
+public class GuiSchematicSave extends ScreenBaseTest {
 	private final Component strSaveSelection = Component.translatable(Names.Gui.Save.SAVE_SELECTION);
 	private final Component strX = Component.translatable(Names.Gui.X);
 	private final Component strY = Component.translatable(Names.Gui.Y);
