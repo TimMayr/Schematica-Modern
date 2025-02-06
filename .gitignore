@@ -28,3 +28,17 @@ runs
 run-data
 
 repo
+
+.classpath
+.project
+.idea/
+classes/
+.metadata
+.vscode
+.settings
+.architectury-transformer
+**/build/
+**/.gradle/
+fabric/run/
+neoforge/run/
+lib/

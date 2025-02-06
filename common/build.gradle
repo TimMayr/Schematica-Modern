@@ -1,0 +1,59 @@
+architectury {
+	common rootProject.enabled_platforms.split(',')
+}
+
+loom {
+	accessWidenerPath = file("src/main/resources/META-INF/schematica.accesswidener")
+}
+
+dependencies {
+	// We depend on Fabric Loader here to use the Fabric @Environment annotations,
+	// which get remapped to the correct annotations on each platform.
+	// Do NOT use other classes from Fabric Loader.
+	modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
+
+	// NeoForge Config API Port
+	modApi "fuzs.forgeconfigapiport:forgeconfigapiport-common-neoforgeapi:$rootProject.forge_config_api_port_version"
+
+	// Common Networking
+	modImplementation 'mysticdrew:common-networking-common:1.0.16-1.21'
+
+	// Architectury API. This is optional, and you can comment it out if you don't need it.
+	modImplementation "dev.architectury:architectury:$rootProject.architectury_api_version"
+
+	modImplementation files("../libs/lunatriuscore-common-${minecraft_version}-${lunatriuscore_version}.jar")
+}
+
+var generateReference = tasks.register("generateReference", ProcessResources) {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	var replaceProperties = [mod_id: mod_id]
+	inputs.properties replaceProperties
+	expand replaceProperties
+	from "src/main/java/${maven_group.replaceAll('\\.', '/')}/reference/Reference.java"
+	into "build/generated/sources/reference"
+}
+
+sourceSets.main.java.srcDir generateReference
+
+sourcesJar {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	dependsOn classes
+	dependsOn generateReference
+	archiveClassifier.set('sources')
+	from sourceSets.main.allSource
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir 'build/generated/sources/reference'
+			exclude "${maven_group.replaceAll('\\.', '/')}/reference/Reference.java"
+		}
+	}
+}
+
+compileJava.dependsOn generateReference
+
+artifacts {
+	archives sourcesJar
+}
