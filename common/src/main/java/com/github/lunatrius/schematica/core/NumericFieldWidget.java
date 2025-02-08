@@ -1,4 +1,4 @@
-package com.github.lunatrius.schematica.client.gui.core;
+package com.github.lunatrius.schematica.core;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;

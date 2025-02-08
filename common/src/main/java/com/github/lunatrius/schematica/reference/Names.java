@@ -177,8 +177,12 @@ public class Names {
 			public static final String MATERIAL_AVAILABLE = "schematica.gui.materialavailable";
 			public static final String MATERIAL_MISSING = "schematica.gui.materialmissing";
 
-			public static final String SORT_PREFIX = "schematica.gui.material";
+			public static final String SORT_PREFIX = "schematica.gui.material.sort";
 			public static final String DUMP = "schematica.gui.materialdump";
+
+			public static class Narration {
+				public static final String MATERIAL_LIST_ENTRY = "schematica.gui.narration.material_list_entry";
+			}
 		}
 	}
 

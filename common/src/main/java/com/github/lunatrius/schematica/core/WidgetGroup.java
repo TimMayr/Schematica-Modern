@@ -1,4 +1,4 @@
-package com.github.lunatrius.schematica.client.gui.core;
+package com.github.lunatrius.schematica.core;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiGraphics;
@@ -180,6 +180,14 @@ public abstract class WidgetGroup extends Button {
 		return super.isActive() || toReturn;
 	}
 
+	public void setActive(boolean active) {
+		for (AbstractWidget child : this.children) {
+			child.active = active;
+		}
+
+		this.active = active;
+	}
+
 	@Override
 	public void setFocused(boolean focused) {
 		for (AbstractWidget child : this.children) {
@@ -260,6 +268,14 @@ public abstract class WidgetGroup extends Button {
 		}
 
 		return super.keyPressed(keyCode, scanCode, modifiers) || toReturn;
+	}
+
+	public void setVisible(boolean visible) {
+		for (AbstractWidget child : this.children) {
+			child.visible = visible;
+		}
+
+		this.visible = visible;
 	}
 
 	@Override

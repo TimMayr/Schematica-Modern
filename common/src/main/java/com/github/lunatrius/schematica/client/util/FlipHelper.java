@@ -16,13 +16,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public class FlipHelper {
 	public static final FlipHelper INSTANCE = new FlipHelper();
 
-	public boolean flip(FakeLevel world, Direction axis, boolean forced) {
+	public boolean flip(FakeLevel world, Direction.Axis axis, boolean forced) {
 		if (world == null) {
 			return false;
 		}
@@ -42,7 +43,7 @@ public class FlipHelper {
 		return false;
 	}
 
-	public Schematic flip(ISchematic schematic, Direction axis, boolean forced) throws FlipException {
+	public Schematic flip(@NotNull ISchematic schematic, Direction.Axis axis, boolean forced) throws FlipException {
 		Vec3i dimensionsFlipped = new Vec3i(schematic.getSizeX(), schematic.getHeight(), schematic.getSizeZ());
 		Schematic schematicFlipped =
 				new Schematic(schematic.getIcon(), dimensionsFlipped.getX(), dimensionsFlipped.getY(),
@@ -65,17 +66,8 @@ public class FlipHelper {
 		return schematicFlipped;
 	}
 
-	private BlockPos flipPos(BlockPos pos, Direction axis, Vec3i dimensions, MBlockPos flipped) {
-		return switch (axis) {
-			case DOWN, UP -> flipped.set(pos.getX(), dimensions.getY() - 1 - pos.getY(), pos.getZ());
-			case NORTH, SOUTH -> flipped.set(pos.getX(), pos.getY(), dimensions.getZ() - 1 - pos.getZ());
-			case WEST, EAST -> flipped.set(dimensions.getX() - 1 - pos.getX(), pos.getY(), pos.getZ());
-		};
-
-	}
-
 	@SuppressWarnings({"rawtypes"})
-	private BlockState flipBlock(BlockState blockState, Direction axis, boolean forced) throws FlipException {
+	private @NotNull BlockState flipBlock(BlockState blockState, Direction.Axis axis, boolean forced) throws FlipException {
 		Property<?> property = BlockStateHelper.getProperty(blockState, "facing");
 		if (property.getPossibleValues().stream().allMatch(Direction.class::isInstance)) {
 			EnumProperty<Direction> propertyFacing = BlockStateProperties.FACING;
@@ -100,8 +92,18 @@ public class FlipHelper {
 		return blockState;
 	}
 
-	private static Direction getFlippedFacing(Direction axis, Direction side) {
-		if (axis.getAxis() == side.getAxis()) {
+	private @NotNull BlockPos flipPos(BlockPos pos, @NotNull Direction.Axis axis, Vec3i dimensions,
+	                                  MBlockPos flipped) {
+		return switch (axis) {
+			case Z -> flipped.set(pos.getX(), dimensions.getY() - 1 - pos.getY(), pos.getZ());
+			case X -> flipped.set(pos.getX(), pos.getY(), dimensions.getZ() - 1 - pos.getZ());
+			case Y -> flipped.set(dimensions.getX() - 1 - pos.getX(), pos.getY(), pos.getZ());
+		};
+
+	}
+
+	private static @NotNull Direction getFlippedFacing(Direction.Axis axis, @NotNull Direction side) {
+		if (axis == side.getAxis()) {
 			return side.getOpposite();
 		}
 

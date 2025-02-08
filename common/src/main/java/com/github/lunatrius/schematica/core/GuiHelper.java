@@ -1,4 +1,4 @@
-package com.github.lunatrius.schematica.client.gui.core;
+package com.github.lunatrius.schematica.core;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.client.gui.GuiGraphics;
@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public class GuiHelperTest {
+public class GuiHelper {
 	private static final ResourceLocation SLOT_SPRITE = ResourceLocation.withDefaultNamespace("container/slot");
 
 	@SuppressWarnings("SuspiciousNameCombination")

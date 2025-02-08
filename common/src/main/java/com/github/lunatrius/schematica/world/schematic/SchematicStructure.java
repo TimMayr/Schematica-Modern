@@ -18,6 +18,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class SchematicStructure extends SchematicFormat {
 	@Override
+	public String getNbtName() {
+		return Names.NBT.FORMAT_STRUCTURE;
+	}
+
+	@Override
 	public ISchematic readFromNBT(CompoundTag tagCompound, Level level) {
 		ItemStack icon = SchematicUtil.getIconFromNBT(tagCompound);
 		StructureTemplate template = new StructureTemplate();

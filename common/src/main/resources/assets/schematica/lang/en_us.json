@@ -45,6 +45,8 @@
   "schematica.gui.materialavailable": "Available",
   "schematica.gui.materialmissing": "Missing",
   "schematica.gui.materialdump": "Save to file",
+  "schematica.gui.narration.material_list_entry": "%s: %s out of %s",
+  "schematica.gui.material.sort": "Sort by",
 
   "_comment": "gui - config - categories",
   "schematica.config.category.debug": "Debug",
@@ -103,8 +105,8 @@
   "schematica.config.schematicDirectory.tooltip": "Schematic directory.",
   "schematica.config.extraAirBlocks": "Extra Air Blocks",
   "schematica.config.extraAirBlocks.tooltip": "Extra blocks to consider as air for the schematic renderer.",
-  "schematica.config.extraAirBlocks": "Sort Type",
-  "schematica.config.extraAirBlocks.tooltip": "Default sort type for the material list.",
+  "schematica.config.sortType": "Sort Type",
+  "schematica.config.sortType.tooltip": "Default sort type for the material list.",
 
   "_comment": "gui - config - server",
   "schematica.config.printerEnabled": "Allow Printer",

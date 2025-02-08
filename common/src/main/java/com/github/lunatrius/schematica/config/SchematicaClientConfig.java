@@ -2,7 +2,6 @@ package com.github.lunatrius.schematica.config;
 
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
-import com.github.lunatrius.schematica.util.ItemStackSortType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
@@ -20,7 +19,6 @@ public class SchematicaClientConfig {
 	public static File schematicDirectory = null;
 	public final ModConfigSpec.ConfigValue<List<? extends String>> extraAirBlocks;
 	public final ModConfigSpec.ConfigValue<String> schematicDirectoryPath;
-	public final ModConfigSpec.EnumValue<ItemStackSortType> sortType;
 	public final ModConfigSpec.BooleanValue dumpBlockList;
 	public final ModConfigSpec.BooleanValue showDebugInfo;
 	public final ModConfigSpec.DoubleValue alpha;
@@ -88,10 +86,6 @@ public class SchematicaClientConfig {
 		schematicDirectoryPath = builder.comment(Names.Config.SCHEMATIC_DIRECTORY_DESC)
 		                                .translation("schematica.config.schematicDirectory.tooltip")
 		                                .define(Names.Config.SCHEMATIC_DIRECTORY, SCHEMATIC_DEFAULT_FOLDER);
-
-		sortType = builder.comment(Names.Config.SORT_TYPE_DESC)
-		                  .translation("schematica.config.extraAirBlocks.tooltip")
-		                  .defineEnum(Names.Config.SORT_TYPE, ItemStackSortType.SIZE_DESC);
 
 		builder.pop().push(Names.Config.Category.PRINTER);
 

@@ -25,6 +25,11 @@ import java.util.*;
 
 public class SchematicAlpha extends SchematicFormat {
 	@Override
+	public String getNbtName() {
+		return Names.NBT.FORMAT_ALPHA;
+	}
+
+	@Override
 	public ISchematic readFromNBT(CompoundTag tagCompound, Level level) {
 		ItemStack icon = SchematicUtil.getIconFromNBT(tagCompound);
 

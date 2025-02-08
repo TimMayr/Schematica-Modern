@@ -1,10 +1,10 @@
 package com.github.lunatrius.schematica.client.gui.control;
 
-import com.github.lunatrius.core.client.gui.NumericFieldWidget;
-import com.github.lunatrius.schematica.client.gui.core.BaseScreen;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.client.util.FlipHelper;
 import com.github.lunatrius.schematica.client.util.RotationHelper;
+import com.github.lunatrius.schematica.core.BaseScreen;
+import com.github.lunatrius.schematica.core.NumericFieldWidget;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;
@@ -12,6 +12,7 @@ import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -39,7 +40,6 @@ public class SchematicControlScreen extends BaseScreen {
 	private NumericFieldWidget numericX = null;
 	private NumericFieldWidget numericY = null;
 	private NumericFieldWidget numericZ = null;
-	private Button buttonLayerMode = null;
 	private NumericFieldWidget numericLayer = null;
 	private Button buttonHide = null;
 	private Button buttonPrint = null;
@@ -52,8 +52,6 @@ public class SchematicControlScreen extends BaseScreen {
 
 	@Override
 	public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		// drawDefaultBackground();
-
 		guiGraphics.drawCenteredString(this.font, this.strMoveSchematic, this.centerX, this.centerY - 45, 0xFFFFFF);
 		guiGraphics.drawCenteredString(this.font, this.strMaterials, 50, this.height - 85, 0xFFFFFF);
 		guiGraphics.drawCenteredString(this.font, this.strPrinter, 50, this.height - 45, 0xFFFFFF);
@@ -73,38 +71,48 @@ public class SchematicControlScreen extends BaseScreen {
 
 		this.clearWidgets();
 
-		this.numericX = new NumericFieldWidget(this.centerX - 50, this.centerY - 30, 100, 20, (button) -> {
+		this.numericX = new NumericFieldWidget(this.centerX - 50, this.centerY - 30, (button) -> {
 			this.schematic.getWorldPos().offset(this.numericX.getValue(), 0, 0);
 			//			RenderSchematic.getINSTANCE().refresh();
 		});
 		this.addRenderableWidget(numericX);
 
-		this.numericY = new NumericFieldWidget(this.centerX - 50, this.centerY - 5, 100, 20, (button) -> {
+
+		this.numericY = new NumericFieldWidget(this.centerX - 50, this.centerY - 5, (button) -> {
 			this.schematic.getWorldPos().offset(0, this.numericY.getValue(), 0);
 			//			RenderSchematic.getINSTANCE().refresh();
 		});
 		this.addRenderableWidget(this.numericY);
 
-		this.numericZ = new NumericFieldWidget(this.centerX - 50, this.centerY + 20, 100, 20, (button) -> {
+
+		this.numericZ = new NumericFieldWidget(this.centerX - 50, this.centerY + 20, (button) -> {
 			this.schematic.getWorldPos().offset(0, 0, this.numericZ.getValue());
 			//			RenderSchematic.getINSTANCE().refresh();
 		});
 		this.addRenderableWidget(this.numericZ);
 
-		Button btnUnload = Button.builder(strUnload, (button) -> {
+
+		Button buttonUnload = Button.builder(strUnload, (button) -> {
 			Reference.proxy.unloadSchematic();
 			this.minecraft.setScreen(this.parentScreen);
 		}).pos(this.width - 90, this.height - 200).size(80, 20).build();
-		this.addRenderableWidget(btnUnload);
+		this.addRenderableWidget(buttonUnload);
 
-		this.buttonLayerMode = Button.builder(Component.translatable(
-				(this.schematic != null ? this.schematic.layerMode : FakeLevel.LayerMode.ALL).name), (button) -> {
-			this.schematic.layerMode = FakeLevel.LayerMode.next(this.schematic.layerMode);
-			this.buttonLayerMode.setMessage(Component.translatable(this.schematic.layerMode.name));
-			this.numericLayer.setActive(this.schematic.layerMode != FakeLevel.LayerMode.ALL);
-			//			RenderSchematic.getINSTANCE().refresh();
-		}).bounds(this.width - 90, this.height - 150 - 25, 80, 20).build();
-		this.addRenderableWidget(this.buttonLayerMode);
+
+		//				RenderSchematic.getINSTANCE().refresh();
+		CycleButton<FakeLevel.LayerMode> buttonLayerMode =
+				new CycleButton.Builder<FakeLevel.LayerMode>(l -> Component.translatable(l.name))
+						.withInitialValue(FakeLevel.LayerMode.ALL)
+						.withValues(FakeLevel.LayerMode.values())
+						.displayOnlyValue()
+						.create(this.width - 90, this.height - 150 - 25, 80, 20, Component.empty(),
+								(button, layer) -> {
+									this.schematic.layerMode = layer;
+									this.numericLayer.setActive(this.schematic.layerMode != FakeLevel.LayerMode.ALL);
+									//				RenderSchematic.getINSTANCE().refresh();
+								});
+		this.addRenderableWidget(buttonLayerMode);
+
 
 		this.numericLayer = new NumericFieldWidget(this.width - 90, this.height - 150, 80, 20, (button) -> {
 			this.schematic.renderLayer = this.numericLayer.getValue();
@@ -112,72 +120,77 @@ public class SchematicControlScreen extends BaseScreen {
 		});
 		this.addRenderableWidget(this.numericLayer);
 
+
 		this.buttonHide =
 				Button.builder(this.schematic != null && this.schematic.isRendering() ? this.strHide : this.strShow,
 								(button) -> this.buttonHide.setMessage(
-						               this.schematic.toggleRendering() ? this.strHide : this.strShow))
-				      .bounds(this.width - 90, this.height - 105, 80, 20)
-				      .build();
+										this.schematic.toggleRendering() ? this.strHide : this.strShow))
+						.bounds(this.width - 90, this.height - 105, 80, 20)
+						.build();
 		this.addRenderableWidget(this.buttonHide);
 
-		Button btnMove = Button.builder(Component.translatable(Names.Gui.Control.MOVE_HERE), (button) -> {
+
+		Button buttonMoveHere = Button.builder(Component.translatable(Names.Gui.Control.MOVE_HERE), (button) -> {
 			ClientProxy.moveSchematicToPlayer(this.schematic);
 			//RenderSchematic.getINSTANCE().refresh();
 			setPoint(this.numericX, this.numericY, this.numericZ, this.schematic.getWorldPos());
 		}).bounds(this.width - 90, this.height - 80, 80, 20).build();
-		this.addRenderableWidget(btnMove);
+		this.addRenderableWidget(buttonMoveHere);
 
-		Button btnFlipDirection = Button.builder(
-				Component.translatable(Names.Gui.Control.TRANSFORM_PREFIX + ClientProxy.axisFlip.getName()),
-				(button) -> {
-					Direction[] values = Direction.values();
-					ClientProxy.axisFlip = values[((ClientProxy.axisFlip.ordinal() + 2) % values.length)];
-					button.setMessage(Component.translatable(
-							Names.Gui.Control.TRANSFORM_PREFIX + ClientProxy.axisFlip.getName()));
-				}).bounds(this.width - 180, this.height - 55, 80, 20).build();
-		this.addRenderableWidget(btnFlipDirection);
+
+		CycleButton<Direction.Axis> buttonFlipDirection =
+				new CycleButton.Builder<Direction.Axis>(axis -> Component.literal(axis.getName().toUpperCase()))
+						.withInitialValue(Direction.Axis.X)
+						.withValues(Direction.Axis.values())
+						.displayOnlyValue()
+						.create(this.width - 180, this.height - 55, 80, 20, Component.empty(),
+								(button, axis) -> ClientProxy.axisFlip = axis);
+		this.addRenderableWidget(buttonFlipDirection);
 
 		//				RenderSchematic.getINSTANCE().refresh();
-		Button btnFlip =
+		Button buttonFlip =
 				Button.builder(Component.literal("↔ " + " ").append(Component.translatable(Names.Gui.Control.FLIP)),
-				               (button) -> {
-					               if (FlipHelper.INSTANCE.flip(this.schematic, ClientProxy.axisFlip,
-					                                            hasShiftDown())) {
-						               //				RenderSchematic.getINSTANCE().refresh();
-						               SchematicPrinter.INSTANCE.refresh();
-					               }
-				               }).bounds(this.width - 90, this.height - 55, 80, 20).build();
-		this.addRenderableWidget(btnFlip);
+						(button) -> {
+							if (FlipHelper.INSTANCE.flip(this.schematic, ClientProxy.axisFlip,
+									hasShiftDown())) {
+								//				RenderSchematic.getINSTANCE().refresh();
+								SchematicPrinter.INSTANCE.refresh();
+							}
+						}).bounds(this.width - 90, this.height - 55, 80, 20).build();
+		this.addRenderableWidget(buttonFlip);
 
-		Button btnRotateDirection = Button.builder(
-				Component.translatable(Names.Gui.Control.TRANSFORM_PREFIX + ClientProxy.axisRotation.getName()),
-				(button) -> {
-					Direction[] values = Direction.values();
-					ClientProxy.axisRotation = values[((ClientProxy.axisRotation.ordinal() + 1) % values.length)];
-					button.setMessage(Component.translatable(
-							Names.Gui.Control.TRANSFORM_PREFIX + ClientProxy.axisRotation.getName()));
-				}).bounds(this.width - 180, this.height - 30, 80, 20).build();
-		this.addRenderableWidget(btnRotateDirection);
+
+		CycleButton<Direction> buttonRotateDirection =
+				new CycleButton.Builder<Direction>(direction -> Component.translatable(Names.Gui.Control.TRANSFORM_PREFIX + direction.getName()))
+						.withInitialValue(Direction.DOWN)
+						.withValues(Direction.values())
+						.displayOnlyValue()
+						.create(this.width - 180, this.height - 30, 80, 20, Component.empty(),
+								(button, direction) -> ClientProxy.axisRotation = direction);
+		this.addRenderableWidget(buttonRotateDirection);
+
 
 		//				RenderSchematic.getINSTANCE().refresh();
-		Button btnRotate =
+		Button buttonRotate =
 				Button.builder(Component.literal("↻ " + " ").append(Component.translatable(Names.Gui.Control.ROTATE)),
-				               (button) -> {
-					               if (RotationHelper.INSTANCE.rotate(this.schematic, ClientProxy.axisRotation,
-					                                                  hasShiftDown())) {
-						               setPoint(this.numericX, this.numericY, this.numericZ,
-						                        this.schematic.getWorldPos());
-						               //				RenderSchematic.getINSTANCE().refresh();
-						               SchematicPrinter.INSTANCE.refresh();
-					               }
-				               }).bounds(this.width - 90, this.height - 30, 80, 20).build();
-		this.addRenderableWidget(btnRotate);
+						(button) -> {
+							if (RotationHelper.INSTANCE.rotate(this.schematic, ClientProxy.axisRotation,
+									hasShiftDown())) {
+								setPoint(this.numericX, this.numericY, this.numericZ,
+										this.schematic.getWorldPos());
+								//				RenderSchematic.getINSTANCE().refresh();
+								SchematicPrinter.INSTANCE.refresh();
+							}
+						}).bounds(this.width - 90, this.height - 30, 80, 20).build();
+		this.addRenderableWidget(buttonRotate);
 
-		Button btnMaterials = Button.builder(this.strMaterials,
+
+		Button buttonMaterials = Button.builder(this.strMaterials,
 						(button) -> this.minecraft.setScreen(new SchematicMaterialsScreen(screen)))
-		                            .bounds(10, this.height - 70, 80, 20)
-		                            .build();
-		this.addRenderableWidget(btnMaterials);
+				.bounds(10, this.height - 70, 80, 20)
+				.build();
+		this.addRenderableWidget(buttonMaterials);
+
 
 		this.buttonPrint = Button.builder(this.printer.isPrinting() ? this.strOn : this.strOff, (button) -> {
 			boolean isPrinting = this.printer.togglePrinting();
@@ -185,21 +198,22 @@ public class SchematicControlScreen extends BaseScreen {
 		}).bounds(10, this.height - 30, 80, 20).build();
 		this.addRenderableWidget(this.buttonPrint);
 
+
 		this.numericX.setActive(this.schematic != null);
 		this.numericY.setActive(this.schematic != null);
 		this.numericZ.setActive(this.schematic != null);
 
-		btnUnload.active = this.schematic != null;
-		this.buttonLayerMode.active = this.schematic != null;
+		buttonUnload.active = this.schematic != null;
+		buttonLayerMode.active = this.schematic != null;
 		this.numericLayer.setActive(this.schematic != null && this.schematic.layerMode != FakeLevel.LayerMode.ALL);
 
 		this.buttonHide.active = this.schematic != null;
-		btnMove.active = this.schematic != null;
-		btnFlipDirection.active = this.schematic != null;
-		btnFlip.active = this.schematic != null;
-		btnRotateDirection.active = this.schematic != null;
-		btnRotate.active = this.schematic != null;
-		btnMaterials.active = this.schematic != null;
+		buttonMoveHere.active = this.schematic != null;
+		buttonFlipDirection.active = this.schematic != null;
+		buttonFlip.active = this.schematic != null;
+		buttonRotateDirection.active = this.schematic != null;
+		buttonRotate.active = this.schematic != null;
+		buttonMaterials.active = this.schematic != null;
 		this.buttonPrint.active = this.schematic != null && this.printer.isEnabled();
 
 		setMinMax(this.numericX);
@@ -217,15 +231,15 @@ public class SchematicControlScreen extends BaseScreen {
 		}
 	}
 
-	private void setMinMax(@NotNull NumericFieldWidget numericField) {
-		numericField.setMinimum(Constants.Level.MINIMUM_COORD);
-		numericField.setMaximum(Constants.Level.MAXIMUM_COORD);
-	}
-
 	private void setPoint(@NotNull NumericFieldWidget numX, @NotNull NumericFieldWidget numY,
 	                      @NotNull NumericFieldWidget numZ, @NotNull BlockPos point) {
 		numX.setValue(point.getX());
 		numY.setValue(point.getY());
 		numZ.setValue(point.getZ());
+	}
+
+	private void setMinMax(@NotNull NumericFieldWidget numericField) {
+		numericField.setMinimum(Constants.Level.MINIMUM_COORD);
+		numericField.setMaximum(Constants.Level.MAXIMUM_COORD);
 	}
 }

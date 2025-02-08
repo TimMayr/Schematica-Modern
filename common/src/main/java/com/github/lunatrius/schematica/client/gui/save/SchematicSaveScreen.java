@@ -1,8 +1,8 @@
 package com.github.lunatrius.schematica.client.gui.save;
 
-import com.github.lunatrius.schematica.client.gui.core.BaseScreen;
-import com.github.lunatrius.schematica.client.gui.core.NumericFieldWidget;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
+import com.github.lunatrius.schematica.core.BaseScreen;
+import com.github.lunatrius.schematica.core.NumericFieldWidget;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;
@@ -224,7 +224,7 @@ public class SchematicSaveScreen extends BaseScreen {
 	}
 
 	private @Nullable String getFormatName() {
-		return this.buttonFormat.getValue().getName();
+		return this.buttonFormat.getValue().getNbtName();
 	}
 
 	private void setMinMax(@NotNull NumericFieldWidget numericField) {

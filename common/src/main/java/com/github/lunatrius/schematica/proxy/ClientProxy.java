@@ -20,6 +20,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,17 +38,17 @@ public class ClientProxy extends CommonProxy {
 	public static Direction orientation = null;
 	public static int rotationRender = 0;
 	public static FakeLevel schematic = null;
-	public static Direction axisFlip = Direction.UP;
+	public static Direction.Axis axisFlip = Direction.Axis.Z;
 	public static Direction axisRotation = Direction.UP;
 	public static HitResult objectMouseOver = null;
 
-	public static void setPlayerData(Player player, float partialTicks) {
+	public static void setPlayerData(@NotNull Player player, float partialTicks) {
 		playerPosition.set(new Vector3d(player.getPosition(partialTicks)));
 		orientation = getOrientation(player);
 		rotationRender = (int) Math.floor(player.getYRot() / 90) & 3;
 	}
 
-	private static Direction getOrientation(Player player) {
+	private static @NotNull Direction getOrientation(@NotNull Player player) {
 		if (player.getXRot() > 45) {
 			return Direction.DOWN;
 		} else if (player.getXRot() < -45) {
@@ -68,7 +69,7 @@ public class ClientProxy extends CommonProxy {
 		return null;
 	}
 
-	public static void movePointToPlayer(MBlockPos point) {
+	public static void movePointToPlayer(@NotNull MBlockPos point) {
 		point.x = (int) Math.floor(playerPosition.x);
 		point.y = (int) Math.floor(playerPosition.y);
 		point.z = (int) Math.floor(playerPosition.z);

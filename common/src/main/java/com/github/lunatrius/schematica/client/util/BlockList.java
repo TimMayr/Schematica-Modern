@@ -11,12 +11,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.LiquidBlock;
-import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.SlabType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +31,9 @@ public class BlockList {
 		MBlockPos mcPos = new MBlockPos();
 
 		for (MBlockPos pos : BlockPosHelper.getAllInBox(BlockPos.ZERO,
-		                                                new BlockPos(world.getLevelSource().getMaxX() - 1,
-		                                                             world.getHeight() - 1,
-		                                                             world.getLevelSource().getMaxZ() - 1))) {
+				new BlockPos(world.getLevelSource().getMaxX() - 1,
+						world.getHeight() - 1,
+						world.getLevelSource().getMaxZ() - 1))) {
 			if (!world.shouldUseLayer(pos.getY())) {
 				continue;
 			}
@@ -78,11 +77,27 @@ public class BlockList {
 				}
 			}
 
+			if (block instanceof CandleBlock) {
+				count = blockState.getValue(BlockStateProperties.CANDLES);
+			}
+
+			if (block instanceof SeaPickleBlock) {
+				count = blockState.getValue(BlockStateProperties.PICKLES);
+			}
+
+			if (block instanceof TurtleEggBlock) {
+				count = blockState.getValue(BlockStateProperties.EGGS);
+			}
+
+			if (block instanceof PinkPetalsBlock) {
+				count = blockState.getValue(BlockStateProperties.FLOWER_AMOUNT);
+			}
+
 			WrappedItemStack wrappedItemStack = findOrCreateWrappedItemStackFor(blockList, stack);
 			if (isPlaced) {
 				wrappedItemStack.placed += count;
 			}
-			wrappedItemStack.total += count;
+			wrappedItemStack.itemStack.setCount(wrappedItemStack.itemStack.getCount() + count);
 		}
 
 		for (WrappedItemStack wrappedItemStack : blockList) {
@@ -90,15 +105,16 @@ public class BlockList {
 				wrappedItemStack.inventory = -1;
 			} else {
 				wrappedItemStack.inventory = EntityHelper.getItemCountInInventory(player.getInventory(),
-				                                                                  wrappedItemStack.itemStack.getItem(),
-				                                                                  wrappedItemStack.itemStack.getDamageValue());
+						wrappedItemStack.itemStack.getItem(),
+						wrappedItemStack.itemStack.getDamageValue());
 			}
 		}
 
 		return blockList;
 	}
 
-	private WrappedItemStack findOrCreateWrappedItemStackFor(List<WrappedItemStack> blockList, ItemStack itemStack) {
+	private @NotNull WrappedItemStack findOrCreateWrappedItemStackFor(@NotNull List<WrappedItemStack> blockList,
+	                                                                  ItemStack itemStack) {
 		for (WrappedItemStack wrappedItemStack : blockList) {
 			if (wrappedItemStack.itemStack.is(itemStack.getItem())) {
 				return wrappedItemStack;
@@ -113,17 +129,16 @@ public class BlockList {
 	public static class WrappedItemStack {
 		public final ItemStack itemStack;
 		public int placed;
-		public int total;
 		public int inventory;
 
 		public WrappedItemStack(ItemStack itemStack) {
-			this(itemStack, 0, 0);
+			this(itemStack, 0, itemStack.getCount());
 		}
 
-		public WrappedItemStack(ItemStack itemStack, int placed, int total) {
+		public WrappedItemStack(@NotNull ItemStack itemStack, int placed, int total) {
 			this.itemStack = itemStack;
 			this.placed = placed;
-			this.total = total;
+			itemStack.setCount(total);
 		}
 
 		public Component getItemStackDisplayName() {
@@ -131,29 +146,33 @@ public class BlockList {
 		}
 
 		public String getFormattedAmount() {
-			char color = this.placed < this.total ? 'c' : 'a';
+			char color = this.placed < this.itemStack.getCount() ? 'c' : 'a';
 			return String.format("§%c%s§r/%s", color, getFormattedStackAmount(this.itemStack, this.placed),
-			                     getFormattedStackAmount(itemStack, this.total));
+					getFormattedStackAmount(itemStack, this.itemStack.getCount()));
 		}
 
-		private static String getFormattedStackAmount(ItemStack itemStack, int amount) {
+		private static @NotNull String getFormattedStackAmount(@NotNull ItemStack itemStack, int amount) {
 			int stackSize = itemStack.getMaxStackSize();
 			if (amount < stackSize || stackSize == 1) {
 				return String.format("%d", amount);
 			} else {
 				int amountStack = amount / stackSize;
 				int amountRemainder = amount % stackSize;
-				return String.format("%d(%d:%d)", amount, amountStack, amountRemainder);
+				return String.format("%d (%d:%d)", amount, amountStack, amountRemainder);
 			}
 		}
 
 		public String getFormattedAmountMissing(String strAvailable, String strMissing) {
-			int need = this.total - (this.inventory + this.placed);
+			int need = this.itemStack.getCount() - (this.inventory + this.placed);
 			if (this.inventory != -1 && need > 0) {
 				return String.format("§c%s: %s", strMissing, getFormattedStackAmount(this.itemStack, need));
 			} else {
 				return String.format("§a%s", strAvailable);
 			}
+		}
+
+		public ItemStack getItemStack() {
+			return itemStack;
 		}
 	}
 }

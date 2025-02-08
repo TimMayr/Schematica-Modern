@@ -1,7 +1,7 @@
 package com.github.lunatrius.schematica.client.gui.load;
 
-import com.github.lunatrius.schematica.client.gui.core.BaseScreen;
 import com.github.lunatrius.schematica.config.SchematicaClientConfig;
+import com.github.lunatrius.schematica.core.BaseScreen;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
@@ -29,12 +29,10 @@ import java.util.List;
 public class SchematicLoadScreen extends BaseScreen {
 	private static final FileFilter FILE_FILTER_FOLDER = new FileFilterSchematic(true);
 	private static final FileFilter FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
-	private final List<SchematicLoadListEntry> schematicListSlots = new ArrayList<>();
+	private final List<SchematicLoadList.Entry> schematicListSlots = new ArrayList<>();
 	private final Component strTitle = Component.translatable(Names.Gui.Load.TITLE);
 	private final Component strFolderInfo = Component.translatable(Names.Gui.Load.FOLDER_INFO);
 	private final Component strNoSchematic = Component.translatable(Names.Gui.Load.NO_SCHEMATIC);
-	private Button buttonOpenDir;
-	private Button buttonDone;
 	protected File currentDirectory = SchematicaClientConfig.schematicDirectory;
 	private SchematicLoadList schematicLoadList;
 
@@ -52,26 +50,21 @@ public class SchematicLoadScreen extends BaseScreen {
 	public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		if (!schematicListSlots.isEmpty()) {
 			super.render(guiGraphics, mouseX, mouseY, partialTicks);
-
-			schematicLoadList.render(guiGraphics, mouseX, mouseY, partialTicks);
-
 			guiGraphics.drawCenteredString(this.minecraft.font, this.strTitle, this.width / 2, 4, 0x00FFFFFF);
 			guiGraphics.drawCenteredString(this.minecraft.font,
-			                               this.strFolderInfo,
-			                               this.width / 2 - 79,
-			                               this.height - 12,
+					this.strFolderInfo,
+					this.width / 2 - 79,
+					this.height - 12,
 					0x00A0A0A0);
-
-			buttonOpenDir.render(guiGraphics, mouseX, mouseY, partialTicks);
-			buttonDone.render(guiGraphics, mouseX, mouseY, partialTicks);
 		}
 	}
 
 	@Override
 	public void init() {
 		this.schematicLoadList = new SchematicLoadList(this);
+		this.addRenderableWidget(schematicLoadList);
 
-		buttonOpenDir = Button.builder(Component.translatable(Names.Gui.Load.OPEN_FOLDER), (event) -> {
+		Button buttonOpenDir = Button.builder(Component.translatable(Names.Gui.Load.OPEN_FOLDER), (event) -> {
 			try {
 				Util.getPlatform().openFile(SchematicaClientConfig.schematicDirectory);
 			} catch (Throwable e) {
@@ -80,7 +73,8 @@ public class SchematicLoadScreen extends BaseScreen {
 		}).size(150, 20).pos(this.width / 2 - 154, this.height - 36).build();
 		this.addRenderableWidget(buttonOpenDir);
 
-		buttonDone = Button.builder(Component.translatable(Names.Gui.DONE), (event) -> {
+
+		Button buttonDone = Button.builder(Component.translatable(Names.Gui.DONE), (event) -> {
 			if (Reference.proxy.isLoadEnabled) {
 				loadSchematic();
 			}
@@ -92,7 +86,7 @@ public class SchematicLoadScreen extends BaseScreen {
 	}
 
 	private void loadSchematic() {
-		SchematicLoadListEntry entry = this.schematicLoadList.getSelected();
+		SchematicLoadList.Entry entry = this.schematicLoadList.getSelected();
 
 		try {
 			if (Reference.proxy.loadSchematic(Minecraft.getInstance().player, this.currentDirectory,
@@ -115,10 +109,10 @@ public class SchematicLoadScreen extends BaseScreen {
 
 		try {
 			if (!this.currentDirectory.getCanonicalPath()
-			                          .equals(SchematicaClientConfig.schematicDirectory.getCanonicalPath())) {
-				this.getSchematicListSlots().add(new SchematicLoadListEntry("..",
-				                                                               Items.LAVA_BUCKET,
-				                                                               true,
+					.equals(SchematicaClientConfig.schematicDirectory.getCanonicalPath())) {
+				this.getSchematicListSlots().add(new SchematicLoadList.Entry("..",
+						Items.LAVA_BUCKET,
+						true,
 						this.schematicLoadList));
 			}
 		} catch (IOException e) {
@@ -140,35 +134,34 @@ public class SchematicLoadScreen extends BaseScreen {
 				File[] files = file.listFiles();
 				item = (files == null || files.length == 0) ? Items.BUCKET : Items.WATER_BUCKET;
 
-				this.getSchematicListSlots().add(new SchematicLoadListEntry(name,
-				                                                               item,
-				                                                               file.isDirectory(),
+				this.getSchematicListSlots().add(new SchematicLoadList.Entry(name,
+						item,
+						file.isDirectory(),
 						this.schematicLoadList));
 			}
 		}
 
 		File[] filesSchematics = this.currentDirectory.listFiles(FILE_FILTER_SCHEMATIC);
 		if (filesSchematics == null || filesSchematics.length == 0) {
-			this.getSchematicListSlots().add(new SchematicLoadListEntry(this.strNoSchematic.getString(),
-			                                                               Blocks.DIRT,
-			                                                               false,
+			this.getSchematicListSlots().add(new SchematicLoadList.Entry(this.strNoSchematic.getString(),
+					Blocks.DIRT,
+					false,
 					this.schematicLoadList));
 		} else {
 			Arrays.sort(filesSchematics, (File a, File b) -> a.getName().compareToIgnoreCase(b.getName()));
 			for (File file : filesSchematics) {
 				name = file.getName();
 
-				this.getSchematicListSlots().add(new SchematicLoadListEntry(name,
-				                                                               SchematicUtil.getIconFromFile(file),
-				                                                               file.isDirectory(),
+				this.getSchematicListSlots().add(new SchematicLoadList.Entry(name, SchematicUtil.getIconFromFile(file),
+						file.isDirectory(),
 						this.schematicLoadList));
 			}
 		}
 
-		schematicLoadList.syncEntries(this);
+		schematicLoadList.syncEntries();
 	}
 
-	public List<SchematicLoadListEntry> getSchematicListSlots() {
+	public List<SchematicLoadList.Entry> getSchematicListSlots() {
 		return schematicListSlots;
 	}
 

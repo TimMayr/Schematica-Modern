@@ -6,7 +6,6 @@ import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -48,6 +47,21 @@ public abstract class SchematicFormat {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Writes the given schematic, notifying the player when finished.
+	 *
+	 * @param file      The file to write to
+	 * @param format    The format to use, or null for {@linkplain #FORMAT_DEFAULT the default}
+	 * @param schematic The schematic to write
+	 * @param player    The player to notify
+	 */
+	public static void writeToFileAndNotify(File file, @Nullable String format, ISchematic schematic,
+	                                        @NotNull Player player) {
+		boolean success = writeToFile(file, format, schematic);
+		String message = success ? Names.Command.Save.Message.SAVE_SUCCESSFUL : Names.Command.Save.Message.SAVE_FAILED;
+		player.displayClientMessage(Component.translatable(message, file.getName()), false);
 	}
 
 	public abstract ISchematic readFromNBT(CompoundTag tagCompound, Level level);
@@ -106,20 +120,15 @@ public abstract class SchematicFormat {
 	public abstract void writeToNBT(CompoundTag tagCompound, ISchematic schematic);
 
 	/**
-	 * Writes the given schematic, notifying the player when finished.
-	 *
-	 * @param file      The file to write to
-	 * @param format    The format to use, or null for {@linkplain #FORMAT_DEFAULT the default}
-	 * @param schematic The schematic to write
-	 * @param player    The player to notify
+	 * Gets a SchematicFormat from its format ID
 	 */
-	public static void writeToFileAndNotify(File file, @Nullable String format, ISchematic schematic,
-	                                        @NotNull Player player) {
-		boolean success = writeToFile(file, format, schematic);
-		String message = success ? Names.Command.Save.Message.SAVE_SUCCESSFUL : Names.Command.Save.Message.SAVE_FAILED;
-		if (!player.isLocalPlayer()) {
-			((ServerPlayer) player).sendSystemMessage(Component.translatable(message, file.getName()));
+	public static SchematicFormat getFormatFromName(String format) {
+		if (!FORMATS.containsKey(format)) {
+			Reference.logger.warn("No format with id {}; returning invalid for name", format,
+					new UnsupportedFormatException(format).fillInStackTrace());
+			throw new UnsupportedFormatException(format);
 		}
+		return FORMATS.get(format);
 	}
 
 	/**
@@ -140,19 +149,12 @@ public abstract class SchematicFormat {
 		return FORMATS.get(format).getName();
 	}
 
-	/**
-	 * Gets a SchematicFormat from its name
-	 */
 	public abstract String getName();
 
-	public static SchematicFormat getFormatFromName(String format) {
-		if (!FORMATS.containsKey(format)) {
-			Reference.logger.warn("No format with id {}; returning invalid for name", format,
-					new UnsupportedFormatException(format).fillInStackTrace());
-			throw new UnsupportedFormatException(format);
-		}
-		return FORMATS.get(format);
-	}
+	/**
+	 * gets Format's proper name
+	 */
+	public abstract String getNbtName();
 
 	/**
 	 * Gets the extension used by the given format.

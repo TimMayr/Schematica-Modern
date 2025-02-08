@@ -1,4 +1,4 @@
-package com.github.lunatrius.schematica.client.gui.core;
+package com.github.lunatrius.schematica.core;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
