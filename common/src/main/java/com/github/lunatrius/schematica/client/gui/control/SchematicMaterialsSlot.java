@@ -15,14 +15,14 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 
-public class GuiSchematicMaterialsSlot extends AbstractSelectionList<GuiSchematicMaterialsSlot.ItemEntry> {
+public class SchematicMaterialsSlot extends AbstractSelectionList<SchematicMaterialsSlot.ItemEntry> {
 	private final Minecraft minecraft = Minecraft.getInstance();
-	private final GuiSchematicMaterials guiSchematicMaterials;
+	private final SchematicMaterialsScreen schematicMaterialsScreen;
 
-	public GuiSchematicMaterialsSlot(Minecraft minecraft, int width, int height, int y, int itemHeight,
-	                                 GuiSchematicMaterials guiSchematicMaterials) {
+	public SchematicMaterialsSlot(Minecraft minecraft, int width, int height, int y, int itemHeight,
+	                              SchematicMaterialsScreen schematicMaterialsScreen) {
 		super(minecraft, width, height, y, itemHeight);
-		this.guiSchematicMaterials = guiSchematicMaterials;
+		this.schematicMaterialsScreen = schematicMaterialsScreen;
 	}
 
 	@Override
@@ -32,17 +32,17 @@ public class GuiSchematicMaterialsSlot extends AbstractSelectionList<GuiSchemati
 		return minecraft;
 	}
 
-	public GuiSchematicMaterials getGuiSchematicMaterials() {
-		return guiSchematicMaterials;
+	public SchematicMaterialsScreen getGuiSchematicMaterials() {
+		return schematicMaterialsScreen;
 	}
 
 	public static class ItemEntry extends AbstractSelectionList.Entry<ItemEntry> {
-		private final GuiSchematicMaterialsSlot parent;
+		private final SchematicMaterialsSlot parent;
 
 		private final Component strMaterialAvailable = Component.translatable(Names.Gui.Control.MATERIAL_AVAILABLE);
 		private final Component strMaterialMissing = Component.translatable(Names.Gui.Control.MATERIAL_MISSING);
 
-		public ItemEntry(GuiSchematicMaterialsSlot parent) {
+		public ItemEntry(SchematicMaterialsSlot parent) {
 			this.parent = parent;
 		}
 

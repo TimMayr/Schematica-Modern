@@ -1,6 +1,6 @@
 package com.github.lunatrius.schematica.client.gui.control;
 
-import com.github.lunatrius.schematica.client.gui.load.ScreenBaseTest;
+import com.github.lunatrius.schematica.client.gui.core.BaseScreen;
 import com.github.lunatrius.schematica.client.util.BlockList;
 import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
@@ -22,16 +22,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.Formatter;
 import java.util.List;
 
-public class GuiSchematicMaterials extends ScreenBaseTest {
+public class SchematicMaterialsScreen extends BaseScreen {
 	private final List<BlockList.WrappedItemStack> blockList;
 	private final Component strMaterialName = Component.translatable(Names.Gui.Control.MATERIAL_NAME);
 	private final Component strMaterialAmount = Component.translatable(Names.Gui.Control.MATERIAL_AMOUNT);
-	private GuiSchematicMaterialsSlot guiSchematicMaterialsSlot;
+	private SchematicMaterialsSlot schematicMaterialsSlot;
 	private ItemStackSortType sortType = SchematicaConfig.CLIENT.sortType.get();
-	private Button btnSort = null;
+	private Button buttonSort = null;
 
-	public GuiSchematicMaterials(Screen guiScreen) {
-		super(guiScreen);
+	public SchematicMaterialsScreen(Screen parentScreen) {
+		super(parentScreen);
 		Minecraft minecraft = Minecraft.getInstance();
 		FakeLevel level = ClientProxy.schematic;
 		this.blockList = new BlockList().getList(minecraft.player, level, minecraft.level);
@@ -44,7 +44,7 @@ public class GuiSchematicMaterials extends ScreenBaseTest {
 
 	@Override
 	public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		this.guiSchematicMaterialsSlot.render(guiGraphics, mouseX, mouseY, partialTicks);
+		this.schematicMaterialsSlot.render(guiGraphics, mouseX, mouseY, partialTicks);
 
 		guiGraphics.drawString(this.minecraft.font, this.strMaterialName, this.width / 2 - 108, 4, 0x00FFFFFF);
 		guiGraphics.drawString(this.minecraft.font, this.strMaterialAmount,
@@ -54,14 +54,14 @@ public class GuiSchematicMaterials extends ScreenBaseTest {
 
 	@Override
 	public void init() {
-		this.btnSort = Button.builder(Component.translatable(Names.Gui.Control.SORT_PREFIX + this.sortType.label)
+		this.buttonSort = Button.builder(Component.translatable(Names.Gui.Control.SORT_PREFIX + this.sortType.label)
 		                                       .append(" " + this.sortType.glyph), (button) -> {
 			this.sortType = this.sortType.next();
 			this.sortType.sort(this.getBlockList());
-			this.btnSort.setMessage(Component.translatable(Names.Gui.Control.SORT_PREFIX + this.sortType.label)
+			this.buttonSort.setMessage(Component.translatable(Names.Gui.Control.SORT_PREFIX + this.sortType.label)
 			                                 .append(" " + this.sortType.glyph));
 		}).bounds(this.width / 2 - 154, this.height - 30, 100, 20).build();
-		this.addRenderableWidget(this.btnSort);
+		this.addRenderableWidget(this.buttonSort);
 
 		Button btnDump = Button.builder(Component.translatable(Names.Gui.Control.DUMP),
 		                                (button) -> dumpMaterialList(this.getBlockList()))
@@ -75,7 +75,7 @@ public class GuiSchematicMaterials extends ScreenBaseTest {
 		                       .build();
 		this.addRenderableWidget(btnDone);
 
-		this.guiSchematicMaterialsSlot = new GuiSchematicMaterialsSlot(this.minecraft, 800, 1000, 0, 50, this);
+		this.schematicMaterialsSlot = new SchematicMaterialsSlot(this.minecraft, 800, 1000, 0, 50, this);
 	}
 
 	private void dumpMaterialList(@NotNull List<BlockList.WrappedItemStack> blockList) {
@@ -122,7 +122,7 @@ public class GuiSchematicMaterials extends ScreenBaseTest {
 
 	@Override
 	public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-		this.guiSchematicMaterialsSlot.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+		this.schematicMaterialsSlot.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
 		return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
 	}
 }

@@ -25,10 +25,6 @@ public abstract class SchematicFormat {
 	public static final String FORMAT_DEFAULT;
 
 	static {
-		FORMATS.put(Names.NBT.FORMAT_ALPHA, new SchematicAlpha());
-		//noinspection StaticInitializerReferencesSubClass
-		FORMATS.put(Names.NBT.FORMAT_STRUCTURE, new SchematicStructure());
-
 		FORMAT_DEFAULT = Names.NBT.FORMAT_ALPHA;
 	}
 
@@ -59,15 +55,10 @@ public abstract class SchematicFormat {
 	/**
 	 * Writes the given schematic.
 	 *
-	 * @param directory
-	 * 		The directory to write in
-	 * @param filename
-	 * 		The filename (including the extension) to write to
-	 * @param format
-	 * 		The format to use, or null for {@linkplain #FORMAT_DEFAULT the default}
-	 * @param schematic
-	 * 		The schematic to write
-	 *
+	 * @param directory The directory to write in
+	 * @param filename  The filename (including the extension) to write to
+	 * @param format    The format to use, or null for {@linkplain #FORMAT_DEFAULT the default}
+	 * @param schematic The schematic to write
 	 * @return True if successful
 	 */
 	public static boolean writeToFile(File directory, String filename, @Nullable String format, ISchematic schematic) {
@@ -75,36 +66,11 @@ public abstract class SchematicFormat {
 	}
 
 	/**
-	 * Writes the given schematic, notifying the player when finished.
-	 *
-	 * @param file
-	 * 		The file to write to
-	 * @param format
-	 * 		The format to use, or null for {@linkplain #FORMAT_DEFAULT the default}
-	 * @param schematic
-	 * 		The schematic to write
-	 * @param player
-	 * 		The player to notify
-	 */
-	public static void writeToFileAndNotify(File file, @Nullable String format, ISchematic schematic,
-	                                        @NotNull Player player) {
-		boolean success = writeToFile(file, format, schematic);
-		String message = success ? Names.Command.Save.Message.SAVE_SUCCESSFUL : Names.Command.Save.Message.SAVE_FAILED;
-		if (!player.isLocalPlayer()) {
-			((ServerPlayer) player).sendSystemMessage(Component.translatable(message, file.getName()));
-		}
-	}
-
-	/**
 	 * Writes the given schematic.
 	 *
-	 * @param file
-	 * 		The file to write to
-	 * @param format
-	 * 		The format to use, or null for {@linkplain #FORMAT_DEFAULT the default}
-	 * @param schematic
-	 * 		The schematic to write
-	 *
+	 * @param file      The file to write to
+	 * @param format    The format to use, or null for {@linkplain #FORMAT_DEFAULT the default}
+	 * @param schematic The schematic to write
 	 * @return True if successful
 	 */
 	public static boolean writeToFile(File file, @Nullable String format, ISchematic schematic) {
@@ -140,35 +106,60 @@ public abstract class SchematicFormat {
 	public abstract void writeToNBT(CompoundTag tagCompound, ISchematic schematic);
 
 	/**
+	 * Writes the given schematic, notifying the player when finished.
+	 *
+	 * @param file      The file to write to
+	 * @param format    The format to use, or null for {@linkplain #FORMAT_DEFAULT the default}
+	 * @param schematic The schematic to write
+	 * @param player    The player to notify
+	 */
+	public static void writeToFileAndNotify(File file, @Nullable String format, ISchematic schematic,
+	                                        @NotNull Player player) {
+		boolean success = writeToFile(file, format, schematic);
+		String message = success ? Names.Command.Save.Message.SAVE_SUCCESSFUL : Names.Command.Save.Message.SAVE_FAILED;
+		if (!player.isLocalPlayer()) {
+			((ServerPlayer) player).sendSystemMessage(Component.translatable(message, file.getName()));
+		}
+	}
+
+	/**
 	 * Gets a schematic format name translation key for the given format ID.
 	 * <p>
 	 * If an invalid format is chosen, logs a warning and returns a key stating
 	 * that it's invalid.
 	 *
-	 * @param format
-	 * 		The format.
+	 * @param format The format.
 	 */
 	public static String getFormatName(String format) {
 		if (!FORMATS.containsKey(format)) {
 			Reference.logger.warn("No format with id {}; returning invalid for name", format,
-			                      new UnsupportedFormatException(format).fillInStackTrace());
+					new UnsupportedFormatException(format).fillInStackTrace());
 			return Names.Formats.INVALID;
 		}
+
 		return FORMATS.get(format).getName();
 	}
 
 	/**
-	 * Gets the translation key used for this format.
+	 * Gets a SchematicFormat from its name
 	 */
 	public abstract String getName();
+
+	public static SchematicFormat getFormatFromName(String format) {
+		if (!FORMATS.containsKey(format)) {
+			Reference.logger.warn("No format with id {}; returning invalid for name", format,
+					new UnsupportedFormatException(format).fillInStackTrace());
+			throw new UnsupportedFormatException(format);
+		}
+		return FORMATS.get(format);
+	}
 
 	/**
 	 * Gets the extension used by the given format.
 	 * <p>
 	 * If the format is invalid, returns the default format's extension.
 	 *
-	 * @param format
-	 * 		The format (or null to use {@link #FORMAT_DEFAULT the default}).
+	 * @param format The format (or null to use {@link #FORMAT_DEFAULT the default}).
 	 */
 	public static String getExtension(@Nullable String format) {
 		if (format == null) {
@@ -176,7 +167,7 @@ public abstract class SchematicFormat {
 		}
 		if (!FORMATS.containsKey(format)) {
 			Reference.logger.warn("No format with id {}; returning default extension", format,
-			                      new UnsupportedFormatException(format).fillInStackTrace());
+					new UnsupportedFormatException(format).fillInStackTrace());
 			format = FORMAT_DEFAULT;
 		}
 		return FORMATS.get(format).getExtension();

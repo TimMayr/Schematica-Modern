@@ -5,7 +5,11 @@ import com.github.lunatrius.schematica.config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.network.PacketHandler;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.proxy.ServerProxy;
+import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.world.schematic.SchematicAlpha;
+import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
+import com.github.lunatrius.schematica.world.schematic.SchematicStructure;
 import dev.architectury.event.events.client.ClientCommandRegistrationEvent;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
@@ -38,6 +42,9 @@ public class Schematica {
 
 		SchematicaClientConfig.schematicDirectory =
 				new File(Reference.proxy.getDataDirectory(), SCHEMATIC_DEFAULT_FOLDER);
+
+		SchematicFormat.FORMATS.put(Names.NBT.FORMAT_ALPHA, new SchematicAlpha());
+		SchematicFormat.FORMATS.put(Names.NBT.FORMAT_STRUCTURE, new SchematicStructure());
 	}
 
 	private static void clientInit() {
