@@ -1,4 +1,4 @@
-package com.github.lunatrius.schematica.client.gui.load;
+package com.github.lunatrius.schematica.client.gui.core;
 
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import net.minecraft.client.gui.GuiGraphics;

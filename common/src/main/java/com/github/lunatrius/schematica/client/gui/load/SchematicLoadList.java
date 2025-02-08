@@ -4,14 +4,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import org.jetbrains.annotations.NotNull;
 
-public class GuiSchematicLoadList extends ObjectSelectionList<GuiSchematicLoadListEntry> {
+public class SchematicLoadList extends ObjectSelectionList<SchematicLoadListEntry> {
 	private final Minecraft minecraft = Minecraft.getInstance();
 
-	private final GuiSchematicLoad parent;
+	private final SchematicLoadScreen parent;
 
 	private long lastClick = 0;
 
-	public GuiSchematicLoadList(@NotNull GuiSchematicLoad parent) {
+	public SchematicLoadList(@NotNull SchematicLoadScreen parent) {
 		//int width, int height, int y, int itemHeight, int headerHeight
 		super(Minecraft.getInstance(), parent.width, parent.height - 56, 16, 22, 0);
 		this.parent = parent;
@@ -27,7 +27,7 @@ public class GuiSchematicLoadList extends ObjectSelectionList<GuiSchematicLoadLi
 		return super.getRowTop(index);
 	}
 
-	public GuiSchematicLoad getParent() {
+	public SchematicLoadScreen getParent() {
 		return parent;
 	}
 
@@ -40,7 +40,7 @@ public class GuiSchematicLoadList extends ObjectSelectionList<GuiSchematicLoadLi
 		super.mouseClicked(mouseX, mouseY, button);
 		boolean ignore = System.nanoTime() - this.lastClick < 500;
 		this.lastClick = System.nanoTime();
-		GuiSchematicLoadListEntry entry = this.getSelected();
+		SchematicLoadListEntry entry = this.getSelected();
 
 		if (ignore || entry == null) {
 			return true;
@@ -56,9 +56,9 @@ public class GuiSchematicLoadList extends ObjectSelectionList<GuiSchematicLoadLi
 		return true;
 	}
 
-	public void syncEntries(@NotNull GuiSchematicLoad parent) {
+	public void syncEntries(@NotNull SchematicLoadScreen parent) {
 		this.clearEntries();
-		for (GuiSchematicLoadListEntry schematicLoadListEntry : parent.getSchematicListSlots()) {
+		for (SchematicLoadListEntry schematicLoadListEntry : parent.getSchematicListSlots()) {
 			this.addEntry(schematicLoadListEntry);
 		}
 	}

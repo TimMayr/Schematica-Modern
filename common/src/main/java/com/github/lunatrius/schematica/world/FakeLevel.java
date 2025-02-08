@@ -74,7 +74,7 @@ import java.util.*;
  * <ul>
  * <li>static access to given data</li>
  * <li>immutability - disables all external changes (but levelSource can be mutable)</li>
- * <li>most of dimension related things is delegated to current client level (class instances can travel across
+ * <li>most of the dimension related things is delegated to current client level (class instances can travel across
  * dimensions)</li>
  * <li>biome info is also delegated from client level</li>
  * <li>light control - manual or delegated from client level</li>

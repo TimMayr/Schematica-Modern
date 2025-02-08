@@ -1,7 +1,7 @@
 package com.github.lunatrius.schematica.client.gui.control;
 
 import com.github.lunatrius.core.client.gui.NumericFieldWidget;
-import com.github.lunatrius.schematica.client.gui.load.ScreenBaseTest;
+import com.github.lunatrius.schematica.client.gui.core.BaseScreen;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.client.util.FlipHelper;
 import com.github.lunatrius.schematica.client.util.RotationHelper;
@@ -18,7 +18,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
-public class GuiSchematicControl extends ScreenBaseTest {
+public class SchematicControlScreen extends BaseScreen {
 	private final FakeLevel schematic;
 	private final SchematicPrinter printer;
 	private final Component strMoveSchematic = Component.translatable(Names.Gui.Control.MOVE_SCHEMATIC);
@@ -39,13 +39,13 @@ public class GuiSchematicControl extends ScreenBaseTest {
 	private NumericFieldWidget numericX = null;
 	private NumericFieldWidget numericY = null;
 	private NumericFieldWidget numericZ = null;
-	private Button btnLayerMode = null;
-	private NumericFieldWidget nfLayer = null;
-	private Button btnHide = null;
-	private Button btnPrint = null;
+	private Button buttonLayerMode = null;
+	private NumericFieldWidget numericLayer = null;
+	private Button buttonHide = null;
+	private Button buttonPrint = null;
 
-	public GuiSchematicControl(Screen Screen) {
-		super(Screen);
+	public SchematicControlScreen(Screen parentScreen) {
+		super(parentScreen);
 		this.schematic = ClientProxy.schematic;
 		this.printer = SchematicPrinter.INSTANCE;
 	}
@@ -97,28 +97,28 @@ public class GuiSchematicControl extends ScreenBaseTest {
 		}).pos(this.width - 90, this.height - 200).size(80, 20).build();
 		this.addRenderableWidget(btnUnload);
 
-		this.btnLayerMode = Button.builder(Component.translatable(
+		this.buttonLayerMode = Button.builder(Component.translatable(
 				(this.schematic != null ? this.schematic.layerMode : FakeLevel.LayerMode.ALL).name), (button) -> {
 			this.schematic.layerMode = FakeLevel.LayerMode.next(this.schematic.layerMode);
-			this.btnLayerMode.setMessage(Component.translatable(this.schematic.layerMode.name));
-			this.nfLayer.setActive(this.schematic.layerMode != FakeLevel.LayerMode.ALL);
+			this.buttonLayerMode.setMessage(Component.translatable(this.schematic.layerMode.name));
+			this.numericLayer.setActive(this.schematic.layerMode != FakeLevel.LayerMode.ALL);
 			//			RenderSchematic.getINSTANCE().refresh();
 		}).bounds(this.width - 90, this.height - 150 - 25, 80, 20).build();
-		this.addRenderableWidget(this.btnLayerMode);
+		this.addRenderableWidget(this.buttonLayerMode);
 
-		this.nfLayer = new NumericFieldWidget(this.width - 90, this.height - 150, 80, 20, (button) -> {
-			this.schematic.renderLayer = this.nfLayer.getValue();
+		this.numericLayer = new NumericFieldWidget(this.width - 90, this.height - 150, 80, 20, (button) -> {
+			this.schematic.renderLayer = this.numericLayer.getValue();
 			//			RenderSchematic.getINSTANCE().refresh();
 		});
-		this.addRenderableWidget(this.nfLayer);
+		this.addRenderableWidget(this.numericLayer);
 
-		this.btnHide =
+		this.buttonHide =
 				Button.builder(this.schematic != null && this.schematic.isRendering() ? this.strHide : this.strShow,
-				               (button) -> this.btnHide.setMessage(
+								(button) -> this.buttonHide.setMessage(
 						               this.schematic.toggleRendering() ? this.strHide : this.strShow))
 				      .bounds(this.width - 90, this.height - 105, 80, 20)
 				      .build();
-		this.addRenderableWidget(this.btnHide);
+		this.addRenderableWidget(this.buttonHide);
 
 		Button btnMove = Button.builder(Component.translatable(Names.Gui.Control.MOVE_HERE), (button) -> {
 			ClientProxy.moveSchematicToPlayer(this.schematic);
@@ -174,33 +174,33 @@ public class GuiSchematicControl extends ScreenBaseTest {
 		this.addRenderableWidget(btnRotate);
 
 		Button btnMaterials = Button.builder(this.strMaterials,
-		                                     (button) -> this.minecraft.setScreen(new GuiSchematicMaterials(screen)))
+						(button) -> this.minecraft.setScreen(new SchematicMaterialsScreen(screen)))
 		                            .bounds(10, this.height - 70, 80, 20)
 		                            .build();
 		this.addRenderableWidget(btnMaterials);
 
-		this.btnPrint = Button.builder(this.printer.isPrinting() ? this.strOn : this.strOff, (button) -> {
+		this.buttonPrint = Button.builder(this.printer.isPrinting() ? this.strOn : this.strOff, (button) -> {
 			boolean isPrinting = this.printer.togglePrinting();
-			this.btnPrint.setMessage(isPrinting ? this.strOn : this.strOff);
+			this.buttonPrint.setMessage(isPrinting ? this.strOn : this.strOff);
 		}).bounds(10, this.height - 30, 80, 20).build();
-		this.addRenderableWidget(this.btnPrint);
+		this.addRenderableWidget(this.buttonPrint);
 
 		this.numericX.setActive(this.schematic != null);
 		this.numericY.setActive(this.schematic != null);
 		this.numericZ.setActive(this.schematic != null);
 
 		btnUnload.active = this.schematic != null;
-		this.btnLayerMode.active = this.schematic != null;
-		this.nfLayer.setActive(this.schematic != null && this.schematic.layerMode != FakeLevel.LayerMode.ALL);
+		this.buttonLayerMode.active = this.schematic != null;
+		this.numericLayer.setActive(this.schematic != null && this.schematic.layerMode != FakeLevel.LayerMode.ALL);
 
-		this.btnHide.active = this.schematic != null;
+		this.buttonHide.active = this.schematic != null;
 		btnMove.active = this.schematic != null;
 		btnFlipDirection.active = this.schematic != null;
 		btnFlip.active = this.schematic != null;
 		btnRotateDirection.active = this.schematic != null;
 		btnRotate.active = this.schematic != null;
 		btnMaterials.active = this.schematic != null;
-		this.btnPrint.active = this.schematic != null && this.printer.isEnabled();
+		this.buttonPrint.active = this.schematic != null && this.printer.isEnabled();
 
 		setMinMax(this.numericX);
 		setMinMax(this.numericY);
@@ -210,10 +210,10 @@ public class GuiSchematicControl extends ScreenBaseTest {
 			setPoint(this.numericX, this.numericY, this.numericZ, this.schematic.getWorldPos());
 		}
 
-		this.nfLayer.setMinimum(0);
-		this.nfLayer.setMaximum(this.schematic != null ? this.schematic.getHeight() - 1 : 0);
+		this.numericLayer.setMinimum(0);
+		this.numericLayer.setMaximum(this.schematic != null ? this.schematic.getHeight() - 1 : 0);
 		if (this.schematic != null) {
-			this.nfLayer.setValue(this.schematic.renderLayer);
+			this.numericLayer.setValue(this.schematic.renderLayer);
 		}
 	}
 

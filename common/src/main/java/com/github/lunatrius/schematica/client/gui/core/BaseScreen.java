@@ -1,13 +1,13 @@
-package com.github.lunatrius.schematica.client.gui.load;
+package com.github.lunatrius.schematica.client.gui.core;
 
 
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 
-public class ScreenBaseTest extends Screen {
+public class BaseScreen extends Screen {
 	protected final Screen parentScreen;
 
-	public ScreenBaseTest(Screen parentScreen) {
+	public BaseScreen(Screen parentScreen) {
 		super(CommonComponents.EMPTY);
 		this.parentScreen = parentScreen;
 	}

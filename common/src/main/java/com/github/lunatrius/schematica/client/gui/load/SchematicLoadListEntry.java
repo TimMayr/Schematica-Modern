@@ -1,6 +1,7 @@
 package com.github.lunatrius.schematica.client.gui.load;
 
 
+import com.github.lunatrius.schematica.client.gui.core.GuiHelperTest;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -12,26 +13,26 @@ import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 
 @MethodsReturnNonnullByDefault
-public class GuiSchematicLoadListEntry extends ObjectSelectionList.Entry<GuiSchematicLoadListEntry> {
+public class SchematicLoadListEntry extends ObjectSelectionList.Entry<SchematicLoadListEntry> {
 	private final String name;
 	private final ItemStack itemStack;
 	private final boolean isDirectory;
-	private final GuiSchematicLoadList parent;
+	private final SchematicLoadList parent;
 
-	public GuiSchematicLoadListEntry(String name, @NotNull ItemStack itemStack, boolean isDirectory,
-	                                 GuiSchematicLoadList parent) {
+	public SchematicLoadListEntry(String name, @NotNull ItemStack itemStack, boolean isDirectory,
+	                              SchematicLoadList parent) {
 		this(name, itemStack.getItem(), isDirectory, parent);
 	}
 
-	public GuiSchematicLoadListEntry(String name, Item item, boolean isDirectory, GuiSchematicLoadList parent) {
+	public SchematicLoadListEntry(String name, Item item, boolean isDirectory, SchematicLoadList parent) {
 		this.name = name;
 		this.isDirectory = isDirectory;
 		this.itemStack = new ItemStack(item, 1);
 		this.parent = parent;
 	}
 
-	public GuiSchematicLoadListEntry(String name, @NotNull Block block, boolean isDirectory,
-	                                 GuiSchematicLoadList parent) {
+	public SchematicLoadListEntry(String name, @NotNull Block block, boolean isDirectory,
+	                              SchematicLoadList parent) {
 		this(name, block.asItem(), isDirectory, parent);
 	}
 

@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import org.jetbrains.annotations.NotNull;
 
 public class SchematicStructure extends SchematicFormat {
 	@Override
@@ -24,7 +25,7 @@ public class SchematicStructure extends SchematicFormat {
 
 		Schematic schematic =
 				new Schematic(icon, template.getSize().getX(), template.getSize().getY(), template.getSize().getZ(),
-				              template.getAuthor());
+						template.getAuthor());
 
 		for (StructureTemplate.Palette palette : template.palettes) {
 			for (StructureTemplate.StructureBlockInfo block : palette.blocks()) {
@@ -63,12 +64,12 @@ public class SchematicStructure extends SchematicFormat {
 
 
 	@Override
-	public void writeToNBT(CompoundTag tagCompoundIn, ISchematic schematic) {
+	public void writeToNBT(@NotNull CompoundTag tagCompoundIn, ISchematic schematic) {
 		StructureTemplate template = new StructureTemplate();
 
 		template.fillFromWorld(FakeLevel.of(schematic), BlockPos.ZERO,
-		                       new BlockPos(schematic.getSizeX(), schematic.getHeight(), schematic.getSizeZ()), true,
-		                       null);
+				new BlockPos(schematic.getSizeX(), schematic.getHeight(), schematic.getSizeZ()), true,
+				null);
 
 		template.setAuthor(schematic.getAuthor());
 

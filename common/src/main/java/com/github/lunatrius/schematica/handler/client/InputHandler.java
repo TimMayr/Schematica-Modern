@@ -2,9 +2,8 @@ package com.github.lunatrius.schematica.handler.client;
 
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.core.util.math.MathHelper;
-import com.github.lunatrius.schematica.client.gui.control.GuiSchematicControl;
-import com.github.lunatrius.schematica.client.gui.load.GuiSchematicLoad;
-import com.github.lunatrius.schematica.client.gui.save.GuiSchematicSave;
+import com.github.lunatrius.schematica.client.gui.control.SchematicControlScreen;
+import com.github.lunatrius.schematica.client.gui.save.SchematicSaveScreen;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Names;
@@ -57,15 +56,15 @@ public class InputHandler {
 		ClientTickEvent.CLIENT_POST.register(instance -> {
 			if (instance.screen == null) {
 				if (KEY_BINDING_LOAD.isDown()) {
-					instance.setScreen(new GuiSchematicLoad(instance.screen));
+					instance.setScreen(new com.github.lunatrius.schematica.client.gui.load.SchematicLoadScreen(instance.screen));
 				}
 
 				if (KEY_BINDING_SAVE.isDown()) {
-					instance.setScreen(new GuiSchematicSave(instance.screen));
+					instance.setScreen(new SchematicSaveScreen(instance.screen));
 				}
 
 				if (KEY_BINDING_CONTROL.isDown()) {
-					instance.setScreen(new GuiSchematicControl(instance.screen));
+					instance.setScreen(new SchematicControlScreen(instance.screen));
 				}
 
 				if (KEY_BINDING_LAYER_INC.isDown()) {
