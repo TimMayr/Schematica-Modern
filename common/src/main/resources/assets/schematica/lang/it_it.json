@@ -1,8 +1,5 @@
 {
   "_comment": "gui - general",
-  "schematica.gui.x": "X:",
-  "schematica.gui.y": "Y:",
-  "schematica.gui.z": "Z:",
   "schematica.gui.done": "Fatto",
 
   "_comment": "gui - general - load",
@@ -31,34 +28,8 @@
   "schematica.gui.materialname": "Materiale",
   "schematica.gui.materialamount": "Quantità",
 
-  "_comment": "gui - config - categories",
-
-  "_comment": "gui - config - debug",
-
-  "_comment": "gui - config - render",
-
-  "_comment": "gui - config - printer",
-
-  "_comment": "gui - config - printer - swap slots",
-
-  "_comment": "gui - config - general",
-
-  "_comment": "gui - config - server",
-
   "_comment": "keys",
   "schematica.key.load": "Carica schematica",
   "schematica.key.save": "Salva schematica",
-  "schematica.key.control": "Manipola schematica",
-
-  "_comment": "commands - save",
-
-  "_comment": "commands - list",
-
-  "_comment": "commands - remove",
-
-  "_comment": "commands - download",
-
-  "_comment": "commands - replace",
-
-  "_comment": "messages"
+	"schematica.key.control": "Manipola schematica"
 }

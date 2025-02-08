@@ -1,8 +1,5 @@
 {
   "_comment": "gui - general",
-  "schematica.gui.x": "X:",
-  "schematica.gui.y": "Y:",
-  "schematica.gui.z": "Z:",
   "schematica.gui.done": "Končano",
 
   "_comment": "gui - general - load",
@@ -29,37 +26,10 @@
   "schematica.gui.movehere": "Premakni sem",
   "schematica.gui.flip": "Zrcali",
   "schematica.gui.rotate": "Rotiraj",
-  "schematica.gui.materialname": "Material",
   "schematica.gui.materialamount": "Količina",
-
-  "_comment": "gui - config - categories",
-
-  "_comment": "gui - config - debug",
-
-  "_comment": "gui - config - render",
-
-  "_comment": "gui - config - printer",
-
-  "_comment": "gui - config - printer - swap slots",
-
-  "_comment": "gui - config - general",
-
-  "_comment": "gui - config - server",
 
   "_comment": "keys",
   "schematica.key.load": "Naloži shemo",
   "schematica.key.save": "Shrani shemo",
-  "schematica.key.control": "Manipuliraj shemo",
-
-  "_comment": "commands - save",
-
-  "_comment": "commands - list",
-
-  "_comment": "commands - remove",
-
-  "_comment": "commands - download",
-
-  "_comment": "commands - replace",
-
-  "_comment": "messages"
+	"schematica.key.control": "Manipuliraj shemo"
 }

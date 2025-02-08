@@ -1,8 +1,5 @@
 {
   "_comment": "gui - general",
-  "schematica.gui.x": "X:",
-  "schematica.gui.y": "Y:",
-  "schematica.gui.z": "Z:",
   "schematica.gui.done": "Fertig",
 
   "_comment": "gui - general - load",
@@ -40,15 +37,13 @@
   "schematica.config.category.general.tooltip": "Generelle Einstellungen",
   "schematica.config.category.server.tooltip": "Einstellungen am Server",
 
-  "_comment": "gui - config - debug",
-
   "_comment": "gui - config - render",
   "schematica.config.alphaEnabled": "Alpha eingeschalten",
   "schematica.config.alphaEnabled.tooltip": "Aktiviert transparente Blöcke.",
 
   "_comment": "gui - config - printer",
   "schematica.config.placeDelay": "Abstand zwischen Blockplatzierung",
-  "schematica.config.placeDelay.tooltip": "Abstan (in ticks) in der ein Spieler Blöcke setzen kann.",
+	"schematica.config.placeDelay.tooltip": "Abstand (in ticks) in dem der Drucker Blöcke setzen kann.",
   "schematica.config.placeInstantly": "Blöcke sofort setzen",
   "schematica.config.placeInstantly.tooltip": "Platziere alle Blöcke innerhalb eines Ticks.",
   "schematica.config.destroyBlocks": "Zerstöre Blöcke",
@@ -57,8 +52,6 @@
   "schematica.config.destroyInstantly.tooltip": "Zerstöre alle Blöcke innerhalb eines Ticks.",
   "schematica.config.placeAdjacent": "Angrenzende Blöcke berücksichtigen",
   "schematica.config.placeAdjacent.tooltip": "Platziere Blöcke nur, wenn es angrenzende Blöcke gibt.",
-
-  "_comment": "gui - config - printer - swap slots",
 
   "_comment": "gui - config - general",
   "schematica.config.schematicDirectory": "Schematic Verzeichnis",
@@ -82,7 +75,7 @@
   "schematica.command.save.started": "%d Chunks werden in %s gespeichert.",
   "schematica.command.save.saveSucceeded": "%s wurde erfolgreich gespeichert.",
   "schematica.command.save.saveFailed": "Es gab ein Problem, die Schematic %s zu speichern.",
-  "schematica.command.save.quotaExceeded": "Du kannst keine Schematics mehr speichern, da das Limit erreicht wurde. Bitte nutze /schematicaList und /schematicaRemove um alte Schematics zu löschen.",
+	"schematica.command.save.quotaExceeded": "Du kannst keine Schematics mehr speichern, da das Limit erreicht wurde. Bitte nutze /schematica list und /schematica remove um alte Schematics zu löschen.",
   "schematica.command.save.playerSchematicDirUnavailable": "Es gab ein Problem, deine Schematic zu speichern. Bitte kontaktiere umgehend einen Server Administrator.",
 
   "_comment": "commands - list",
@@ -91,13 +84,5 @@
   "schematica.command.list.download": "Herunterladen",
   "schematica.command.list.header": "--- Schematics: Seite %d von %d ---",
   "schematica.command.list.noSuchPage": "Keine Seite",
-  "schematica.command.list.noSchematics": "Es sind keine Schematics verfügbar.",
-
-  "_comment": "commands - remove",
-
-  "_comment": "commands - download",
-
-  "_comment": "commands - replace",
-
-  "_comment": "messages"
+	"schematica.command.list.noSchematics": "Es sind keine Schematics verfügbar."
 }

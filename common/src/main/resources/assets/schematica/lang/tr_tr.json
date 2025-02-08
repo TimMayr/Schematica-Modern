@@ -1,8 +1,5 @@
 {
   "_comment": "gui - general",
-  "schematica.gui.x": "X:",
-  "schematica.gui.y": "Y:",
-  "schematica.gui.z": "Z:",
   "schematica.gui.done": "Tamam",
 
   "_comment": "gui - general - load",
@@ -32,34 +29,8 @@
   "schematica.gui.materialname": "Malzeme",
   "schematica.gui.materialamount": "Miktar",
 
-  "_comment": "gui - config - categories",
-
-  "_comment": "gui - config - debug",
-
-  "_comment": "gui - config - render",
-
-  "_comment": "gui - config - printer",
-
-  "_comment": "gui - config - printer - swap slots",
-
-  "_comment": "gui - config - general",
-
-  "_comment": "gui - config - server",
-
   "_comment": "keys",
   "schematica.key.load": "Şematiki yükle",
   "schematica.key.save": "Şematiki kaydet",
   "schematica.key.control": "Şematiki işleyin",
-
-  "_comment": "commands - save",
-
-  "_comment": "commands - list",
-
-  "_comment": "commands - remove",
-
-  "_comment": "commands - download",
-
-  "_comment": "commands - replace",
-
-  "_comment": "messages"
 }

@@ -1,8 +1,5 @@
 {
   "_comment": "gui - general",
-  "schematica.gui.x": "X:",
-  "schematica.gui.y": "Y:",
-  "schematica.gui.z": "Z:",
   "schematica.gui.on": "켜기",
   "schematica.gui.off": "끄기",
   "schematica.gui.done": "완료",
@@ -44,8 +41,6 @@
   "schematica.config.category.server": "서버",
   "schematica.config.category.server.tooltip": "서버 측 설정.",
 
-  "_comment": "gui - config - debug",
-
   "_comment": "gui - config - render",
   "schematica.config.alphaEnabled": "알파 활성화됨",
   "schematica.config.alphaEnabled.tooltip": "투명한 텍스쳐 활성화.",
@@ -72,8 +67,6 @@
   "schematica.config.placeAdjacent": "접촉된 블럭만 놓기",
   "schematica.config.placeAdjacent.tooltip": "접촉된 블럭이 있을 경우에만 블럭을 놓습니다.",
 
-  "_comment": "gui - config - printer - swap slots",
-
   "_comment": "gui - config - general",
   "schematica.config.schematicDirectory": "Schematic 디렉토리",
   "schematica.config.schematicDirectory.tooltip": "Schematic 디렉토리.",
@@ -93,18 +86,8 @@
   "schematica.key.control": "Schematic 조작",
 
   "_comment": "commands - save",
-  "schematica.command.save.usage": "/schematicaSave <X시작> <Y시작> <Z시작> <X끝> <Y끝> <Z끝> <이름>",
+	"schematica.command.save.usage": "/schematica save <X시작> <Y시작> <Z시작> <X끝> <Y끝> <Z끝> <이름>",
   "schematica.command.save.playersOnly": "이 커맨드는 오직 플레이어만 사용할 수 있습니다.",
   "schematica.command.save.saveSucceeded": "%s을(를) 성공적으로 저장하였습니다.",
-  "schematica.command.save.saveFailed": "Schematic %s을(를) 저장하는데 문제가 발생하였습니다.",
-
-  "_comment": "commands - list",
-
-  "_comment": "commands - remove",
-
-  "_comment": "commands - download",
-
-  "_comment": "commands - replace",
-
-  "_comment": "messages"
+	"schematica.command.save.saveFailed": "Schematic %s을(를) 저장하는데 문제가 발생하였습니다."
 }

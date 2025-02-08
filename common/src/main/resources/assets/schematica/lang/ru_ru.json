@@ -1,8 +1,5 @@
 {
   "_comment": "gui - general",
-  "schematica.gui.x": "X:",
-  "schematica.gui.y": "Y:",
-  "schematica.gui.z": "Z:",
   "schematica.gui.on": "Вкл",
   "schematica.gui.off": "Выкл",
   "schematica.gui.done": "Готово",
@@ -24,7 +21,7 @@
   "schematica.gui.point.blue": "Синяя точка",
   "schematica.gui.save": "Сохранить",
   "schematica.gui.saveselection": "Сохранение схемы",
-  "schematica.gui.format": "Формат: %s",
+	"schematica.gui.format": "Формат",
 
   "_comment": "gui - general - control",
   "schematica.gui.moveschematic": "Перемещение схемы",
@@ -90,7 +87,6 @@
   "schematica.config.placeAdjacent": "Соседнее размещение",
   "schematica.config.placeAdjacent.tooltip": "Блоки размещаются только при наличии других блоков около них.",
 
-  "_comment": "gui - config - printer - swap slots",
   "_comment": "gui - config - general",
   "schematica.config.schematicDirectory": "Папка схем",
   "schematica.config.schematicDirectory.tooltip": "Папка, в которой хранятся схемы.",
@@ -106,7 +102,6 @@
   "schematica.config.loadEnabled.tooltip": "Позволяет игрокам загружать схемы.",
 
   "_comment": "keys",
-  "schematica.key.category": "Schematica",
   "schematica.key.load": "Загрузить схему",
   "schematica.key.save": "Сохранить схему",
   "schematica.key.control": "Управление схемой",
@@ -119,17 +114,17 @@
   "schematica.key.pickBlock": "Выбор блока в схеме",
 
   "_comment": "commands - save",
-  "schematica.command.save.usage": "/schematicaSave <началоX> <началоY> <началоZ> <конецX> <конецY> <конецZ> <название> [формат]",
+	"schematica.command.save.usage": "/schematica save <началоX> <началоY> <началоZ> <конецX> <конецY> <конецZ> <название> [формат]",
   "schematica.command.save.playersOnly": "Только игроки могут использовать данную команду.",
   "schematica.command.save.started": "Сохранение %d чанка(-ов) в файл «%s»...",
   "schematica.command.save.saveSucceeded": "Схема «%s» сохранена.",
   "schematica.command.save.saveFailed": "Произошла ошибка при сохранении файла «%s».",
-  "schematica.command.save.quotaExceeded": "Превышена квота сервера. Используйте /schematicaList и /schematicaRemove, чтобы удалить старые схемы.",
+	"schematica.command.save.quotaExceeded": "Превышена квота сервера. Используйте /schematica list и /schematica remove, чтобы удалить старые схемы.",
   "schematica.command.save.playerSchematicDirUnavailable": "Произошла ошибка на сервере, из-за которой неудалось сохранить схему. Свяжитесь с администратором сервера.",
   "schematica.command.save.unknownFormat": "Формат неизвестен: «%s»",
 
   "_comment": "commands - list",
-  "schematica.command.list.usage": "/schematicaList [страница]",
+	"schematica.command.list.usage": "/schematica list [страница]",
   "schematica.command.list.notAvailable": "Произошла ошибка при получении списка схем.",
   "schematica.command.list.remove": "Удалить",
   "schematica.command.list.download": "Загрузить",
@@ -138,19 +133,19 @@
   "schematica.command.list.noSchematics": "Нет доступных схем.",
 
   "_comment": "commands - remove",
-  "schematica.command.remove.usage": "/schematicaRemove <название>",
+	"schematica.command.remove.usage": "/schematica remove <название>",
   "schematica.command.remove.schematicRemoved": "Схема «%s» удалена.",
   "schematica.command.remove.schematicNotFound": "Схема «%s» не найдена.",
   "schematica.command.remove.areYouSure": "Уверены?",
 
   "_comment": "commands - download",
-  "schematica.command.download.usage": "/schematicaDownload <название>",
+	"schematica.command.download.usage": "/schematica download <название>",
   "schematica.command.download.started": "Загрузка файла «%s»...",
   "schematica.command.download.downloadSucceeded": "Схема «%s» успешно загружена.",
   "schematica.command.download.downloadFail": "Произошла ошибка во время загрузки.",
 
   "_comment": "commands - replace",
-  "schematica.command.replace.usage": "/schematicaReplace <оригинал> <замена>",
+	"schematica.command.replace.usage": "/schematica replace <оригинал> <замена>",
   "schematica.command.replace.noSchematic": "Нет загруженных схем.",
   "schematica.command.replace.success": "%s блоков заменено.",
 
@@ -161,7 +156,6 @@
   "schematica.message.invalidPropertyForBlock": "Свойтво «%s» не существует у блока «%s».",
 
   "_comment": "schematic formats",
-  "schematica.format.classic": "Classic",
   "schematica.format.alpha": "Стандартный",
   "schematica.format.structure": "Блок-конструктор",
   "schematica.format.invalid": "Неизвестный"

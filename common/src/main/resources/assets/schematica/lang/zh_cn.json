@@ -1,8 +1,5 @@
 {
   "_comment": "gui - general",
-  "schematica.gui.x": "X:",
-  "schematica.gui.y": "Y:",
-  "schematica.gui.z": "Z:",
   "schematica.gui.done": "完成",
 
   "_comment": "gui - general - load",
@@ -32,34 +29,8 @@
   "schematica.gui.materialname": "材料",
   "schematica.gui.materialamount": "数量",
 
-  "_comment": "gui - config - categories",
-
-  "_comment": "gui - config - debug",
-
-  "_comment": "gui - config - render",
-
-  "_comment": "gui - config - printer",
-
-  "_comment": "gui - config - printer - swap slots",
-
-  "_comment": "gui - config - general",
-
-  "_comment": "gui - config - server",
-
   "_comment": "keys",
   "schematica.key.load": "载入Schematic文件",
   "schematica.key.save": "保存Schematic文件",
-  "schematica.key.control": "调整Schematic文件",
-
-  "_comment": "commands - save",
-
-  "_comment": "commands - list",
-
-  "_comment": "commands - remove",
-
-  "_comment": "commands - download",
-
-  "_comment": "commands - replace",
-
-  "_comment": "messages"
+	"schematica.key.control": "调整Schematic文件"
 }

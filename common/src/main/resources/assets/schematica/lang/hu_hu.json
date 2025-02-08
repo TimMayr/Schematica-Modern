@@ -1,8 +1,5 @@
 {
   "_comment": "gui - general",
-  "schematica.gui.x": "X:",
-  "schematica.gui.y": "Y:",
-  "schematica.gui.z": "Z:",
   "schematica.gui.done": "Kész",
 
   "_comment": "gui - general - load",
@@ -32,34 +29,8 @@
   "schematica.gui.materialname": "Anyag",
   "schematica.gui.materialamount": "Mennyiség",
 
-  "_comment": "gui - config - categories",
-
-  "_comment": "gui - config - debug",
-
-  "_comment": "gui - config - render",
-
-  "_comment": "gui - config - printer",
-
-  "_comment": "gui - config - printer - swap slots",
-
-  "_comment": "gui - config - general",
-
-  "_comment": "gui - config - server",
-
   "_comment": "keys",
   "schematica.key.load": "Klisé betöltése",
   "schematica.key.save": "Klisé mentése",
-  "schematica.key.control": "Klisé módosítása",
-
-  "_comment": "commands - save",
-
-  "_comment": "commands - list",
-
-  "_comment": "commands - remove",
-
-  "_comment": "commands - download",
-
-  "_comment": "commands - replace",
-
-  "_comment": "messages"
+	"schematica.key.control": "Klisé módosítása"
 }

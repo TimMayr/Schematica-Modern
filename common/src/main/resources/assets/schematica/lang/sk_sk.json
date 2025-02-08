@@ -1,8 +1,5 @@
 {
   "_comment": "gui - general",
-  "schematica.gui.x": "X:",
-  "schematica.gui.y": "Y:",
-  "schematica.gui.z": "Z:",
   "schematica.gui.done": "Hotovo",
 
   "_comment": "gui - general - load",
@@ -32,34 +29,8 @@
   "schematica.gui.materialname": "Materiál",
   "schematica.gui.materialamount": "Množstvo",
 
-  "_comment": "gui - config - categories",
-
-  "_comment": "gui - config - debug",
-
-  "_comment": "gui - config - render",
-
-  "_comment": "gui - config - printer",
-
-  "_comment": "gui - config - printer - swap slots",
-
-  "_comment": "gui - config - general",
-
-  "_comment": "gui - config - server",
-
   "_comment": "keys",
   "schematica.key.load": "Načítať schému",
   "schematica.key.save": "Uložiť schému",
-  "schematica.key.control": "Manipulovať so schémou",
-
-  "_comment": "commands - save",
-
-  "_comment": "commands - list",
-
-  "_comment": "commands - remove",
-
-  "_comment": "commands - download",
-
-  "_comment": "commands - replace",
-
-  "_comment": "messages"
+	"schematica.key.control": "Manipulovať so schémou"
 }
