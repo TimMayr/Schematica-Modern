@@ -12,7 +12,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -20,35 +19,29 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 public class SchematicAlpha extends SchematicFormat {
-	@Override
-	public String getNbtName() {
-		return Names.NBT.FORMAT_ALPHA;
-	}
-
 	@Override
 	public ISchematic readFromNBT(CompoundTag tagCompound, Level level) {
 		ItemStack icon = SchematicUtil.getIconFromNBT(tagCompound);
 
 		List<BlockState> localBlockList =
 				Arrays.stream(tagCompound.getIntArray(Names.NBT.BLOCKS)).mapToObj(Block::stateById).toList();
-		BlockState[] localBlocks = localBlockList.toArray(new BlockState[] {});
+		BlockState[] localBlocks = localBlockList.toArray(new BlockState[]{});
 
 		int width = tagCompound.getInt(Names.NBT.WIDTH);
 		int length = tagCompound.getInt(Names.NBT.LENGTH);
 		int height = tagCompound.getInt(Names.NBT.HEIGHT);
 
-		Block id;
-		Map<ResourceLocation, Block> oldToNew = new HashMap<>();
-		if (tagCompound.hasUUID(Names.NBT.MAPPING_SCHEMATICA)) {
+		Map<BlockState, BlockState> oldToNew = new HashMap<>();
+		if (tagCompound.contains(Names.NBT.MAPPING_SCHEMATICA)) {
 			CompoundTag mapping = tagCompound.getCompound(Names.NBT.MAPPING_SCHEMATICA);
 			Set<String> names = mapping.getAllKeys();
-			for (String name : names) {
-				ResourceLocation location = ResourceLocation.tryParse(mapping.getString(name));
-				oldToNew.put(location, BuiltInRegistries.BLOCK.getValue(location));
+			for (String id : names) {
+				oldToNew.put(Block.stateById(Integer.parseInt(id)), Block.stateById(mapping.getInt(id)));
 			}
 		}
 
@@ -60,17 +53,17 @@ public class SchematicAlpha extends SchematicFormat {
 					int index = x + (y * length + z) * width;
 					BlockState blockstate = localBlocks[index];
 
-					id = oldToNew.get(blockstate.getBlock().arch$registryName());
-					if (id != null) {
-						blockstate = id.defaultBlockState();
+					if (oldToNew.containsKey(blockstate)) {
+						blockstate = oldToNew.get(blockstate);
 					}
 
 					pos.set(x, y, z);
+
 					try {
 						schematic.setBlockState(pos, blockstate);
 					} catch (Exception e) {
 						Reference.logger.error("Could not set block state at {} to {} with blockstate {}", pos,
-						                       blockstate.getBlock().arch$registryName(), blockstate, e);
+								blockstate.getBlock().arch$registryName(), blockstate, e);
 					}
 				}
 			}
@@ -108,7 +101,7 @@ public class SchematicAlpha extends SchematicFormat {
 	}
 
 	@Override
-	public void writeToNBT(CompoundTag tagCompoundIn, ISchematic schematic) {
+	public void writeToNBT(CompoundTag tagCompoundIn, @NotNull ISchematic schematic) {
 		CompoundTag tagCompound = new CompoundTag();
 		CompoundTag tagCompoundIcon = new CompoundTag();
 		ItemStack icon = schematic.getIcon();
@@ -123,16 +116,16 @@ public class SchematicAlpha extends SchematicFormat {
 		BlockState[] localBlocks = new BlockState[size];
 
 		MBlockPos pos = new MBlockPos();
-		Map<String, Block> mappings = new HashMap<>();
+		Map<BlockState, BlockState> mappings = new HashMap<>();
 		for (int x = 0; x < schematic.getSizeX(); x++) {
 			for (int y = 0; y < schematic.getHeight(); y++) {
 				for (int z = 0; z < schematic.getSizeZ(); z++) {
 					int index = x + (y * schematic.getSizeZ() + z) * schematic.getSizeX();
 					BlockState blockState = schematic.getBlockState(pos.set(x, y, z));
 					localBlocks[index] = blockState;
-					String name = String.valueOf(blockState.getBlock().arch$registryName());
-					if (!mappings.containsKey(name)) {
-						mappings.put(name, blockState.getBlock());
+
+					if (!mappings.containsKey(blockState)) {
+						mappings.put(blockState, blockState);
 					}
 				}
 			}
@@ -145,17 +138,17 @@ public class SchematicAlpha extends SchematicFormat {
 				CompoundTag blockEntityCompoundTag = NBTHelper.writeBlockEntityToCompound(blockEntity);
 				blockEntities.add(blockEntityCompoundTag);
 			} catch (Exception e) {
-				BlockPos tePos = blockEntity.getBlockPos();
-				int index = tePos.getX() + (tePos.getY() * schematic.getSizeZ() + tePos.getZ()) * schematic.getSizeX();
+				BlockPos bePos = blockEntity.getBlockPos();
+				int index = bePos.getX() + (bePos.getY() * schematic.getSizeZ() + bePos.getZ()) * schematic.getSizeX();
 				if (--count > 0) {
-					BlockState blockState = schematic.getBlockState(tePos);
+					BlockState blockState = schematic.getBlockState(bePos);
 					Block block = blockState.getBlock();
 					Reference.logger.error(
-							"Block {}[{}] with BlockEntity {} failed to save! Replacing with bedrock." + "..", block,
+							"Block {}[{}] with BlockEntity {} failed to save! Replacing with air." + "..", block,
 							BuiltInRegistries.BLOCK.getKey(block), blockEntity.getClass().getName(), e);
 				}
 
-				localBlocks[index] = Blocks.BEDROCK.defaultBlockState();
+				localBlocks[index] = Blocks.AIR.defaultBlockState();
 			}
 		}
 
@@ -175,8 +168,10 @@ public class SchematicAlpha extends SchematicFormat {
 		PlatformProxy.createAndPostPreSchematicSaveEvent(schematic, mappings);
 
 		CompoundTag nbtMapping = new CompoundTag();
-		for (Map.Entry<String, Block> entry : mappings.entrySet()) {
-			nbtMapping.putString(entry.getKey(), entry.getValue().arch$registryName().toString());
+		for (Map.Entry<BlockState, BlockState> entry : mappings.entrySet()) {
+			if (entry.getKey() != entry.getValue()) {
+				nbtMapping.putInt(String.valueOf(Block.getId(entry.getKey())), Block.getId(entry.getValue()));
+			}
 		}
 
 		tagCompound.putString(Names.NBT.FORMAT, Names.NBT.FORMAT_ALPHA);
@@ -190,6 +185,11 @@ public class SchematicAlpha extends SchematicFormat {
 	@Override
 	public String getName() {
 		return Names.Formats.ALPHA;
+	}
+
+	@Override
+	public String getNbtName() {
+		return Names.NBT.FORMAT_ALPHA;
 	}
 
 	@Override

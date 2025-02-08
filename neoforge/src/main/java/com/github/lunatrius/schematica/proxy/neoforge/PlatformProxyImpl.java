@@ -5,7 +5,7 @@ import com.github.lunatrius.schematica.neoforge.api.event.PostSchematicCaptureEv
 import com.github.lunatrius.schematica.neoforge.api.event.PostSchematicSaveEvent;
 import com.github.lunatrius.schematica.neoforge.api.event.PreSchematicCaptureEvent;
 import com.github.lunatrius.schematica.neoforge.api.event.PreSchematicSaveEvent;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -17,7 +17,7 @@ public class PlatformProxyImpl {
 		NeoForge.EVENT_BUS.post(new PostSchematicCaptureEvent(schematic));
 	}
 
-	public static void createAndPostPreSchematicSaveEvent(ISchematic schematic, Map<String, Block> mappings) {
+	public static void createAndPostPreSchematicSaveEvent(ISchematic schematic, Map<BlockState, BlockState> mappings) {
 		NeoForge.EVENT_BUS.post(new PreSchematicSaveEvent(schematic, mappings));
 	}
 

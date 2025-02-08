@@ -5,7 +5,7 @@ import com.github.lunatrius.schematica.fabric.api.event.PostSchematicCaptureCall
 import com.github.lunatrius.schematica.fabric.api.event.PostSchematicSaveCallback;
 import com.github.lunatrius.schematica.fabric.api.event.PreSchematicCaptureCallback;
 import com.github.lunatrius.schematica.fabric.api.event.PreSchematicSaveCallback;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
 import java.io.File;
@@ -16,7 +16,7 @@ public class PlatformProxyImpl {
 		PostSchematicCaptureCallback.EVENT.invoker().postCapture(schematic);
 	}
 
-	public static void createAndPostPreSchematicSaveEvent(ISchematic schematic, Map<String, Block> mappings) {
+	public static void createAndPostPreSchematicSaveEvent(ISchematic schematic, Map<BlockState, BlockState> mappings) {
 		PreSchematicSaveCallback.EVENT.invoker().preSave(schematic, mappings, null);
 	}
 

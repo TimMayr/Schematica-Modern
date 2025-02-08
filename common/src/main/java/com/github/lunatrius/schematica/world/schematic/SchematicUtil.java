@@ -9,6 +9,7 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -18,7 +19,7 @@ import java.nio.file.Files;
 public class SchematicUtil {
 	public static final ItemStack DEFAULT_ICON = new ItemStack(Blocks.GRASS_BLOCK);
 
-	public static ItemStack getIconFromName(String iconName) {
+	public static @NotNull ItemStack getIconFromName(@NotNull String iconName) {
 		ResourceLocation rl = null;
 
 		String[] parts = iconName.split(",");
@@ -65,7 +66,7 @@ public class SchematicUtil {
 	public static ItemStack getIconFromNBT(CompoundTag tagCompound) {
 		ItemStack icon = DEFAULT_ICON.copy();
 
-		if (tagCompound != null && tagCompound.hasUUID(Names.NBT.ICON)) {
+		if (tagCompound != null && tagCompound.contains(Names.NBT.ICON)) {
 			icon = ItemStack.parseOptional(Reference.proxy.getRegistryAccess(),
 			                               tagCompound.getCompound(Names.NBT.ICON));
 

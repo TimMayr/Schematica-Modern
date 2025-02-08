@@ -2,7 +2,7 @@ package com.github.lunatrius.schematica.proxy;
 
 import com.github.lunatrius.schematica.api.ISchematic;
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
 import java.io.File;
@@ -15,7 +15,7 @@ public class PlatformProxy {
 	}
 
 	@ExpectPlatform
-	public static void createAndPostPreSchematicSaveEvent(ISchematic schematic, Map<String, Block> mappings) {
+	public static void createAndPostPreSchematicSaveEvent(ISchematic schematic, Map<BlockState, BlockState> mappings) {
 		throw new AssertionError();
 	}
 
