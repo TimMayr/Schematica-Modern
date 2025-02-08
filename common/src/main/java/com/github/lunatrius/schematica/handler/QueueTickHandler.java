@@ -6,7 +6,6 @@ import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
 import dev.architectury.event.events.common.TickEvent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -42,9 +41,7 @@ public class QueueTickHandler {
 				Component component =
 						Component.translatable(Names.Command.Save.Message.SAVE_STARTED, container.chunkCount,
 						                       container.file.getName());
-				if (container.player != null && !container.player.isLocalPlayer()) {
-					((ServerPlayer) container.player).sendSystemMessage(component);
-				}
+				container.player.displayClientMessage(component, false);
 			}
 
 			container.next();

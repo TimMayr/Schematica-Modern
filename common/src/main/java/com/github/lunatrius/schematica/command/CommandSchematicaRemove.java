@@ -25,13 +25,45 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		return Commands.literal(Names.Command.Remove.NAME)
-		               .then(Commands.argument("name", StringArgumentType.string())
-		                             .suggests(
-				                             ((context, builder) -> CommandSchematicaBase.getSchematicNamesSuggestions(
-						                             context, builder, FILE_FILTER_SCHEMATIC)))
-		                             .executes(CommandSchematicaRemove::showDeleteConfirmation)
-		                             .then(Commands.argument("hash", StringArgumentType.string())
-		                                           .executes(CommandSchematicaRemove::delete)));
+				.then(Commands.argument("name", StringArgumentType.string())
+						.suggests(
+								((context, builder) -> CommandSchematicaBase.getSchematicNamesSuggestions(
+										context, builder, FILE_FILTER_SCHEMATIC)))
+						.executes(CommandSchematicaRemove::showDeleteConfirmation)
+						.then(Commands.argument("hash", StringArgumentType.string())
+								.executes(CommandSchematicaRemove::delete)));
+	}
+
+	private static int showDeleteConfirmation(@NotNull CommandContext<CommandSourceStack> commandContext)
+			throws CommandSyntaxException {
+		CommandSourceStack source = commandContext.getSource();
+		ServerPlayer player = source.getPlayerOrException();
+		String name = StringArgumentType.getString(commandContext, "name");
+		File file;
+		try {
+			file = getSchematicFile(player, name);
+		} catch (IllegalArgumentException e) {
+			source.sendFailure(Component.translatable(e.getMessage()));
+			return -1;
+		}
+
+		if (file.exists()) {
+			String hash = DigestUtils.md5Hex(name);
+			String confirmCommand =
+					String.format("/%s %s %s", Reference.MOD_ID + " " + Names.Command.Remove.NAME, name, hash);
+			Component chatComponent = Component.translatable(Names.Command.Remove.Message.ARE_YOU_SURE_START, name)
+					.append(withStyle(Component.literal("[")
+									.append(Component.translatable(
+											Names.Command.Remove.Message.YES))
+									.append(Component.literal("]")),
+							ChatFormatting.RED, confirmCommand));
+
+			source.sendSystemMessage(chatComponent);
+			return 0;
+		} else {
+			source.sendFailure(Component.translatable(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND, name));
+			return -1;
+		}
 	}
 
 	private static int delete(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -55,44 +87,12 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 					source.sendSuccess(
 							() -> Component.translatable(Names.Command.Remove.Message.SCHEMATIC_REMOVED, name), true);
 				} else {
-					source.sendFailure(Component.translatable(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND));
+					source.sendFailure(Component.translatable(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND, name));
 					return -1;
 				}
 			}
 		}
 		return 0;
-	}
-
-	private static int showDeleteConfirmation(@NotNull CommandContext<CommandSourceStack> commandContext)
-			throws CommandSyntaxException {
-		CommandSourceStack source = commandContext.getSource();
-		ServerPlayer player = source.getPlayerOrException();
-		String name = StringArgumentType.getString(commandContext, "name");
-		File file;
-		try {
-			file = getSchematicFile(player, name);
-		} catch (IllegalArgumentException e) {
-			source.sendFailure(Component.translatable(e.getMessage()));
-			return -1;
-		}
-
-		if (file.exists()) {
-			String hash = DigestUtils.md5Hex(name);
-			String confirmCommand =
-					String.format("/%s %s %s", Reference.MOD_ID + " " + Names.Command.Remove.NAME, name, hash);
-			Component chatComponent = Component.translatable(Names.Command.Remove.Message.ARE_YOU_SURE_START, name)
-			                                   .append(withStyle(Component.literal("[")
-			                                                              .append(Component.translatable(
-					                                                              Names.Command.Remove.Message.YES))
-			                                                              .append(Component.literal("]")),
-			                                                     ChatFormatting.RED, confirmCommand));
-
-			source.sendSystemMessage(chatComponent);
-			return 0;
-		} else {
-			source.sendFailure(Component.translatable(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND));
-			return -1;
-		}
 	}
 
 	private static @NotNull File getSchematicFile(Player player, String name) {
@@ -101,7 +101,8 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 
 		if (!FileUtils.contains(schematicDirectory, file)) {
 			Reference.logger.error("{} has tried to download the file {}", player.getName(), name);
-			throw new IllegalArgumentException(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND);
+			throw new IllegalArgumentException(Component.translatable(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND
+					, name).toString());
 		}
 
 		return file;
