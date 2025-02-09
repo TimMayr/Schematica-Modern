@@ -71,7 +71,7 @@ This section assumes that you're using the command-line version of Git.
 1. Import the gradle project in an ide like intellij
 2. Run the build task
 3. Go to `mcdev\Schematica-Modern\build\libs`.
-    * You should see a `.jar` file named `LunatriusCore-#.#.#-#.#.#.#.jar`.
+    * You should see a `.jar` file named `Schematica-#.#.#-#.#.#.#.jar`.
 4. Copy the jar into your Minecraft mods folder, and you are done!
 5. Alternatively you can use the Client run configuration in your ide
 
