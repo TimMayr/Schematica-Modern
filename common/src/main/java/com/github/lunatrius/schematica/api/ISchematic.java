@@ -47,11 +47,6 @@ public interface ISchematic extends BlockGetter {
 		return isPosInside(pos) ? getBlockState(pos).getFluidState() : Fluids.EMPTY.defaultFluidState();
 	}
 
-	@Override
-	default int getMaxY() {
-		return getMinY() + getHeight();
-	}
-
 	/**
 	 * @param pos
 	 * 		tested pos
@@ -67,6 +62,10 @@ public interface ISchematic extends BlockGetter {
 				&& pos.getY() <= getMaxY()
 				&& getMinZ() <= pos.getZ()
 				&& pos.getZ() < getMaxZ();
+	}
+
+	default int getMinY() {
+		return 0;
 	}
 
 	/**
@@ -210,8 +209,9 @@ public interface ISchematic extends BlockGetter {
 	 */
 	int getHeight();
 
-	default int getMinY() {
-		return 0;
+	@Override
+	default int getMaxY() {
+		return getMinY() + getHeight();
 	}
 
 	/**

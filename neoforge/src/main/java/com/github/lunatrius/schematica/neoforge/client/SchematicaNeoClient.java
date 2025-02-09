@@ -1,7 +1,6 @@
 package com.github.lunatrius.schematica.neoforge.client;
 
 import com.github.lunatrius.schematica.handler.client.InputHandler;
-import com.github.lunatrius.schematica.neoforge.SchematicaNeoForge;
 import com.github.lunatrius.schematica.neoforge.client.handler.PlayerHandlerNeo;
 import com.github.lunatrius.schematica.neoforge.client.handler.RenderTickHandlerNeo;
 import com.github.lunatrius.schematica.reference.Reference;
@@ -9,7 +8,6 @@ import net.minecraft.client.KeyMapping;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.common.NeoForge;
