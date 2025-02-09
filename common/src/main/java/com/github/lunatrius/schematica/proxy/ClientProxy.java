@@ -208,11 +208,6 @@ public class ClientProxy extends CommonProxy {
 			Reference.proxy.createFolders();
 			SchematicaClientConfig.populateExtraAirBlocks();
 			SchematicaClientConfig.normalizeSchematicPath();
-
-			for (KeyMapping keyMapping : InputHandler.KEY_BINDINGS) {
-				KeyMappingRegistry.register(keyMapping);
-			}
-
 //		NeoForge.EVENT_BUS.register(new WorldHandler());
 			Reference.proxy.resetSettings();
 		});

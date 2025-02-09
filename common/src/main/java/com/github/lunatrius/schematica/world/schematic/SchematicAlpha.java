@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -36,17 +37,40 @@ public class SchematicAlpha extends SchematicFormat {
 		int length = tagCompound.getInt(Names.NBT.LENGTH);
 		int height = tagCompound.getInt(Names.NBT.HEIGHT);
 
+		String author = tagCompound.getString(Names.NBT.AUTHOR);
+
 		Map<BlockState, BlockState> oldToNew = new HashMap<>();
 		if (tagCompound.contains(Names.NBT.MAPPING_SCHEMATICA)) {
 			CompoundTag mapping = tagCompound.getCompound(Names.NBT.MAPPING_SCHEMATICA);
 			Set<String> names = mapping.getAllKeys();
 			for (String id : names) {
-				oldToNew.put(Block.stateById(Integer.parseInt(id)), Block.stateById(mapping.getInt(id)));
+				BlockState toReplace;
+
+				try {
+					toReplace = Block.stateById(Integer.parseInt(id));
+				} catch (NumberFormatException n) {
+					toReplace = BuiltInRegistries.BLOCK.getValue(ResourceLocation.tryParse(id)).defaultBlockState();
+				}
+
+				BlockState replaceWith;
+
+				String value = mapping.getString(id);
+
+				if (value.isEmpty()) {
+					replaceWith = Block.stateById(mapping.getInt(id));
+				} else {
+					ResourceLocation location = ResourceLocation.tryParse(mapping.getString(id));
+					replaceWith = BuiltInRegistries.BLOCK.getValue(location).defaultBlockState();
+				}
+
+				oldToNew.put(toReplace, replaceWith);
 			}
 		}
 
 		MBlockPos pos = new MBlockPos();
 		ISchematic schematic = new Schematic(icon, width, height, length);
+		schematic.setAuthor(author);
+
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				for (int z = 0; z < length; z++) {
@@ -174,12 +198,13 @@ public class SchematicAlpha extends SchematicFormat {
 			}
 		}
 
+		tagCompound.putString(Names.NBT.AUTHOR, schematic.getAuthor());
 		tagCompound.putString(Names.NBT.FORMAT, Names.NBT.FORMAT_ALPHA);
 		tagCompound.putIntArray(Names.NBT.BLOCKS, Arrays.stream(localBlocks).mapToInt(Block::getId).toArray());
 		tagCompound.put(Names.NBT.ENTITIES, entityList);
 		tagCompound.put(Names.NBT.BLOCK_ENTITIES, blockEntities);
 		tagCompound.put(Names.NBT.MAPPING_SCHEMATICA, nbtMapping);
-		tagCompoundIn.put("root", tagCompound);
+		tagCompoundIn.put(Names.NBT.ROOT, tagCompound);
 	}
 
 	@Override

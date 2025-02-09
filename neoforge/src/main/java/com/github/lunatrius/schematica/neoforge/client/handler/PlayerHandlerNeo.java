@@ -7,6 +7,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import org.jetbrains.annotations.NotNull;
 
 @OnlyIn(Dist.CLIENT)
 public class PlayerHandlerNeo {
@@ -15,7 +16,7 @@ public class PlayerHandlerNeo {
 	private PlayerHandlerNeo() {}
 
 	@SubscribeEvent
-	public void onRenderWorldLast(RenderLevelStageEvent event) {
+	public void onRenderWorldLast(@NotNull RenderLevelStageEvent event) {
 		if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) {
 			return;
 		}

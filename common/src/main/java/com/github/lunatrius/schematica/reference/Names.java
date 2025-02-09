@@ -205,6 +205,7 @@ public class Names {
 		public static final String FORMAT_ALPHA = "Alpha";
 		public static final String FORMAT_STRUCTURE = "Structure";
 
+		public static final String ROOT = "Schematic";
 		public static final String ICON = "Icon";
 		public static final String BLOCKS = "Blocks";
 		public static final String WIDTH = "Width";
@@ -213,6 +214,7 @@ public class Names {
 		public static final String MAPPING_SCHEMATICA = "SchematicaMapping";
 		public static final String BLOCK_ENTITIES = "TileEntities";
 		public static final String ENTITIES = "Entities";
+		public static final String AUTHOR = "Author";
 	}
 
 	public static class Formats {

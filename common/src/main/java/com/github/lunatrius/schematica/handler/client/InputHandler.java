@@ -1,20 +1,20 @@
 package com.github.lunatrius.schematica.handler.client;
 
 import com.github.lunatrius.core.util.math.MBlockPos;
-import com.github.lunatrius.core.util.math.MathHelper;
 import com.github.lunatrius.schematica.client.gui.control.SchematicControlScreen;
+import com.github.lunatrius.schematica.client.gui.load.SchematicLoadScreen;
 import com.github.lunatrius.schematica.client.gui.save.SchematicSaveScreen;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.world.FakeLevel;
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.serialization.Codec;
 import dev.architectury.event.events.client.ClientTickEvent;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.HitResult;
 import org.lwjgl.glfw.GLFW;
 
@@ -40,89 +40,89 @@ public class InputHandler {
 			new KeyMapping(Names.Keys.MOVE_HERE, GLFW.GLFW_KEY_UNKNOWN, Names.Keys.CATEGORY);
 	private static final KeyMapping KEY_BINDING_PICK_BLOCK =
 			new KeyMapping(Names.Keys.PICK_BLOCK, GLFW.GLFW_KEY_UNKNOWN, Names.Keys.CATEGORY);
-	public static final Codec<InputHandler> CODEC = Codec.unit(InputHandler::new);
-	public static final KeyMapping[] KEY_BINDINGS = new KeyMapping[] {KEY_BINDING_LOAD,
-	                                                                  KEY_BINDING_SAVE,
-	                                                                  KEY_BINDING_CONTROL,
-	                                                                  KEY_BINDING_LAYER_INC,
-	                                                                  KEY_BINDING_LAYER_DEC,
-	                                                                  KEY_BINDING_LAYER_TOGGLE,
-	                                                                  KEY_BINDING_RENDER_TOGGLE,
-	                                                                  KEY_BINDING_PRINTER_TOGGLE,
-	                                                                  KEY_BINDING_MOVE_HERE,
-	                                                                  KEY_BINDING_PICK_BLOCK};
+	public static final KeyMapping[] KEY_BINDINGS = new KeyMapping[]{KEY_BINDING_LOAD,
+			KEY_BINDING_SAVE,
+			KEY_BINDING_CONTROL,
+			KEY_BINDING_LAYER_INC,
+			KEY_BINDING_LAYER_DEC,
+			KEY_BINDING_LAYER_TOGGLE,
+			KEY_BINDING_RENDER_TOGGLE,
+			KEY_BINDING_PRINTER_TOGGLE,
+			KEY_BINDING_MOVE_HERE,
+			KEY_BINDING_PICK_BLOCK};
 
 	private InputHandler() {
-		ClientTickEvent.CLIENT_POST.register(instance -> {
+		ClientTickEvent.CLIENT_PRE.register(instance -> {
 			if (instance.screen == null) {
-				if (KEY_BINDING_LOAD.isDown()) {
-					instance.setScreen(new com.github.lunatrius.schematica.client.gui.load.SchematicLoadScreen(instance.screen));
+				while (KEY_BINDING_LOAD.consumeClick()) {
+					instance.setScreen(new SchematicLoadScreen(instance.screen));
 				}
 
-				if (KEY_BINDING_SAVE.isDown()) {
+				while (KEY_BINDING_SAVE.consumeClick()) {
 					instance.setScreen(new SchematicSaveScreen(instance.screen));
 				}
 
-				if (KEY_BINDING_CONTROL.isDown()) {
+				while (KEY_BINDING_CONTROL.consumeClick()) {
 					instance.setScreen(new SchematicControlScreen(instance.screen));
 				}
 
-				if (KEY_BINDING_LAYER_INC.isDown()) {
+				while (KEY_BINDING_LAYER_INC.isDown()) {
 					FakeLevel schematic = ClientProxy.schematic;
 					if (schematic != null && schematic.layerMode != FakeLevel.LayerMode.ALL) {
 
 						schematic.renderLayer =
-								MathHelper.clamp(schematic.renderLayer + 1, 0, schematic.getHeight() - 1);
+								Mth.clamp(schematic.renderLayer + 1, 0, schematic.getHeight() - 1);
 					}
 				}
 
-				if (KEY_BINDING_LAYER_DEC.isDown()) {
+				while (KEY_BINDING_LAYER_DEC.isDown()) {
 					FakeLevel schematic = ClientProxy.schematic;
 					if (schematic != null && schematic.layerMode != FakeLevel.LayerMode.ALL) {
 						schematic.renderLayer =
-								MathHelper.clamp(schematic.renderLayer - 1, 0, schematic.getHeight() - 1);
+								Mth.clamp(schematic.renderLayer - 1, 0, schematic.getHeight() - 1);
 					}
 				}
 
-				if (KEY_BINDING_LAYER_TOGGLE.isDown()) {
+				while (KEY_BINDING_LAYER_TOGGLE.consumeClick()) {
 					FakeLevel schematic = ClientProxy.schematic;
 					if (schematic != null) {
 						schematic.layerMode = FakeLevel.LayerMode.next(schematic.layerMode);
 					}
 				}
 
-				if (KEY_BINDING_RENDER_TOGGLE.isDown()) {
+				while (KEY_BINDING_RENDER_TOGGLE.consumeClick()) {
 					FakeLevel schematic = ClientProxy.schematic;
 					if (schematic != null) {
 						schematic.setRendering(!schematic.isRendering());
 					}
 				}
 
-				if (KEY_BINDING_PRINTER_TOGGLE.isDown()) {
+				while (KEY_BINDING_PRINTER_TOGGLE.consumeClick()) {
 					if (ClientProxy.schematic != null) {
 						boolean printing = SchematicPrinter.INSTANCE.togglePrinting();
 						if (instance.player != null) {
 							instance.player.displayClientMessage(Component.translatable(Names.Messages.TOGGLE_PRINTER,
-							                                                            printing
-							                                                            ? Names.Gui.ON
-							                                                            : Names.Gui.OFF), false);
+									printing
+											? Names.Gui.ON
+											: Names.Gui.OFF), false);
 						}
 					}
 				}
 
-				if (KEY_BINDING_MOVE_HERE.isDown()) {
+				while (KEY_BINDING_MOVE_HERE.consumeClick()) {
 					FakeLevel schematic = ClientProxy.schematic;
 					if (schematic != null) {
 						ClientProxy.moveSchematicToPlayer(schematic);
 					}
 				}
 
-				if (KEY_BINDING_PICK_BLOCK.isDown()) {
+				while (KEY_BINDING_PICK_BLOCK.consumeClick()) {
 					FakeLevel schematic = ClientProxy.schematic;
 					if (schematic != null && schematic.isRendering()) {
 						pickBlock(schematic, ClientProxy.objectMouseOver, instance);
 					}
 				}
+
 			}
 		});
 	}
@@ -139,10 +139,9 @@ public class InputHandler {
 		LocalPlayer player = instance.player;
 
 		if (player != null && player.isCreative()) {
-			int slot = player.getInventory().items.size() - 10 + player.getInventory().selected;
 			if (instance.gameMode != null) {
 				instance.gameMode.handlePickItemFromBlock(new MBlockPos(objectMouseOver.getLocation()),
-				                                          player.input.keyPresses.sprint());
+						player.input.keyPresses.sprint());
 			}
 		}
 	}

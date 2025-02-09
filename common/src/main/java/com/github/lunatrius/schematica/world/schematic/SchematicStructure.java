@@ -82,8 +82,9 @@ public class SchematicStructure extends SchematicFormat {
 
 		template.save(writeTo);
 		writeTo.putString(Names.NBT.FORMAT, Names.NBT.FORMAT_STRUCTURE);
+		writeTo.putString(Names.NBT.AUTHOR, schematic.getAuthor());
 
-		tagCompoundIn.put("root", writeTo);
+		tagCompoundIn.put(Names.NBT.ROOT, writeTo);
 	}
 
 	@Override

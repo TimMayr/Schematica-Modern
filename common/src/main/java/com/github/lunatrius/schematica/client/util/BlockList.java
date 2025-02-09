@@ -39,9 +39,10 @@ public class BlockList {
 			}
 
 			BlockState blockState = world.getBlockState(pos);
+
 			Block block = blockState.getBlock();
 
-			if (world.getBlockState(pos).isAir()) {
+			if (blockState.isAir()) {
 				continue;
 			}
 

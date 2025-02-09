@@ -1,9 +1,12 @@
 package com.github.lunatrius.schematica.fabric.client;
 
+import com.github.lunatrius.schematica.handler.client.InputHandler;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.world.FakeLevel;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -32,6 +35,10 @@ public final class SchematicaFabricClient implements ClientModInitializer {
 			FakeLevel schematic = ClientProxy.schematic;
 			ClientProxy.objectMouseOver = schematic != null ? rayTrace(schematic, 1.0f) : null;
 		});
+
+		for (KeyMapping keyBinding : InputHandler.KEY_BINDINGS) {
+			KeyBindingHelper.registerKeyBinding(keyBinding);
+		}
 	}
 
 	@SuppressWarnings("SameParameterValue")
@@ -49,18 +56,18 @@ public final class SchematicaFabricClient implements ClientModInitializer {
 			double posZ = renderViewEntity.getZ();
 
 			renderViewEntity.setPos(posX - schematic.getWorldPos().x, posY - schematic.getWorldPos().y,
-			                        posZ - schematic.getWorldPos().z);
+					posZ - schematic.getWorldPos().z);
 
 			Vec3 vecPosition = renderViewEntity.getEyePosition(partialTicks);
 			Vec3 vecLook = renderViewEntity.getLookAngle();
 			Vec3 vecExtendedLook = vecPosition.add(vecLook.x * blockReachDistance, vecLook.y * blockReachDistance,
-			                                       vecLook.z * blockReachDistance);
+					vecLook.z * blockReachDistance);
 
 			renderViewEntity.setPos(posX, posY, posZ);
 
 			return schematic.clip(
 					new ClipContext(vecPosition, vecExtendedLook, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE,
-					                renderViewEntity));
+							renderViewEntity));
 		}
 
 		throw new IllegalStateException("Error rendering Schematic");

@@ -82,9 +82,7 @@ public class SchematicMaterialsList extends ObjectSelectionList<SchematicMateria
 				parent.getParent()
 						.setTooltipForNextRenderPass(Screen.getTooltipFromItem(parent.getMinecraft(), itemStack)
 								.stream()
-								.reduce(Component.empty(),
-										MutableComponent::append,
-										MutableComponent::append));
+								.findFirst().orElse(Component.empty()));
 			}
 		}
 
