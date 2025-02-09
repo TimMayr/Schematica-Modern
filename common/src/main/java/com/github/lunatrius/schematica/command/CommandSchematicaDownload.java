@@ -23,43 +23,43 @@ public class CommandSchematicaDownload extends CommandSchematicaBase {
 
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		return Commands.literal(Names.Command.Download.NAME)
-		               .then(Commands.argument("filename", StringArgumentType.string())
-		                             .suggests(
-				                             ((context, builder) -> CommandSchematicaBase.getSchematicNamesSuggestions(
-						                             context, builder, FILE_FILTER_SCHEMATIC)))
-		                             .executes((commandContext) -> {
-			                             CommandSourceStack source = commandContext.getSource();
-			                             ServerPlayer player = source.getPlayerOrException();
+				.then(Commands.argument("filename", StringArgumentType.string())
+						.suggests(
+								((context, builder) -> CommandSchematicaBase.getSchematicNamesSuggestions(
+										context, builder, FILE_FILTER_SCHEMATIC)))
+						.executes((commandContext) -> {
+							CommandSourceStack source = commandContext.getSource();
+							ServerPlayer player = source.getPlayerOrException();
 
-			                             String filename = StringArgumentType.getString(commandContext, "filename");
-			                             File directory = Reference.proxy.getPlayerSchematicDirectory(player, true);
+							String filename = StringArgumentType.getString(commandContext, "filename");
+							File directory = Reference.proxy.getPlayerSchematicDirectory(player, true);
 
-			                             if (!FileUtils.contains(directory, filename)) {
-				                             Reference.logger.error("{} has tried to download" + " the file " + "{}",
-				                                                    player.getName(), filename);
+							if (!FileUtils.contains(directory, filename)) {
+								Reference.logger.error("{} has tried to download" + " the file " + "{}",
+										player.getName(), filename);
 
-				                             source.sendFailure(Component.translatable(
-						                             Names.Command.Download.Message.DOWNLOAD_FAILED));
-				                             return -1;
-			                             }
+								source.sendFailure(Component.translatable(
+										Names.Command.Download.Message.DOWNLOAD_FAILED));
+								return -1;
+							}
 
-			                             ISchematic schematic = SchematicFormat.readFromFile(directory, filename,
-			                                                                                 Reference.proxy.getLevel(
-					                                                                                 player));
+							ISchematic schematic = SchematicFormat.readFromFile(directory, filename,
+									Reference.proxy.getLevel(
+											player));
 
-			                             if (schematic != null) {
-				                             DownloadHandler.INSTANCE.transferMap.put(player.getScoreboardName(),
-				                                                                      new SchematicTransfer(schematic,
-				                                                                                            filename));
-				                             source.sendSuccess(() -> Component.translatable(
-						                             Names.Command.Download.Message.DOWNLOAD_STARTED, filename), true);
-			                             } else {
-				                             source.sendFailure(Component.translatable(
-						                             Names.Command.Download.Message.DOWNLOAD_FAILED));
-				                             return -1;
-			                             }
+							if (schematic != null) {
+								DownloadHandler.INSTANCE.transferMap.put(player.getScoreboardName(),
+										new SchematicTransfer(schematic,
+												filename));
+								source.sendSuccess(() -> Component.translatable(
+										Names.Command.Download.Message.DOWNLOAD_STARTED, filename), true);
+							} else {
+								source.sendFailure(Component.translatable(
+										Names.Command.Download.Message.DOWNLOAD_FAILED));
+								return -1;
+							}
 
-			                             return 0;
-		                             }));
+							return 0;
+						}));
 	}
 }

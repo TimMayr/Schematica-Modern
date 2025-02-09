@@ -9,15 +9,12 @@ import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Reference;
 import commonnetwork.api.Dispatcher;
 import dev.architectury.event.events.common.TickEvent;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-@Environment(EnvType.SERVER)
 public class DownloadHandler {
 	public static final DownloadHandler INSTANCE = new DownloadHandler();
 	public final Map<String, SchematicTransfer> transferMap = new LinkedHashMap<>();

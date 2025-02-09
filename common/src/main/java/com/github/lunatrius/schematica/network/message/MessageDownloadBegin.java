@@ -15,6 +15,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 @MethodsReturnNonnullByDefault
 public record MessageDownloadBegin(ItemStack icon, int width, int height, int length)
@@ -28,11 +29,11 @@ public record MessageDownloadBegin(ItemStack icon, int width, int height, int le
 			                      MessageDownloadBegin::width, ByteBufCodecs.INT, MessageDownloadBegin::height,
 			                      ByteBufCodecs.INT, MessageDownloadBegin::length, MessageDownloadBegin::new);
 
-	public MessageDownloadBegin(ISchematic schematic) {
+	public MessageDownloadBegin(@NotNull ISchematic schematic) {
 		this(schematic.getIcon(), schematic.getSizeX(), schematic.getHeight(), schematic.getSizeZ());
 	}
 
-	public static void handle(PacketContext<MessageDownloadBegin> ctx) {
+	public static void handle(@NotNull PacketContext<MessageDownloadBegin> ctx) {
 		if (ctx.side() == Side.CLIENT) {
 			DownloadHandler.INSTANCE.schematic =
 					new Schematic(ctx.message().icon, ctx.message().width, ctx.message().height, ctx.message().length);

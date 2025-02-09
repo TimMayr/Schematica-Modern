@@ -66,6 +66,9 @@ public class Names {
 	}
 
 	public static class Command {
+		public static final String BASE = "schematica";
+		public static final String CLIENT_BASE = "schematicaClient";
+
 		public static class Save {
 			public static final String NAME = "save";
 

@@ -108,15 +108,10 @@ public class FakeLevel extends Level {
 	private boolean isRendering;
 
 	/**
-	 * @param levelSource
-	 * 		data source, also try to set block entities/entities collections
-	 * @param lightProvider
-	 * 		light source
-	 * @param scoreboard
-	 * 		if null client level is used instead
-	 * @param overrideBeLevel
-	 * 		if true all block entities will have set level to this instance
-	 *
+	 * @param levelSource     data source, also try to set block entities/entities collections
+	 * @param lightProvider   light source
+	 * @param scoreboard      if null client level is used instead
+	 * @param overrideBeLevel if true all block entities will have set level to this instance
 	 * @see #setBlockEntities(Map) for better block entity handling, if set then levelSource BE getter is not used
 	 * @see #setEntities(Collection) only way to add entities into fake level
 	 * @see #setRealLevel(Level) if you want to reuse this instance
@@ -124,8 +119,9 @@ public class FakeLevel extends Level {
 	public FakeLevel(final ISchematic levelSource, final IFakeLevelLightProvider lightProvider,
 	                 @Nullable final Scoreboard scoreboard, final boolean overrideBeLevel) {
 		super(new FakeLevelData(clientLevel()::getLevelData, lightProvider), clientLevel().dimension(),
-		      clientLevel().registryAccess(), clientLevel().dimensionTypeRegistration(), clientLevel().isClientSide(),
-		      clientLevel().isDebug(), 0, 0);
+				clientLevel().registryAccess(), clientLevel().dimensionTypeRegistration(),
+				clientLevel().isClientSide(),
+				clientLevel().isDebug(), 0, 0);
 		this.setLevelSource(levelSource);
 		this.lightProvider = lightProvider;
 		this.realLevel = clientLevel();
@@ -194,8 +190,7 @@ public class FakeLevel extends Level {
 	}
 
 	/**
-	 * @param worldPos
-	 * 		where is fake level anchor when querying current client level data
+	 * @param worldPos where is fake level anchor when querying current client level data
 	 */
 	public void setWorldPos(MBlockPos worldPos) {
 		this.worldPos = worldPos;
@@ -206,8 +201,7 @@ public class FakeLevel extends Level {
 	 * {@link ISchematic#getBlockEntity(BlockPos)
 	 * levelSource.getBlockEntity(BlockPos)} is not used. Reset with empty collection
 	 *
-	 * @param blockEntities
-	 * 		all block entities, should be data equivalent to levelSource
+	 * @param blockEntities all block entities, should be data equivalent to levelSource
 	 */
 	public void setBlockEntities(Map<BlockPos, BlockEntity> blockEntities) {
 		this.blockEntities = blockEntities;
@@ -245,10 +239,9 @@ public class FakeLevel extends Level {
 	}
 
 	@Override
-	public boolean setBlock(@Nullable BlockPos ignored_1, @Nullable BlockState ignored_2, int ignored_3,
-	                        int ignored_4) {
-		// Noop
-		return false;
+	public boolean setBlock(@Nullable BlockPos pos, @Nullable BlockState block, int ignored_1,
+	                        int ignored_2) {
+		return levelSource.setBlockState(pos, block);
 	}
 
 	@Override
@@ -309,7 +302,7 @@ public class FakeLevel extends Level {
 	@Override
 	public BlockState getBlockState(@NotNull BlockPos pos) {
 		return getLevelSource().isPosInside(pos) ? getLevelSource().getBlockState(pos) :
-		       Blocks.AIR.defaultBlockState();
+				Blocks.AIR.defaultBlockState();
 	}
 
 	@Override
@@ -584,13 +577,12 @@ public class FakeLevel extends Level {
 	}
 
 	/**
-	 * @param entities
-	 * 		all entities, their level should be this fake level instance. Reset with empty collection
+	 * @param entities all entities, their level should be this fake level instance. Reset with empty collection
 	 */
 	public void setEntities(@NotNull Collection<? extends Entity> entities) {
 		levelEntityGetter = entities.isEmpty()
-		                    ? FakeLevelEntityGetterAdapter.EMPTY
-		                    : FakeLevelEntityGetterAdapter.ofEntities(entities);
+				? FakeLevelEntityGetterAdapter.EMPTY
+				: FakeLevelEntityGetterAdapter.ofEntities(entities);
 	}
 
 	@Override
@@ -674,8 +666,8 @@ public class FakeLevel extends Level {
 	public int getBrightness(@NotNull LightLayer lightType, @NotNull BlockPos pos) {
 		try (Level realLevel = realLevel()) {
 			return lightProvider.forceOwnLightLevel()
-			       ? lightProvider.getBrightness(lightType, pos)
-			       : realLevel.getBrightness(lightType, worldPos.offset(pos));
+					? lightProvider.getBrightness(lightType, pos)
+					: realLevel.getBrightness(lightType, worldPos.offset(pos));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -685,8 +677,8 @@ public class FakeLevel extends Level {
 	public int getRawBrightness(@NotNull BlockPos pos, int amount) {
 		try (Level realLevel = realLevel()) {
 			return lightProvider.forceOwnLightLevel()
-			       ? lightProvider.getRawBrightness(pos, amount)
-			       : realLevel.getRawBrightness(worldPos.offset(pos), amount);
+					? lightProvider.getRawBrightness(pos, amount)
+					: realLevel.getRawBrightness(worldPos.offset(pos), amount);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -778,10 +770,9 @@ public class FakeLevel extends Level {
 		int count = 0;
 
 		for (MBlockPos pos : BlockPosHelper.getAllInBox(0, 0, 0, getLevelSource().getMaxX(), getHeight(),
-		                                                getLevelSource().getMaxZ())) {
+				getLevelSource().getMaxZ())) {
 			BlockState blockState = this.getBlockState(pos);
 
-			// TODO: add support for tile entities?
 			if (blockState.hasBlockEntity()) {
 				continue;
 			}
@@ -790,7 +781,6 @@ public class FakeLevel extends Level {
 				Map<Property, Comparable> properties = BlockStateHelper.getProperties(blockState);
 				BlockState replacement = replacer.getReplacement(properties);
 
-				// TODO: add support for tile entities?
 				if (replacement.hasBlockEntity()) {
 					continue;
 				}

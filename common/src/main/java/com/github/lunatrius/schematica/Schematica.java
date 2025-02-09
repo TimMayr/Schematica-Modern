@@ -26,15 +26,12 @@ public class Schematica {
 	public static void init() {
 		if (Platform.getEnv() == EnvType.CLIENT) {
 			Schematica.clientInit();
+		} else {
+			Schematica.serverInit();
 		}
 
 		CommandRegistrationEvent.EVENT.register(
 				(dispatcher, context, selection) -> CommandSchematicaBase.register(dispatcher));
-
-		if (Platform.getEnv() == EnvType.SERVER) {
-			LifecycleEvent.SERVER_STARTING.register(
-					(server) -> ServerProxy.serverWeakReference = new WeakReference<>(server));
-		}
 
 		Reference.proxy = EnvExecutor.getEnvSpecific(() -> ClientProxy::new, () -> ServerProxy::new);
 		Reference.proxy.init();
@@ -48,7 +45,11 @@ public class Schematica {
 	}
 
 	private static void clientInit() {
-		ClientCommandRegistrationEvent.EVENT.register(
-				((dispatcher, context) -> CommandSchematicaBase.registerClient(context)));
+		ClientCommandRegistrationEvent.EVENT.register(CommandSchematicaBase::registerClient);
+	}
+
+	private static void serverInit() {
+		LifecycleEvent.SERVER_STARTING.register(
+				(server) -> ServerProxy.serverWeakReference = new WeakReference<>(server));
 	}
 }

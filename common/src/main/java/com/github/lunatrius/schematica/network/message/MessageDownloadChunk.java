@@ -4,14 +4,16 @@ import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.nbt.NBTHelper;
+import com.github.lunatrius.schematica.network.transfer.SchematicTransfer;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import commonnetwork.api.Dispatcher;
 import commonnetwork.networking.data.PacketContext;
 import commonnetwork.networking.data.Side;
+import dev.architectury.platform.Platform;
+import net.fabricmc.api.EnvType;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -21,6 +23,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -32,38 +35,16 @@ public class MessageDownloadChunk implements CustomPacketPayload {
 			ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, Names.Network.DOWNLOAD_CHUNK_LOCATION));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, MessageDownloadChunk> STREAM_CODEC = new StreamCodec<>() {
-		public @NotNull MessageDownloadChunk decode(RegistryFriendlyByteBuf buf) {
-			int msgBaseX = buf.readInt();
-			int msgBaseY = buf.readInt();
-			int msgBaseZ = buf.readInt();
-
-			BlockState[][][] msgBlocks =
-					new BlockState[Constants.SchematicChunk.WIDTH][Constants.SchematicChunk.HEIGHT][Constants.SchematicChunk.LENGTH];
-			List<BlockEntity> msgBlockEntities = new ArrayList<>();
-			List<Entity> msgEntities = new ArrayList<>();
-
-			for (int x = 0; x < Constants.SchematicChunk.WIDTH; x++) {
-				for (int y = 0; y < Constants.SchematicChunk.HEIGHT; y++) {
-					for (int z = 0; z < Constants.SchematicChunk.LENGTH; z++) {
-						msgBlocks[x][y][z] = Block.stateById(buf.readVarInt());
-					}
-				}
+		@Contract("_ -> new")
+		public @NotNull MessageDownloadChunk decode(@NotNull RegistryFriendlyByteBuf buf) {
+			if (Platform.getEnv() == EnvType.CLIENT) {
+				return SchematicTransfer.readFromBuff(buf);
 			}
 
-			CompoundTag blockEntitiesTag = buf.readNbt();
-			if (blockEntitiesTag != null) {
-				NBTHelper.readBlockEntitiesFromCompound(blockEntitiesTag, Minecraft.getInstance().level,
-				                                        msgBlockEntities);
-			}
-
-			CompoundTag entitiesTag = buf.readNbt();
-			NBTHelper.readEntitiesFromCompound(entitiesTag, msgEntities, Minecraft.getInstance().level);
-
-			return new MessageDownloadChunk(msgBaseX, msgBaseY, msgBaseZ, msgBlocks, msgBlockEntities, msgEntities);
-
+			throw new IllegalStateException("Can't be run on server");
 		}
 
-		public void encode(RegistryFriendlyByteBuf buf, MessageDownloadChunk msg) {
+		public void encode(@NotNull RegistryFriendlyByteBuf buf, @NotNull MessageDownloadChunk msg) {
 			buf.writeInt(msg.getBaseX());
 			buf.writeInt(msg.getBaseY());
 			buf.writeInt(msg.getBaseZ());
@@ -116,8 +97,8 @@ public class MessageDownloadChunk implements CustomPacketPayload {
 		}
 	}
 
-	private MessageDownloadChunk(int baseX, int baseY, int baseZ, BlockState[][][] blocks,
-	                             List<BlockEntity> blockEntities, List<Entity> entities) {
+	public MessageDownloadChunk(int baseX, int baseY, int baseZ, BlockState[][][] blocks,
+	                            List<BlockEntity> blockEntities, List<Entity> entities) {
 		this.baseX = baseX;
 		this.baseY = baseY;
 		this.baseZ = baseZ;
@@ -126,12 +107,12 @@ public class MessageDownloadChunk implements CustomPacketPayload {
 		this.entities = entities;
 	}
 
-	public static void handle(PacketContext<MessageDownloadChunk> ctx) {
+	public static void handle(@NotNull PacketContext<MessageDownloadChunk> ctx) {
 		if (ctx.side() == Side.CLIENT) {
 			ctx.message().copyToSchematic(DownloadHandler.INSTANCE.schematic);
 			Dispatcher.sendToServer(
 					new MessageDownloadChunkAck(true, ctx.message().getBaseX(), ctx.message().getBaseY(),
-					                            ctx.message().getBaseZ()));
+							ctx.message().getBaseZ()));
 		}
 	}
 

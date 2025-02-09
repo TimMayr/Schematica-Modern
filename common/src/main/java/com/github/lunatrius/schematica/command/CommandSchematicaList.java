@@ -25,9 +25,9 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		return Commands.literal(Names.Command.List.NAME)
-		               .executes(CommandSchematicaList::printList)
-		               .then(Commands.argument("page", IntegerArgumentType.integer(1))
-		                             .executes(CommandSchematicaList::printList));
+				.executes(CommandSchematicaList::printList)
+				.then(Commands.argument("page", IntegerArgumentType.integer(1))
+						.executes(CommandSchematicaList::printList));
 	}
 
 	private static int printList(@NotNull CommandContext<CommandSourceStack> commandContext)
@@ -60,7 +60,7 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 		if (!schematicDirectory.exists()) {
 			if (!schematicDirectory.mkdirs()) {
 				Reference.logger.warn("Could not create player schematic directory {}",
-				                      schematicDirectory.getAbsolutePath());
+						schematicDirectory.getAbsolutePath());
 
 				source.sendFailure(Component.translatable(Names.Command.Save.Message.PLAYER_SCHEMATIC_DIR_UNAVAILABLE));
 				return -1;
@@ -74,23 +74,23 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 					String fileName = path.getName();
 
 					Component chatComponent = Component.literal(String.format("%2d (%s): %s [", currentFile + 1,
-					                                                          FileUtils.humanReadableByteCount(
-							                                                          path.length()),
-					                                                          FilenameUtils.removeExtension(fileName)));
+							FileUtils.humanReadableByteCount(
+									path.length()),
+							FilenameUtils.removeExtension(fileName)));
 
 					String removeCommand =
 							String.format("/%s %s", Reference.MOD_ID + " " + Names.Command.Remove.NAME, fileName);
 					Component removeLink =
 							withStyle(Component.translatable(Names.Command.List.Message.REMOVE), ChatFormatting.RED,
-							          removeCommand);
+									removeCommand);
 					chatComponent = chatComponent.copy().append(removeLink).append("][");
 
 					String downloadCommand =
 							String.format("/%s %s", Reference.MOD_ID + " " + Names.Command.Download.NAME, fileName);
 					Component downloadLink =
 							withStyle(Component.translatable(Names.Command.List.Message.DOWNLOAD),
-							          ChatFormatting.GREEN,
-							          downloadCommand);
+									ChatFormatting.GREEN,
+									downloadCommand);
 					chatComponent = chatComponent.copy().append(downloadLink).append("]");
 
 					componentsToSend.add(chatComponent);
@@ -112,7 +112,7 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 
 		source.sendSystemMessage(
 				withStyle(Component.translatable(Names.Command.List.Message.PAGE_HEADER, page + 1, totalPages + 1),
-				          ChatFormatting.DARK_GREEN, null));
+						ChatFormatting.DARK_GREEN, null));
 		for (Component chatComponent : componentsToSend) {
 			source.sendSystemMessage(chatComponent);
 		}

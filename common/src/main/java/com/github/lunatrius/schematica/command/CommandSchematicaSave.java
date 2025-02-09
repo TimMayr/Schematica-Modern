@@ -21,21 +21,20 @@ import java.io.File;
 public class CommandSchematicaSave extends CommandSchematicaBase {
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		return Commands.literal(Names.Command.Save.NAME)
-		               .then(Commands.argument("from", BlockPosArgument.blockPos())
-		                             .then(Commands.argument("to", BlockPosArgument.blockPos())
-		                                           .then(Commands.argument("name", StringArgumentType.string())
-		                                                         .executes(CommandSchematicaSave::execute)
-		                                                         .then(Commands.argument("format",
-		                                                                                 StringArgumentType.string())
-		                                                                       .suggests(((context, builder) -> {
-			                                                                       for (String s :
-					                                                                       SchematicFormat.FORMATS.keySet()) {
-				                                                                       builder.suggest(s);
-			                                                                       }
-			                                                                       return builder.buildFuture();
-		                                                                       }))
-		                                                                       .executes(
-				                                                                       CommandSchematicaSave::execute)))));
+				.then(Commands.argument("from", BlockPosArgument.blockPos())
+						.then(Commands.argument("to", BlockPosArgument.blockPos())
+								.then(Commands.argument("name", StringArgumentType.string())
+										.executes(CommandSchematicaSave::execute)
+										.then(Commands.argument("format",
+														StringArgumentType.string())
+												.suggests(((context, builder) -> {
+													for (String s :
+															SchematicFormat.FORMATS.keySet()) {
+														builder.suggest(s);
+													}
+													return builder.buildFuture();
+												}))
+												.executes(CommandSchematicaSave::execute)))));
 	}
 
 	private static int execute(@NotNull CommandContext<CommandSourceStack> commandContext)
@@ -67,7 +66,7 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 
 		String filename = name + SchematicFormat.getExtension(format);
 
-		Reference.logger.debug("Saving " + "schematic from {} to {} to {}", from, to, filename);
+		Reference.logger.debug("Saving schematic from {} to {} to {}", from, to, filename);
 		File schematicDirectory = Reference.proxy.getPlayerSchematicDirectory(player, true);
 		if (schematicDirectory == null) {
 			//Chances are that if this is null, we could not retrieve their UUID.
@@ -79,7 +78,7 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 		if (!schematicDirectory.exists()) {
 			if (!schematicDirectory.mkdirs()) {
 				Reference.logger.warn("Could not create " + "player " + "schematic " + "directory " + "{}",
-				                      schematicDirectory.getAbsolutePath());
+						schematicDirectory.getAbsolutePath());
 				source.sendFailure(Component.translatable(Names.Command.Save.Message.PLAYER_SCHEMATIC_DIR_UNAVAILABLE));
 				return -1;
 			}
@@ -87,7 +86,7 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 
 		try {
 			Reference.proxy.saveSchematic(player, schematicDirectory, filename, player.getCommandSenderWorld(), format,
-			                              from, to);
+					from, to);
 		} catch (Exception e) {
 			source.sendFailure(Component.translatable(Names.Command.Save.Message.SAVE_FAILED));
 			return -1;

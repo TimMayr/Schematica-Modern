@@ -6,10 +6,11 @@ import com.github.lunatrius.schematica.reference.Reference;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
+import org.jetbrains.annotations.NotNull;
 
 @Mod(Reference.MOD_ID)
 public final class SchematicaNeoForge {
-	public SchematicaNeoForge(ModContainer modContainer) {
+	public SchematicaNeoForge(@NotNull ModContainer modContainer) {
 		// Run our common setup.
 		Schematica.init();
 

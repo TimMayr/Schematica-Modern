@@ -1,6 +1,7 @@
 package com.github.lunatrius.schematica.command;
 
 import com.github.lunatrius.schematica.command.client.CommandSchematicaReplace;
+import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -8,7 +9,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.mojang.brigadier.tree.CommandNode;
+import dev.architectury.event.events.client.ClientCommandRegistrationEvent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -27,7 +29,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class CommandSchematicaBase {
-	private static LiteralCommandNode<CommandSourceStack> mainNode;
+	private static CommandNode<CommandSourceStack> rootNode;
 
 	protected static @NotNull MutableComponent withStyle(MutableComponent component, ChatFormatting formatting,
 	                                                     @Nullable String command) {
@@ -41,15 +43,15 @@ public abstract class CommandSchematicaBase {
 	}
 
 	public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
-		mainNode = dispatcher.register(Commands.literal("schematica")
-		                                       .then(CommandSchematicaDownload.register())
-		                                       .then(CommandSchematicaList.register())
-		                                       .then(CommandSchematicaSave.register())
-		                                       .then(CommandSchematicaRemove.register()));
+		rootNode = dispatcher.register(Commands.literal(Names.Command.BASE)
+				.then(CommandSchematicaDownload.register())
+				.then(CommandSchematicaList.register())
+				.then(CommandSchematicaSave.register())
+				.then(CommandSchematicaRemove.register()));
 	}
 
-	public static void registerClient(CommandBuildContext context) {
-		mainNode.addChild(CommandSchematicaReplace.register(context).build());
+	public static void registerClient(@NotNull CommandDispatcher<ClientCommandRegistrationEvent.ClientCommandSourceStack> dispatcher, CommandBuildContext context) {
+		dispatcher.register(CommandSchematicaReplace.register(context));
 	}
 
 	public static CompletableFuture<Suggestions> getSchematicNamesSuggestions(

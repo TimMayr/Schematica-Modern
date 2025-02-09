@@ -11,6 +11,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 
 @MethodsReturnNonnullByDefault
 public record MessageCapabilities(boolean isPrinterEnabled, boolean isSaveEnabled, boolean isLoadEnabled)
@@ -23,7 +24,7 @@ public record MessageCapabilities(boolean isPrinterEnabled, boolean isSaveEnable
 			                      MessageCapabilities::isSaveEnabled, ByteBufCodecs.BOOL,
 			                      MessageCapabilities::isLoadEnabled, MessageCapabilities::new);
 
-	public static void handle(PacketContext<MessageCapabilities> ctx) {
+	public static void handle(@NotNull PacketContext<MessageCapabilities> ctx) {
 		if (ctx.side() == Side.CLIENT) {
 			SchematicPrinter.INSTANCE.setEnabled(ctx.message().isPrinterEnabled());
 			Reference.proxy.isSaveEnabled = ctx.message().isSaveEnabled();
