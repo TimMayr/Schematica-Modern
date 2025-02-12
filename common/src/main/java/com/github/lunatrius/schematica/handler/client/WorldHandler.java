@@ -1,12 +1,7 @@
 package com.github.lunatrius.schematica.handler.client;
 
-import com.github.lunatrius.schematica.proxy.ClientProxy;
-import com.github.lunatrius.schematica.world.FakeLevel;
-import dev.architectury.event.events.client.ClientLifecycleEvent;
-import dev.architectury.event.events.client.ClientTickEvent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.network.ClientboundPacketListener;
 
 @Environment(EnvType.CLIENT)
 public class WorldHandler {

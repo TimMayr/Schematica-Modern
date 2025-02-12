@@ -91,12 +91,9 @@ public class Schematic implements ISchematic {
 		return true;
 	}
 
-	private boolean isValid(@NotNull BlockPos pos) {
-		int x = pos.getX();
-		int y = pos.getY();
-		int z = pos.getZ();
-
-		return !(x < 0 || y < 0 || z < 0 || x >= this.width || y >= this.height || z >= this.length);
+	@Override
+	public List<BlockEntity> getBlockEntities() {
+		return this.blockEntities;
 	}
 
 	@Override
@@ -152,11 +149,6 @@ public class Schematic implements ISchematic {
 		this.author = author;
 	}
 
-	@Override
-	public List<BlockEntity> getBlockEntities() {
-		return this.blockEntities;
-	}
-
 	public void setBlockEntity(BlockPos pos, BlockEntity blockEntity) {
 		if (!isValid(pos)) {
 			return;
@@ -177,5 +169,13 @@ public class Schematic implements ISchematic {
 	@Override
 	public int getHeight() {
 		return this.height;
+	}
+
+	private boolean isValid(@NotNull BlockPos pos) {
+		int x = pos.getX();
+		int y = pos.getY();
+		int z = pos.getZ();
+
+		return !(x < 0 || y < 0 || z < 0 || x >= this.width || y >= this.height || z >= this.length);
 	}
 }

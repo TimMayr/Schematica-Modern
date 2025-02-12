@@ -156,18 +156,6 @@ public class RotationHelper {
 
 	}
 
-	private @NotNull BlockPos rotatePos(BlockPos pos, @NotNull Direction axis, Vec3i dimensions, MBlockPos rotated) {
-		return switch (axis) {
-			case DOWN -> rotated.set(pos.getZ(), pos.getY(), dimensions.getZ() - 1 - pos.getX());
-			case UP -> rotated.set(dimensions.getX() - 1 - pos.getZ(), pos.getY(), pos.getX());
-			case NORTH -> rotated.set(dimensions.getX() - 1 - pos.getY(), pos.getX(), pos.getZ());
-			case SOUTH -> rotated.set(pos.getY(), dimensions.getY() - 1 - pos.getX(), pos.getZ());
-			case WEST -> rotated.set(pos.getX(), dimensions.getY() - 1 - pos.getZ(), pos.getY());
-			case EAST -> rotated.set(pos.getX(), pos.getZ(), dimensions.getZ() - 1 - pos.getY());
-		};
-
-	}
-
 	@SuppressWarnings({"rawtypes"})
 	private @NotNull BlockState rotateBlock(BlockState blockState, Direction axisRotation, boolean forced)
 			throws RotationException {
@@ -207,6 +195,18 @@ public class RotationHelper {
 		}
 
 		return blockState;
+	}
+
+	private @NotNull BlockPos rotatePos(BlockPos pos, @NotNull Direction axis, Vec3i dimensions, MBlockPos rotated) {
+		return switch (axis) {
+			case DOWN -> rotated.set(pos.getZ(), pos.getY(), dimensions.getZ() - 1 - pos.getX());
+			case UP -> rotated.set(dimensions.getX() - 1 - pos.getZ(), pos.getY(), pos.getX());
+			case NORTH -> rotated.set(dimensions.getX() - 1 - pos.getY(), pos.getX(), pos.getZ());
+			case SOUTH -> rotated.set(pos.getY(), dimensions.getY() - 1 - pos.getX(), pos.getZ());
+			case WEST -> rotated.set(pos.getX(), dimensions.getY() - 1 - pos.getZ(), pos.getY());
+			case EAST -> rotated.set(pos.getX(), pos.getZ(), dimensions.getZ() - 1 - pos.getY());
+		};
+
 	}
 
 	private static Direction getRotatedFacing(@NotNull Direction source, @NotNull Direction side) {

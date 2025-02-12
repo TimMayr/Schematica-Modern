@@ -1,6 +1,5 @@
 package com.github.lunatrius.schematica.command;
 
-import com.github.lunatrius.schematica.command.client.CommandSchematicaReplace;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.mojang.brigadier.CommandDispatcher;
@@ -9,9 +8,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import dev.architectury.event.events.client.ClientCommandRegistrationEvent;
 import net.minecraft.ChatFormatting;
-import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.ClickEvent;
