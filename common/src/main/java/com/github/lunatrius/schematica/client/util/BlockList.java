@@ -6,6 +6,8 @@ import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.block.state.BlockStateHelper;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -20,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public class BlockList {
 	public List<WrappedItemStack> getList(Player player, FakeLevel world, Level mcWorld) {
 		List<WrappedItemStack> blockList = new ArrayList<>();

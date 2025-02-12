@@ -1,5 +1,7 @@
 package com.github.lunatrius.schematica.client.printer.registry;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
@@ -18,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+@Environment(EnvType.CLIENT)
 public class PlacementRegistry {
 	public static final PlacementRegistry INSTANCE = new PlacementRegistry();
 

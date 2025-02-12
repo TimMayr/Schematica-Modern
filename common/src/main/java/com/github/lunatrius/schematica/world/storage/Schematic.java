@@ -1,27 +1,19 @@
 package com.github.lunatrius.schematica.world.storage;
 
-import com.github.lunatrius.core.util.math.BlockPosHelper;
-import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
-import com.github.lunatrius.schematica.block.state.BlockStateHelper;
-import com.github.lunatrius.schematica.block.state.pattern.BlockStateReplacer;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraft.world.level.levelgen.structure.templatesystem.BlockStateMatchTest;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @MethodsReturnNonnullByDefault
 public class Schematic implements ISchematic {
@@ -62,12 +54,27 @@ public class Schematic implements ISchematic {
 		return null;
 	}
 
-	private boolean isValid(@NotNull BlockPos pos) {
+	@Override
+	public BlockState getBlockState(@NotNull BlockPos pos) {
+		if (!isValid(pos)) {
+			return Blocks.AIR.defaultBlockState();
+		}
+
 		int x = pos.getX();
 		int y = pos.getY();
 		int z = pos.getZ();
 
-		return !(x < 0 || y < 0 || z < 0 || x >= this.width || y >= this.height || z >= this.length);
+		return blockstates[x][y][z];
+	}
+
+	@Override
+	public int getSizeX() {
+		return this.width;
+	}
+
+	@Override
+	public int getSizeZ() {
+		return this.length;
 	}
 
 	@Override
@@ -84,39 +91,12 @@ public class Schematic implements ISchematic {
 		return true;
 	}
 
-	@Override
-	public BlockState getBlockState(@NotNull BlockPos pos) {
-		if (!isValid(pos)) {
-			return Blocks.AIR.defaultBlockState();
-		}
-
+	private boolean isValid(@NotNull BlockPos pos) {
 		int x = pos.getX();
 		int y = pos.getY();
 		int z = pos.getZ();
 
-		return blockstates[x][y][z];
-	}
-
-	@Override
-	public List<BlockEntity> getBlockEntities() {
-		return this.blockEntities;
-	}
-
-	public void setBlockEntity(BlockPos pos, BlockEntity blockEntity) {
-		if (!isValid(pos)) {
-			return;
-		}
-
-		removeBlockEntity(pos);
-
-		if (blockEntity != null) {
-			this.blockEntities.add(blockEntity);
-		}
-	}
-
-	@Override
-	public void removeBlockEntity(BlockPos pos) {
-		this.blockEntities.removeIf(blockEntity -> blockEntity.getBlockPos().equals(pos));
+		return !(x < 0 || y < 0 || z < 0 || x >= this.width || y >= this.height || z >= this.length);
 	}
 
 	@Override
@@ -163,21 +143,6 @@ public class Schematic implements ISchematic {
 	}
 
 	@Override
-	public int getSizeX() {
-		return this.width;
-	}
-
-	@Override
-	public int getSizeZ() {
-		return this.length;
-	}
-
-	@Override
-	public int getHeight() {
-		return this.height;
-	}
-
-	@Override
 	public String getAuthor() {
 		return this.author;
 	}
@@ -185,5 +150,32 @@ public class Schematic implements ISchematic {
 	@Override
 	public void setAuthor(String author) {
 		this.author = author;
+	}
+
+	@Override
+	public List<BlockEntity> getBlockEntities() {
+		return this.blockEntities;
+	}
+
+	public void setBlockEntity(BlockPos pos, BlockEntity blockEntity) {
+		if (!isValid(pos)) {
+			return;
+		}
+
+		removeBlockEntity(pos);
+
+		if (blockEntity != null) {
+			this.blockEntities.add(blockEntity);
+		}
+	}
+
+	@Override
+	public void removeBlockEntity(BlockPos pos) {
+		this.blockEntities.removeIf(blockEntity -> blockEntity.getBlockPos().equals(pos));
+	}
+
+	@Override
+	public int getHeight() {
+		return this.height;
 	}
 }

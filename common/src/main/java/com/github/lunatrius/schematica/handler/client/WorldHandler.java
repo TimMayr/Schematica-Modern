@@ -1,14 +1,24 @@
 package com.github.lunatrius.schematica.handler.client;
 
+import com.github.lunatrius.schematica.proxy.ClientProxy;
+import com.github.lunatrius.schematica.world.FakeLevel;
+import dev.architectury.event.events.client.ClientLifecycleEvent;
+import dev.architectury.event.events.client.ClientTickEvent;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.network.ClientboundPacketListener;
+
+@Environment(EnvType.CLIENT)
 public class WorldHandler {
-//	@SubscribeEvent
-//	public void onLoad(WorldEvent.Load event) {
-//		Level world = event.getWorld().getWorld();
-//		if (world.isRemote && !(world instanceof SchematicWorld)) {
-//			RenderSchematic.getINSTANCE().setWorldAndLoadRenderers(ClientProxy.schematic);
+	public static WorldHandler INSTANCE = new WorldHandler();
+
+	private WorldHandler() {
+//		ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(world -> {
+//          RenderSchematic.getINSTANCE().setWorldAndLoadRenderers(ClientProxy.schematic);
 //			addWorldAccess(world, RenderSchematic.getINSTANCE());
-//		}
-//	}
+//		});
+	}
+
 //
 //	public static void addWorldAccess(Level world, RenderSchematic schematic) {
 //		if (world != null && schematic != null) {

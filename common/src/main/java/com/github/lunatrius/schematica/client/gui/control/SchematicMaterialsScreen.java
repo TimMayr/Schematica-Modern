@@ -7,6 +7,8 @@ import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -22,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Formatter;
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public class SchematicMaterialsScreen extends BaseScreen {
 	private final List<BlockList.WrappedItemStack> blockList;
 	private final Component strMaterialName = Component.translatable(Names.Gui.Control.MATERIAL_NAME);

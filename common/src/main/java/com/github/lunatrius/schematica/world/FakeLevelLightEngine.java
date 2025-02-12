@@ -73,7 +73,7 @@ public class FakeLevelLightEngine extends LevelLightEngine {
 	}
 
 	@Override
-	public LayerLightEventListener getLayerListener(LightLayer layer) {
+	public LayerLightEventListener getLayerListener(@NotNull LightLayer layer) {
 		return switch (layer) {
 			case BLOCK -> {
 				if (blockLightLayer == null) {

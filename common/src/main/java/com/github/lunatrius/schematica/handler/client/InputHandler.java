@@ -10,6 +10,8 @@ import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.world.FakeLevel;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.architectury.event.events.client.ClientTickEvent;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -18,6 +20,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.HitResult;
 import org.lwjgl.glfw.GLFW;
 
+@Environment(EnvType.CLIENT)
 public class InputHandler {
 	public static final InputHandler INSTANCE = new InputHandler();
 	private static final KeyMapping KEY_BINDING_LOAD =

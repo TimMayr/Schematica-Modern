@@ -10,6 +10,8 @@ import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
@@ -19,6 +21,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
+@Environment(EnvType.CLIENT)
 public class SchematicControlScreen extends BaseScreen {
 	private final FakeLevel schematic;
 	private final SchematicPrinter printer;

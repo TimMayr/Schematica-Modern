@@ -1,6 +1,6 @@
 package com.github.lunatrius.schematica.client.gui.save;
 
-import com.github.lunatrius.schematica.config.SchematicaClientConfig;
+import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
 import com.github.lunatrius.schematica.core.BaseScreen;
 import com.github.lunatrius.schematica.core.NumericFieldWidget;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
@@ -8,6 +8,8 @@ import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
@@ -20,13 +22,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 
+@Environment(EnvType.CLIENT)
 public class SchematicSaveScreen extends BaseScreen {
 	private final Component strSaveSelection = Component.translatable(Names.Gui.Save.SAVE_SELECTION);
 	private final Component strX = Component.translatable(Names.Gui.X);
 	private final Component strY = Component.translatable(Names.Gui.Y);
 	private final Component strZ = Component.translatable(Names.Gui.Z);
-	private final Component strOn = Component.translatable(Names.Gui.ON);
-	private final Component strOff = Component.translatable(Names.Gui.OFF);
 	private int centerX = 0;
 	private int centerY = 0;
 	private NumericFieldWidget numericAX = null;
@@ -35,9 +36,7 @@ public class SchematicSaveScreen extends BaseScreen {
 	private NumericFieldWidget numericBX = null;
 	private NumericFieldWidget numericBY = null;
 	private NumericFieldWidget numericBZ = null;
-	private Button buttonEnable = null;
 	private CycleButton<SchematicFormat> buttonFormat = null;
-	private Button buttonSave = null;
 	private EditBox editBoxFilename = null;
 	private String filename = "";
 
@@ -153,27 +152,12 @@ public class SchematicSaveScreen extends BaseScreen {
 		});
 		this.addRenderableWidget(this.numericBZ);
 
-
-		this.buttonEnable =
-				Button.builder(ClientProxy.isRenderingGuide && Reference.proxy.isSaveEnabled ? this.strOn :
-								this.strOff,
-						(button) -> {
-							ClientProxy.isRenderingGuide =
-									!ClientProxy.isRenderingGuide && Reference.proxy.isSaveEnabled;
-							this.buttonEnable.setMessage(ClientProxy.isRenderingGuide ? this.strOn : this.strOff);
-							this.buttonSave.active = ClientProxy.isRenderingGuide || ClientProxy.schematic != null;
-							this.buttonFormat.active =
-									ClientProxy.isRenderingGuide || ClientProxy.schematic != null;
-						}).bounds(this.width - 210, this.height - 55, 50, 20).build();
-		this.addRenderableWidget(this.buttonEnable);
-
-
-		this.editBoxFilename = new EditBox(this.minecraft.font, this.width - 209, this.height - 29, 153, 18,
+		this.editBoxFilename = new EditBox(this.minecraft.font, this.width - 205, this.height - 30, 150, 20,
 				Component.empty());
 		this.addRenderableWidget(this.editBoxFilename);
 
 
-		this.buttonSave = Button.builder(Component.translatable(Names.Gui.Save.SAVE), (button) -> {
+		Button buttonSave = Button.builder(Component.translatable(Names.Gui.Save.SAVE), (button) -> {
 			String path = this.editBoxFilename.getValue() + SchematicFormat.getExtension(this.getFormatName());
 			if (ClientProxy.isRenderingGuide) {
 				if (Reference.proxy.saveSchematic(this.minecraft.player, SchematicaClientConfig.schematicDirectory,
@@ -188,17 +172,13 @@ public class SchematicSaveScreen extends BaseScreen {
 						this.minecraft.player);
 			}
 		}).bounds(this.width - 50, this.height - 30, 40, 20).build();
-		this.buttonSave.active =
-				ClientProxy.isRenderingGuide && Reference.proxy.isSaveEnabled || ClientProxy.schematic != null;
-		this.addRenderableWidget(this.buttonSave);
+		this.addRenderableWidget(buttonSave);
 
 
 		this.buttonFormat = new CycleButton.Builder<SchematicFormat>(o -> Component.translatable(o.getName()))
 				.withInitialValue(SchematicFormat.getFormatFromName(SchematicFormat.FORMAT_DEFAULT))
 				.withValues(SchematicFormat.FORMATS.values())
-				.create(this.width - 155, this.height - 55, 145, 20, Component.translatable(Names.Gui.Save.FORMAT));
-		this.buttonFormat.active =
-				ClientProxy.isRenderingGuide && Reference.proxy.isSaveEnabled || ClientProxy.schematic != null;
+				.create(this.width - 205, this.height - 55, 195, 20, Component.translatable(Names.Gui.Save.FORMAT));
 		this.addRenderableWidget(this.buttonFormat);
 
 

@@ -37,3 +37,4 @@ classes/
 fabric/run/
 neoforge/run/
 lib/
+!/neoforge/run/server/.gitkeep

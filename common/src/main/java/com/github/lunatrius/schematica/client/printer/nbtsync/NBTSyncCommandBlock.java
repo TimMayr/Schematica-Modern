@@ -1,6 +1,8 @@
 package com.github.lunatrius.schematica.client.printer.nbtsync;
 
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundSetCommandBlockPacket;
 import net.minecraft.world.entity.player.Player;
@@ -10,7 +12,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import org.jetbrains.annotations.NotNull;
 
-
+@Environment(EnvType.CLIENT)
 public class NBTSyncCommandBlock extends NBTSync {
 	@Override
 	public boolean execute(Player player, @NotNull Level schematic, BlockPos pos, @NotNull Level level,

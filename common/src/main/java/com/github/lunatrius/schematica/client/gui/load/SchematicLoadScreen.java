@@ -1,6 +1,6 @@
 package com.github.lunatrius.schematica.client.gui.load;
 
-import com.github.lunatrius.schematica.config.SchematicaClientConfig;
+import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
 import com.github.lunatrius.schematica.core.BaseScreen;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Names;
@@ -8,6 +8,8 @@ import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import com.github.lunatrius.schematica.world.FakeLevel;
 import com.github.lunatrius.schematica.world.schematic.SchematicUtil;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public class SchematicLoadScreen extends BaseScreen {
 	private static final FileFilter FILE_FILTER_FOLDER = new FileFilterSchematic(true);
 	private static final FileFilter FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);

@@ -8,12 +8,13 @@ import com.github.lunatrius.schematica.client.printer.nbtsync.SyncRegistry;
 import com.github.lunatrius.schematica.client.printer.registry.PlacementData;
 import com.github.lunatrius.schematica.client.printer.registry.PlacementRegistry;
 import com.github.lunatrius.schematica.client.util.BlockStateToItemStack;
-import com.github.lunatrius.schematica.config.SchematicaClientConfig;
-import com.github.lunatrius.schematica.config.SchematicaConfig;
+import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
@@ -49,6 +50,7 @@ import java.util.List;
 
 import static net.minecraft.world.entity.ai.attributes.Attributes.ENTITY_INTERACTION_RANGE;
 
+@Environment(EnvType.CLIENT)
 public class SchematicPrinter {
 	public static final SchematicPrinter INSTANCE = new SchematicPrinter();
 
@@ -108,7 +110,7 @@ public class SchematicPrinter {
 		int x = (int) Math.floor(dX);
 		int y = (int) Math.floor(dY);
 		int z = (int) Math.floor(dZ);
-		int range = SchematicaConfig.CLIENT.placeDistance.get();
+		int range = SchematicaClientConfig.CLIENT.placeDistance.get();
 
 		int minX = Math.max(0, x - range);
 		int maxX = Math.min(this.schematic.getLevelSource().getMaxX() - 1, x + range);
@@ -190,7 +192,7 @@ public class SchematicPrinter {
 		if (BlockStateHelper.areBlockStatesEqual(blockState, realBlockState)) {
 			NBTSync handler = SyncRegistry.INSTANCE.getHandler(realBlock);
 			if (handler != null) {
-				this.timeout[x][y][z] = SchematicaConfig.CLIENT.timeout.get().byteValue();
+				this.timeout[x][y][z] = SchematicaClientConfig.CLIENT.timeout.get().byteValue();
 
 				Integer tries = this.syncBlacklist.get(realPos);
 				if (tries == null) {
@@ -211,15 +213,15 @@ public class SchematicPrinter {
 			return false;
 		}
 
-		if (SchematicaConfig.CLIENT.destroyBlocks.get()
+		if (SchematicaClientConfig.CLIENT.destroyBlocks.get()
 				&& !level.getBlockState(realPos).isAir()
 				&& player.isCreative()) {
 			//TODO: Probably also discord
 			this.minecraft.gameMode.startDestroyBlock(realPos, Direction.DOWN);
 
-			this.timeout[x][y][z] = SchematicaConfig.CLIENT.timeout.get().byteValue();
+			this.timeout[x][y][z] = SchematicaClientConfig.CLIENT.timeout.get().byteValue();
 
-			return !SchematicaConfig.CLIENT.destroyInstantly.get();
+			return !SchematicaClientConfig.CLIENT.destroyInstantly.get();
 		}
 
 		if (this.schematic.getLevelSource().getBlockState(pos).isAir()) {
@@ -241,16 +243,16 @@ public class SchematicPrinter {
 		}
 
 		if (placeBlock(level, player, realPos, blockState, itemStack)) {
-			this.timeout[x][y][z] = SchematicaConfig.CLIENT.timeout.get().byteValue();
+			this.timeout[x][y][z] = SchematicaClientConfig.CLIENT.timeout.get().byteValue();
 
-			return !SchematicaConfig.CLIENT.placeInstantly.get();
+			return !SchematicaClientConfig.CLIENT.placeInstantly.get();
 		}
 
 		return false;
 	}
 
 	private @NotNull List<Direction> getSolidSides(Level level, BlockPos pos, Player player) {
-		if (!SchematicaConfig.CLIENT.placeAdjacent.get()) {
+		if (!SchematicaClientConfig.CLIENT.placeAdjacent.get()) {
 			return Arrays.asList(Direction.values());
 		}
 

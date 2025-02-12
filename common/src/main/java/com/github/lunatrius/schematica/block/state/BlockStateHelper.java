@@ -5,6 +5,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 public class BlockStateHelper {
-	public static List<String> getFormattedProperties(BlockState blockState) {
+	public static @NotNull List<String> getFormattedProperties(@NotNull BlockState blockState) {
 		List<String> list = new ArrayList<>();
 
 		for (Map.Entry<Property<?>, Comparable<?>> entry : blockState.getValues().entrySet()) {
@@ -33,7 +35,7 @@ public class BlockStateHelper {
 	}
 
 	@SuppressWarnings("rawtypes")
-	public static <T> Map<Property, T> getProperties(BlockState blockState) {
+	public static <T> @NotNull Map<Property, T> getProperties(@NotNull BlockState blockState) {
 		Map<Property, T> properties = new HashMap<>();
 
 		blockState.getProperties()
@@ -44,7 +46,7 @@ public class BlockStateHelper {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends Comparable<T>> T getPropertyValue(BlockState blockState, String name) {
+	public static <T extends Comparable<T>> @NotNull T getPropertyValue(BlockState blockState, String name) {
 		Property<T> property = getProperty(blockState, name);
 		if (property == null) {
 			throw new IllegalArgumentException(name + " does not exist in " + blockState);
@@ -54,7 +56,7 @@ public class BlockStateHelper {
 	}
 
 	@SuppressWarnings({"rawtypes"})
-	public static Property getProperty(BlockState blockState, String name) {
+	public static @Nullable Property getProperty(@NotNull BlockState blockState, String name) {
 		for (Property prop : blockState.getProperties()) {
 			if (prop.getName().equals(name)) {
 				return prop;

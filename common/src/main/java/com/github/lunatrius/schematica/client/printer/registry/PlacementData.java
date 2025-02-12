@@ -1,6 +1,8 @@
 package com.github.lunatrius.schematica.client.printer.registry;
 
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.player.Player;
@@ -11,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public class PlacementData {
 	private final IValidPlayerFacing validPlayerFacing;
 	private final IValidBlockFacing validBlockFacing;

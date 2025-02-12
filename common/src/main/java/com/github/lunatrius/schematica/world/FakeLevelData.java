@@ -64,7 +64,7 @@ public class FakeLevelData implements WritableLevelData {
 
 	@Override
 	public Difficulty getDifficulty() {
-		// would like peaceful but dont want to trigger entity remove in case someone actually manage to tick fake
+		// would like peaceful but don't want to trigger entity remove in case someone actually manage to tick fake
 		// level
 		return Difficulty.EASY;
 	}

@@ -7,6 +7,8 @@ import com.github.lunatrius.schematica.block.state.BlockStateHelper;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
 import com.github.lunatrius.schematica.world.storage.Schematic;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -20,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public class FlipHelper {
 	public static final FlipHelper INSTANCE = new FlipHelper();
 

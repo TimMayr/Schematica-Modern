@@ -1,6 +1,8 @@
 package com.github.lunatrius.schematica.client.printer.nbtsync;
 
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
@@ -12,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 
+@Environment(EnvType.CLIENT)
 public class NBTSyncSign extends NBTSync {
 	@Override
 	public boolean execute(Player player, @NotNull Level schematic, BlockPos pos, @NotNull Level level,

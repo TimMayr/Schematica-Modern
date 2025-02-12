@@ -1,28 +1,26 @@
 package com.github.lunatrius.schematica.proxy;
 
-import com.github.lunatrius.schematica.config.SchematicaClientConfig;
 import com.github.lunatrius.schematica.config.SchematicaConfig;
+import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
 import com.github.lunatrius.schematica.reference.Reference;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.UUID;
 
-@Environment(EnvType.SERVER)
 public class ServerProxy extends CommonProxy {
 	public static WeakReference<MinecraftServer> serverWeakReference = null;
 
 	@Override
 	public File getDataDirectory() {
 		MinecraftServer server = ServerProxy.serverWeakReference != null ? ServerProxy.serverWeakReference.get() :
-		                         null;
+				null;
 		File file = server != null ? server.getFile(".").toFile() : new File(".");
 		try {
 			return file.getCanonicalFile();
@@ -74,7 +72,7 @@ public class ServerProxy extends CommonProxy {
 	}
 
 	@Override
-	public File getPlayerSchematicDirectory(Player player, boolean privateDirectory) {
+	public File getPlayerSchematicDirectory(@NotNull Player player, boolean privateDirectory) {
 		UUID playerId = player.getUUID();
 
 		File playerDir = new File(SchematicaClientConfig.schematicDirectory.getAbsolutePath(), playerId.toString());

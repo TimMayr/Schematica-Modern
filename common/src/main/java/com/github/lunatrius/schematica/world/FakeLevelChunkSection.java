@@ -13,6 +13,7 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.PalettedContainerRO;
 import net.minecraft.world.level.material.FluidState;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
@@ -31,7 +32,7 @@ public class FakeLevelChunkSection extends LevelChunkSection {
 	 * @param yIdx
 	 * 		yLevel in chunk, multiply by section height
 	 */
-	public FakeLevelChunkSection(final FakeChunk fakeChunk, final int yIdx) {
+	public FakeLevelChunkSection(final @NotNull FakeChunk fakeChunk, final int yIdx) {
 		super(null, null);
 		this.fakeChunk = fakeChunk;
 		this.yIdx = yIdx;

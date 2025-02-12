@@ -4,7 +4,7 @@ import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.core.util.vector.Vector3d;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
-import com.github.lunatrius.schematica.config.SchematicaClientConfig;
+import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;

@@ -2,7 +2,7 @@ package com.github.lunatrius.schematica.handler.client;
 
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.block.state.BlockStateHelper;
-import com.github.lunatrius.schematica.config.SchematicaConfig;
+import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.world.FakeLevel;
 import dev.architectury.event.events.client.ClientGuiEvent;
@@ -23,7 +23,7 @@ public class OverlayHandler {
 
 	private OverlayHandler() {
 		ClientGuiEvent.DEBUG_TEXT_LEFT.register(strings -> {
-			if (SchematicaConfig.CLIENT.showDebugInfo.get()) {
+			if (SchematicaClientConfig.CLIENT.showDebugInfo.get()) {
 				FakeLevel level = ClientProxy.schematic;
 				if (level != null && level.isRendering()) {
 					HitResult rtr = ClientProxy.objectMouseOver;
@@ -40,7 +40,7 @@ public class OverlayHandler {
 		});
 
 		ClientGuiEvent.DEBUG_TEXT_RIGHT.register(strings -> {
-			if (SchematicaConfig.CLIENT.showDebugInfo.get()) {
+			if (SchematicaClientConfig.CLIENT.showDebugInfo.get()) {
 				FakeLevel level = ClientProxy.schematic;
 				if (level != null && level.isRendering()) {
 					HitResult rtr = ClientProxy.objectMouseOver;
@@ -63,7 +63,7 @@ public class OverlayHandler {
 	private String getLookMessage(@NotNull BlockPos pos, @NotNull BlockPos offsetPos) {
 		String lookMessage =
 				String.format("Looking at: %d %d %d (%d %d %d)", pos.getX(), pos.getY(), pos.getZ(), offsetPos.getX(),
-				              offsetPos.getY(), offsetPos.getZ());
+						offsetPos.getY(), offsetPos.getZ());
 		if (this.minecraft.hitResult != null && this.minecraft.hitResult.getType() == HitResult.Type.BLOCK) {
 			BlockPos origPos = new MBlockPos(this.minecraft.hitResult.getLocation());
 			if (offsetPos.equals(origPos)) {
