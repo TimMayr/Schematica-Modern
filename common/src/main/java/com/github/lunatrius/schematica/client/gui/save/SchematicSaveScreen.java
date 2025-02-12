@@ -20,8 +20,6 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-
 @Environment(EnvType.CLIENT)
 public class SchematicSaveScreen extends BaseScreen {
 	private final Component strSaveSelection = Component.translatable(Names.Gui.Save.SAVE_SELECTION);
@@ -159,17 +157,11 @@ public class SchematicSaveScreen extends BaseScreen {
 
 		Button buttonSave = Button.builder(Component.translatable(Names.Gui.Save.SAVE), (button) -> {
 			String path = this.editBoxFilename.getValue() + SchematicFormat.getExtension(this.getFormatName());
-			if (ClientProxy.isRenderingGuide) {
-				if (Reference.proxy.saveSchematic(this.minecraft.player, SchematicaClientConfig.schematicDirectory,
-						path, this.minecraft.level, this.getFormatName(), ClientProxy.pointMin,
-						ClientProxy.pointMax)) {
-					this.editBoxFilename.setValue(this.filename);
-					this.minecraft.setScreen(this.parentScreen);
-				}
-			} else {
-				SchematicFormat.writeToFileAndNotify(new File(SchematicaClientConfig.schematicDirectory, path),
-						this.getFormatName(), ClientProxy.schematic.getLevelSource(),
-						this.minecraft.player);
+			if (Reference.proxy.saveSchematic(this.minecraft.player, SchematicaClientConfig.schematicDirectory,
+					path, this.minecraft.level, this.getFormatName(), ClientProxy.pointMin,
+					ClientProxy.pointMax)) {
+				this.editBoxFilename.setValue(this.filename);
+				this.minecraft.setScreen(this.parentScreen);
 			}
 		}).bounds(this.width - 50, this.height - 30, 40, 20).build();
 		this.addRenderableWidget(buttonSave);
