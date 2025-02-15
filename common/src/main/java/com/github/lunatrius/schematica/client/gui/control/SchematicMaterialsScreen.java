@@ -7,6 +7,8 @@ import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -22,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Formatter;
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public class SchematicMaterialsScreen extends BaseScreen {
 	private final List<BlockList.WrappedItemStack> blockList;
 	private final Component strMaterialName = Component.translatable(Names.Gui.Control.MATERIAL_NAME);
@@ -29,8 +32,8 @@ public class SchematicMaterialsScreen extends BaseScreen {
 	private SchematicMaterialsList schematicMaterialsList;
 	private ItemStackSortType sortType = ItemStackSortType.SIZE_DESC;
 
-	public SchematicMaterialsScreen(Screen parentScreen) {
-		super(parentScreen);
+	public SchematicMaterialsScreen(Screen parent) {
+		super(parent);
 		Minecraft minecraft = Minecraft.getInstance();
 		FakeLevel level = ClientProxy.schematic;
 		this.blockList = new BlockList().getList(minecraft.player, level, minecraft.level);
@@ -61,18 +64,18 @@ public class SchematicMaterialsScreen extends BaseScreen {
 		this.addRenderableWidget(buttonSort);
 
 
-		Button btnDump = Button.builder(Component.translatable(Names.Gui.Control.DUMP),
+		Button buttonDump = Button.builder(Component.translatable(Names.Gui.Control.DUMP),
 						(button) -> dumpMaterialList(this.getBlockList()))
 				.bounds(this.width / 2 - 50, this.height - 30, 100, 20)
 				.build();
-		this.addRenderableWidget(btnDump);
+		this.addRenderableWidget(buttonDump);
 
 
-		Button btnDone = Button.builder(Component.translatable(Names.Gui.DONE),
-						(button) -> this.minecraft.setScreen(this.parentScreen))
+		Button buttonDone = Button.builder(Component.translatable(Names.Gui.DONE),
+						(button) -> this.minecraft.setScreen(this.parent))
 				.bounds(this.width / 2 + 54, this.height - 30, 100, 20)
 				.build();
-		this.addRenderableWidget(btnDone);
+		this.addRenderableWidget(buttonDone);
 
 		this.schematicMaterialsList = new SchematicMaterialsList(this);
 		this.addRenderableWidget(schematicMaterialsList);

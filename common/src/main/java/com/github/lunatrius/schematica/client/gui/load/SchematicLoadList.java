@@ -1,6 +1,8 @@
 package com.github.lunatrius.schematica.client.gui.load;
 
 import com.github.lunatrius.schematica.core.GuiHelper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -12,6 +14,7 @@ import net.minecraft.world.level.block.Block;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 
+@Environment(EnvType.CLIENT)
 public class SchematicLoadList extends ObjectSelectionList<SchematicLoadList.Entry> {
 	private final Minecraft minecraft = Minecraft.getInstance();
 

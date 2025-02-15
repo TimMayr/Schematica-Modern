@@ -23,9 +23,7 @@ public interface ISchematic extends BlockGetter {
 	 * Gets the block entity at the requested location. If no block entity exists at that location, null will be
 	 * returned.
 	 *
-	 * @param pos
-	 * 		the location in world space.
-	 *
+	 * @param pos the location in world space.
 	 * @return the located block entity.
 	 */
 	@Nullable BlockEntity getBlockEntity(@NotNull BlockPos pos);
@@ -34,9 +32,7 @@ public interface ISchematic extends BlockGetter {
 	 * Gets a block state at a given location within the schematic. Requesting a block state outside of those bounds
 	 * returns the default block state for air.
 	 *
-	 * @param pos
-	 * 		the location in world space.
-	 *
+	 * @param pos the location in world space.
 	 * @return the block at the requested location.
 	 */
 
@@ -48,37 +44,16 @@ public interface ISchematic extends BlockGetter {
 	}
 
 	/**
-	 * @param pos
-	 * 		tested pos
+	 * The width of the schematic
 	 *
-	 * @return true if inside aabb
-	 *
-	 * @see #isOutsideBuildHeight(BlockPos) extension of
+	 * @return the schematic width
 	 */
-	default boolean isPosInside(@NotNull BlockPos pos) {
-		return getMinX() <= pos.getX()
-				&& pos.getX() < getMaxX()
-				&& getMinY() <= pos.getY()
-				&& pos.getY() <= getMaxY()
-				&& getMinZ() <= pos.getZ()
-				&& pos.getZ() < getMaxZ();
-	}
-
-	default int getMinY() {
-		return 0;
-	}
+	int getSizeX();
 
 	/**
 	 * @return min X coord inclusive
 	 */
 	default int getMinX() {
-		return 0;
-	}
-
-	/**
-	 * @return min Z coord inclusive
-	 */
-	default int getMinZ() {
 		return 0;
 	}
 
@@ -90,11 +65,14 @@ public interface ISchematic extends BlockGetter {
 	}
 
 	/**
-	 * The width of the schematic
+	 * Sets the block state at the given location. Attempting to set a block state outside of the schematic
+	 * boundaries or with an invalid block state will result in no change being made and this method will return false.
 	 *
-	 * @return the schematic width
+	 * @param pos        the location in world space.
+	 * @param blockState the block state to set
+	 * @return true if the block state was successfully set.
 	 */
-	int getSizeX();
+	boolean setBlockState(BlockPos pos, BlockState blockState);
 
 	/**
 	 * @return max Z coord exclusive
@@ -104,6 +82,34 @@ public interface ISchematic extends BlockGetter {
 	}
 
 	/**
+	 * Adds an entity to the schematic if it's not a player.
+	 *
+	 * @param entity the entity to add.
+	 */
+	void addEntity(Entity entity);
+
+	/**
+	 * Removes an entity from the schematic.
+	 *
+	 * @param entity the entity to remove.
+	 */
+	void removeEntity(Entity entity);
+
+	/**
+	 * Modifies the icon that will be used when saving the schematic.
+	 *
+	 * @param icon an ItemStack of the Item you wish you use as the icon.
+	 */
+	void setIcon(ItemStack icon);
+
+	/**
+	 * Sets the author of the schematic.
+	 *
+	 * @param author The new author of the schematic.
+	 */
+	void setAuthor(String author);
+
+	/**
 	 * The length of the schematic
 	 *
 	 * @return the schematic length
@@ -111,17 +117,13 @@ public interface ISchematic extends BlockGetter {
 	int getSizeZ();
 
 	/**
-	 * Sets the block state at the given location. Attempting to set a block state outside of the schematic
-	 * boundaries or with an invalid block state will result in no change being made and this method will return false.
+	 * Add or replace a block entity to a block at the requested location. Does nothing if the location is out of
+	 * bounds.
 	 *
-	 * @param pos
-	 * 		the location in world space.
-	 * @param blockState
-	 * 		the block state to set
-	 *
-	 * @return true if the block state was successfully set.
+	 * @param pos         the location in world space.
+	 * @param blockEntity the block entity to set.
 	 */
-	boolean setBlockState(BlockPos pos, BlockState blockState);
+	void setBlockEntity(BlockPos pos, BlockEntity blockEntity);
 
 	/**
 	 * Returns a list of all entities in the schematic.
@@ -131,20 +133,20 @@ public interface ISchematic extends BlockGetter {
 	List<Entity> getEntities();
 
 	/**
-	 * Adds an entity to the schematic if it's not a player.
+	 * Removes a block entity from the specific location if it exists, otherwise it silently continues.
 	 *
-	 * @param entity
-	 * 		the entity to add.
+	 * @param pos the location in world space.
 	 */
-	void addEntity(Entity entity);
+	void removeBlockEntity(BlockPos pos);
 
 	/**
-	 * Removes an entity from the schematic.
-	 *
-	 * @param entity
-	 * 		the entity to remove.
+	 * @param pos tested pos
+	 * @return true if outside aabb
+	 * @see #isOutsideBuildHeight(BlockPos) extension of
 	 */
-	void removeEntity(Entity entity);
+	default boolean isPosOutside(BlockPos pos) {
+		return !isPosInside(pos);
+	}
 
 	/**
 	 * Retrieves the icon that will be used to save the schematic.
@@ -154,12 +156,18 @@ public interface ISchematic extends BlockGetter {
 	ItemStack getIcon();
 
 	/**
-	 * Modifies the icon that will be used when saving the schematic.
-	 *
-	 * @param icon
-	 * 		an ItemStack of the Item you wish you use as the icon.
+	 * @param pos tested pos
+	 * @return true if inside aabb
+	 * @see #isOutsideBuildHeight(BlockPos) extension of
 	 */
-	void setIcon(ItemStack icon);
+	default boolean isPosInside(@NotNull BlockPos pos) {
+		return getMinX() <= pos.getX()
+				&& pos.getX() < getMaxX()
+				&& getMinY() <= pos.getY()
+				&& pos.getY() <= getMaxY()
+				&& getMinZ() <= pos.getZ()
+				&& pos.getZ() < getMaxZ();
+	}
 
 	/**
 	 * Gets the author of the schematic, or an empty String if unknown.
@@ -169,12 +177,11 @@ public interface ISchematic extends BlockGetter {
 	String getAuthor();
 
 	/**
-	 * Sets the author of the schematic.
-	 *
-	 * @param author
-	 * 		The new author of the schematic.
+	 * @return min Z coord inclusive
 	 */
-	void setAuthor(String author);
+	default int getMinZ() {
+		return 0;
+	}
 
 	/**
 	 * Returns a list of all block entities in the schematic.
@@ -184,46 +191,19 @@ public interface ISchematic extends BlockGetter {
 	List<BlockEntity> getBlockEntities();
 
 	/**
-	 * Add or replace a block entity to a block at the requested location. Does nothing if the location is out of
-	 * bounds.
-	 *
-	 * @param pos
-	 * 		the location in world space.
-	 * @param blockEntity
-	 * 		the block entity to set.
-	 */
-	void setBlockEntity(BlockPos pos, BlockEntity blockEntity);
-
-	/**
-	 * Removes a block entity from the specific location if it exists, otherwise it silently continues.
-	 *
-	 * @param pos
-	 * 		the location in world space.
-	 */
-	void removeBlockEntity(BlockPos pos);
-
-	/**
 	 * The height of the schematic
 	 *
 	 * @return the schematic height
 	 */
 	int getHeight();
 
+	default int getMinY() {
+		return 0;
+	}
+
 	@Override
 	default int getMaxY() {
 		return getMinY() + getHeight();
-	}
-
-	/**
-	 * @param pos
-	 * 		tested pos
-	 *
-	 * @return true if outside aabb
-	 *
-	 * @see #isOutsideBuildHeight(BlockPos) extension of
-	 */
-	default boolean isPosOutside(BlockPos pos) {
-		return !isPosInside(pos);
 	}
 
 	/**
@@ -233,7 +213,6 @@ public interface ISchematic extends BlockGetter {
 
 	/**
 	 * @return function useful temporary insert into existing world
-	 *
 	 * @see #getRawBlockState(BlockPos)
 	 */
 	default Function<BlockPos, @Nullable BlockState> getRawBlockStateFunction() {
@@ -254,4 +233,6 @@ public interface ISchematic extends BlockGetter {
 	default AABB getAABB() {
 		return new AABB(getMinX(), getMinY(), getMinZ(), getMaxX(), getMaxY(), getMaxZ());
 	}
+
+	String getName();
 }

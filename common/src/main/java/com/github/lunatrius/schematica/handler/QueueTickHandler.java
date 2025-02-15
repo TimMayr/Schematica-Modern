@@ -4,7 +4,6 @@ import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.world.chunk.SchematicContainer;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
 import dev.architectury.event.events.common.TickEvent;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 
 import java.util.ArrayDeque;
@@ -15,14 +14,6 @@ public class QueueTickHandler {
 	private final Queue<SchematicContainer> queue = new ArrayDeque<>();
 
 	private QueueTickHandler() {
-		TickEvent.PLAYER_POST.register((player) -> {
-			if (player instanceof LocalPlayer localPlayer) {
-				if (!localPlayer.connection.getConnection().isMemoryConnection()) {
-					processQueue();
-				}
-			}
-		});
-
 		TickEvent.SERVER_POST.register((server) -> processQueue());
 	}
 

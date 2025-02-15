@@ -9,12 +9,16 @@ import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Reference;
 import commonnetwork.api.Dispatcher;
 import dev.architectury.event.events.common.TickEvent;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Environment(EnvType.SERVER)
 public class DownloadHandler {
 	public static final DownloadHandler INSTANCE = new DownloadHandler();
 	public final Map<String, SchematicTransfer> transferMap = new LinkedHashMap<>();
@@ -63,14 +67,14 @@ public class DownloadHandler {
 		this.transferMap.put(player.getScoreboardName(), transfer);
 	}
 
-	private void sendBegin(ServerPlayer player, SchematicTransfer transfer) {
+	private void sendBegin(ServerPlayer player, @NotNull SchematicTransfer transfer) {
 		transfer.setState(SchematicTransfer.State.BEGIN);
 
 		MessageDownloadBegin message = new MessageDownloadBegin(transfer.schematic);
 		Dispatcher.sendToClient(message, player);
 	}
 
-	private void sendChunk(ServerPlayer player, SchematicTransfer transfer) {
+	private void sendChunk(ServerPlayer player, @NotNull SchematicTransfer transfer) {
 		transfer.setState(SchematicTransfer.State.CHUNK);
 
 		Reference.logger.trace("Sending chunk {},{},{}", transfer.baseX, transfer.baseY, transfer.baseZ);
@@ -79,7 +83,7 @@ public class DownloadHandler {
 		Dispatcher.sendToClient(message, player);
 	}
 
-	private void sendEnd(ServerPlayer player, SchematicTransfer transfer) {
+	private void sendEnd(ServerPlayer player, @NotNull SchematicTransfer transfer) {
 		MessageDownloadEnd message = new MessageDownloadEnd(transfer.name);
 		Dispatcher.sendToClient(message, player);
 	}

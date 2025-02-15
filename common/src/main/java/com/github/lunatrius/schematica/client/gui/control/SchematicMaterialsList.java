@@ -3,6 +3,8 @@ package com.github.lunatrius.schematica.client.gui.control;
 import com.github.lunatrius.schematica.client.util.BlockList;
 import com.github.lunatrius.schematica.core.GuiHelper;
 import com.github.lunatrius.schematica.reference.Names;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -12,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+@Environment(EnvType.CLIENT)
 public class SchematicMaterialsList extends ObjectSelectionList<SchematicMaterialsList.Entry> {
 	private final Minecraft minecraft = Minecraft.getInstance();
 	private final SchematicMaterialsScreen parent;

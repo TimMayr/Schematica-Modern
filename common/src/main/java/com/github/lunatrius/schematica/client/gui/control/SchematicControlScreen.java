@@ -10,6 +10,8 @@ import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
@@ -19,6 +21,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
+@Environment(EnvType.CLIENT)
 public class SchematicControlScreen extends BaseScreen {
 	private final FakeLevel schematic;
 	private final SchematicPrinter printer;
@@ -44,8 +47,8 @@ public class SchematicControlScreen extends BaseScreen {
 	private Button buttonHide = null;
 	private Button buttonPrint = null;
 
-	public SchematicControlScreen(Screen parentScreen) {
-		super(parentScreen);
+	public SchematicControlScreen(Screen parent) {
+		super(parent);
 		this.schematic = ClientProxy.schematic;
 		this.printer = SchematicPrinter.INSTANCE;
 	}
@@ -94,7 +97,7 @@ public class SchematicControlScreen extends BaseScreen {
 
 		Button buttonUnload = Button.builder(strUnload, (button) -> {
 			Reference.proxy.unloadSchematic();
-			this.minecraft.setScreen(this.parentScreen);
+			this.minecraft.setScreen(this.parent);
 		}).pos(this.width - 90, this.height - 200).size(80, 20).build();
 		this.addRenderableWidget(buttonUnload);
 
@@ -161,7 +164,8 @@ public class SchematicControlScreen extends BaseScreen {
 
 
 		CycleButton<Direction> buttonRotateDirection =
-				new CycleButton.Builder<Direction>(direction -> Component.translatable(Names.Gui.Control.TRANSFORM_PREFIX + direction.getName()))
+				new CycleButton.Builder<Direction>(direction -> Component.translatable(
+						Names.Gui.Control.TRANSFORM_PREFIX + direction.getName()))
 						.withInitialValue(Direction.DOWN)
 						.withValues(Direction.values())
 						.displayOnlyValue()

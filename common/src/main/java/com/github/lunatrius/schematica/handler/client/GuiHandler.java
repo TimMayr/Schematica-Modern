@@ -1,9 +1,12 @@
 package com.github.lunatrius.schematica.handler.client;
 
 import dev.architectury.event.events.client.ClientTickEvent;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
 
+@Environment(EnvType.CLIENT)
 public class GuiHandler {
 	public static final GuiHandler INSTANCE = new GuiHandler();
 

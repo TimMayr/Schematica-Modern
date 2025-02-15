@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.LinkedList;
+import java.util.List;
 
 public class CommandSchematicaList extends CommandSchematicaBase {
 	private static final FileFilter FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
@@ -45,58 +46,37 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 		int pageStart = page * pageSize;
 		int pageEnd = pageStart + pageSize;
 		int currentFile = 0;
-
 		LinkedList<Component> componentsToSend = new LinkedList<>();
 
-		File schematicDirectory = Reference.proxy.getPlayerSchematicDirectory(player, true);
+		List<File> fileList = Reference.proxy.getAllAccessibleSchematics(player, FILE_FILTER_SCHEMATIC);
 
+		for (File path : fileList) {
+			if (currentFile >= pageStart && currentFile < pageEnd) {
+				String fileName = path.getName();
 
-		if (schematicDirectory == null) {
-			Reference.logger.warn("Unable to determine the schematic directory for " + "player {}", player);
-			source.sendFailure(Component.translatable(Names.Command.Save.Message.PLAYER_SCHEMATIC_DIR_UNAVAILABLE));
-			return -1;
-		}
+				Component chatComponent = Component.literal(String.format("%2d (%s): %s [", currentFile + 1,
+						FileUtils.humanReadableByteCount(
+								path.length()),
+						FilenameUtils.removeExtension(fileName)));
 
-		if (!schematicDirectory.exists()) {
-			if (!schematicDirectory.mkdirs()) {
-				Reference.logger.warn("Could not create player schematic directory {}",
-						schematicDirectory.getAbsolutePath());
+				String removeCommand =
+						String.format("/%s %s", Reference.MOD_ID + " " + Names.Command.Remove.NAME, fileName);
+				Component removeLink =
+						withStyle(Component.translatable(Names.Command.List.Message.REMOVE), ChatFormatting.RED,
+								removeCommand);
+				chatComponent = chatComponent.copy().append(removeLink).append("][");
 
-				source.sendFailure(Component.translatable(Names.Command.Save.Message.PLAYER_SCHEMATIC_DIR_UNAVAILABLE));
-				return -1;
+				String downloadCommand =
+						String.format("/%s %s", Reference.MOD_ID + " " + Names.Command.Download.NAME, fileName);
+				Component downloadLink =
+						withStyle(Component.translatable(Names.Command.List.Message.DOWNLOAD),
+								ChatFormatting.GREEN,
+								downloadCommand);
+				chatComponent = chatComponent.copy().append(downloadLink).append("]");
+
+				componentsToSend.add(chatComponent);
 			}
-		}
-
-		File[] files = schematicDirectory.listFiles(FILE_FILTER_SCHEMATIC);
-		if (files != null) {
-			for (File path : files) {
-				if (currentFile >= pageStart && currentFile < pageEnd) {
-					String fileName = path.getName();
-
-					Component chatComponent = Component.literal(String.format("%2d (%s): %s [", currentFile + 1,
-							FileUtils.humanReadableByteCount(
-									path.length()),
-							FilenameUtils.removeExtension(fileName)));
-
-					String removeCommand =
-							String.format("/%s %s", Reference.MOD_ID + " " + Names.Command.Remove.NAME, fileName);
-					Component removeLink =
-							withStyle(Component.translatable(Names.Command.List.Message.REMOVE), ChatFormatting.RED,
-									removeCommand);
-					chatComponent = chatComponent.copy().append(removeLink).append("][");
-
-					String downloadCommand =
-							String.format("/%s %s", Reference.MOD_ID + " " + Names.Command.Download.NAME, fileName);
-					Component downloadLink =
-							withStyle(Component.translatable(Names.Command.List.Message.DOWNLOAD),
-									ChatFormatting.GREEN,
-									downloadCommand);
-					chatComponent = chatComponent.copy().append(downloadLink).append("]");
-
-					componentsToSend.add(chatComponent);
-				}
-				++currentFile;
-			}
+			++currentFile;
 		}
 
 		if (currentFile == 0) {

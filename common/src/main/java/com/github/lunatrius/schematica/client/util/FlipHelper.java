@@ -7,6 +7,8 @@ import com.github.lunatrius.schematica.block.state.BlockStateHelper;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
 import com.github.lunatrius.schematica.world.storage.Schematic;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -20,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+@Environment(EnvType.CLIENT)
 public class FlipHelper {
 	public static final FlipHelper INSTANCE = new FlipHelper();
 
@@ -46,12 +49,12 @@ public class FlipHelper {
 	public Schematic flip(@NotNull ISchematic schematic, Direction.Axis axis, boolean forced) throws FlipException {
 		Vec3i dimensionsFlipped = new Vec3i(schematic.getSizeX(), schematic.getHeight(), schematic.getSizeZ());
 		Schematic schematicFlipped =
-				new Schematic(schematic.getIcon(), dimensionsFlipped.getX(), dimensionsFlipped.getY(),
-				              dimensionsFlipped.getZ(), schematic.getAuthor());
+				new Schematic(schematic.getIcon(), schematic.getName(), dimensionsFlipped.getX(),
+						dimensionsFlipped.getY(), dimensionsFlipped.getZ(), schematic.getAuthor());
 		MBlockPos tmp = new MBlockPos();
 
 		for (MBlockPos pos : BlockPosHelper.getAllInBox(0, 0, 0, schematic.getSizeX() - 1, schematic.getHeight() - 1,
-		                                                schematic.getSizeZ() - 1)) {
+				schematic.getSizeZ() - 1)) {
 			BlockState blockState = schematic.getBlockState(pos);
 			BlockState blockStateFlipped = flipBlock(blockState, axis, forced);
 			schematicFlipped.setBlockState(flipPos(pos, axis, dimensionsFlipped, tmp), blockStateFlipped);
@@ -80,13 +83,13 @@ public class FlipHelper {
 			}
 		} else {
 			Reference.logger.error("'{}': found 'facing' property with unknown type {}",
-			                       BuiltInRegistries.BLOCK.getKey(blockState.getBlock()),
-			                       property.getClass().getSimpleName());
+					BuiltInRegistries.BLOCK.getKey(blockState.getBlock()),
+					property.getClass().getSimpleName());
 		}
 
 		if (!forced) {
 			throw new FlipException("'%s' cannot be flipped across '%s'",
-			                        BuiltInRegistries.BLOCK.getKey(blockState.getBlock()), axis);
+					BuiltInRegistries.BLOCK.getKey(blockState.getBlock()), axis);
 		}
 
 		return blockState;

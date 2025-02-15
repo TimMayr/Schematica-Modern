@@ -77,8 +77,9 @@ public class MessageDownloadChunk implements CustomPacketPayload {
 		this.baseY = baseY;
 		this.baseZ = baseZ;
 
-		this.blocks =
-				new BlockState[Constants.SchematicChunk.WIDTH][Constants.SchematicChunk.HEIGHT][Constants.SchematicChunk.LENGTH];
+		this.blocks = new BlockState[Constants.SchematicChunk.WIDTH]
+				[Constants.SchematicChunk.HEIGHT]
+				[Constants.SchematicChunk.LENGTH];
 
 		this.blockEntities = new ArrayList<>();
 		this.entities = new ArrayList<>();
@@ -146,8 +147,9 @@ public class MessageDownloadChunk implements CustomPacketPayload {
 		return baseZ;
 	}
 
+
 	@Override
 	public Type<? extends CustomPacketPayload> type() {
-		return null;
+		return TYPE;
 	}
 }

@@ -1,14 +1,19 @@
 package com.github.lunatrius.schematica.handler.client;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+@Environment(EnvType.CLIENT)
 public class WorldHandler {
-//	@SubscribeEvent
-//	public void onLoad(WorldEvent.Load event) {
-//		Level world = event.getWorld().getWorld();
-//		if (world.isRemote && !(world instanceof SchematicWorld)) {
-//			RenderSchematic.getINSTANCE().setWorldAndLoadRenderers(ClientProxy.schematic);
+	public static WorldHandler INSTANCE = new WorldHandler();
+
+	private WorldHandler() {
+//		ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(world -> {
+//          RenderSchematic.getINSTANCE().setWorldAndLoadRenderers(ClientProxy.schematic);
 //			addWorldAccess(world, RenderSchematic.getINSTANCE());
-//		}
-//	}
+//		});
+	}
+
 //
 //	public static void addWorldAccess(Level world, RenderSchematic schematic) {
 //		if (world != null && schematic != null) {

@@ -13,8 +13,6 @@ public final class SchematicaNeoForge {
 	public SchematicaNeoForge(@NotNull ModContainer modContainer) {
 		// Run our common setup.
 		Schematica.init();
-
-		modContainer.registerConfig(ModConfig.Type.CLIENT, SchematicaConfig.clientSpec);
 		modContainer.registerConfig(ModConfig.Type.SERVER, SchematicaConfig.serverSpec);
 	}
 }

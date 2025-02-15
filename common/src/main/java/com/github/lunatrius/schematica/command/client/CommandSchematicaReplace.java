@@ -8,6 +8,8 @@ import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import dev.architectury.event.events.client.ClientCommandRegistrationEvent;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
@@ -15,6 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.BlockStateMatchTest;
 
+@Environment(EnvType.CLIENT)
 public class CommandSchematicaReplace extends CommandSchematicaBase {
 	public static LiteralArgumentBuilder<ClientCommandRegistrationEvent.ClientCommandSourceStack> register(CommandBuildContext context) {
 		return ClientCommandRegistrationEvent.literal(Names.Command.BASE).then(

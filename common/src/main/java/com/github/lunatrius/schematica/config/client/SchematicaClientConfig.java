@@ -1,22 +1,37 @@
-package com.github.lunatrius.schematica.config;
+package com.github.lunatrius.schematica.config.client;
 
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.common.ModConfigSpec;
+import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+@Environment(EnvType.CLIENT)
 public class SchematicaClientConfig {
 	public static final Queue<Integer> swapSlotsQueue = new ArrayDeque<>();
 	public static final String SCHEMATIC_DEFAULT_FOLDER = "./schematics";
+	public static final ModConfigSpec clientSpec;
+	public static final SchematicaClientConfig CLIENT;
 	private static final Set<Block> extraAirBlockList = new HashSet<>();
 	public static File schematicDirectory = null;
+
+	static {
+		Pair<SchematicaClientConfig, ModConfigSpec> clientSpecPair =
+				new ModConfigSpec.Builder().configure(SchematicaClientConfig::new);
+		clientSpec = clientSpecPair.getRight();
+		CLIENT = clientSpecPair.getLeft();
+	}
+
 	public final ModConfigSpec.ConfigValue<List<? extends String>> extraAirBlocks;
 	public final ModConfigSpec.ConfigValue<String> schematicDirectoryPath;
 	public final ModConfigSpec.BooleanValue dumpBlockList;
@@ -36,91 +51,91 @@ public class SchematicaClientConfig {
 	public final ModConfigSpec.IntValue timeout;
 	public final ModConfigSpec.ConfigValue<List<? extends Integer>> swapSlots;
 
-	SchematicaClientConfig(ModConfigSpec.Builder builder) {
+	SchematicaClientConfig(ModConfigSpec.@NotNull Builder builder) {
 		builder.push(Names.Config.Category.RENDER);
 
 		alpha = builder.comment(Names.Config.ALPHA_DESC)
-		               .translation("schematica.config.alpha.tooltip")
-		               .defineInRange(Names.Config.ALPHA, 1.0f, 0, 1);
+				.translation("schematica.config.alpha.tooltip")
+				.defineInRange(Names.Config.ALPHA, 1.0f, 0, 1);
 
 		alphaEnabled = builder.comment(Names.Config.ALPHA_ENABLED_DESC)
-		                      .translation("schematica.config.alphaEnabled.tooltip")
-		                      .define(Names.Config.ALPHA_ENABLED, false);
+				.translation("schematica.config.alphaEnabled.tooltip")
+				.define(Names.Config.ALPHA_ENABLED, false);
 
 		blockDelta = builder.comment(Names.Config.BLOCK_DELTA_DESC)
-		                    .translation("schematica.config.blockDelta.tooltip")
-		                    .defineInRange(Names.Config.BLOCK_DELTA, 0.005, 0, Float.POSITIVE_INFINITY);
+				.translation("schematica.config.blockDelta.tooltip")
+				.defineInRange(Names.Config.BLOCK_DELTA, 0.005, 0, Float.POSITIVE_INFINITY);
 
 		highlight = builder.comment(Names.Config.HIGHLIGHT_DESC)
-		                   .translation("schematica.config.highlight.tooltip")
-		                   .define(Names.Config.HIGHLIGHT, true);
+				.translation("schematica.config.highlight.tooltip")
+				.define(Names.Config.HIGHLIGHT, true);
 
 		highlightAir = builder.comment(Names.Config.HIGHLIGHT_AIR_DESC)
-		                      .translation("schematica.config.highlightAir.tooltip")
-		                      .define(Names.Config.HIGHLIGHT_AIR, true);
+				.translation("schematica.config.highlightAir.tooltip")
+				.define(Names.Config.HIGHLIGHT_AIR, true);
 
 		renderDistance = builder.comment(Names.Config.RENDER_DISTANCE_DESC)
-		                        .translation("schematica.config.renderDistance.tooltip")
-		                        .defineInRange(Names.Config.RENDER_DISTANCE, 8, 2, 32);
+				.translation("schematica.config.renderDistance.tooltip")
+				.defineInRange(Names.Config.RENDER_DISTANCE, 8, 2, 32);
 
 
 		builder.pop().push(Names.Config.Category.DEBUG);
 
 		dumpBlockList = builder.comment(Names.Config.DUMP_BLOCK_LIST_DESC)
-		                       .translation("schematica.config.dumpBlockList.tooltip")
-		                       .define(Names.Config.DUMP_BLOCK_LIST, false);
+				.translation("schematica.config.dumpBlockList.tooltip")
+				.define(Names.Config.DUMP_BLOCK_LIST, false);
 
 		showDebugInfo = builder.comment(Names.Config.SHOW_DEBUG_INFO_DESC)
-		                       .translation("schematica.config.showDebugInfo.tooltip")
-		                       .define(Names.Config.SHOW_DEBUG_INFO, true);
+				.translation("schematica.config.showDebugInfo.tooltip")
+				.define(Names.Config.SHOW_DEBUG_INFO, true);
 
 
 		builder.pop().push(Names.Config.Category.GENERAL);
 
 		extraAirBlocks = builder.comment(Names.Config.EXTRA_AIR_BLOCKS_DESC)
-		                        .translation("schematica.config.extraAirBlocks.tooltip")
-		                        .defineList(Names.Config.EXTRA_AIR_BLOCKS, List.of(), () -> "minecraft:dirt",
-		                                    s -> s instanceof String && BuiltInRegistries.BLOCK.containsKey(
-				                                    ResourceLocation.parse((String) s)));
+				.translation("schematica.config.extraAirBlocks.tooltip")
+				.defineList(Names.Config.EXTRA_AIR_BLOCKS, List.of(), () -> "minecraft:dirt",
+						s -> s instanceof String && BuiltInRegistries.BLOCK.containsKey(
+								ResourceLocation.parse((String) s)));
 
 		schematicDirectoryPath = builder.comment(Names.Config.SCHEMATIC_DIRECTORY_DESC)
-		                                .translation("schematica.config.schematicDirectory.tooltip")
-		                                .define(Names.Config.SCHEMATIC_DIRECTORY, SCHEMATIC_DEFAULT_FOLDER);
+				.translation("schematica.config.schematicDirectory.tooltip")
+				.define(Names.Config.SCHEMATIC_DIRECTORY, SCHEMATIC_DEFAULT_FOLDER);
 
 		builder.pop().push(Names.Config.Category.PRINTER);
 
 		destroyBlocks = builder.comment(Names.Config.DESTROY_BLOCKS_DESC)
-		                       .translation("schematica.config.destroyBlocks.tooltip")
-		                       .define(Names.Config.DESTROY_BLOCKS, false);
+				.translation("schematica.config.destroyBlocks.tooltip")
+				.define(Names.Config.DESTROY_BLOCKS, false);
 
 		destroyInstantly = builder.comment(Names.Config.DESTROY_INSTANTLY_DESC)
-		                          .translation("schematica.config.destroyInstantly.tooltip")
-		                          .define(Names.Config.DESTROY_INSTANTLY, false);
+				.translation("schematica.config.destroyInstantly.tooltip")
+				.define(Names.Config.DESTROY_INSTANTLY, false);
 
 		placeAdjacent = builder.comment(Names.Config.PLACE_ADJACENT_DESC)
-		                       .translation("schematica.config.placeAdjacent.tooltip")
-		                       .define(Names.Config.PLACE_ADJACENT, true);
+				.translation("schematica.config.placeAdjacent.tooltip")
+				.define(Names.Config.PLACE_ADJACENT, true);
 
 		placeDelay = builder.comment(Names.Config.PLACE_DELAY_DESC)
-		                    .translation("schematica.config.placeDelay.tooltip")
-		                    .defineInRange(Names.Config.PLACE_DELAY, 1, 1, Integer.MAX_VALUE);
+				.translation("schematica.config.placeDelay.tooltip")
+				.defineInRange(Names.Config.PLACE_DELAY, 1, 1, Integer.MAX_VALUE);
 
 		placeDistance = builder.comment(Names.Config.PLACE_DISTANCE_DESC)
-		                       .translation("schematica.config.placeDistance.tooltip")
-		                       .defineInRange(Names.Config.PLACE_DISTANCE, 5, 1, Integer.MAX_VALUE);
+				.translation("schematica.config.placeDistance.tooltip")
+				.defineInRange(Names.Config.PLACE_DISTANCE, 5, 1, Integer.MAX_VALUE);
 
 		placeInstantly = builder.comment(Names.Config.PLACE_INSTANTLY_DESC)
-		                        .translation("schematica.config.placeInstantly.tooltip")
-		                        .define(Names.Config.PLACE_INSTANTLY, false);
+				.translation("schematica.config.placeInstantly.tooltip")
+				.define(Names.Config.PLACE_INSTANTLY, false);
 
 		timeout = builder.comment(Names.Config.TIMEOUT_DESC)
-		                 .translation("schematica.config.timeout.tooltip")
-		                 .defineInRange(Names.Config.TIMEOUT, 10, 2, Integer.MAX_VALUE);
+				.translation("schematica.config.timeout.tooltip")
+				.defineInRange(Names.Config.TIMEOUT, 10, 2, Integer.MAX_VALUE);
 
 		swapSlots = builder.comment(Names.Config.SWAP_SLOT_DESC)
-		                   .translation("schematica.config.swapslots.tooltip")
-		                   .defineList(Names.Config.SWAP_SLOT, Arrays.asList(5, 6, 7, 8), () -> 1,
-		                               num -> num instanceof Integer && (Integer) num > 0 && (Integer) num <= 9);
+				.translation("schematica.config.swapslots.tooltip")
+				.defineList(Names.Config.SWAP_SLOT, Arrays.asList(5, 6, 7, 8), () -> 1,
+						num -> num instanceof Integer && (Integer) num > 0 && (Integer) num <= 9);
 	}
 
 	public static void normalizeSchematicPath() {
@@ -138,7 +153,7 @@ public class SchematicaClientConfig {
 		}
 	}
 
-	private static String mergePaths(String schematicPath, String dataPath) {
+	private static @NotNull String mergePaths(@NotNull String schematicPath, String dataPath) {
 		String newPath;
 		if (schematicPath.startsWith(dataPath)) {
 			newPath = "." + schematicPath.substring(dataPath.length());
@@ -151,7 +166,7 @@ public class SchematicaClientConfig {
 
 	public static void populateExtraAirBlocks() {
 		extraAirBlockList.clear();
-		for (String name : SchematicaConfig.CLIENT.extraAirBlocks.get()) {
+		for (String name : SchematicaClientConfig.CLIENT.extraAirBlocks.get()) {
 			Block block = BuiltInRegistries.BLOCK.getValue(ResourceLocation.parse(name));
 			if (block != Blocks.AIR) {
 				extraAirBlockList.add(block);

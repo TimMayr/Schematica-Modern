@@ -6,6 +6,7 @@ import net.minecraft.world.level.entity.EntityLookup;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.entity.LevelEntityGetterAdapter;
 import net.minecraft.world.phys.AABB;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -23,7 +24,8 @@ public class FakeLevelEntityGetterAdapter extends LevelEntityGetterAdapter<Entit
 		super(entityLookup, null);
 	}
 
-	public static <T extends Entity> FakeLevelEntityGetterAdapter ofEntities(Collection<T> entities) {
+	@Contract("_ -> new")
+	public static <T extends Entity> @NotNull FakeLevelEntityGetterAdapter ofEntities(@NotNull Collection<T> entities) {
 		EntityLookup<Entity> entityLookup = new EntityLookup<>();
 		entities.forEach(entityLookup::add);
 		return new FakeLevelEntityGetterAdapter(entityLookup);

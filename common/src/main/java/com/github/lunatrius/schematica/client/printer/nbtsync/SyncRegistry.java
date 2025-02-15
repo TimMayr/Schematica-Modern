@@ -1,10 +1,13 @@
 package com.github.lunatrius.schematica.client.printer.nbtsync;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.HashMap;
 
+@Environment(EnvType.CLIENT)
 public class SyncRegistry {
 	public static final SyncRegistry INSTANCE = new SyncRegistry();
 

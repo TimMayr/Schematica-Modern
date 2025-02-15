@@ -2,6 +2,8 @@ package com.github.lunatrius.schematica.block.state.pattern;
 
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -12,7 +14,8 @@ public class BlockStateReplacer {
 		this.defaultReplacement = defaultReplacement;
 	}
 
-	public static BlockStateReplacer forBlockState(BlockState replacement) {
+	@Contract(value = "_ -> new", pure = true)
+	public static @NotNull BlockStateReplacer forBlockState(BlockState replacement) {
 		return new BlockStateReplacer(replacement);
 	}
 
@@ -22,7 +25,7 @@ public class BlockStateReplacer {
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	private BlockState applyProperties(BlockState state, Map<Property, Comparable> properties) {
+	private BlockState applyProperties(BlockState state, @NotNull Map<Property, Comparable> properties) {
 		BlockState mutableState = state;
 
 		for (Map.Entry<Property, Comparable> entry : properties.entrySet()) {

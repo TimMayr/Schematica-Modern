@@ -4,14 +4,17 @@ import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.core.util.vector.Vector3d;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
-import com.github.lunatrius.schematica.config.SchematicaClientConfig;
+import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
+import com.github.lunatrius.schematica.network.message.MessageSave;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
+import commonnetwork.api.Dispatcher;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.entity.player.Player;
@@ -21,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 @Environment(EnvType.CLIENT)
 public class ClientProxy extends CommonProxy {
@@ -165,6 +169,16 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
+	public boolean saveSchematic(Player player, @NotNull String filename, Level level, @NotNull String format,
+	                             @NotNull BlockPos from, @NotNull BlockPos to, boolean isPrivate,
+	                             @NotNull String iconName) {
+		MessageSave message = new MessageSave(filename, format, isPrivate, from, to, iconName);
+		Dispatcher.sendToServer(message);
+
+		return true;
+	}
+
+	@Override
 	public RegistryAccess getRegistryAccess() {
 		return Minecraft.getInstance().level.registryAccess();
 	}
@@ -179,8 +193,8 @@ public class ClientProxy extends CommonProxy {
 		FakeLevel world = FakeLevel.of(schematic);
 
 		Reference.logger.debug("Loaded {} [w:{},h:{},l:{}]", filename, world.getLevelSource().getMaxX(),
-		                       world.getHeight(),
-		                       world.getLevelSource().getMaxZ());
+				world.getHeight(),
+				world.getLevelSource().getMaxZ());
 
 		ClientProxy.schematic = world;
 		SchematicPrinter.INSTANCE.setSchematic(world);
@@ -200,6 +214,11 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
+	public List<File> getAllAccessibleDirectories(Player player) {
+		return List.of(getPlayerSchematicDirectory(player, true));
+	}
+
+	@Override
 	public void init() {
 		ClientLifecycleEvent.CLIENT_SETUP.register(instance -> {
 			Reference.proxy.createFolders();
@@ -212,6 +231,11 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public Level getLevel(Player player) {
+		return getLevel();
+	}
+
+	@Override
+	public Level getLevel() {
 		return Minecraft.getInstance().level;
 	}
 }
