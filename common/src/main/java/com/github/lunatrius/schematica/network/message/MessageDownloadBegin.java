@@ -18,31 +18,37 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 @MethodsReturnNonnullByDefault
-public record MessageDownloadBegin(ItemStack icon, int width, int height, int length)
+public record MessageDownloadBegin(ItemStack icon, String name, int width, int height, int length)
 		implements CustomPacketPayload {
 
 	public static final CustomPacketPayload.Type<MessageDownloadBegin> TYPE = new CustomPacketPayload.Type<>(
 			ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, Names.Network.DOWNLOAD_BEGIN_LOCATION));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, MessageDownloadBegin> STREAM_CODEC =
-			StreamCodec.composite(ItemStack.STREAM_CODEC, MessageDownloadBegin::icon, ByteBufCodecs.INT,
-			                      MessageDownloadBegin::width, ByteBufCodecs.INT, MessageDownloadBegin::height,
-			                      ByteBufCodecs.INT, MessageDownloadBegin::length, MessageDownloadBegin::new);
+			StreamCodec.composite(
+					ItemStack.STREAM_CODEC, MessageDownloadBegin::icon,
+					ByteBufCodecs.STRING_UTF8, MessageDownloadBegin::name,
+					ByteBufCodecs.INT, MessageDownloadBegin::width,
+					ByteBufCodecs.INT, MessageDownloadBegin::height,
+					ByteBufCodecs.INT, MessageDownloadBegin::length,
+					MessageDownloadBegin::new);
 
 	public MessageDownloadBegin(@NotNull ISchematic schematic) {
-		this(schematic.getIcon(), schematic.getSizeX(), schematic.getHeight(), schematic.getSizeZ());
+		this(schematic.getIcon(), schematic.getName(), schematic.getSizeX(), schematic.getHeight(),
+				schematic.getSizeZ());
 	}
 
 	public static void handle(@NotNull PacketContext<MessageDownloadBegin> ctx) {
 		if (ctx.side() == Side.CLIENT) {
 			DownloadHandler.INSTANCE.schematic =
-					new Schematic(ctx.message().icon, ctx.message().width, ctx.message().height, ctx.message().length);
+					new Schematic(ctx.message().icon(), ctx.message().name(), ctx.message().width(),
+							ctx.message().height(), ctx.message().length());
 			Dispatcher.sendToServer(new MessageDownloadBeginAck(true));
 		}
 	}
 
 	@Override
 	public Type<? extends CustomPacketPayload> type() {
-		return null;
+		return TYPE;
 	}
 }

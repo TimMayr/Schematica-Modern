@@ -6,13 +6,12 @@ import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.block.state.BlockStateHelper;
 import com.github.lunatrius.schematica.block.state.pattern.BlockStateReplacer;
 import com.github.lunatrius.schematica.reference.Names;
+import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.chunk.FakeChunk;
 import com.github.lunatrius.schematica.world.chunk.FakeChunkSource;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.MethodsReturnNonnullByDefault;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.*;
 import net.minecraft.core.BlockPos.MutableBlockPos;
@@ -118,19 +117,19 @@ public class FakeLevel extends Level {
 	 */
 	public FakeLevel(final ISchematic levelSource, final IFakeLevelLightProvider lightProvider,
 	                 @Nullable final Scoreboard scoreboard, final boolean overrideBeLevel) {
-		super(new FakeLevelData(clientLevel()::getLevelData, lightProvider), clientLevel().dimension(),
-				clientLevel().registryAccess(), clientLevel().dimensionTypeRegistration(),
-				clientLevel().isClientSide(),
-				clientLevel().isDebug(), 0, 0);
+		super(new FakeLevelData(level()::getLevelData, lightProvider), level().dimension(),
+				level().registryAccess(), level().dimensionTypeRegistration(),
+				level().isClientSide(),
+				level().isDebug(), 0, 0);
 		this.setLevelSource(levelSource);
 		this.lightProvider = lightProvider;
-		this.realLevel = clientLevel();
+		this.realLevel = level();
 		this.scoreboard = scoreboard;
 		this.overrideBeLevel = overrideBeLevel;
 		this.chunkSource = new FakeChunkSource(this);
 		this.lightEngine = new FakeLevelLightEngine(this);
 
-		setRealLevel(clientLevel());
+		setRealLevel(level());
 		try (Level realLevel = realLevel()) {
 			((FakeLevelData) getLevelData()).vanillaLevelData = realLevel::getLevelData;
 		} catch (IOException e) {
@@ -138,20 +137,11 @@ public class FakeLevel extends Level {
 		}
 	}
 
-	protected static ClientLevel clientLevel() {
-		return Minecraft.getInstance().level;
+	protected static Level level() {
+		return Reference.proxy.getLevel();
 	}
 
 	public void setRealLevel(Level realLevel) {
-		if (Objects.equals(this.realLevel, realLevel)) {
-			return;
-		}
-
-		if (realLevel != null && realLevel.isClientSide != this.isClientSide) {
-			throw new IllegalArgumentException(
-					"Received wrong sided realLevel - fakeLevel.isClientSide = " + this.isClientSide);
-		}
-
 		this.realLevel = realLevel;
 	}
 

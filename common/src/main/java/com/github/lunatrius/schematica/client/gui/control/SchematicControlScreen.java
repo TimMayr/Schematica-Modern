@@ -47,8 +47,8 @@ public class SchematicControlScreen extends BaseScreen {
 	private Button buttonHide = null;
 	private Button buttonPrint = null;
 
-	public SchematicControlScreen(Screen parentScreen) {
-		super(parentScreen);
+	public SchematicControlScreen(Screen parent) {
+		super(parent);
 		this.schematic = ClientProxy.schematic;
 		this.printer = SchematicPrinter.INSTANCE;
 	}
@@ -97,7 +97,7 @@ public class SchematicControlScreen extends BaseScreen {
 
 		Button buttonUnload = Button.builder(strUnload, (button) -> {
 			Reference.proxy.unloadSchematic();
-			this.minecraft.setScreen(this.parentScreen);
+			this.minecraft.setScreen(this.parent);
 		}).pos(this.width - 90, this.height - 200).size(80, 20).build();
 		this.addRenderableWidget(buttonUnload);
 
@@ -164,7 +164,8 @@ public class SchematicControlScreen extends BaseScreen {
 
 
 		CycleButton<Direction> buttonRotateDirection =
-				new CycleButton.Builder<Direction>(direction -> Component.translatable(Names.Gui.Control.TRANSFORM_PREFIX + direction.getName()))
+				new CycleButton.Builder<Direction>(direction -> Component.translatable(
+						Names.Gui.Control.TRANSFORM_PREFIX + direction.getName()))
 						.withInitialValue(Direction.DOWN)
 						.withValues(Direction.values())
 						.displayOnlyValue()

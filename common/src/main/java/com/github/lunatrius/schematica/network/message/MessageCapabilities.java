@@ -20,9 +20,11 @@ public record MessageCapabilities(boolean isPrinterEnabled, boolean isSaveEnable
 			ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, Names.Network.CAPABILITIES_LOCATION));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, MessageCapabilities> STREAM_CODEC =
-			StreamCodec.composite(ByteBufCodecs.BOOL, MessageCapabilities::isPrinterEnabled, ByteBufCodecs.BOOL,
-			                      MessageCapabilities::isSaveEnabled, ByteBufCodecs.BOOL,
-			                      MessageCapabilities::isLoadEnabled, MessageCapabilities::new);
+			StreamCodec.composite(
+					ByteBufCodecs.BOOL, MessageCapabilities::isPrinterEnabled,
+					ByteBufCodecs.BOOL, MessageCapabilities::isSaveEnabled,
+					ByteBufCodecs.BOOL, MessageCapabilities::isLoadEnabled,
+					MessageCapabilities::new);
 
 	public static void handle(@NotNull PacketContext<MessageCapabilities> ctx) {
 		if (ctx.side() == Side.CLIENT) {
@@ -31,8 +33,8 @@ public record MessageCapabilities(boolean isPrinterEnabled, boolean isSaveEnable
 			Reference.proxy.isLoadEnabled = ctx.message().isLoadEnabled();
 
 			Reference.logger.info("Server capabilities{printer={}, save={}, load={}}",
-			                      ctx.message().isPrinterEnabled(),
-			                      ctx.message().isSaveEnabled(), ctx.message().isLoadEnabled());
+					ctx.message().isPrinterEnabled(),
+					ctx.message().isSaveEnabled(), ctx.message().isLoadEnabled());
 		}
 	}
 

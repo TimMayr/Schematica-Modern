@@ -67,7 +67,6 @@ public class Names {
 
 	public static class Command {
 		public static final String BASE = "schematica";
-		public static final String CLIENT_BASE = "schematicaClient";
 
 		public static class Save {
 			public static final String NAME = "save";
@@ -81,6 +80,7 @@ public class Names {
 				public static final String PLAYER_SCHEMATIC_DIR_UNAVAILABLE =
 						"schematica.command.save.playerSchematicDirUnavailable";
 				public static final String UNKNOWN_FORMAT = "schematica.command.save.unknownFormat";
+				public static final String CONFIRM_MESSAGE = "schematica.command.save.confirm";
 			}
 		}
 
@@ -104,7 +104,9 @@ public class Names {
 				public static final String USAGE = "schematica.command.remove.usage";
 				public static final String SCHEMATIC_REMOVED = "schematica.command.remove.schematicRemoved";
 				public static final String SCHEMATIC_NOT_FOUND = "schematica.command.remove.schematicNotFound";
-				public static final String ARE_YOU_SURE_START = "schematica.command.remove.areYouSure";
+				public static final String SCHEMATIC_NOT_ACCESSIBLE = "schematica.command.remove" +
+						".schematicNotAccessible";
+				public static final String ARE_YOU_SURE = "schematica.command.remove.areYouSure";
 				public static final String YES = "gui.yes";
 			}
 		}
@@ -142,6 +144,8 @@ public class Names {
 		public static final String ON = "schematica.gui.on";
 		public static final String OFF = "schematica.gui.off";
 		public static final String DONE = "schematica.gui.done";
+		public static final String CONTINUE = "schematica.gui.continue";
+		public static final String BACK = "schematica.gui.back";
 
 		public static class Load {
 			public static final String TITLE = "schematica.gui.title";
@@ -156,7 +160,10 @@ public class Names {
 			public static final String SAVE = "schematica.gui.save";
 			public static final String SAVE_SELECTION = "schematica.gui.saveselection";
 			public static final String FORMAT = "schematica.gui.format";
+			public static final String PRIVATE = "schematica.gui.private";
+			public static final String PUBLIC = "schematica.gui.public";
 		}
+
 
 		public static class Control {
 			public static final String MOVE_SCHEMATIC = "schematica.gui.moveschematic";
@@ -218,6 +225,7 @@ public class Names {
 		public static final String BLOCK_ENTITIES = "TileEntities";
 		public static final String ENTITIES = "Entities";
 		public static final String AUTHOR = "Author";
+		public static final String TITLE = "Name";
 	}
 
 	public static class Formats {
@@ -233,6 +241,7 @@ public class Names {
 
 	public static class Network {
 		public static final String CAPABILITIES_LOCATION = "capabilities";
+		public static final String SAVE_LOCATION = "save";
 		public static final String DOWNLOAD_BEGIN_LOCATION = "download_begin";
 		public static final String DOWNLOAD_BEGIN_ACK_LOCATION = "download_begin_ack";
 		public static final String DOWNLOAD_CHUNK_LOCATION = "download_chunk";

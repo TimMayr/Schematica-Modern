@@ -1,6 +1,5 @@
 package com.github.lunatrius.schematica.client.gui.save;
 
-import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
 import com.github.lunatrius.schematica.core.BaseScreen;
 import com.github.lunatrius.schematica.core.NumericFieldWidget;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
@@ -20,6 +19,8 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
+
 @Environment(EnvType.CLIENT)
 public class SchematicSaveScreen extends BaseScreen {
 	private final Component strSaveSelection = Component.translatable(Names.Gui.Save.SAVE_SELECTION);
@@ -37,9 +38,10 @@ public class SchematicSaveScreen extends BaseScreen {
 	private CycleButton<SchematicFormat> buttonFormat = null;
 	private EditBox editBoxFilename = null;
 	private String filename = "";
+	private boolean isSavePrivate = true;
 
-	public SchematicSaveScreen(Screen parentScreen) {
-		super(parentScreen);
+	public SchematicSaveScreen(Screen parent) {
+		super(parent);
 	}
 
 	@Override
@@ -93,12 +95,12 @@ public class SchematicSaveScreen extends BaseScreen {
 
 		this.clearWidgets();
 
-		Button btnPointA = Button.builder(Component.translatable(Names.Gui.Save.POINT_RED), (button) -> {
+		Button buttonPointA = Button.builder(Component.translatable(Names.Gui.Save.POINT_RED), (button) -> {
 			ClientProxy.movePointToPlayer(ClientProxy.pointA);
 			ClientProxy.updatePoints();
 			setPoint(this.numericAX, this.numericAY, this.numericAZ, ClientProxy.pointA);
 		}).bounds(this.centerX - 130, this.centerY - 55, 100, 20).build();
-		this.addRenderableWidget(btnPointA);
+		this.addRenderableWidget(buttonPointA);
 
 
 		this.numericAX = new NumericFieldWidget(this.centerX - 130, this.centerY - 30, (button) -> {
@@ -122,12 +124,12 @@ public class SchematicSaveScreen extends BaseScreen {
 		this.addRenderableWidget(this.numericAZ);
 
 
-		Button btnPointB = Button.builder(Component.translatable(Names.Gui.Save.POINT_BLUE), (button) -> {
+		Button buttonPointB = Button.builder(Component.translatable(Names.Gui.Save.POINT_BLUE), (button) -> {
 			ClientProxy.movePointToPlayer(ClientProxy.pointB);
 			ClientProxy.updatePoints();
 			setPoint(this.numericBX, this.numericBY, this.numericBZ, ClientProxy.pointB);
 		}).bounds(this.centerX + 30, this.centerY - 55, 100, 20).build();
-		this.addRenderableWidget(btnPointB);
+		this.addRenderableWidget(buttonPointB);
 
 
 		this.numericBX = new NumericFieldWidget(this.centerX + 30, this.centerY - 30, (button) -> {
@@ -156,13 +158,22 @@ public class SchematicSaveScreen extends BaseScreen {
 
 
 		Button buttonSave = Button.builder(Component.translatable(Names.Gui.Save.SAVE), (button) -> {
-			String path = this.editBoxFilename.getValue() + SchematicFormat.getExtension(this.getFormatName());
-			if (Reference.proxy.saveSchematic(this.minecraft.player, SchematicaClientConfig.schematicDirectory,
-					path, this.minecraft.level, this.getFormatName(), ClientProxy.pointMin,
-					ClientProxy.pointMax)) {
-				this.editBoxFilename.setValue(this.filename);
-				this.minecraft.setScreen(this.parentScreen);
+			this.filename = this.editBoxFilename.getValue();
+			String filename = this.editBoxFilename.getValue() + SchematicFormat.getExtension(this.getFormatName());
+
+			File directory = Reference.proxy.getPlayerSchematicDirectory(this.minecraft.player, this.isSavePrivate);
+			File file = new File(directory, filename);
+
+			if (!file.exists()) {
+				if (Reference.proxy.saveSchematic(this.minecraft.player, filename, this.minecraft.level,
+						this.getFormatName(), ClientProxy.pointMin, ClientProxy.pointMax, this.isSavePrivate, "")) {
+					this.minecraft.setScreen(this.parent);
+				}
+			} else {
+				this.minecraft.setScreen(new SchematicSaveConfirmScreen(this, this.parent, filename,
+						this.getFormatName(), this.isSavePrivate));
 			}
+
 		}).bounds(this.width - 50, this.height - 30, 40, 20).build();
 		this.addRenderableWidget(buttonSave);
 
@@ -170,8 +181,16 @@ public class SchematicSaveScreen extends BaseScreen {
 		this.buttonFormat = new CycleButton.Builder<SchematicFormat>(o -> Component.translatable(o.getName()))
 				.withInitialValue(SchematicFormat.getFormatFromName(SchematicFormat.FORMAT_DEFAULT))
 				.withValues(SchematicFormat.FORMATS.values())
-				.create(this.width - 205, this.height - 55, 195, 20, Component.translatable(Names.Gui.Save.FORMAT));
+				.create(this.width - 150, this.height - 55, 140, 20, Component.translatable(Names.Gui.Save.FORMAT));
 		this.addRenderableWidget(this.buttonFormat);
+
+
+		Button buttonVisibility = Button.builder(Component.translatable(Names.Gui.Save.PRIVATE), (button) -> {
+			button.setMessage(this.isSavePrivate ?
+					Component.translatable(Names.Gui.Save.PUBLIC) : Component.translatable(Names.Gui.Save.PRIVATE));
+			this.isSavePrivate = !this.isSavePrivate;
+		}).bounds(this.width - 205, this.height - 55, 50, 20).build();
+		this.addRenderableWidget(buttonVisibility);
 
 
 		this.editBoxFilename.setMaxLength(1024);

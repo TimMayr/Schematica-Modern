@@ -5,11 +5,11 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 
 public class BaseScreen extends Screen {
-	protected final Screen parentScreen;
+	protected final Screen parent;
 
-	public BaseScreen(Screen parentScreen) {
+	public BaseScreen(Screen parent) {
 		super(CommonComponents.EMPTY);
-		this.parentScreen = parentScreen;
+		this.parent = parent;
 	}
 
 	@Override
@@ -19,11 +19,15 @@ public class BaseScreen extends Screen {
 
 	@Override
 	public void onClose() {
-		this.minecraft.setScreen(parentScreen);
+		this.minecraft.setScreen(parent);
 	}
 
 	@Override
 	public void init() {
 		this.children().clear();
+	}
+
+	public Screen getParent() {
+		return parent;
 	}
 }

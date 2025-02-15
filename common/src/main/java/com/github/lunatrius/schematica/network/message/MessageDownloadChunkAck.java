@@ -13,6 +13,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.NotNull;
 
 @MethodsReturnNonnullByDefault
 public record MessageDownloadChunkAck(boolean ack, int baseX, int baseY, int baseZ) implements CustomPacketPayload {
@@ -20,21 +21,22 @@ public record MessageDownloadChunkAck(boolean ack, int baseX, int baseY, int bas
 			ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, Names.Network.DOWNLOAD_CHUNK_ACK_LOCATION));
 
 	public static StreamCodec<RegistryFriendlyByteBuf, MessageDownloadChunkAck> STREAM_CODEC =
-			net.minecraft.network.codec.StreamCodec.composite(ByteBufCodecs.BOOL, MessageDownloadChunkAck::ack,
-			                                                  ByteBufCodecs.INT, MessageDownloadChunkAck::baseX,
-			                                                  ByteBufCodecs.INT, MessageDownloadChunkAck::baseY,
-			                                                  ByteBufCodecs.INT, MessageDownloadChunkAck::baseZ,
-			                                                  MessageDownloadChunkAck::new);
+			net.minecraft.network.codec.StreamCodec.composite(
+					ByteBufCodecs.BOOL, MessageDownloadChunkAck::ack,
+					ByteBufCodecs.INT, MessageDownloadChunkAck::baseX,
+					ByteBufCodecs.INT, MessageDownloadChunkAck::baseY,
+					ByteBufCodecs.INT, MessageDownloadChunkAck::baseZ,
+					MessageDownloadChunkAck::new);
 
 
-	public static void handle(PacketContext<MessageDownloadChunkAck> ctx) {
+	public static void handle(@NotNull PacketContext<MessageDownloadChunkAck> ctx) {
 		if (ctx.side() == Side.SERVER) {
 			if (ctx.message().ack()) {
 				Player player = ctx.sender();
 				SchematicTransfer transfer = DownloadHandler.INSTANCE.transferMap.get(player.getScoreboardName());
 
 				if (transfer != null) {
-					transfer.confirmChunk(ctx.message().baseX, ctx.message().baseY, ctx.message().baseZ);
+					transfer.confirmChunk(ctx.message().baseX(), ctx.message().baseY(), ctx.message().baseZ());
 				}
 			}
 		}

@@ -1,5 +1,6 @@
 package com.github.lunatrius.schematica.command;
 
+import com.github.lunatrius.schematica.core.FileNameUtils;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.mojang.brigadier.CommandDispatcher;
@@ -20,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -61,19 +61,13 @@ public abstract class CommandSchematicaBase {
 			return builder.buildFuture();
 		}
 
-		File directory = Reference.proxy.getPlayerSchematicDirectory(player, true);
-		File[] files = directory.listFiles(FILE_FILTER_SCHEMATIC);
+		List<File> files = Reference.proxy.getAllAccessibleSchematics(player, FILE_FILTER_SCHEMATIC);
+		List<String> filenames = FileNameUtils.getFileNamesWithDirectories(files);
 
-		if (files != null) {
-			List<String> filenames = new ArrayList<>();
-
-			for (File file : files) {
-				filenames.add(file.getName());
-			}
-
+		if (!filenames.isEmpty()) {
+			//Copy so that the lambda can access it
 			String finalName = name;
 			filenames.stream().filter(s -> s.startsWith(finalName)).forEach(builder::suggest);
-			return builder.buildFuture();
 		}
 
 		return builder.buildFuture();

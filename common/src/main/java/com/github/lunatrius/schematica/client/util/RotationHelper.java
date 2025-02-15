@@ -29,49 +29,49 @@ public class RotationHelper {
 	private static final Direction.Axis[][] AXISES = new Direction.Axis[Direction.Axis.values().length][];
 
 	static {
-		FACINGS[Direction.DOWN.ordinal()] = new Direction[] {Direction.DOWN,
-		                                                     Direction.UP,
-		                                                     Direction.WEST,
-		                                                     Direction.EAST,
-		                                                     Direction.SOUTH,
-		                                                     Direction.NORTH};
-		FACINGS[Direction.UP.ordinal()] = new Direction[] {Direction.DOWN,
-		                                                   Direction.UP,
-		                                                   Direction.EAST,
-		                                                   Direction.WEST,
-		                                                   Direction.NORTH,
-		                                                   Direction.SOUTH};
-		FACINGS[Direction.NORTH.ordinal()] = new Direction[] {Direction.EAST,
-		                                                      Direction.WEST,
-		                                                      Direction.NORTH,
-		                                                      Direction.SOUTH,
-		                                                      Direction.DOWN,
-		                                                      Direction.UP};
-		FACINGS[Direction.SOUTH.ordinal()] = new Direction[] {Direction.WEST,
-		                                                      Direction.EAST,
-		                                                      Direction.NORTH,
-		                                                      Direction.SOUTH,
-		                                                      Direction.UP,
-		                                                      Direction.DOWN};
-		FACINGS[Direction.WEST.ordinal()] = new Direction[] {Direction.NORTH,
-		                                                     Direction.SOUTH,
-		                                                     Direction.UP,
-		                                                     Direction.DOWN,
-		                                                     Direction.WEST,
-		                                                     Direction.EAST};
-		FACINGS[Direction.EAST.ordinal()] = new Direction[] {Direction.SOUTH,
-		                                                     Direction.NORTH,
-		                                                     Direction.DOWN,
-		                                                     Direction.UP,
-		                                                     Direction.WEST,
-		                                                     Direction.EAST};
+		FACINGS[Direction.DOWN.ordinal()] = new Direction[]{Direction.DOWN,
+				Direction.UP,
+				Direction.WEST,
+				Direction.EAST,
+				Direction.SOUTH,
+				Direction.NORTH};
+		FACINGS[Direction.UP.ordinal()] = new Direction[]{Direction.DOWN,
+				Direction.UP,
+				Direction.EAST,
+				Direction.WEST,
+				Direction.NORTH,
+				Direction.SOUTH};
+		FACINGS[Direction.NORTH.ordinal()] = new Direction[]{Direction.EAST,
+				Direction.WEST,
+				Direction.NORTH,
+				Direction.SOUTH,
+				Direction.DOWN,
+				Direction.UP};
+		FACINGS[Direction.SOUTH.ordinal()] = new Direction[]{Direction.WEST,
+				Direction.EAST,
+				Direction.NORTH,
+				Direction.SOUTH,
+				Direction.UP,
+				Direction.DOWN};
+		FACINGS[Direction.WEST.ordinal()] = new Direction[]{Direction.NORTH,
+				Direction.SOUTH,
+				Direction.UP,
+				Direction.DOWN,
+				Direction.WEST,
+				Direction.EAST};
+		FACINGS[Direction.EAST.ordinal()] = new Direction[]{Direction.SOUTH,
+				Direction.NORTH,
+				Direction.DOWN,
+				Direction.UP,
+				Direction.WEST,
+				Direction.EAST};
 
 		AXISES[Direction.Axis.X.ordinal()] =
-				new Direction.Axis[] {Direction.Axis.X, Direction.Axis.Z, Direction.Axis.Y};
+				new Direction.Axis[]{Direction.Axis.X, Direction.Axis.Z, Direction.Axis.Y};
 		AXISES[Direction.Axis.Y.ordinal()] =
-				new Direction.Axis[] {Direction.Axis.Z, Direction.Axis.Y, Direction.Axis.X};
+				new Direction.Axis[]{Direction.Axis.Z, Direction.Axis.Y, Direction.Axis.X};
 		AXISES[Direction.Axis.Z.ordinal()] =
-				new Direction.Axis[] {Direction.Axis.Y, Direction.Axis.X, Direction.Axis.Z};
+				new Direction.Axis[]{Direction.Axis.Y, Direction.Axis.X, Direction.Axis.Z};
 	}
 
 	public boolean rotate(FakeLevel world, Direction axis, boolean forced) {
@@ -95,6 +95,30 @@ public class RotationHelper {
 		}
 
 		return false;
+	}
+
+	public Schematic rotate(@NotNull ISchematic schematic, Direction axis, boolean forced) throws RotationException {
+		Vec3i dimensionsRotated =
+				rotateDimensions(axis, schematic.getSizeX(), schematic.getHeight(), schematic.getSizeZ());
+		Schematic schematicRotated =
+				new Schematic(schematic.getIcon(), schematic.getName(), dimensionsRotated.getX(),
+						dimensionsRotated.getY(), dimensionsRotated.getZ(), schematic.getAuthor());
+		MBlockPos tmp = new MBlockPos();
+
+		for (MBlockPos pos : BlockPosHelper.getAllInBox(0, 0, 0, schematic.getSizeX() - 1, schematic.getHeight() - 1,
+				schematic.getSizeZ() - 1)) {
+			BlockState blockState = schematic.getBlockState(pos);
+			BlockState blockStateRotated = rotateBlock(blockState, axis, forced);
+			schematicRotated.setBlockState(rotatePos(pos, axis, dimensionsRotated, tmp), blockStateRotated);
+		}
+
+		List<BlockEntity> blockEntities = schematic.getBlockEntities();
+		for (BlockEntity blockEntity : blockEntities) {
+			BlockPos pos = blockEntity.getBlockPos();
+			schematicRotated.setBlockEntity(new BlockPos(rotatePos(pos, axis, dimensionsRotated, tmp)), blockEntity);
+		}
+
+		return schematicRotated;
 	}
 
 	private void updatePosition(FakeLevel world, @NotNull Direction axis) {
@@ -122,30 +146,6 @@ public class RotationHelper {
 		}
 	}
 
-	public Schematic rotate(@NotNull ISchematic schematic, Direction axis, boolean forced) throws RotationException {
-		Vec3i dimensionsRotated =
-				rotateDimensions(axis, schematic.getSizeX(), schematic.getHeight(), schematic.getSizeZ());
-		Schematic schematicRotated =
-				new Schematic(schematic.getIcon(), dimensionsRotated.getX(), dimensionsRotated.getY(),
-				              dimensionsRotated.getZ(), schematic.getAuthor());
-		MBlockPos tmp = new MBlockPos();
-
-		for (MBlockPos pos : BlockPosHelper.getAllInBox(0, 0, 0, schematic.getSizeX() - 1, schematic.getHeight() - 1,
-		                                                schematic.getSizeZ() - 1)) {
-			BlockState blockState = schematic.getBlockState(pos);
-			BlockState blockStateRotated = rotateBlock(blockState, axis, forced);
-			schematicRotated.setBlockState(rotatePos(pos, axis, dimensionsRotated, tmp), blockStateRotated);
-		}
-
-		List<BlockEntity> blockEntities = schematic.getBlockEntities();
-		for (BlockEntity blockEntity : blockEntities) {
-			BlockPos pos = blockEntity.getBlockPos();
-			schematicRotated.setBlockEntity(new BlockPos(rotatePos(pos, axis, dimensionsRotated, tmp)), blockEntity);
-		}
-
-		return schematicRotated;
-	}
-
 	@SuppressWarnings("SuspiciousNameCombination")
 	private @NotNull Vec3i rotateDimensions(@NotNull Direction axis, int width, int height, int length) {
 		return switch (axis) {
@@ -171,8 +171,8 @@ public class RotationHelper {
 			}
 		} else {
 			Reference.logger.error("'{}': found 'facing' property with unknown type {}",
-			                       BuiltInRegistries.BLOCK.getKey(blockState.getBlock()),
-			                       propertyFacingPotentially.getClass().getSimpleName());
+					BuiltInRegistries.BLOCK.getKey(blockState.getBlock()),
+					propertyFacingPotentially.getClass().getSimpleName());
 		}
 
 		Property<?> property = BlockStateHelper.getProperty(blockState, "axis");
@@ -185,13 +185,13 @@ public class RotationHelper {
 			}
 		} else {
 			Reference.logger.error("'{}': found 'axis' property with unknown type {}",
-			                       BuiltInRegistries.BLOCK.getKey(blockState.getBlock()),
-			                       property.getClass().getSimpleName());
+					BuiltInRegistries.BLOCK.getKey(blockState.getBlock()),
+					property.getClass().getSimpleName());
 		}
 
 		if (!forced) {
 			throw new RotationException("'%s' cannot be rotated around '%s'",
-			                            BuiltInRegistries.BLOCK.getKey(blockState.getBlock()), axisRotation);
+					BuiltInRegistries.BLOCK.getKey(blockState.getBlock()), axisRotation);
 		}
 
 		return blockState;

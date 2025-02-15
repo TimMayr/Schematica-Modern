@@ -24,8 +24,8 @@ public class CommandSchematicaDownload extends CommandSchematicaBase {
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		return Commands.literal(Names.Command.Download.NAME)
 				.then(Commands.argument("filename", StringArgumentType.string())
-						.suggests(
-								((context, builder) -> CommandSchematicaBase.getSchematicNamesSuggestions(
+						.suggests(((context, builder) ->
+								CommandSchematicaBase.getSchematicNamesSuggestions(
 										context, builder, FILE_FILTER_SCHEMATIC)))
 						.executes((commandContext) -> {
 							CommandSourceStack source = commandContext.getSource();
@@ -44,13 +44,11 @@ public class CommandSchematicaDownload extends CommandSchematicaBase {
 							}
 
 							ISchematic schematic = SchematicFormat.readFromFile(directory, filename,
-									Reference.proxy.getLevel(
-											player));
+									Reference.proxy.getLevel(player));
 
 							if (schematic != null) {
 								DownloadHandler.INSTANCE.transferMap.put(player.getScoreboardName(),
-										new SchematicTransfer(schematic,
-												filename));
+										new SchematicTransfer(schematic, filename));
 								source.sendSuccess(() -> Component.translatable(
 										Names.Command.Download.Message.DOWNLOAD_STARTED, filename), true);
 							} else {

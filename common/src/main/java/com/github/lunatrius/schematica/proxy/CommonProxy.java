@@ -3,11 +3,7 @@ package com.github.lunatrius.schematica.proxy;
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
-import com.github.lunatrius.schematica.handler.QueueTickHandler;
 import com.github.lunatrius.schematica.reference.Reference;
-import com.github.lunatrius.schematica.world.chunk.SchematicContainer;
-import com.github.lunatrius.schematica.world.schematic.SchematicUtil;
-import com.github.lunatrius.schematica.world.storage.Schematic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.entity.Entity;
@@ -18,10 +14,13 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 public abstract class CommonProxy {
@@ -32,7 +31,7 @@ public abstract class CommonProxy {
 		if (!SchematicaClientConfig.schematicDirectory.exists()) {
 			if (!SchematicaClientConfig.schematicDirectory.mkdirs()) {
 				Reference.logger.warn("Could not create schematic directory [{}]!",
-				                      SchematicaClientConfig.schematicDirectory.getAbsolutePath());
+						SchematicaClientConfig.schematicDirectory.getAbsolutePath());
 			}
 		}
 	}
@@ -50,7 +49,7 @@ public abstract class CommonProxy {
 		try {
 			return subDirectory.getCanonicalFile();
 		} catch (IOException e) {
-			e.printStackTrace();
+			Reference.logger.error("Could not canonize directory [{}]!", subDirectory.getAbsolutePath());
 		}
 
 		return subDirectory;
@@ -117,48 +116,9 @@ public abstract class CommonProxy {
 		}
 	}
 
-	public boolean saveSchematic(Player player, File directory, String filename, Level level, @Nullable String format,
-	                             BlockPos from, BlockPos to) {
-		try {
-			String iconName = "";
-
-			try {
-				String[] parts = filename.split(";");
-				if (parts.length == 2) {
-					iconName = parts[0];
-					filename = parts[1];
-				}
-			} catch (Exception e) {
-				Reference.logger.error("Failed to parse icon data!", e);
-			}
-
-			int minX = Math.min(from.getX(), to.getX());
-			int maxX = Math.max(from.getX(), to.getX());
-			int minY = Math.min(from.getY(), to.getY());
-			int maxY = Math.max(from.getY(), to.getY());
-			int minZ = Math.min(from.getZ(), to.getZ());
-			int maxZ = Math.max(from.getZ(), to.getZ());
-
-			short width = (short) (Math.abs(maxX - minX) + 1);
-			short height = (short) (Math.abs(maxY - minY) + 1);
-			short length = (short) (Math.abs(maxZ - minZ) + 1);
-
-			ISchematic schematic = new Schematic(SchematicUtil.getIconFromName(iconName), width, height, length,
-			                                     player.getScoreboardName());
-
-			PlatformProxy.createAndPostPreSchematicCaptureEvent(new AABB(minX, minY, minZ, maxX, maxY, maxZ));
-
-			SchematicContainer container =
-					new SchematicContainer(schematic, player, level, new File(directory, filename), format, minX, maxX,
-					                       minY, maxY, minZ, maxZ);
-			QueueTickHandler.INSTANCE.queueSchematic(container);
-
-			return true;
-		} catch (Exception e) {
-			Reference.logger.error("Failed to save schematic!", e);
-		}
-		return false;
-	}
+	public abstract boolean saveSchematic(Player player, @NotNull String filename, Level level,
+	                                      @NotNull String format, @NotNull BlockPos from, @NotNull BlockPos to,
+	                                      boolean isPrivate, @NotNull String iconName);
 
 	public abstract RegistryAccess getRegistryAccess();
 
@@ -168,7 +128,22 @@ public abstract class CommonProxy {
 
 	public abstract File getPlayerSchematicDirectory(Player player, boolean privateDirectory);
 
+	public List<File> getAllAccessibleSchematics(Player player, FileFilter filter) {
+		List<File> dirs = getAllAccessibleDirectories(player);
+		List<File> schematics = new LinkedList<>();
+
+		for (File dir : dirs) {
+			Collections.addAll(schematics, dir.listFiles(filter));
+		}
+
+		return schematics;
+	}
+
+	public abstract List<File> getAllAccessibleDirectories(Player player);
+
 	public abstract void init();
 
 	public abstract Level getLevel(Player player);
+
+	public abstract Level getLevel();
 }

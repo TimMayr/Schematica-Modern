@@ -28,6 +28,7 @@ public class SchematicAlpha extends SchematicFormat {
 	@Override
 	public ISchematic readFromNBT(CompoundTag tagCompound, Level level) {
 		ItemStack icon = SchematicUtil.getIconFromNBT(tagCompound);
+		String name = tagCompound.getString(Names.NBT.TITLE);
 
 		List<BlockState> localBlockList =
 				Arrays.stream(tagCompound.getIntArray(Names.NBT.BLOCKS)).mapToObj(Block::stateById).toList();
@@ -68,8 +69,7 @@ public class SchematicAlpha extends SchematicFormat {
 		}
 
 		MBlockPos pos = new MBlockPos();
-		ISchematic schematic = new Schematic(icon, width, height, length);
-		schematic.setAuthor(author);
+		ISchematic schematic = new Schematic(icon, name, width, height, length, author);
 
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
@@ -131,6 +131,7 @@ public class SchematicAlpha extends SchematicFormat {
 		ItemStack icon = schematic.getIcon();
 		icon.save(Reference.proxy.getRegistryAccess(), tagCompoundIcon);
 		tagCompound.put(Names.NBT.ICON, tagCompoundIcon);
+		tagCompound.putString(Names.NBT.TITLE, schematic.getName());
 
 		tagCompound.putInt(Names.NBT.WIDTH, schematic.getSizeX());
 		tagCompound.putInt(Names.NBT.LENGTH, schematic.getSizeZ());

@@ -18,19 +18,15 @@ import org.jetbrains.annotations.NotNull;
 
 public class SchematicStructure extends SchematicFormat {
 	@Override
-	public String getNbtName() {
-		return Names.NBT.FORMAT_STRUCTURE;
-	}
-
-	@Override
 	public ISchematic readFromNBT(CompoundTag tagCompound, Level level) {
 		ItemStack icon = SchematicUtil.getIconFromNBT(tagCompound);
+		String name = tagCompound.getString(Names.NBT.TITLE);
 		StructureTemplate template = new StructureTemplate();
 		template.load(BuiltInRegistries.BLOCK, tagCompound);
 
 		Schematic schematic =
-				new Schematic(icon, template.getSize().getX(), template.getSize().getY(), template.getSize().getZ(),
-						template.getAuthor());
+				new Schematic(icon, name, template.getSize().getX(), template.getSize().getY(),
+						template.getSize().getZ(), template.getAuthor());
 
 		for (StructureTemplate.Palette palette : template.palettes) {
 			for (StructureTemplate.StructureBlockInfo block : palette.blocks()) {
@@ -67,7 +63,6 @@ public class SchematicStructure extends SchematicFormat {
 		return schematic;
 	}
 
-
 	@Override
 	public void writeToNBT(@NotNull CompoundTag tagCompoundIn, ISchematic schematic) {
 		StructureTemplate template = new StructureTemplate();
@@ -83,6 +78,7 @@ public class SchematicStructure extends SchematicFormat {
 		template.save(writeTo);
 		writeTo.putString(Names.NBT.FORMAT, Names.NBT.FORMAT_STRUCTURE);
 		writeTo.putString(Names.NBT.AUTHOR, schematic.getAuthor());
+		writeTo.putString(Names.NBT.TITLE, schematic.getName());
 
 		tagCompoundIn.put(Names.NBT.ROOT, writeTo);
 	}
@@ -90,6 +86,11 @@ public class SchematicStructure extends SchematicFormat {
 	@Override
 	public String getName() {
 		return Names.Formats.STRUCTURE;
+	}
+
+	@Override
+	public String getNbtName() {
+		return Names.NBT.FORMAT_STRUCTURE;
 	}
 
 	@Override

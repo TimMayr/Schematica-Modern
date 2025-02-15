@@ -13,16 +13,20 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.NotNull;
 
+//ack value is needed because the StreamCodec needs something to decode
 @MethodsReturnNonnullByDefault
 public record MessageDownloadBeginAck(boolean ack) implements CustomPacketPayload {
 	public static final CustomPacketPayload.Type<MessageCapabilities> TYPE = new CustomPacketPayload.Type<>(
 			ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, Names.Network.DOWNLOAD_BEGIN_ACK_LOCATION));
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, MessageDownloadBeginAck> STREAM_CODEC =
-			StreamCodec.composite(ByteBufCodecs.BOOL, MessageDownloadBeginAck::ack, MessageDownloadBeginAck::new);
+			StreamCodec.composite(
+					ByteBufCodecs.BOOL, MessageDownloadBeginAck::ack,
+					MessageDownloadBeginAck::new);
 
-	public static void handle(PacketContext<MessageDownloadBeginAck> ctx) {
+	public static void handle(@NotNull PacketContext<MessageDownloadBeginAck> ctx) {
 		if (ctx.side() == Side.SERVER) {
 			if (ctx.message().ack()) {
 				Player player = ctx.sender();

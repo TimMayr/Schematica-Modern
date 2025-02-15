@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -19,7 +20,11 @@ import java.nio.file.Files;
 public class SchematicUtil {
 	public static final ItemStack DEFAULT_ICON = new ItemStack(Blocks.GRASS_BLOCK);
 
-	public static @NotNull ItemStack getIconFromName(@NotNull String iconName) {
+	public static @NotNull ItemStack getIconFromName(@Nullable String iconName) {
+		if (iconName == null) {
+			DEFAULT_ICON.copy();
+		}
+
 		ResourceLocation rl = null;
 
 		String[] parts = iconName.split(",");
@@ -54,21 +59,12 @@ public class SchematicUtil {
 		return DEFAULT_ICON.copy();
 	}
 
-	public static CompoundTag readTagCompoundFromFile(File file) throws IOException {
-		try {
-			return NbtIo.readCompressed(Files.newInputStream(file.toPath()), NbtAccounter.unlimitedHeap());
-		} catch (Exception ex) {
-			Reference.logger.warn("Failed compressed read, trying normal read...", ex);
-			return NbtIo.read(new DataInputStream(Files.newInputStream(file.toPath())), NbtAccounter.unlimitedHeap());
-		}
-	}
-
 	public static ItemStack getIconFromNBT(CompoundTag tagCompound) {
 		ItemStack icon = DEFAULT_ICON.copy();
 
 		if (tagCompound != null && tagCompound.contains(Names.NBT.ICON)) {
 			icon = ItemStack.parseOptional(Reference.proxy.getRegistryAccess(),
-			                               tagCompound.getCompound(Names.NBT.ICON));
+					tagCompound.getCompound(Names.NBT.ICON));
 
 			if (icon.isEmpty()) {
 				icon = DEFAULT_ICON.copy();
@@ -76,5 +72,14 @@ public class SchematicUtil {
 		}
 
 		return icon;
+	}
+
+	public static CompoundTag readTagCompoundFromFile(File file) throws IOException {
+		try {
+			return NbtIo.readCompressed(Files.newInputStream(file.toPath()), NbtAccounter.unlimitedHeap());
+		} catch (Exception ex) {
+			Reference.logger.warn("Failed compressed read, trying normal read...", ex);
+			return NbtIo.read(new DataInputStream(Files.newInputStream(file.toPath())), NbtAccounter.unlimitedHeap());
+		}
 	}
 }

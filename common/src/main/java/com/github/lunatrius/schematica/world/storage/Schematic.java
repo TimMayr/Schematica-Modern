@@ -23,16 +23,18 @@ public class Schematic implements ISchematic {
 	private final List<Entity> entities = new ArrayList<>();
 	private final int width;
 	private final int height;
+	private final String name;
 	private final int length;
 	private ItemStack icon;
 	private String author;
 
-	public Schematic(ItemStack icon, int width, int height, int length) {
-		this(icon, width, height, length, "");
+	public Schematic(ItemStack icon, String name, int width, int height, int length) {
+		this(icon, name, width, height, length, "");
 	}
 
-	public Schematic(ItemStack icon, int width, int height, int length, String author) {
+	public Schematic(ItemStack icon, String name, int width, int height, int length, String author) {
 		this.icon = icon;
+		this.name = name;
 		this.blockstates = new BlockState[width][height][length];
 
 		this.width = width;
@@ -73,6 +75,11 @@ public class Schematic implements ISchematic {
 	}
 
 	@Override
+	public List<BlockEntity> getBlockEntities() {
+		return this.blockEntities;
+	}
+
+	@Override
 	public int getSizeZ() {
 		return this.length;
 	}
@@ -89,11 +96,6 @@ public class Schematic implements ISchematic {
 
 		this.blockstates[x][y][z] = blockState;
 		return true;
-	}
-
-	@Override
-	public List<BlockEntity> getBlockEntities() {
-		return this.blockEntities;
 	}
 
 	@Override
@@ -149,6 +151,11 @@ public class Schematic implements ISchematic {
 		this.author = author;
 	}
 
+	@Override
+	public int getHeight() {
+		return this.height;
+	}
+
 	public void setBlockEntity(BlockPos pos, BlockEntity blockEntity) {
 		if (!isValid(pos)) {
 			return;
@@ -167,8 +174,8 @@ public class Schematic implements ISchematic {
 	}
 
 	@Override
-	public int getHeight() {
-		return this.height;
+	public String getName() {
+		return name;
 	}
 
 	private boolean isValid(@NotNull BlockPos pos) {

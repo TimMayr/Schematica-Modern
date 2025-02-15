@@ -39,8 +39,8 @@ public class SchematicLoadScreen extends BaseScreen {
 	protected File currentDirectory = SchematicaClientConfig.schematicDirectory;
 	private SchematicLoadList schematicLoadList;
 
-	public SchematicLoadScreen(Screen parentScreen) {
-		super(parentScreen);
+	public SchematicLoadScreen(Screen parent) {
+		super(parent);
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class SchematicLoadScreen extends BaseScreen {
 			if (Reference.proxy.isLoadEnabled) {
 				loadSchematic();
 			}
-			this.minecraft.setScreen(this.parentScreen);
+			this.minecraft.setScreen(this.parent);
 		}).bounds(this.width / 2 + 4, this.height - 36, 150, 20).build();
 		this.addRenderableWidget(buttonDone);
 
