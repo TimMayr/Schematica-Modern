@@ -4,7 +4,7 @@ import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.nbt.NBTHelper;
 import com.github.lunatrius.schematica.network.message.MessageDownloadChunk;
 import com.github.lunatrius.schematica.reference.Constants;
-import net.minecraft.client.Minecraft;
+import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
@@ -37,6 +37,40 @@ public class SchematicTransfer {
 		this.width = schematic.getSizeX();
 		this.height = schematic.getHeight();
 		this.length = schematic.getSizeZ();
+	}
+
+	@Contract("_ -> new")
+	public static @NotNull MessageDownloadChunk readFromBuff(@NotNull RegistryFriendlyByteBuf buf) {
+		int msgBaseX = buf.readInt();
+		int msgBaseY = buf.readInt();
+		int msgBaseZ = buf.readInt();
+
+		BlockState[][][] msgBlocks =
+				new BlockState[Constants.SchematicChunk.WIDTH]
+						[Constants.SchematicChunk.HEIGHT]
+						[Constants.SchematicChunk.LENGTH];
+		List<BlockEntity> msgBlockEntities = new ArrayList<>();
+		List<Entity> msgEntities = new ArrayList<>();
+
+		for (int x = 0; x < Constants.SchematicChunk.WIDTH; x++) {
+			for (int y = 0; y < Constants.SchematicChunk.HEIGHT; y++) {
+				for (int z = 0; z < Constants.SchematicChunk.LENGTH; z++) {
+					msgBlocks[x][y][z] = Block.stateById(buf.readVarInt());
+				}
+			}
+		}
+
+		CompoundTag blockEntitiesTag = buf.readNbt();
+		if (blockEntitiesTag != null) {
+			NBTHelper.readBlockEntitiesFromCompound(blockEntitiesTag, Reference.proxy.getLevel(),
+					msgBlockEntities);
+		}
+
+		CompoundTag entitiesTag = buf.readNbt();
+		NBTHelper.readEntitiesFromCompound(entitiesTag, msgEntities, Reference.proxy.getLevel());
+
+		return new MessageDownloadChunk(msgBaseX, msgBaseY, msgBaseZ, msgBlocks, msgBlockEntities,
+				msgEntities);
 	}
 
 	public void confirmChunk(int chunkX, int chunkY, int chunkZ) {
@@ -84,37 +118,5 @@ public class SchematicTransfer {
 		public boolean isWaiting() {
 			return this.waiting;
 		}
-	}
-
-	@Contract("_ -> new")
-	public static @NotNull MessageDownloadChunk readFromBuff(@NotNull RegistryFriendlyByteBuf buf) {
-		int msgBaseX = buf.readInt();
-		int msgBaseY = buf.readInt();
-		int msgBaseZ = buf.readInt();
-
-		BlockState[][][] msgBlocks =
-				new BlockState[Constants.SchematicChunk.WIDTH][Constants.SchematicChunk.HEIGHT][Constants.SchematicChunk.LENGTH];
-		List<BlockEntity> msgBlockEntities = new ArrayList<>();
-		List<Entity> msgEntities = new ArrayList<>();
-
-		for (int x = 0; x < Constants.SchematicChunk.WIDTH; x++) {
-			for (int y = 0; y < Constants.SchematicChunk.HEIGHT; y++) {
-				for (int z = 0; z < Constants.SchematicChunk.LENGTH; z++) {
-					msgBlocks[x][y][z] = Block.stateById(buf.readVarInt());
-				}
-			}
-		}
-
-		CompoundTag blockEntitiesTag = buf.readNbt();
-		if (blockEntitiesTag != null) {
-			NBTHelper.readBlockEntitiesFromCompound(blockEntitiesTag, Minecraft.getInstance().level,
-					msgBlockEntities);
-		}
-
-		CompoundTag entitiesTag = buf.readNbt();
-		NBTHelper.readEntitiesFromCompound(entitiesTag, msgEntities, Minecraft.getInstance().level);
-
-		return new MessageDownloadChunk(msgBaseX, msgBaseY, msgBaseZ, msgBlocks, msgBlockEntities,
-				msgEntities);
 	}
 }

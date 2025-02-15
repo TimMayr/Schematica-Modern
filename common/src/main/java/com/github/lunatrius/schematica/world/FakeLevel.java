@@ -209,9 +209,8 @@ public class FakeLevel extends Level {
 		return levelSource;
 	}
 
-	public FakeLevel setLevelSource(ISchematic levelSource) {
+	public void setLevelSource(ISchematic levelSource) {
 		this.levelSource = levelSource;
-		return this;
 	}
 
 	// ========================================
@@ -242,7 +241,6 @@ public class FakeLevel extends Level {
 	@Override
 	public boolean destroyBlock(@Nullable BlockPos ignored_1, boolean ignored_2, @Nullable Entity ignored_3,
 	                            int ignored_4) {
-		// Noop
 		return false;
 	}
 
@@ -265,7 +263,7 @@ public class FakeLevel extends Level {
 	public void neighborShapeChanged(@Nullable Direction ignored_1, @Nullable BlockPos ignored_2,
 	                                 @Nullable BlockPos ignored_3, @Nullable BlockState ignored_4, int flags,
 	                                 int recursionLeft) {
-// Noop
+		// Noop
 	}
 
 	@Override
@@ -331,13 +329,11 @@ public class FakeLevel extends Level {
 
 	@Override
 	public boolean shouldTickDeath(@Nullable Entity ignored) {
-		// Noop
 		return false;
 	}
 
 	@Override
 	public boolean shouldTickBlocksAt(long ignored) {
-		// Noop
 		return false;
 	}
 
@@ -370,7 +366,6 @@ public class FakeLevel extends Level {
 
 	@Override
 	public boolean isLoaded(@Nullable BlockPos ignored) {
-		// Noop
 		return true;
 	}
 
@@ -402,7 +397,6 @@ public class FakeLevel extends Level {
 
 	@Override
 	public boolean mayInteract(@Nullable Player ignored_1, @Nullable BlockPos ignored_2) {
-		// Noop
 		return false;
 	}
 
@@ -418,7 +412,6 @@ public class FakeLevel extends Level {
 
 	@Override
 	public float getThunderLevel(float ignored) {
-		// Noop
 		return 0;
 	}
 
@@ -429,7 +422,6 @@ public class FakeLevel extends Level {
 
 	@Override
 	public float getRainLevel(float ignored) {
-		// Noop
 		return 0;
 	}
 
@@ -463,7 +455,6 @@ public class FakeLevel extends Level {
 
 	@Override
 	public MapId getFreeMapId() {
-		// Noop
 		return new MapId(0);
 	}
 
@@ -548,7 +539,6 @@ public class FakeLevel extends Level {
 
 	@Override
 	public boolean noSave() {
-		// Noop
 		return true;
 	}
 
@@ -727,13 +717,11 @@ public class FakeLevel extends Level {
 
 	@Override
 	public LevelTickAccess<Block> getBlockTicks() {
-		// Noop
 		return BlackholeTickAccess.emptyLevelList();
 	}
 
 	@Override
 	public LevelTickAccess<Fluid> getFluidTicks() {
-		// Noop
 		return BlackholeTickAccess.emptyLevelList();
 	}
 
@@ -741,9 +729,8 @@ public class FakeLevel extends Level {
 		return isRendering;
 	}
 
-	public FakeLevel setRendering(boolean rendering) {
+	public void setRendering(boolean rendering) {
 		isRendering = rendering;
-		return this;
 	}
 
 	public boolean shouldUseLayer(int y) {

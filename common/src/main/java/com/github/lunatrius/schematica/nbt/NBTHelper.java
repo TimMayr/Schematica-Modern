@@ -32,7 +32,7 @@ public class NBTHelper {
 	public static BlockEntity readBlockEntityFromCompound(@NotNull CompoundTag blockEntityCompound,
 	                                                      @NotNull Level level) {
 		BlockPos pos = new BlockPos(blockEntityCompound.getShort("x"), blockEntityCompound.getShort("y"),
-		                            blockEntityCompound.getShort("z"));
+				blockEntityCompound.getShort("z"));
 		return readBlockEntityFromCompound(pos, blockEntityCompound, level.getBlockState(pos));
 	}
 
@@ -43,7 +43,7 @@ public class NBTHelper {
 
 	public static BlockEntity readBlockEntityFromCompound(@NotNull CompoundTag blockEntityCompound, BlockState state) {
 		BlockPos pos = new BlockPos(blockEntityCompound.getShort("x"), blockEntityCompound.getShort("y"),
-		                            blockEntityCompound.getShort("z"));
+				blockEntityCompound.getShort("z"));
 		return BlockEntity.loadStatic(pos, state, blockEntityCompound, Reference.proxy.getRegistryAccess());
 	}
 
@@ -56,9 +56,12 @@ public class NBTHelper {
 	public static @NotNull CompoundTag writeBlockEntitiesToCompound(@NotNull List<BlockEntity> blockEntities,
 	                                                                CompoundTag compound) {
 		ListTag tagList = new ListTag();
-		for (BlockEntity BlockEntity : blockEntities) {
-			CompoundTag BlockEntityCompound = writeBlockEntityToCompound(BlockEntity);
-			tagList.add(BlockEntityCompound);
+
+		for (BlockEntity blockEntity : blockEntities) {
+			if (blockEntity != null) {
+				CompoundTag BlockEntityCompound = writeBlockEntityToCompound(blockEntity);
+				tagList.add(BlockEntityCompound);
+			}
 		}
 
 		compound.put(Names.NBT.BLOCK_ENTITIES, tagList);
@@ -98,9 +101,11 @@ public class NBTHelper {
 	public static @NotNull CompoundTag writeEntitiesToCompound(@NotNull List<Entity> entities, CompoundTag compound) {
 		ListTag tagList = new ListTag();
 		for (Entity entity : entities) {
-			CompoundTag entityCompound = new CompoundTag();
-			entity.save(entityCompound);
-			tagList.add(entityCompound);
+			if (entity != null) {
+				CompoundTag entityCompound = new CompoundTag();
+				entity.save(entityCompound);
+				tagList.add(entityCompound);
+			}
 		}
 
 		compound.put(Names.NBT.ENTITIES, tagList);

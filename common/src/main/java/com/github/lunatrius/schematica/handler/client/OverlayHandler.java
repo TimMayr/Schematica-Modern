@@ -18,7 +18,7 @@ public class OverlayHandler {
 	private static final String SCHEMATICA_PREFIX =
 			"[" + ChatFormatting.GOLD + "Schematica" + ChatFormatting.RESET + "] ";
 	private static final String SCHEMATICA_SUFFIX = " [" + ChatFormatting.GOLD + "S" + ChatFormatting.RESET + "]";
-	private static final OverlayHandler INSTANCE = new OverlayHandler();
+	private static OverlayHandler INSTANCE;
 	private final Minecraft minecraft = Minecraft.getInstance();
 
 	private OverlayHandler() {
@@ -71,5 +71,9 @@ public class OverlayHandler {
 			}
 		}
 		return lookMessage;
+	}
+
+	public static void init() {
+		OverlayHandler.INSTANCE = new OverlayHandler();
 	}
 }

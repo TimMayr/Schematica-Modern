@@ -6,7 +6,7 @@ import commonnetwork.api.Dispatcher;
 import dev.architectury.event.events.common.PlayerEvent;
 
 public class PlayerHandler {
-	public static final PlayerHandler INSTANCE = new PlayerHandler();
+	public static PlayerHandler INSTANCE;
 
 	private PlayerHandler() {
 		PlayerEvent.PLAYER_JOIN.register((player) -> Dispatcher.sendToClient(
@@ -16,5 +16,9 @@ public class PlayerHandler {
 
 		PlayerEvent.PLAYER_QUIT.register(
 				player -> DownloadHandler.INSTANCE.transferMap.remove(player.getScoreboardName()));
+	}
+
+	public static void init() {
+		PlayerHandler.INSTANCE = new PlayerHandler();
 	}
 }

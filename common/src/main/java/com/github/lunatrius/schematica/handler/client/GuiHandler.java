@@ -8,7 +8,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractSignEditScreen;
 
 @Environment(EnvType.CLIENT)
 public class GuiHandler {
-	public static final GuiHandler INSTANCE = new GuiHandler();
+	public static GuiHandler INSTANCE;
 
 	private GuiHandler() {
 		ClientTickEvent.CLIENT_POST.register(instance -> {
@@ -17,5 +17,9 @@ public class GuiHandler {
 				instance.setScreen(null);
 			}
 		});
+	}
+
+	public static void init() {
+		GuiHandler.INSTANCE = new GuiHandler();
 	}
 }

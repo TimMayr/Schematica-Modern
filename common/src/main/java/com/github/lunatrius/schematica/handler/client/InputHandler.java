@@ -10,6 +10,7 @@ import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.world.FakeLevel;
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.architectury.event.events.client.ClientTickEvent;
+import dev.architectury.registry.client.keymappings.KeyMappingRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.KeyMapping;
@@ -22,7 +23,6 @@ import org.lwjgl.glfw.GLFW;
 
 @Environment(EnvType.CLIENT)
 public class InputHandler {
-	public static final InputHandler INSTANCE = new InputHandler();
 	private static final KeyMapping KEY_BINDING_LOAD =
 			new KeyMapping(Names.Keys.LOAD, GLFW.GLFW_KEY_KP_DIVIDE, Names.Keys.CATEGORY);
 	private static final KeyMapping KEY_BINDING_SAVE =
@@ -53,6 +53,7 @@ public class InputHandler {
 			KEY_BINDING_PRINTER_TOGGLE,
 			KEY_BINDING_MOVE_HERE,
 			KEY_BINDING_PICK_BLOCK};
+	public static InputHandler INSTANCE;
 
 	private InputHandler() {
 		ClientTickEvent.CLIENT_PRE.register(instance -> {
@@ -128,6 +129,13 @@ public class InputHandler {
 
 			}
 		});
+	}
+
+	public static void init() {
+		InputHandler.INSTANCE = new InputHandler();
+		for (KeyMapping keyBinding : InputHandler.KEY_BINDINGS) {
+			KeyMappingRegistry.register(keyBinding);
+		}
 	}
 
 	private void pickBlock(FakeLevel schematic, HitResult objectMouseOver, Minecraft instance) {

@@ -49,8 +49,7 @@ public class SchematicSaveConfirmScreen extends BaseScreen {
 							this.format, ClientProxy.pointMin, ClientProxy.pointMax, this.isSavePrivate, "")) {
 						this.minecraft.setScreen(this.superParent);
 					}
-				}).bounds((this.width / 2) + 5, (this.height / 2) - 10,
-				100, 20).build();
+				}).bounds((this.width / 2) + 5, (this.height / 2) - 10, 100, 20).build();
 		this.addRenderableWidget(buttonContinue);
 	}
 }

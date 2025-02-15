@@ -1,7 +1,7 @@
 package com.github.lunatrius.schematica.command;
 
-import com.github.lunatrius.core.util.FileUtils;
 import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.core.FileNameUtils;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.network.transfer.SchematicTransfer;
 import com.github.lunatrius.schematica.reference.Names;
@@ -17,6 +17,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.List;
 
 public class CommandSchematicaDownload extends CommandSchematicaBase {
 	private static final FileFilter FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
@@ -25,16 +26,19 @@ public class CommandSchematicaDownload extends CommandSchematicaBase {
 		return Commands.literal(Names.Command.Download.NAME)
 				.then(Commands.argument("filename", StringArgumentType.string())
 						.suggests(((context, builder) ->
-								CommandSchematicaBase.getSchematicNamesSuggestions(
-										context, builder, FILE_FILTER_SCHEMATIC)))
+								CommandSchematicaBase.getSchematicNamesSuggestions(context, builder,
+										FILE_FILTER_SCHEMATIC)))
 						.executes((commandContext) -> {
 							CommandSourceStack source = commandContext.getSource();
 							ServerPlayer player = source.getPlayerOrException();
 
 							String filename = StringArgumentType.getString(commandContext, "filename");
-							File directory = Reference.proxy.getPlayerSchematicDirectory(player, true);
+							List<File> schematics = Reference.proxy.getAllAccessibleSchematics(player,
+									FILE_FILTER_SCHEMATIC);
 
-							if (!FileUtils.contains(directory, filename)) {
+							File schematicFile = FileNameUtils.getFileByName(schematics, filename);
+
+							if (schematicFile == null) {
 								Reference.logger.error("{} has tried to download" + " the file " + "{}",
 										player.getName(), filename);
 
@@ -43,7 +47,7 @@ public class CommandSchematicaDownload extends CommandSchematicaBase {
 								return -1;
 							}
 
-							ISchematic schematic = SchematicFormat.readFromFile(directory, filename,
+							ISchematic schematic = SchematicFormat.readFromFile(schematicFile,
 									Reference.proxy.getLevel(player));
 
 							if (schematic != null) {

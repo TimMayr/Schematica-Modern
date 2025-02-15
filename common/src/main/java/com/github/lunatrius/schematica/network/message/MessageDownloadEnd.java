@@ -30,16 +30,17 @@ public record MessageDownloadEnd(String name) implements CustomPacketPayload {
 
 	public static void handle(@NotNull PacketContext<MessageDownloadEnd> ctx) {
 		if (ctx.side() == Side.CLIENT) {
-			File directory = Reference.proxy.getPlayerSchematicDirectory(null, true);
-			boolean success =
-					SchematicFormat.writeToFile(directory, ctx.message().name(), DownloadHandler.INSTANCE.schematic);
+			File path = new File(Reference.proxy.getPlayerSchematicDirectory(null, true), ctx.message().name());
+			boolean success = SchematicFormat.writeToFile(path, null, DownloadHandler.INSTANCE.schematic);
 
 			if (success) {
-				if (Minecraft.getInstance().player != null) {
-					Minecraft.getInstance().player.displayClientMessage(
-							Component.translatable(Names.Command.Download.Message.DOWNLOAD_SUCCEEDED,
-									ctx.message().name()), false);
-				}
+				Minecraft.getInstance().player.displayClientMessage(
+						Component.translatable(Names.Command.Download.Message.DOWNLOAD_SUCCEEDED,
+								ctx.message().name()), false);
+			} else {
+				Minecraft.getInstance().player.displayClientMessage(
+						Component.translatable(Names.Command.Download.Message.DOWNLOAD_FAILED,
+								ctx.message().name()), false);
 			}
 
 			DownloadHandler.INSTANCE.schematic = null;

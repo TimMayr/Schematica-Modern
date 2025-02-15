@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -135,6 +136,8 @@ public abstract class CommonProxy {
 		for (File dir : dirs) {
 			Collections.addAll(schematics, dir.listFiles(filter));
 		}
+
+		schematics.sort(Comparator.comparing(File::getName));
 
 		return schematics;
 	}

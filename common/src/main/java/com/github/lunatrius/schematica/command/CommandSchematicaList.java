@@ -1,6 +1,7 @@
 package com.github.lunatrius.schematica.command;
 
 import com.github.lunatrius.core.util.FileUtils;
+import com.github.lunatrius.schematica.core.FileNameUtils;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.util.FileFilterSchematic;
@@ -19,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Map;
 
 public class CommandSchematicaList extends CommandSchematicaBase {
 	private static final FileFilter FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
@@ -48,26 +49,28 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 		int currentFile = 0;
 		LinkedList<Component> componentsToSend = new LinkedList<>();
 
-		List<File> fileList = Reference.proxy.getAllAccessibleSchematics(player, FILE_FILTER_SCHEMATIC);
+		Map<String, File> fileList =
+				FileNameUtils.getUniqueReadableStringForFile(Reference.proxy.getAllAccessibleSchematics(player,
+						FILE_FILTER_SCHEMATIC));
 
-		for (File path : fileList) {
+		for (Map.Entry<String, File> path : fileList.entrySet()) {
 			if (currentFile >= pageStart && currentFile < pageEnd) {
-				String fileName = path.getName();
+				String fileName = path.getKey();
 
 				Component chatComponent = Component.literal(String.format("%2d (%s): %s [", currentFile + 1,
 						FileUtils.humanReadableByteCount(
-								path.length()),
+								path.getValue().length()),
 						FilenameUtils.removeExtension(fileName)));
 
 				String removeCommand =
-						String.format("/%s %s", Reference.MOD_ID + " " + Names.Command.Remove.NAME, fileName);
+						String.format("/%s %s \"%s\"", Reference.MOD_ID, Names.Command.Remove.NAME, fileName);
 				Component removeLink =
 						withStyle(Component.translatable(Names.Command.List.Message.REMOVE), ChatFormatting.RED,
 								removeCommand);
 				chatComponent = chatComponent.copy().append(removeLink).append("][");
 
 				String downloadCommand =
-						String.format("/%s %s", Reference.MOD_ID + " " + Names.Command.Download.NAME, fileName);
+						String.format("/%s %s \"%s\"", Reference.MOD_ID, Names.Command.Download.NAME, fileName);
 				Component downloadLink =
 						withStyle(Component.translatable(Names.Command.List.Message.DOWNLOAD),
 								ChatFormatting.GREEN,

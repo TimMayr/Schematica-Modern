@@ -5,13 +5,17 @@ import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
 public class WorldHandler {
-	public static WorldHandler INSTANCE = new WorldHandler();
+	public static WorldHandler INSTANCE;
 
 	private WorldHandler() {
 //		ClientLifecycleEvent.CLIENT_LEVEL_LOAD.register(world -> {
 //          RenderSchematic.getINSTANCE().setWorldAndLoadRenderers(ClientProxy.schematic);
 //			addWorldAccess(world, RenderSchematic.getINSTANCE());
 //		});
+	}
+
+	public static void init() {
+		WorldHandler.INSTANCE = new WorldHandler();
 	}
 
 //

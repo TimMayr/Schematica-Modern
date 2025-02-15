@@ -67,7 +67,7 @@ public abstract class CommandSchematicaBase {
 		if (!filenames.isEmpty()) {
 			//Copy so that the lambda can access it
 			String finalName = name;
-			filenames.stream().filter(s -> s.startsWith(finalName)).forEach(builder::suggest);
+			filenames.stream().filter(s -> s.startsWith(finalName)).forEach(s -> builder.suggest("\"" + s + "\""));
 		}
 
 		return builder.buildFuture();

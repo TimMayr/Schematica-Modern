@@ -10,11 +10,15 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 
 public class QueueTickHandler {
-	public static final QueueTickHandler INSTANCE = new QueueTickHandler();
+	public static QueueTickHandler INSTANCE;
 	private final Queue<SchematicContainer> queue = new ArrayDeque<>();
 
 	private QueueTickHandler() {
 		TickEvent.SERVER_POST.register((server) -> processQueue());
+	}
+
+	public static void init() {
+		QueueTickHandler.INSTANCE = new QueueTickHandler();
 	}
 
 	private void processQueue() {
@@ -31,7 +35,7 @@ public class QueueTickHandler {
 			if (container.isFirstChunk()) {
 				Component component =
 						Component.translatable(Names.Command.Save.Message.SAVE_STARTED, container.chunkCount,
-						                       container.file.getName());
+								container.file.getName());
 				container.player.displayClientMessage(component, false);
 			}
 
@@ -41,7 +45,7 @@ public class QueueTickHandler {
 				this.queue.offer(container);
 			} else {
 				SchematicFormat.writeToFileAndNotify(container.file, container.format, container.schematic,
-				                                     container.player);
+						container.player);
 			}
 		}
 	}

@@ -36,36 +36,6 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 								.executes(CommandSchematicaRemove::delete)));
 	}
 
-	private static int showDeleteConfirmation(@NotNull CommandContext<CommandSourceStack> commandContext)
-			throws CommandSyntaxException {
-		CommandSourceStack source = commandContext.getSource();
-		ServerPlayer player = source.getPlayerOrException();
-		String name = StringArgumentType.getString(commandContext, "name");
-		File file;
-		try {
-			file = getSchematicFile(player, name);
-		} catch (IllegalArgumentException e) {
-			source.sendFailure(Component.translatable(e.getMessage()));
-			return -1;
-		}
-
-		if (file.exists()) {
-			String confirmCommand =
-					String.format("/%s %s %s %b", Names.Command.BASE, Names.Command.Remove.NAME, name, true);
-			Component chatComponent = Component.translatable(Names.Command.Remove.Message.ARE_YOU_SURE, name)
-					.append(Component.literal(" "))
-					.append(withStyle(ComponentUtils.wrapInSquareBrackets(
-									Component.translatable(Names.Command.Remove.Message.YES)),
-							ChatFormatting.RED, confirmCommand));
-
-			source.sendSystemMessage(chatComponent);
-			return 0;
-		} else {
-			source.sendFailure(Component.translatable(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND, name));
-			return -1;
-		}
-	}
-
 	private static int delete(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 		String name = StringArgumentType.getString(context, "name");
 		boolean confirm = BoolArgumentType.getBool(context, "confirm");
@@ -76,7 +46,7 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 		try {
 			file = getSchematicFile(player, name);
 		} catch (IllegalArgumentException e) {
-			source.sendFailure(Component.translatable(e.getMessage()));
+			source.sendFailure(Component.literal(e.getMessage()));
 			return -1;
 		}
 
@@ -102,7 +72,7 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 			Reference.logger.error("{} has tried to delete the file {}, but it does not exist", player.getName(),
 					name);
 			throw new IllegalArgumentException(Component.translatable(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND
-					, name).toString());
+					, name).getString());
 		}
 
 		if (!toReturn.getParentFile().equals(Reference.proxy.getPlayerSchematicDirectory(player, true)) &&
@@ -110,9 +80,39 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 			Reference.logger.error("{} has tried to delete the file {}, but is not granted access", player.getName(),
 					name);
 			throw new IllegalArgumentException(Component.translatable(
-					Names.Command.Remove.Message.SCHEMATIC_NOT_ACCESSIBLE, name).toString());
+					Names.Command.Remove.Message.SCHEMATIC_NOT_ACCESSIBLE, name).getString());
 		}
 
 		return toReturn;
+	}
+
+	private static int showDeleteConfirmation(@NotNull CommandContext<CommandSourceStack> commandContext)
+			throws CommandSyntaxException {
+		CommandSourceStack source = commandContext.getSource();
+		ServerPlayer player = source.getPlayerOrException();
+		String name = StringArgumentType.getString(commandContext, "name");
+		File file;
+		try {
+			file = getSchematicFile(player, name);
+		} catch (IllegalArgumentException e) {
+			source.sendFailure(Component.literal(e.getMessage()));
+			return -1;
+		}
+
+		if (file.exists()) {
+			String confirmCommand =
+					String.format("/%s %s \"%s\" %b", Names.Command.BASE, Names.Command.Remove.NAME, name, true);
+			Component chatComponent = Component.translatable(Names.Command.Remove.Message.ARE_YOU_SURE, name)
+					.append(Component.literal(" "))
+					.append(withStyle(ComponentUtils.wrapInSquareBrackets(
+									Component.translatable(Names.Command.Remove.Message.YES)),
+							ChatFormatting.RED, confirmCommand));
+
+			source.sendSystemMessage(chatComponent);
+			return 0;
+		} else {
+			source.sendFailure(Component.translatable(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND, name));
+			return -1;
+		}
 	}
 }

@@ -1,6 +1,9 @@
 package com.github.lunatrius.schematica;
 
 import com.github.lunatrius.schematica.command.CommandSchematicaBase;
+import com.github.lunatrius.schematica.handler.DownloadHandler;
+import com.github.lunatrius.schematica.handler.PlayerHandler;
+import com.github.lunatrius.schematica.handler.QueueTickHandler;
 import com.github.lunatrius.schematica.network.PacketHandler;
 import com.github.lunatrius.schematica.proxy.ServerProxy;
 import com.github.lunatrius.schematica.reference.Names;
@@ -25,6 +28,9 @@ public class Schematica {
 		}
 
 		PacketHandler.init();
+		DownloadHandler.init();
+		PlayerHandler.init();
+		QueueTickHandler.init();
 		SchematicFormat.FORMATS.put(Names.NBT.FORMAT_ALPHA, new SchematicAlpha());
 		SchematicFormat.FORMATS.put(Names.NBT.FORMAT_STRUCTURE, new SchematicStructure());
 	}

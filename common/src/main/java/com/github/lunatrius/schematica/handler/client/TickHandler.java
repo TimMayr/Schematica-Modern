@@ -15,7 +15,7 @@ import net.minecraft.util.profiling.Profiler;
 
 @Environment(EnvType.CLIENT)
 public class TickHandler {
-	public static final TickHandler INSTANCE = new TickHandler();
+	public static TickHandler INSTANCE;
 
 	private int ticks = -1;
 
@@ -54,5 +54,9 @@ public class TickHandler {
 
 			Profiler.get().pop();
 		});
+	}
+
+	public static void init() {
+		TickHandler.INSTANCE = new TickHandler();
 	}
 }
