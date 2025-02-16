@@ -3,7 +3,7 @@ package com.github.lunatrius.schematica.fabric.api.event;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * This event is fired after the schematic has been serialized to the schematic format.
@@ -26,5 +26,5 @@ public interface PostSchematicSaveCallback {
 				return true;
 			});
 
-	boolean postSave(File file);
+	boolean postSave(Path file);
 }

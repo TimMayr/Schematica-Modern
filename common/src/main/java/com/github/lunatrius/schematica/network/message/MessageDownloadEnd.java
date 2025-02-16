@@ -16,7 +16,7 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
+import java.nio.file.Path;
 
 @MethodsReturnNonnullByDefault
 public record MessageDownloadEnd(String name) implements CustomPacketPayload {
@@ -30,7 +30,7 @@ public record MessageDownloadEnd(String name) implements CustomPacketPayload {
 
 	public static void handle(@NotNull PacketContext<MessageDownloadEnd> ctx) {
 		if (ctx.side() == Side.CLIENT) {
-			File path = new File(Reference.proxy.getPlayerSchematicDirectory(null, true), ctx.message().name());
+			Path path = Reference.proxy.getPlayerSchematicDirectory(null, true).resolve(ctx.message().name());
 			boolean success = SchematicFormat.writeToFile(path, null, DownloadHandler.INSTANCE.schematic);
 
 			if (success) {

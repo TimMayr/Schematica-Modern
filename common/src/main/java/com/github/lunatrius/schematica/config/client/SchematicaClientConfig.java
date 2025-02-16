@@ -12,8 +12,8 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.*;
 
 @Environment(EnvType.CLIENT)
@@ -23,7 +23,7 @@ public class SchematicaClientConfig {
 	public static final ModConfigSpec clientSpec;
 	public static final SchematicaClientConfig CLIENT;
 	private static final Set<Block> extraAirBlockList = new HashSet<>();
-	public static File schematicDirectory = null;
+	public static Path schematicDirectory = null;
 
 	static {
 		Pair<SchematicaClientConfig, ModConfigSpec> clientSpecPair =
@@ -140,9 +140,9 @@ public class SchematicaClientConfig {
 
 	public static void normalizeSchematicPath() {
 		try {
-			schematicDirectory = schematicDirectory.getCanonicalFile();
-			String schematicPath = schematicDirectory.getAbsolutePath();
-			String dataPath = Reference.proxy.getDataDirectory().getAbsolutePath();
+			schematicDirectory = schematicDirectory.toRealPath().normalize();
+			String schematicPath = schematicDirectory.toAbsolutePath().toString();
+			String dataPath = Reference.proxy.getDataDirectory().toAbsolutePath().toString();
 			String newSchematicPath = mergePaths(schematicPath, dataPath);
 
 			Reference.logger.debug("Schematic path: {}", schematicPath);

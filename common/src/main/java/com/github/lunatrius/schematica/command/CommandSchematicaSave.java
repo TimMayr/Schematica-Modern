@@ -19,7 +19,8 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class CommandSchematicaSave extends CommandSchematicaBase {
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
@@ -87,10 +88,10 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 
 		String filename = name + SchematicFormat.getExtension(format);
 
-		File directory = Reference.proxy.getPlayerSchematicDirectory(player, isPrivate);
-		File file = new File(directory, filename);
+		Path directory = Reference.proxy.getPlayerSchematicDirectory(player, isPrivate);
+		Path file = directory.resolve(filename);
 
-		if (!confirm && file.exists()) {
+		if (!confirm && Files.exists(file)) {
 			String confirmCommand =
 					String.format("/%s %s %s %s %s %s %b %b", Names.Command.BASE, Names.Command.Save.NAME, from, to,
 							name, format, isPrivate, true);
@@ -106,7 +107,7 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 		}
 
 		Reference.logger.debug("Saving schematic from {} to {} to {}", from, to, filename);
-		File schematicDirectory = Reference.proxy.getPlayerSchematicDirectory(player, isPrivate);
+		Path schematicDirectory = Reference.proxy.getPlayerSchematicDirectory(player, isPrivate);
 		if (schematicDirectory == null) {
 			Reference.logger.warn("Unable to determine the schematic directory for player {}", player);
 			source.sendFailure(Component.translatable(Names.Command.Save.Message.PLAYER_SCHEMATIC_DIR_UNAVAILABLE));

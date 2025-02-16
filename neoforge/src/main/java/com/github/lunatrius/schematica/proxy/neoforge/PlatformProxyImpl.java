@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.common.NeoForge;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Map;
 
 public class PlatformProxyImpl {
@@ -25,7 +25,7 @@ public class PlatformProxyImpl {
 		NeoForge.EVENT_BUS.post(new PreSchematicCaptureEvent(aabb));
 	}
 
-	public static void createAndPostPostSchematicSaveEvent(File file) {
+	public static void createAndPostPostSchematicSaveEvent(Path file) {
 		NeoForge.EVENT_BUS.post(new PostSchematicSaveEvent(file));
 	}
 }

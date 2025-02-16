@@ -2,7 +2,7 @@ package com.github.lunatrius.schematica.neoforge.api.event;
 
 import net.neoforged.bus.api.Event;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * This event is fired after the schematic has been serialized to the schematic format.
@@ -13,9 +13,9 @@ public class PostSchematicSaveEvent extends Event {
 	/**
 	 * The file to which the schematic was saved.
 	 */
-	public final File file;
+	public final Path file;
 
-	public PostSchematicSaveEvent(File schematic) {
+	public PostSchematicSaveEvent(Path schematic) {
 		this.file = schematic;
 	}
 }

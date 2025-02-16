@@ -1,5 +1,6 @@
 package com.github.lunatrius.schematica.command;
 
+import com.github.lunatrius.schematica.accounting.FilePermission;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.core.FileNameUtils;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
@@ -15,28 +16,27 @@ import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.io.File;
-import java.io.FileFilter;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Path;
 import java.util.List;
 
 public class CommandSchematicaDownload extends CommandSchematicaBase {
-	private static final FileFilter FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
+	private static final DirectoryStream.Filter<Path> FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
 
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		return Commands.literal(Names.Command.Download.NAME)
 				.then(Commands.argument("filename", StringArgumentType.string())
-						.suggests(((context, builder) ->
-								CommandSchematicaBase.getSchematicNamesSuggestions(context, builder,
-										FILE_FILTER_SCHEMATIC)))
+						.suggests((context, builder) -> CommandSchematicaBase.getSchematicNamesSuggestions(context,
+								builder, FilePermission.READ))
 						.executes((commandContext) -> {
 							CommandSourceStack source = commandContext.getSource();
 							ServerPlayer player = source.getPlayerOrException();
 
 							String filename = StringArgumentType.getString(commandContext, "filename");
-							List<File> schematics = Reference.proxy.getAllAccessibleSchematics(player,
-									FILE_FILTER_SCHEMATIC);
+							List<Path> schematics = Reference.proxy.getAllAccessibleSchematics(player
+							);
 
-							File schematicFile = FileNameUtils.getFileByName(schematics, filename);
+							Path schematicFile = FileNameUtils.getFileByName(schematics, filename);
 
 							if (schematicFile == null) {
 								Reference.logger.error("{} has tried to download" + " the file " + "{}",

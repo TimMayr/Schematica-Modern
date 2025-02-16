@@ -15,12 +15,10 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Formatter;
 import java.util.List;
 
@@ -102,12 +100,10 @@ public class SchematicMaterialsScreen extends BaseScreen {
 
 		StringBuilder stringBuilder = formatBlockList(blockList, maxSize, maxLengthName);
 
-		File dumps = Reference.proxy.getDirectory("dumps");
+		Path dumps = Reference.proxy.getDirectory("dumps");
 		try {
-			try (FileOutputStream outputStream = new FileOutputStream(
-					new File(dumps, Reference.MOD_ID + "-materials.txt"))) {
-				IOUtils.write(stringBuilder.toString(), outputStream, StandardCharsets.UTF_8);
-			}
+			Files.writeString(dumps.resolve(Reference.MOD_ID + "-materials.txt"),
+					stringBuilder.toString());
 		} catch (Exception e) {
 			Reference.logger.error("Could not dump the material list!", e);
 		}

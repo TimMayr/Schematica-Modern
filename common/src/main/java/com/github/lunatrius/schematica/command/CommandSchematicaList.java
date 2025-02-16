@@ -1,10 +1,10 @@
 package com.github.lunatrius.schematica.command;
 
 import com.github.lunatrius.core.util.FileUtils;
-import com.github.lunatrius.schematica.core.FileNameUtils;
+import com.github.lunatrius.schematica.accounting.SchematicAccounter;
+import com.github.lunatrius.schematica.accounting.SchematicHolder;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
-import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -17,14 +17,10 @@ import net.minecraft.server.level.ServerPlayer;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.FileFilter;
 import java.util.LinkedList;
-import java.util.Map;
+import java.util.List;
 
 public class CommandSchematicaList extends CommandSchematicaBase {
-	private static final FileFilter FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
-
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		return Commands.literal(Names.Command.List.NAME)
 				.executes(CommandSchematicaList::printList)
@@ -49,32 +45,30 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 		int currentFile = 0;
 		LinkedList<Component> componentsToSend = new LinkedList<>();
 
-		Map<String, File> fileList =
-				FileNameUtils.getUniqueReadableStringForFile(Reference.proxy.getAllAccessibleSchematics(player,
-						FILE_FILTER_SCHEMATIC));
+		List<SchematicHolder> schematics = SchematicAccounter.sorted(player);
 
-		for (Map.Entry<String, File> path : fileList.entrySet()) {
+		for (SchematicHolder entry : schematics) {
 			if (currentFile >= pageStart && currentFile < pageEnd) {
-				String fileName = path.getKey();
+				String fileName = entry.getName();
 
 				Component chatComponent = Component.literal(String.format("%2d (%s): %s [", currentFile + 1,
-						FileUtils.humanReadableByteCount(
-								path.getValue().length()),
+						FileUtils.humanReadableByteCount(entry.getFileSize()),
 						FilenameUtils.removeExtension(fileName)));
 
-				String removeCommand =
-						String.format("/%s %s \"%s\"", Reference.MOD_ID, Names.Command.Remove.NAME, fileName);
-				Component removeLink =
-						withStyle(Component.translatable(Names.Command.List.Message.REMOVE), ChatFormatting.RED,
-								removeCommand);
+				String removeCommand = String.format("/%s %s \"%s\"", Reference.MOD_ID, Names.Command.Remove.NAME,
+						fileName);
+				Component removeLink = withStyle(
+						Component.translatable(Names.Command.List.Message.REMOVE),
+						ChatFormatting.RED,
+						removeCommand);
 				chatComponent = chatComponent.copy().append(removeLink).append("][");
 
-				String downloadCommand =
-						String.format("/%s %s \"%s\"", Reference.MOD_ID, Names.Command.Download.NAME, fileName);
-				Component downloadLink =
-						withStyle(Component.translatable(Names.Command.List.Message.DOWNLOAD),
-								ChatFormatting.GREEN,
-								downloadCommand);
+				String downloadCommand = String.format("/%s %s \"%s\"", Reference.MOD_ID, Names.Command.Download.NAME,
+						fileName);
+				Component downloadLink = withStyle(
+						Component.translatable(Names.Command.List.Message.DOWNLOAD),
+						ChatFormatting.GREEN,
+						downloadCommand);
 				chatComponent = chatComponent.copy().append(downloadLink).append("]");
 
 				componentsToSend.add(chatComponent);

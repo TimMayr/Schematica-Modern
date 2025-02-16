@@ -8,7 +8,7 @@ import com.github.lunatrius.schematica.fabric.api.event.PreSchematicSaveCallback
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Map;
 
 public class PlatformProxyImpl {
@@ -24,7 +24,7 @@ public class PlatformProxyImpl {
 		PreSchematicCaptureCallback.EVENT.invoker().postCapture(aabb);
 	}
 
-	public static void createAndPostPostSchematicSaveEvent(File file) {
+	public static void createAndPostPostSchematicSaveEvent(Path file) {
 		PostSchematicSaveCallback.EVENT.invoker().postSave(file);
 	}
 }

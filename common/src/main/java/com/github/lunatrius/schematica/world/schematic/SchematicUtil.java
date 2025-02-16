@@ -13,9 +13,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.DataInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class SchematicUtil {
 	public static final ItemStack DEFAULT_ICON = new ItemStack(Blocks.GRASS_BLOCK);
@@ -49,7 +49,7 @@ public class SchematicUtil {
 		return DEFAULT_ICON.copy();
 	}
 
-	public static ItemStack getIconFromFile(File file) {
+	public static ItemStack getIconFromFile(Path file) {
 		try {
 			return getIconFromNBT(readTagCompoundFromFile(file));
 		} catch (Exception e) {
@@ -74,12 +74,12 @@ public class SchematicUtil {
 		return icon;
 	}
 
-	public static CompoundTag readTagCompoundFromFile(File file) throws IOException {
+	public static CompoundTag readTagCompoundFromFile(Path file) throws IOException {
 		try {
-			return NbtIo.readCompressed(Files.newInputStream(file.toPath()), NbtAccounter.unlimitedHeap());
+			return NbtIo.readCompressed(Files.newInputStream(file), NbtAccounter.unlimitedHeap());
 		} catch (Exception ex) {
 			Reference.logger.warn("Failed compressed read, trying normal read...", ex);
-			return NbtIo.read(new DataInputStream(Files.newInputStream(file.toPath())), NbtAccounter.unlimitedHeap());
+			return NbtIo.read(new DataInputStream(Files.newInputStream(file)), NbtAccounter.unlimitedHeap());
 		}
 	}
 }

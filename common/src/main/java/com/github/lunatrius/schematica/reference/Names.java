@@ -135,6 +135,7 @@ public class Names {
 
 	public static class Messages {
 		public static final String TOGGLE_PRINTER = "schematica.message.togglePrinter";
+		public static final String WATCHDOG_ERROR = "schematic.message.watchdogError";
 	}
 
 	public static class Gui {
@@ -247,5 +248,7 @@ public class Names {
 		public static final String DOWNLOAD_CHUNK_LOCATION = "download_chunk";
 		public static final String DOWNLOAD_CHUNK_ACK_LOCATION = "download_chunk_ack";
 		public static final String DOWNLOAD_END_LOCATION = "download_end";
+		public static final String ADD_SCHEMATIC = "add_schematic";
+		public static final String REMOVE_SCHEMATIC = "remove_schematic";
 	}
 }

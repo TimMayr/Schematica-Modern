@@ -12,11 +12,8 @@ import com.github.lunatrius.schematica.world.schematic.SchematicAlpha;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
 import com.github.lunatrius.schematica.world.schematic.SchematicStructure;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
-import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.platform.Platform;
 import net.fabricmc.api.EnvType;
-
-import java.lang.ref.WeakReference;
 
 public class Schematica {
 	public static void init() {
@@ -37,8 +34,6 @@ public class Schematica {
 
 	public static void serverInit() {
 		Reference.proxy = new ServerProxy();
-		LifecycleEvent.SERVER_STARTING.register(
-				(server) -> ServerProxy.serverWeakReference = new WeakReference<>(server));
 		Reference.proxy.init();
 	}
 }

@@ -3,6 +3,7 @@ package com.github.lunatrius.schematica.proxy;
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
+import com.github.lunatrius.schematica.core.FileUtils;
 import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
@@ -16,10 +17,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
-import java.util.Collections;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,34 +29,32 @@ public abstract class CommonProxy {
 	public boolean isLoadEnabled = true;
 
 	public void createFolders() {
-		if (!SchematicaClientConfig.schematicDirectory.exists()) {
-			if (!SchematicaClientConfig.schematicDirectory.mkdirs()) {
+		if (!Files.exists(SchematicaClientConfig.schematicDirectory)) {
+			try {
+				Files.createDirectories(SchematicaClientConfig.schematicDirectory);
+			} catch (IOException e) {
 				Reference.logger.warn("Could not create schematic directory [{}]!",
-						SchematicaClientConfig.schematicDirectory.getAbsolutePath());
+						SchematicaClientConfig.schematicDirectory.toAbsolutePath());
 			}
 		}
 	}
 
-	public File getDirectory(String directory) {
-		File dataDirectory = getDataDirectory();
-		File subDirectory = new File(dataDirectory, directory);
+	public Path getDirectory(String directory) {
+		Path dataDirectory = getDataDirectory();
+		Path subDirectory = dataDirectory.resolve(directory);
 
-		if (!subDirectory.exists()) {
-			if (!subDirectory.mkdirs()) {
-				Reference.logger.error("Could not create directory [{}]!", subDirectory.getAbsolutePath());
+		if (!Files.exists(subDirectory)) {
+			try {
+				Files.createDirectories(subDirectory);
+			} catch (IOException e) {
+				Reference.logger.error("Could not create directory [{}]!", subDirectory.toAbsolutePath());
 			}
 		}
 
-		try {
-			return subDirectory.getCanonicalFile();
-		} catch (IOException e) {
-			Reference.logger.error("Could not canonize directory [{}]!", subDirectory.getAbsolutePath());
-		}
-
-		return subDirectory;
+		return subDirectory.normalize();
 	}
 
-	public abstract File getDataDirectory();
+	public abstract Path getDataDirectory();
 
 	public void resetSettings() {
 		this.isSaveEnabled = true;
@@ -123,30 +121,44 @@ public abstract class CommonProxy {
 
 	public abstract RegistryAccess getRegistryAccess();
 
-	public abstract boolean loadSchematic(Player player, File directory, String filename);
+	public abstract boolean loadSchematic(Player player, Path directory, String filename);
 
 	public abstract boolean isPlayerQuotaExceeded(Player player);
 
-	public abstract File getPlayerSchematicDirectory(Player player, boolean privateDirectory);
+	public abstract Path getPlayerSchematicDirectory(Player player, boolean privateDirectory);
 
-	public List<File> getAllAccessibleSchematics(Player player, FileFilter filter) {
-		List<File> dirs = getAllAccessibleDirectories(player);
-		List<File> schematics = new LinkedList<>();
+	public List<Path> getAllAccessibleSchematics(Player player) {
+		List<Path> dirs = getAllAccessibleDirectories(player);
+		return getPaths(dirs);
+	}
 
-		for (File dir : dirs) {
-			Collections.addAll(schematics, dir.listFiles(filter));
+	public abstract List<Path> getAllAccessibleDirectories(Player player);
+
+	@NotNull
+	private List<Path> getPaths(@NotNull List<Path> dirs) {
+		List<Path> schematics = new LinkedList<>();
+
+		for (Path dir : dirs) {
+			schematics.addAll(FileUtils.getAllFilesInDirectory(dir));
 		}
 
-		schematics.sort(Comparator.comparing(File::getName));
+		schematics.sort(Comparator.comparing(path -> path.getFileName().toFile()));
 
 		return schematics;
 	}
 
-	public abstract List<File> getAllAccessibleDirectories(Player player);
+	public List<Path> getAllSchematics() {
+		List<Path> dirs = getAllSchematicDirectories();
+		return getPaths(dirs);
+	}
+
+	public abstract List<Path> getAllSchematicDirectories();
 
 	public abstract void init();
 
 	public abstract Level getLevel(Player player);
 
 	public abstract Level getLevel();
+
+	public abstract void addSchematic(Path schematic);
 }

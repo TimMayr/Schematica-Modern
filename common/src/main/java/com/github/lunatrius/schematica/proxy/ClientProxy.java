@@ -2,6 +2,8 @@ package com.github.lunatrius.schematica.proxy;
 
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.core.util.vector.Vector3d;
+import com.github.lunatrius.schematica.accounting.SchematicAccounter;
+import com.github.lunatrius.schematica.accounting.SchematicHolder;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
@@ -11,6 +13,7 @@ import com.github.lunatrius.schematica.world.FakeLevel;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
 import commonnetwork.api.Dispatcher;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
+import dev.architectury.event.events.client.ClientPlayerEvent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -22,9 +25,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 @Environment(EnvType.CLIENT)
 public class ClientProxy extends CommonProxy {
@@ -124,10 +129,10 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public File getDataDirectory() {
-		File file = MINECRAFT.gameDirectory;
+	public Path getDataDirectory() {
+		Path file = MINECRAFT.gameDirectory.toPath();
 		try {
-			return file.getCanonicalFile();
+			return file.toRealPath().normalize();
 		} catch (IOException e) {
 			Reference.logger.debug("Could not canonize path!", e);
 		}
@@ -184,7 +189,7 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public boolean loadSchematic(Player player, File directory, String filename) {
+	public boolean loadSchematic(Player player, Path directory, String filename) {
 		ISchematic schematic = SchematicFormat.readFromFile(directory, filename, Reference.proxy.getLevel(player));
 		if (schematic == null) {
 			return false;
@@ -209,13 +214,18 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public File getPlayerSchematicDirectory(Player player, boolean privateDirectory) {
+	public Path getPlayerSchematicDirectory(Player player, boolean privateDirectory) {
 		return SchematicaClientConfig.schematicDirectory;
 	}
 
 	@Override
-	public List<File> getAllAccessibleDirectories(Player player) {
+	public List<Path> getAllAccessibleDirectories(Player player) {
 		return List.of(getPlayerSchematicDirectory(player, true));
+	}
+
+	@Override
+	public List<Path> getAllSchematicDirectories() {
+		return getAllAccessibleDirectories(ClientProxy.MINECRAFT.player);
 	}
 
 	@Override
@@ -227,6 +237,14 @@ public class ClientProxy extends CommonProxy {
 //		NeoForge.EVENT_BUS.register(new WorldHandler());
 			Reference.proxy.resetSettings();
 		});
+
+		ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(player -> {
+			SchematicAccounter.initWatchService();
+
+			for (Path schematic : getAllSchematics()) {
+				addSchematic(schematic);
+			}
+		});
 	}
 
 	@Override
@@ -237,5 +255,12 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public Level getLevel() {
 		return Minecraft.getInstance().level;
+	}
+
+	@Override
+	public void addSchematic(Path schematic) {
+		UUID owner = Minecraft.getInstance().player.getUUID();
+		SchematicAccounter.addSchematic(new SchematicHolder(schematic, owner, new HashSet<>(),
+				new HashSet<>()));
 	}
 }

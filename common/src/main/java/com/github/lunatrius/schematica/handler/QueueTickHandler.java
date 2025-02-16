@@ -1,7 +1,7 @@
 package com.github.lunatrius.schematica.handler;
 
 import com.github.lunatrius.schematica.reference.Names;
-import com.github.lunatrius.schematica.world.chunk.SchematicContainer;
+import com.github.lunatrius.schematica.world.SchematicContainer;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
 import dev.architectury.event.events.common.TickEvent;
 import net.minecraft.network.chat.Component;
@@ -35,7 +35,7 @@ public class QueueTickHandler {
 			if (container.isFirstChunk()) {
 				Component component =
 						Component.translatable(Names.Command.Save.Message.SAVE_STARTED, container.chunkCount,
-								container.file.getName());
+								container.file.getFileName().toString());
 				container.player.displayClientMessage(component, false);
 			}
 

@@ -1,8 +1,8 @@
 package com.github.lunatrius.schematica.command;
 
-import com.github.lunatrius.schematica.core.FileNameUtils;
+import com.github.lunatrius.schematica.accounting.FilePermission;
+import com.github.lunatrius.schematica.accounting.SchematicAccounter;
 import com.github.lunatrius.schematica.reference.Names;
-import com.github.lunatrius.schematica.reference.Reference;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -19,8 +19,6 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.FileFilter;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -46,7 +44,7 @@ public abstract class CommandSchematicaBase {
 
 	public static CompletableFuture<Suggestions> getSchematicNamesSuggestions(
 			@NotNull CommandContext<CommandSourceStack> context, SuggestionsBuilder builder,
-			FileFilter FILE_FILTER_SCHEMATIC) {
+			FilePermission permission) {
 		CommandSourceStack source = context.getSource();
 		Player player;
 		String name = "";
@@ -61,8 +59,7 @@ public abstract class CommandSchematicaBase {
 			return builder.buildFuture();
 		}
 
-		List<File> files = Reference.proxy.getAllAccessibleSchematics(player, FILE_FILTER_SCHEMATIC);
-		List<String> filenames = FileNameUtils.getFileNamesWithDirectories(files);
+		List<String> filenames = SchematicAccounter.sortedNames(player, permission);
 
 		if (!filenames.isEmpty()) {
 			//Copy so that the lambda can access it

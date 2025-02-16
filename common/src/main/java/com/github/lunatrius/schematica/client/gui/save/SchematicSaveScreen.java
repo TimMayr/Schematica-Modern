@@ -19,7 +19,8 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 @Environment(EnvType.CLIENT)
 public class SchematicSaveScreen extends BaseScreen {
@@ -161,10 +162,10 @@ public class SchematicSaveScreen extends BaseScreen {
 			this.filename = this.editBoxFilename.getValue();
 			String filename = this.editBoxFilename.getValue() + SchematicFormat.getExtension(this.getFormatName());
 
-			File directory = Reference.proxy.getPlayerSchematicDirectory(this.minecraft.player, this.isSavePrivate);
-			File file = new File(directory, filename);
+			Path directory = Reference.proxy.getPlayerSchematicDirectory(this.minecraft.player, this.isSavePrivate);
+			Path file = directory.resolve(filename);
 
-			if (!file.exists()) {
+			if (!Files.exists(file)) {
 				if (Reference.proxy.saveSchematic(this.minecraft.player, filename, this.minecraft.level,
 						this.getFormatName(), ClientProxy.pointMin, ClientProxy.pointMax, this.isSavePrivate, "")) {
 					this.minecraft.setScreen(this.parent);

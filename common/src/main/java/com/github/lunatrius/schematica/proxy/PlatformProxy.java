@@ -5,7 +5,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.Map;
 
 public class PlatformProxy {
@@ -25,7 +25,7 @@ public class PlatformProxy {
 	}
 
 	@ExpectPlatform
-	public static void createAndPostPostSchematicSaveEvent(File file) {
+	public static void createAndPostPostSchematicSaveEvent(Path file) {
 		throw new AssertionError();
 	}
 }
