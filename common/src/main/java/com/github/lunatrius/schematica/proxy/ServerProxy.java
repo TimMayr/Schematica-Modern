@@ -185,14 +185,12 @@ public class ServerProxy extends CommonProxy {
 
 	@Override
 	public void init() {
+		Reference.logger.info("Initializing server proxy");
+
 		LifecycleEvent.SERVER_STARTED.register(server -> {
 			ServerProxy.serverWeakReference = new WeakReference<>(server);
 
-			SchematicAccounter.initWatchService();
-
-			for (Path schematic : getAllSchematics()) {
-				addSchematic(schematic);
-			}
+			SchematicAccounter.init();
 		});
 	}
 

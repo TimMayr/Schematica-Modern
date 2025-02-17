@@ -1,9 +1,9 @@
 package com.github.lunatrius.schematica.handler;
 
 import com.github.lunatrius.schematica.api.ISchematic;
-import com.github.lunatrius.schematica.network.message.MessageDownloadBegin;
-import com.github.lunatrius.schematica.network.message.MessageDownloadChunk;
-import com.github.lunatrius.schematica.network.message.MessageDownloadEnd;
+import com.github.lunatrius.schematica.network.message.download.MessageDownloadBegin;
+import com.github.lunatrius.schematica.network.message.download.MessageDownloadChunk;
+import com.github.lunatrius.schematica.network.message.download.MessageDownloadEnd;
 import com.github.lunatrius.schematica.network.transfer.SchematicTransfer;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Reference;

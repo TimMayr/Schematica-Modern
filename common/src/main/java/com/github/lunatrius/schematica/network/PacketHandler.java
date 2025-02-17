@@ -1,6 +1,10 @@
 package com.github.lunatrius.schematica.network;
 
-import com.github.lunatrius.schematica.network.message.*;
+import com.github.lunatrius.schematica.network.message.MessageCapabilities;
+import com.github.lunatrius.schematica.network.message.accounting.MessageAddSchematic;
+import com.github.lunatrius.schematica.network.message.accounting.MessageRemoveSchematic;
+import com.github.lunatrius.schematica.network.message.accounting.MessageSaveSchematic;
+import com.github.lunatrius.schematica.network.message.download.*;
 import commonnetwork.api.Network;
 
 public class PacketHandler {
@@ -17,8 +21,9 @@ public class PacketHandler {
 				MessageDownloadChunkAck.STREAM_CODEC, MessageDownloadChunkAck::handle);
 		Network.registerPacket(MessageDownloadEnd.TYPE, MessageDownloadEnd.class, MessageDownloadEnd.STREAM_CODEC,
 				MessageDownloadEnd::handle);
-		Network.registerPacket(MessageSave.TYPE, MessageSave.class, MessageSave.STREAM_CODEC,
-				MessageSave::handle);
+		Network.registerPacket(MessageSaveSchematic.TYPE, MessageSaveSchematic.class,
+				MessageSaveSchematic.STREAM_CODEC,
+				MessageSaveSchematic::handle);
 		Network.registerPacket(MessageAddSchematic.TYPE, MessageAddSchematic.class, MessageAddSchematic.STREAM_CODEC,
 				MessageAddSchematic::handle);
 		Network.registerPacket(MessageRemoveSchematic.TYPE, MessageRemoveSchematic.class,

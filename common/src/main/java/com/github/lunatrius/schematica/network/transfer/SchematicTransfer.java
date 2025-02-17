@@ -2,7 +2,7 @@ package com.github.lunatrius.schematica.network.transfer;
 
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.nbt.NBTHelper;
-import com.github.lunatrius.schematica.network.message.MessageDownloadChunk;
+import com.github.lunatrius.schematica.network.message.download.MessageDownloadChunk;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.nbt.CompoundTag;

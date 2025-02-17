@@ -2,8 +2,9 @@ package com.github.lunatrius.schematica.accounting;
 
 import com.github.lunatrius.schematica.core.FileNameUtils;
 import com.github.lunatrius.schematica.core.PlayerUtils;
-import com.github.lunatrius.schematica.network.message.MessageAddSchematic;
-import com.github.lunatrius.schematica.network.message.MessageRemoveSchematic;
+import com.github.lunatrius.schematica.network.message.accounting.MessageAddSchematic;
+import com.github.lunatrius.schematica.network.message.accounting.MessageRemoveSchematic;
+import com.github.lunatrius.schematica.proxy.CommonProxy;
 import com.github.lunatrius.schematica.proxy.ServerProxy;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
@@ -32,47 +33,69 @@ import java.util.concurrent.TimeUnit;
 public class SchematicAccounter {
 	private static final Map<UUID, SchematicHolder> schematics = new HashMap<>();
 	private static WatchService watchService;
+	private static final Map<WatchKey, Path> keyToPathMap = new HashMap<>();
+	private static final TickEvent.Server listener = (server) -> {
+		try {
+			WatchKey key = watchService.poll(100, TimeUnit.MILLISECONDS);
+			if (key != null) {
+				Path schematicDir = keyToPathMap.get(key);
+
+				for (WatchEvent<?> event : key.pollEvents()) {
+					if (event.kind().equals(StandardWatchEventKinds.ENTRY_CREATE)) {
+						if (event.context() instanceof Path relativePath) {
+							Path fullPath = schematicDir.resolve(relativePath).toAbsolutePath().normalize();
+							//This check makes sure that the discovered schematic isn't actively getting saved by some
+							// other method, as that would duplicate the entry. Technically we could stop calling
+							if (!CommonProxy.recentlyAdded.contains(fullPath)) {
+								UUID owner;
+
+								if (Platform.getEnv() == EnvType.CLIENT) {
+									owner = PlayerUtils.getClientPlayer().getUUID();
+								} else {
+									owner = UUID.fromString(
+											fullPath.getParent().getParent().getFileName().toString());
+								}
+
+								SchematicHolder holder = new SchematicHolder(fullPath, owner, new HashSet<>(),
+										new HashSet<>());
+
+								Reference.logger.info("Schematic [{}] was discovered by watchService",
+										holder.getName());
+								SchematicAccounter.addSchematic(holder);
+							}
+						}
+					} else if (event.kind().equals(StandardWatchEventKinds.ENTRY_DELETE)) {
+						if (event.context() instanceof Path modifiedPath) {
+							SchematicAccounter.removeSchematic(SchematicAccounter.getIdForFile(modifiedPath));
+						}
+					}
+				}
+
+				key.reset();
+			}
+		} catch (InterruptedException e) {
+			Reference.logger.error("Error polling watchService", e);
+		}
+	};
+
+	public static void init() {
+		initWatchService();
+
+		for (Path schematic : Reference.proxy.getAllSchematics()) {
+			Reference.proxy.addSchematic(schematic);
+		}
+	}
 
 	public static void initWatchService() {
 		try {
 			watchService = FileSystems.getDefault().newWatchService();
 			for (Path schematicDirectory : Reference.proxy.getAllSchematicDirectories()) {
-				schematicDirectory.register(watchService, StandardWatchEventKinds.ENTRY_CREATE,
+				WatchKey key = schematicDirectory.register(watchService, StandardWatchEventKinds.ENTRY_CREATE,
 						StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
+				keyToPathMap.put(key, schematicDirectory);
 			}
 
-			TickEvent.SERVER_POST.register(server -> {
-				try {
-					WatchKey key = watchService.poll(100, TimeUnit.MILLISECONDS);
-					if (key != null) {
-						for (WatchEvent<?> event : key.pollEvents()) {
-							if (event.kind().equals(StandardWatchEventKinds.ENTRY_CREATE)) {
-								if (event.context() instanceof Path modifiedPath) {
-									UUID owner;
-
-									if (Platform.getEnv() == EnvType.CLIENT) {
-										owner = PlayerUtils.getClientPlayer().getUUID();
-									} else {
-										owner = UUID.fromString(
-												modifiedPath.getParent().getParent().getFileName().toString());
-									}
-
-									SchematicHolder holder = new SchematicHolder(modifiedPath, owner, new HashSet<>(),
-											new HashSet<>());
-
-									SchematicAccounter.addSchematic(holder);
-								}
-							} else if (event.kind().equals(StandardWatchEventKinds.ENTRY_DELETE)) {
-								if (event.context() instanceof Path modifiedPath) {
-									SchematicAccounter.removeSchematic(SchematicAccounter.getIdForFile(modifiedPath));
-								}
-							}
-						}
-
-						key.reset();
-					}
-				} catch (InterruptedException ignored) {}
-			});
+			TickEvent.SERVER_POST.register(listener);
 
 		} catch (IOException e) {
 			Reference.logger.warn("Error creating schematic watchdog");
@@ -83,12 +106,29 @@ public class SchematicAccounter {
 		}
 	}
 
+	public static void reset() {
+		if (watchService != null) {
+			try {
+				TickEvent.SERVER_POST.unregister(listener);
+				watchService.close();
+				watchService = null;
+			} catch (IOException e) {
+				Reference.logger.error("Error shutting down watchService");
+			}
+		}
+
+		schematics.clear();
+		keyToPathMap.clear();
+	}
+
 	/**
 	 * Only whenever this side adds a schematic. Gets synced to the client/server
 	 *
 	 * @param holder the SchematicHolder to add
 	 */
 	public static void addSchematic(@NotNull SchematicHolder holder) {
+		Reference.logger.info("Schematic [{}] was added", holder.getName());
+
 		UUID id = UUID.randomUUID();
 		schematics.put(id, holder);
 		MessageAddSchematic message = new MessageAddSchematic(id, holder.getName(), holder.getFileSize(),
@@ -206,6 +246,7 @@ public class SchematicAccounter {
 	 * @param holder the SchematicHolder to add
 	 */
 	public static void syncedAddSchematic(@NotNull UUID id, SchematicHolder holder) {
+		Reference.logger.info("Schematic [{}] has been received from remote", holder.getName());
 		schematics.put(id, holder);
 	}
 

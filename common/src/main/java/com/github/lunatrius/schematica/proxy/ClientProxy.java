@@ -7,7 +7,7 @@ import com.github.lunatrius.schematica.accounting.SchematicHolder;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
-import com.github.lunatrius.schematica.network.message.MessageSave;
+import com.github.lunatrius.schematica.network.message.accounting.MessageSaveSchematic;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
 import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
@@ -177,7 +177,7 @@ public class ClientProxy extends CommonProxy {
 	public boolean saveSchematic(Player player, @NotNull String filename, Level level, @NotNull String format,
 	                             @NotNull BlockPos from, @NotNull BlockPos to, boolean isPrivate,
 	                             @NotNull String iconName) {
-		MessageSave message = new MessageSave(filename, format, isPrivate, from, to, iconName);
+		MessageSaveSchematic message = new MessageSaveSchematic(filename, format, isPrivate, from, to, iconName);
 		Dispatcher.sendToServer(message);
 
 		return true;
@@ -215,7 +215,7 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public Path getPlayerSchematicDirectory(Player player, boolean privateDirectory) {
-		return SchematicaClientConfig.schematicDirectory;
+		return Path.of("D:/Mein Stuff/Dev/Schematica-Modern/neoforge/run/dev1/schematics");
 	}
 
 	@Override
@@ -230,6 +230,8 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public void init() {
+		Reference.logger.info("Initializing client proxy");
+
 		ClientLifecycleEvent.CLIENT_SETUP.register(instance -> {
 			Reference.proxy.createFolders();
 			SchematicaClientConfig.populateExtraAirBlocks();
@@ -238,13 +240,8 @@ public class ClientProxy extends CommonProxy {
 			Reference.proxy.resetSettings();
 		});
 
-		ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(player -> {
-			SchematicAccounter.initWatchService();
-
-			for (Path schematic : getAllSchematics()) {
-				addSchematic(schematic);
-			}
-		});
+		ClientPlayerEvent.CLIENT_PLAYER_JOIN.register(player -> SchematicAccounter.init());
+		ClientPlayerEvent.CLIENT_PLAYER_QUIT.register(player -> SchematicAccounter.reset());
 	}
 
 	@Override

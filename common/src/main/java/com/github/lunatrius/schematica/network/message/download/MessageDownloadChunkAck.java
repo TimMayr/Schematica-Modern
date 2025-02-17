@@ -1,4 +1,4 @@
-package com.github.lunatrius.schematica.network.message;
+package com.github.lunatrius.schematica.network.message.download;
 
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.network.transfer.SchematicTransfer;
@@ -15,25 +15,28 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-//ack value is needed because the StreamCodec needs something to decode
 @MethodsReturnNonnullByDefault
-public record MessageDownloadBeginAck(boolean ack) implements CustomPacketPayload {
-	public static final CustomPacketPayload.Type<MessageCapabilities> TYPE = new CustomPacketPayload.Type<>(
-			ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, Names.Network.DOWNLOAD_BEGIN_ACK_LOCATION));
+public record MessageDownloadChunkAck(boolean ack, int baseX, int baseY, int baseZ) implements CustomPacketPayload {
+	public static Type<MessageDownloadChunkAck> TYPE = new Type<>(
+			ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, Names.Network.DOWNLOAD_CHUNK_ACK_LOCATION));
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, MessageDownloadBeginAck> STREAM_CODEC =
-			StreamCodec.composite(
-					ByteBufCodecs.BOOL, MessageDownloadBeginAck::ack,
-					MessageDownloadBeginAck::new);
+	public static StreamCodec<RegistryFriendlyByteBuf, MessageDownloadChunkAck> STREAM_CODEC =
+			net.minecraft.network.codec.StreamCodec.composite(
+					ByteBufCodecs.BOOL, MessageDownloadChunkAck::ack,
+					ByteBufCodecs.INT, MessageDownloadChunkAck::baseX,
+					ByteBufCodecs.INT, MessageDownloadChunkAck::baseY,
+					ByteBufCodecs.INT, MessageDownloadChunkAck::baseZ,
+					MessageDownloadChunkAck::new);
 
-	public static void handle(@NotNull PacketContext<MessageDownloadBeginAck> ctx) {
+
+	public static void handle(@NotNull PacketContext<MessageDownloadChunkAck> ctx) {
 		if (ctx.side() == Side.SERVER) {
 			if (ctx.message().ack()) {
 				Player player = ctx.sender();
 				SchematicTransfer transfer = DownloadHandler.INSTANCE.transferMap.get(player.getScoreboardName());
 
 				if (transfer != null) {
-					transfer.setState(SchematicTransfer.State.CHUNK_WAIT);
+					transfer.confirmChunk(ctx.message().baseX(), ctx.message().baseY(), ctx.message().baseZ());
 				}
 			}
 		}

@@ -18,8 +18,9 @@ public class SchematicHolder {
 	private final UUID owner;
 	private long fileSize = -1;
 
-	public SchematicHolder(@NotNull Path file, @NotNull UUID owner, Set<UUID> additionalReadPlayers,
+	public SchematicHolder(@NotNull Path rawFile, @NotNull UUID owner, Set<UUID> additionalReadPlayers,
 	                       Set<UUID> additionalRemovePlayers) {
+		Path file = rawFile.toAbsolutePath().normalize();
 		this.name = file.getFileName().toString();
 		this.locationType = file.getParent().getParent().getFileName().toString().equals(owner.toString()) ?
 				file.getParent().getFileName().toString().equals("public") ?

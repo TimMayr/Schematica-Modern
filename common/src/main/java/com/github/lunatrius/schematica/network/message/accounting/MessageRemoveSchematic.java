@@ -1,4 +1,4 @@
-package com.github.lunatrius.schematica.network.message;
+package com.github.lunatrius.schematica.network.message.accounting;
 
 import com.github.lunatrius.schematica.accounting.SchematicAccounter;
 import com.github.lunatrius.schematica.core.Codecs;

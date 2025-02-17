@@ -1,6 +1,7 @@
 package com.github.lunatrius.schematica.world.schematic;
 
 import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.proxy.CommonProxy;
 import com.github.lunatrius.schematica.proxy.PlatformProxy;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
@@ -16,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
 public abstract class SchematicFormat {
@@ -27,7 +29,7 @@ public abstract class SchematicFormat {
 		FORMAT_DEFAULT = Names.NBT.FORMAT_ALPHA;
 	}
 
-	public static ISchematic readFromFile(Path directory, String filename, Level level) {
+	public static ISchematic readFromFile(@NotNull Path directory, String filename, Level level) {
 		return readFromFile(directory.resolve(filename), level);
 	}
 
@@ -69,13 +71,31 @@ public abstract class SchematicFormat {
 	/**
 	 * Writes the given schematic.
 	 *
-	 * @param file      The file to write to
+	 * @param directory The directory to write in
+	 * @param filename  The filename (including the extension) to write to
 	 * @param format    The format to use, or null for {@linkplain #FORMAT_DEFAULT the default}
 	 * @param schematic The schematic to write
 	 * @return True if successful
 	 */
-	public static boolean writeToFile(Path file, @Nullable String format, ISchematic schematic) {
+	public static boolean writeToFile(@NotNull Path directory, String filename, @Nullable String format,
+	                                  ISchematic schematic) {
+		return writeToFile(directory.resolve(filename), format, schematic);
+	}
+
+	/**
+	 * Writes the given schematic.
+	 *
+	 * @param rawPath   The file to write to
+	 * @param format    The format to use, or null for {@linkplain #FORMAT_DEFAULT the default}
+	 * @param schematic The schematic to write
+	 * @return True if successful
+	 */
+	public static boolean writeToFile(Path rawPath, @Nullable String format, ISchematic schematic) {
 		try {
+			Path normalizedFile = rawPath.toAbsolutePath().normalize();
+
+			CommonProxy.recentlyAdded.add(normalizedFile);
+
 			if (format == null) {
 				format = FORMAT_DEFAULT;
 			}
@@ -91,11 +111,14 @@ public abstract class SchematicFormat {
 			FORMATS.get(format).writeToNBT(tagCompound, schematic);
 
 			try (DataOutputStream dataOutputStream = new DataOutputStream(
-					new GZIPOutputStream(Files.newOutputStream(file)))) {
+					new GZIPOutputStream(Files.newOutputStream(normalizedFile)))) {
 				tagCompound.write(dataOutputStream);
-				PlatformProxy.createAndPostPostSchematicSaveEvent(file);
-				Reference.proxy.addSchematic(file);
+				PlatformProxy.createAndPostPostSchematicSaveEvent(normalizedFile);
 			}
+
+			Reference.proxy.addSchematic(normalizedFile);
+			CommonProxy.scheduler.schedule(() -> CommonProxy.recentlyAdded.remove(normalizedFile), 200,
+					TimeUnit.MILLISECONDS);
 
 			return true;
 		} catch (Exception ex) {
@@ -103,19 +126,6 @@ public abstract class SchematicFormat {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Writes the given schematic.
-	 *
-	 * @param directory The directory to write in
-	 * @param filename  The filename (including the extension) to write to
-	 * @param format    The format to use, or null for {@linkplain #FORMAT_DEFAULT the default}
-	 * @param schematic The schematic to write
-	 * @return True if successful
-	 */
-	public static boolean writeToFile(Path directory, String filename, @Nullable String format, ISchematic schematic) {
-		return writeToFile(directory.resolve(filename), format, schematic);
 	}
 
 	public abstract void writeToNBT(CompoundTag tagCompound, ISchematic schematic);

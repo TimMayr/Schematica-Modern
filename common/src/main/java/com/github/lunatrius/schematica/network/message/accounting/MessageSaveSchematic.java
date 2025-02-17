@@ -1,4 +1,4 @@
-package com.github.lunatrius.schematica.network.message;
+package com.github.lunatrius.schematica.network.message.accounting;
 
 import com.github.lunatrius.schematica.proxy.ServerProxy;
 import com.github.lunatrius.schematica.reference.Names;
@@ -15,23 +15,23 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 @MethodsReturnNonnullByDefault
-public record MessageSave(String schematicName, String format, boolean isPrivate, BlockPos start, BlockPos end,
-                          String iconName)
+public record MessageSaveSchematic(String schematicName, String format, boolean isPrivate, BlockPos start, BlockPos end,
+                                   String iconName)
 		implements CustomPacketPayload {
-	public static final Type<MessageSave> TYPE = new Type<>(
+	public static final Type<MessageSaveSchematic> TYPE = new Type<>(
 			ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, Names.Network.SAVE_LOCATION));
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, MessageSave> STREAM_CODEC =
+	public static final StreamCodec<RegistryFriendlyByteBuf, MessageSaveSchematic> STREAM_CODEC =
 			StreamCodec.composite(
-					ByteBufCodecs.STRING_UTF8, MessageSave::schematicName,
-					ByteBufCodecs.STRING_UTF8, MessageSave::format,
-					ByteBufCodecs.BOOL, MessageSave::isPrivate,
-					BlockPos.STREAM_CODEC, MessageSave::start,
-					BlockPos.STREAM_CODEC, MessageSave::end,
-					ByteBufCodecs.STRING_UTF8, MessageSave::iconName,
-					MessageSave::new);
+					ByteBufCodecs.STRING_UTF8, MessageSaveSchematic::schematicName,
+					ByteBufCodecs.STRING_UTF8, MessageSaveSchematic::format,
+					ByteBufCodecs.BOOL, MessageSaveSchematic::isPrivate,
+					BlockPos.STREAM_CODEC, MessageSaveSchematic::start,
+					BlockPos.STREAM_CODEC, MessageSaveSchematic::end,
+					ByteBufCodecs.STRING_UTF8, MessageSaveSchematic::iconName,
+					MessageSaveSchematic::new);
 
-	public static void handle(@NotNull PacketContext<MessageSave> ctx) {
+	public static void handle(@NotNull PacketContext<MessageSaveSchematic> ctx) {
 		if (ctx.side() == Side.SERVER) {
 			ServerProxy.saveServerSchematic(ctx.sender(), ctx.message().schematicName(),
 					ctx.sender().getCommandSenderWorld(), ctx.message().format(), ctx.message().start(),
@@ -40,7 +40,7 @@ public record MessageSave(String schematicName, String format, boolean isPrivate
 	}
 
 	@Override
-	public Type<MessageSave> type() {
+	public Type<MessageSaveSchematic> type() {
 		return TYPE;
 	}
 }

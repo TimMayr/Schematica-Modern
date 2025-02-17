@@ -1,4 +1,4 @@
-package com.github.lunatrius.schematica.network.message;
+package com.github.lunatrius.schematica.network.message.download;
 
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.handler.DownloadHandler;

@@ -23,10 +23,20 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 public abstract class CommonProxy {
 	public boolean isSaveEnabled = true;
 	public boolean isLoadEnabled = true;
+	/**
+	 * Stores the path of the schematic currently getting added. Currently only needed to make sure the watchService
+	 * doesn't discover the schematic we are actively saving.
+	 */
+	public static final Set<Path> recentlyAdded = ConcurrentHashMap.newKeySet();
+	public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
 	public void createFolders() {
 		if (!Files.exists(SchematicaClientConfig.schematicDirectory)) {
