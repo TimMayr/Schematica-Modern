@@ -5,6 +5,7 @@ import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
 import com.github.lunatrius.schematica.core.FileUtils;
 import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.entity.Entity;
@@ -20,10 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -139,17 +137,18 @@ public abstract class CommonProxy {
 
 	public List<Path> getAllAccessibleSchematics(Player player) {
 		List<Path> dirs = getAllAccessibleDirectories(player);
-		return getPaths(dirs);
+		return getSchematicsInDirectory(dirs);
 	}
 
 	public abstract List<Path> getAllAccessibleDirectories(Player player);
 
 	@NotNull
-	private List<Path> getPaths(@NotNull List<Path> dirs) {
+	private List<Path> getSchematicsInDirectory(@NotNull List<Path> dirs) {
 		List<Path> schematics = new LinkedList<>();
+		FileFilterSchematic filter = new FileFilterSchematic(false);
 
 		for (Path dir : dirs) {
-			schematics.addAll(FileUtils.getAllFilesInDirectory(dir));
+			schematics.addAll(FileUtils.getAllFilesInDirectory(dir).stream().filter(filter::accept).toList());
 		}
 
 		schematics.sort(Comparator.comparing(path -> path.getFileName().toFile()));
@@ -159,7 +158,7 @@ public abstract class CommonProxy {
 
 	public List<Path> getAllSchematics() {
 		List<Path> dirs = getAllSchematicDirectories();
-		return getPaths(dirs);
+		return getSchematicsInDirectory(dirs);
 	}
 
 	public abstract List<Path> getAllSchematicDirectories();
@@ -171,4 +170,6 @@ public abstract class CommonProxy {
 	public abstract Level getLevel();
 
 	public abstract void addSchematic(Path schematic);
+
+	public abstract String getUsernameForUUID(UUID uuid);
 }

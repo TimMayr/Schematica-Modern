@@ -18,7 +18,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Map;
 
 public class CommandSchematicaList extends CommandSchematicaBase {
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
@@ -45,14 +45,14 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 		int currentFile = 0;
 		LinkedList<Component> componentsToSend = new LinkedList<>();
 
-		List<SchematicHolder> schematics = SchematicAccounter.sorted(player);
+		Map<String, SchematicHolder> schematics = SchematicAccounter.sortedSchematics(player);
 
-		for (SchematicHolder entry : schematics) {
+		for (Map.Entry<String, SchematicHolder> entry : schematics.entrySet()) {
 			if (currentFile >= pageStart && currentFile < pageEnd) {
-				String fileName = entry.getName();
+				String fileName = entry.getKey();
 
 				Component chatComponent = Component.literal(String.format("%2d (%s): %s [", currentFile + 1,
-						FileUtils.humanReadableByteCount(entry.getFileSize()),
+						FileUtils.humanReadableByteCount(entry.getValue().getFileSize()),
 						FilenameUtils.removeExtension(fileName)));
 
 				String removeCommand = String.format("/%s %s \"%s\"", Reference.MOD_ID, Names.Command.Remove.NAME,

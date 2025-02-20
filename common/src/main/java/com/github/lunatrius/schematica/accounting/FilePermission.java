@@ -5,12 +5,12 @@ import java.util.function.BiFunction;
 
 public enum FilePermission {
 	READ((uuid, holder) ->
-			holder.getLocationType() == SchematicLocation.PUBLIC ||
-					holder.getOwner().equals(uuid) ||
-					holder.getAdditionalReadPlayers().contains(uuid)),
+			holder.locationType() == SchematicLocation.PUBLIC ||
+					holder.owner().equals(uuid) ||
+					holder.additionalReadPlayers().contains(uuid)),
 	DELETE((uuid, holder) ->
-			holder.getOwner().equals(uuid) ||
-					holder.getAdditionalRemovePlayers().contains(uuid));
+			holder.owner().equals(uuid) ||
+					holder.additionalRemovePlayers().contains(uuid));
 
 	private final BiFunction<UUID, SchematicHolder, Boolean> checkFunc;
 

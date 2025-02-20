@@ -1,80 +1,48 @@
 package com.github.lunatrius.schematica.accounting;
 
+import com.github.lunatrius.schematica.accounting.loaders.ClientSchematicLoader;
+import com.github.lunatrius.schematica.api.ISchematic;
+import dev.architectury.platform.Platform;
+import net.fabricmc.api.EnvType;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.Locale;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
-public class SchematicHolder {
-	private final String name;
-	private final SchematicLocation locationType;
-	private final Set<UUID> additionalReadPlayers;
-	private final Set<UUID> additionalRemovePlayers;
-	private final UUID owner;
-	private long fileSize = -1;
+public record SchematicHolder(String name, long filesize, SchematicLocation locationType, UUID owner,
+                              Set<UUID> additionalReadPlayers, Set<UUID> additionalRemovePlayers) {
+	static @NotNull Map<String, SchematicHolder> qualify(@NotNull Collection<SchematicHolder> holders) {
+		Map<String, Integer> nameCount = new HashMap<>();
+		Map<String, SchematicHolder> result = new TreeMap<>();
 
-	public SchematicHolder(@NotNull Path rawFile, @NotNull UUID owner, Set<UUID> additionalReadPlayers,
-	                       Set<UUID> additionalRemovePlayers) {
-		Path file = rawFile.toAbsolutePath().normalize();
-		this.name = file.getFileName().toString();
-		this.locationType = file.getParent().getParent().getFileName().toString().equals(owner.toString()) ?
-				file.getParent().getFileName().toString().equals("public") ?
-						SchematicLocation.PUBLIC :
-						SchematicLocation.PRIVATE
-				: SchematicLocation.LOCAL;
-		this.additionalReadPlayers = new HashSet<>(additionalReadPlayers);
-		this.additionalRemovePlayers = new HashSet<>(additionalRemovePlayers);
-		this.owner = owner;
-		try {
-			this.fileSize = Files.size(file);
-		} catch (IOException ignored) {}
-	}
-
-	public SchematicHolder(@NotNull String name, long fileSize, SchematicLocation locationType, UUID owner,
-	                       Set<UUID> additionalReadPlayers, Set<UUID> additionalRemovePlayers) {
-		this.name = name;
-		this.fileSize = fileSize;
-		this.locationType = locationType;
-		this.additionalReadPlayers = new HashSet<>(additionalReadPlayers);
-		this.additionalRemovePlayers = new HashSet<>(additionalRemovePlayers);
-		this.owner = owner;
-	}
-
-	public long getFileSize() {
-		return fileSize;
-	}
-
-	public Set<UUID> getAdditionalReadPlayers() {
-		return additionalReadPlayers;
-	}
-
-	public Set<UUID> getAdditionalRemovePlayers() {
-		return additionalRemovePlayers;
-	}
-
-	public @NotNull Path getPath() {
-		if (this.getLocationType() == SchematicLocation.LOCAL) {
-			return Path.of(this.getName());
-		} else {
-			return Path.of(this.getOwner().toString(),
-					this.getLocationType().toString().toLowerCase(Locale.ROOT)).resolve(this.getName());
+		for (SchematicHolder holder : holders) {
+			String name = holder.name();
+			nameCount.put(name, nameCount.getOrDefault(name, 0) + 1);
 		}
+
+		for (SchematicHolder holder : holders) {
+			String name = holder.name;
+			if (nameCount.get(name) > 1) {
+				result.put(holder.toString(), holder);
+			} else {
+				result.put(name, holder);
+			}
+		}
+
+		return result;
 	}
 
-	public SchematicLocation getLocationType() {
-		return locationType;
+	@Override
+	public @NotNull String toString() {
+		return String.format("%s (by %s) (%s)", this.name, this.owner,
+				this.locationType.toString().toLowerCase(Locale.ROOT));
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public UUID getOwner() {
-		return owner;
+	public @NotNull CompletableFuture<ISchematic> getSchematic() {
+		if (Platform.getEnv() == EnvType.CLIENT) {
+			return ClientSchematicLoader.get(this);
+		} else {
+			return null;
+		}
 	}
 }

@@ -8,6 +8,7 @@ import com.github.lunatrius.schematica.proxy.CommonProxy;
 import com.github.lunatrius.schematica.proxy.ServerProxy;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import commonnetwork.api.Dispatcher;
 import dev.architectury.event.events.common.TickEvent;
 import dev.architectury.platform.Platform;
@@ -32,6 +33,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SchematicAccounter {
 	private static final Map<UUID, SchematicHolder> schematics = new HashMap<>();
+	private static final FileFilterSchematic FILTER_SCHEMATIC = new FileFilterSchematic(false);
 	private static WatchService watchService;
 	private static final Map<WatchKey, Path> keyToPathMap = new HashMap<>();
 	private static final TickEvent.Server listener = (server) -> {
@@ -44,24 +46,26 @@ public class SchematicAccounter {
 					if (event.kind().equals(StandardWatchEventKinds.ENTRY_CREATE)) {
 						if (event.context() instanceof Path relativePath) {
 							Path fullPath = schematicDir.resolve(relativePath).toAbsolutePath().normalize();
-							//This check makes sure that the discovered schematic isn't actively getting saved by some
-							// other method, as that would duplicate the entry. Technically we could stop calling
-							if (!CommonProxy.recentlyAdded.contains(fullPath)) {
-								UUID owner;
+							if (FILTER_SCHEMATIC.accept(fullPath)) {
+								//This check makes sure that the discovered schematic isn't actively getting saved by
+								//some other method, as that would duplicate the entry
+								if (!CommonProxy.recentlyAdded.contains(fullPath)) {
+									UUID owner;
 
-								if (Platform.getEnv() == EnvType.CLIENT) {
-									owner = PlayerUtils.getClientPlayer().getUUID();
-								} else {
-									owner = UUID.fromString(
-											fullPath.getParent().getParent().getFileName().toString());
+									if (Platform.getEnv() == EnvType.CLIENT) {
+										owner = PlayerUtils.getClientPlayer().getUUID();
+									} else {
+										owner = UUID.fromString(
+												fullPath.getParent().getParent().getFileName().toString());
+									}
+
+									SchematicHolder holder = new SchematicHolder(fullPath, owner, new HashSet<>(),
+											new HashSet<>());
+
+									Reference.logger.info("Schematic [{}] was discovered by watchService",
+											holder.name());
+									SchematicAccounter.addSchematic(holder);
 								}
-
-								SchematicHolder holder = new SchematicHolder(fullPath, owner, new HashSet<>(),
-										new HashSet<>());
-
-								Reference.logger.info("Schematic [{}] was discovered by watchService",
-										holder.getName());
-								SchematicAccounter.addSchematic(holder);
 							}
 						}
 					} else if (event.kind().equals(StandardWatchEventKinds.ENTRY_DELETE)) {
@@ -127,13 +131,13 @@ public class SchematicAccounter {
 	 * @param holder the SchematicHolder to add
 	 */
 	public static void addSchematic(@NotNull SchematicHolder holder) {
-		Reference.logger.info("Schematic [{}] was added", holder.getName());
+		Reference.logger.info("Schematic [{}] was added", holder.name());
 
 		UUID id = UUID.randomUUID();
 		schematics.put(id, holder);
-		MessageAddSchematic message = new MessageAddSchematic(id, holder.getName(), holder.getFileSize(),
-				holder.getLocationType(), holder.getOwner(), holder.getAdditionalReadPlayers(),
-				holder.getAdditionalRemovePlayers());
+		MessageAddSchematic message = new MessageAddSchematic(id, holder.name(), holder.getFileSize(),
+				holder.locationType(), holder.owner(), holder.additionalReadPlayers(),
+				holder.additionalRemovePlayers());
 
 		if (Platform.getEnv() == EnvType.CLIENT) {
 			Dispatcher.sendToServer(message);
@@ -174,8 +178,8 @@ public class SchematicAccounter {
 
 		for (Map.Entry<UUID, SchematicHolder> entry : schematics.entrySet()) {
 			SchematicHolder holder = entry.getValue();
-			if (holder.getName().equals(name) &&
-					holder.getLocationType() == location && holder.getOwner().equals(owner)) {
+			if (holder.name().equals(name) &&
+					holder.locationType() == location && holder.owner().equals(owner)) {
 				return entry.getKey();
 			}
 		}
@@ -196,17 +200,17 @@ public class SchematicAccounter {
 	}
 
 	public static List<SchematicHolder> sorted() {
-		return schematics.values().stream().sorted(Comparator.comparing(SchematicHolder::getName)).toList();
+		return schematics.values().stream().sorted(Comparator.comparing(SchematicHolder::name)).toList();
 	}
 
 	public static List<SchematicHolder> sorted(Player player) {
 		return schematics.values().stream().filter(holder -> FilePermission.READ.check(player.getUUID(), holder))
-				.sorted(Comparator.comparing(SchematicHolder::getName)).toList();
+				.sorted(Comparator.comparing(SchematicHolder::name)).toList();
 	}
 
 	public static List<SchematicHolder> sorted(Player player, FilePermission permission) {
 		return schematics.values().stream().filter(holder -> permission.check(player.getUUID(), holder))
-				.sorted(Comparator.comparing(SchematicHolder::getName)).toList();
+				.sorted(Comparator.comparing(SchematicHolder::name)).toList();
 	}
 
 	public static @NotNull List<String> sortedNames() {
@@ -214,8 +218,8 @@ public class SchematicAccounter {
 		return FileNameUtils.getQualifiedFileNames(paths);
 	}
 
-	private static List<Path> sortedPaths() {
-		return schematics.values().stream().sorted(Comparator.comparing(SchematicHolder::getName))
+	public static List<Path> sortedPaths() {
+		return schematics.values().stream().sorted(Comparator.comparing(SchematicHolder::name))
 				.map(SchematicHolder::getPath).toList();
 	}
 
@@ -224,9 +228,9 @@ public class SchematicAccounter {
 		return FileNameUtils.getQualifiedFileNames(paths);
 	}
 
-	private static List<Path> sortedPaths(Player player) {
+	public static List<Path> sortedPaths(Player player) {
 		return schematics.values().stream().filter(holder -> FilePermission.READ.check(player.getUUID(), holder))
-				.sorted(Comparator.comparing(SchematicHolder::getName)).map(SchematicHolder::getPath).toList();
+				.sorted(Comparator.comparing(SchematicHolder::name)).map(SchematicHolder::getPath).toList();
 	}
 
 	public static @NotNull List<String> sortedNames(Player player, FilePermission permission) {
@@ -234,9 +238,20 @@ public class SchematicAccounter {
 		return FileNameUtils.getQualifiedFileNames(paths);
 	}
 
-	private static List<Path> sortedPaths(Player player, FilePermission permission) {
+	public static List<Path> sortedPaths(Player player, FilePermission permission) {
 		return schematics.values().stream().filter(holder -> permission.check(player.getUUID(), holder))
-				.sorted(Comparator.comparing(SchematicHolder::getName)).map(SchematicHolder::getPath).toList();
+				.sorted(Comparator.comparing(SchematicHolder::name)).map(SchematicHolder::getPath).toList();
+	}
+
+	public static @NotNull Map<String, SchematicHolder> sortedSchematics(Player player) {
+		return sortedSchematics(player, FilePermission.READ);
+	}
+
+	public static @NotNull Map<String, SchematicHolder> sortedSchematics(Player player, FilePermission permission) {
+		List<SchematicHolder> entries = schematics.values().stream().filter(entry ->
+						permission.check(player.getUUID(), entry))
+				.sorted(Comparator.comparing(SchematicHolder::name)).toList();
+		return FileNameUtils.getUniqueReadableStringForFile(entries, SchematicHolder::getPath);
 	}
 
 	/**
@@ -245,8 +260,8 @@ public class SchematicAccounter {
 	 *
 	 * @param holder the SchematicHolder to add
 	 */
-	public static void syncedAddSchematic(@NotNull UUID id, SchematicHolder holder) {
-		Reference.logger.info("Schematic [{}] has been received from remote", holder.getName());
+	public static void syncedAddSchematic(@NotNull UUID id, @NotNull SchematicHolder holder) {
+		Reference.logger.info("Schematic [{}] has been received from remote", holder.name());
 		schematics.put(id, holder);
 	}
 
@@ -262,9 +277,9 @@ public class SchematicAccounter {
 		for (Map.Entry<UUID, SchematicHolder> entry : schematics.entrySet()) {
 			UUID id = entry.getKey();
 			SchematicHolder holder = entry.getValue();
-			MessageAddSchematic message = new MessageAddSchematic(id, holder.getName(), holder.getFileSize(),
-					holder.getLocationType(), holder.getOwner(), holder.getAdditionalReadPlayers(),
-					holder.getAdditionalRemovePlayers());
+			MessageAddSchematic message = new MessageAddSchematic(id, holder.name(), holder.getFileSize(),
+					holder.locationType(), holder.owner(), holder.additionalReadPlayers(),
+					holder.additionalRemovePlayers());
 
 			Dispatcher.sendToClient(message, player);
 		}

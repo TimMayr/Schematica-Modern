@@ -17,24 +17,7 @@ public class FileNameUtils {
 	 * parent directory
 	 */
 	public static @NotNull Map<String, Path> getUniqueReadableStringForFile(@NotNull Collection<Path> files) {
-		Map<String, Integer> nameCount = new HashMap<>();
-		Map<String, Path> result = new TreeMap<>();
-
-		for (Path file : files) {
-			String name = file.getFileName().toString();
-			nameCount.put(name, nameCount.getOrDefault(name, 0) + 1);
-		}
-
-		for (Path file : files) {
-			String name = file.getFileName().toString();
-			if (nameCount.get(name) > 1) {
-				result.put(file.getParent().getFileName() + "/" + name, file);
-			} else {
-				result.put(name, file);
-			}
-		}
-
-		return result;
+		return getUniqueReadableStringForFile(files, path -> path);
 	}
 
 	public static <T> @NotNull Map<String, T> getUniqueReadableStringForFile(@NotNull Collection<T> fileHolders,
@@ -49,7 +32,7 @@ public class FileNameUtils {
 		}
 
 		for (T fileHolder : fileHolders) {
-			Path file = keyExtractor.apply(fileHolder);
+			Path file = keyExtractor.apply(fileHolder).toAbsolutePath().normalize();
 			String name = file.getFileName().toString();
 			if (nameCount.get(name) > 1) {
 				result.put(file.getParent().getFileName() + "/" + name, fileHolder);

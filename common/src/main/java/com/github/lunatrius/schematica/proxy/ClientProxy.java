@@ -220,12 +220,19 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public List<Path> getAllAccessibleDirectories(Player player) {
-		return List.of(getPlayerSchematicDirectory(player, true));
+		Path playerDir = getPlayerSchematicDirectory(player, true);
+		Path downloadDir = playerDir.resolve("downloaded");
+		return List.of(playerDir, downloadDir);
 	}
 
 	@Override
 	public List<Path> getAllSchematicDirectories() {
 		return getAllAccessibleDirectories(ClientProxy.MINECRAFT.player);
+	}
+
+	@Override
+	public @NotNull String getUsernameForUUID(@NotNull UUID uuid) {
+		return uuid.toString();
 	}
 
 	@Override

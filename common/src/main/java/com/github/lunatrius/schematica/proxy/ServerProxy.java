@@ -20,6 +20,7 @@ import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.file.Files;
@@ -162,7 +163,42 @@ public class ServerProxy extends CommonProxy {
 			}
 		}
 
+		Path usernameFile = playerDir.resolve(".username");
+		if (!Files.exists(usernameFile)) {
+			try (DataOutputStream dataOutputStream = new DataOutputStream(
+					new DataOutputStream(Files.newOutputStream(usernameFile)))) {
+				dataOutputStream.writeChars(player.getScoreboardName());
+			} catch (IOException e) {
+				Reference.logger.warn("Unable to save username");
+			}
+		} else {
+			try {
+				String username = Files.readString(usernameFile);
+				if (!username.equals(player.getScoreboardName())) {
+					try (DataOutputStream dataOutputStream = new DataOutputStream(
+							new DataOutputStream(Files.newOutputStream(usernameFile)))) {
+						dataOutputStream.writeChars(player.getScoreboardName());
+					} catch (IOException e) {
+						Reference.logger.warn("Unable to update username");
+					}
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
 		return playerDir;
+	}
+
+	@Override
+	public @NotNull String getUsernameForUUID(@NotNull UUID uuid) {
+		Path file = getServerSchematicDirectory().resolve(uuid.toString()).resolve(".username");
+		try {
+			return Files.readString(file);
+		} catch (IOException e) {
+			Reference.logger.warn("Unable to get username for uuid \"{}\"", uuid);
+			return uuid.toString();
+		}
 	}
 
 	@Override
