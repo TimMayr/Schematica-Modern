@@ -1,7 +1,10 @@
 package com.github.lunatrius.schematica.world.schematic;
 
+import com.github.lunatrius.schematica.core.CommonNbtUtils;
+import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
+import com.mojang.datafixers.kinds.Const;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
@@ -11,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.injection.Constant;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -18,11 +22,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class SchematicUtil {
-	public static final ItemStack DEFAULT_ICON = new ItemStack(Blocks.GRASS_BLOCK);
 
 	public static @NotNull ItemStack getIconFromName(@Nullable String iconName) {
 		if (iconName == null) {
-			DEFAULT_ICON.copy();
+			Constants.Schematic.DEFAULT_ICON.copy();
 		}
 
 		ResourceLocation rl = null;
@@ -33,7 +36,7 @@ public class SchematicUtil {
 		}
 
 		if (rl == null) {
-			return DEFAULT_ICON.copy();
+			return Constants.Schematic.DEFAULT_ICON.copy();
 		}
 
 		ItemStack block = new ItemStack(BuiltInRegistries.BLOCK.getValue(rl), 1);
@@ -46,32 +49,17 @@ public class SchematicUtil {
 			return item;
 		}
 
-		return DEFAULT_ICON.copy();
+		return Constants.Schematic.DEFAULT_ICON.copy();
 	}
 
 	public static ItemStack getIconFromFile(Path file) {
 		try {
-			return getIconFromNBT(readTagCompoundFromFile(file));
+			return CommonNbtUtils.deserializeItemStack(readTagCompoundFromFile(file), Names.NBT.ICON);
 		} catch (Exception e) {
 			Reference.logger.error("Failed to read schematic icon!", e);
 		}
 
-		return DEFAULT_ICON.copy();
-	}
-
-	public static ItemStack getIconFromNBT(CompoundTag tagCompound) {
-		ItemStack icon = DEFAULT_ICON.copy();
-
-		if (tagCompound != null && tagCompound.contains(Names.NBT.ICON)) {
-			icon = ItemStack.parseOptional(Reference.proxy.getRegistryAccess(),
-					tagCompound.getCompound(Names.NBT.ICON));
-
-			if (icon.isEmpty()) {
-				icon = DEFAULT_ICON.copy();
-			}
-		}
-
-		return icon;
+		return Constants.Schematic.DEFAULT_ICON.copy();
 	}
 
 	public static CompoundTag readTagCompoundFromFile(Path file) throws IOException {

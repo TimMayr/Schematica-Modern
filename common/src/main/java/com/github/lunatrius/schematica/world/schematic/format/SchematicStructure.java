@@ -1,6 +1,7 @@
-package com.github.lunatrius.schematica.world.schematic;
+package com.github.lunatrius.schematica.world.schematic.format;
 
 import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.api.SchematicMetadata;
 import com.github.lunatrius.schematica.nbt.NBTHelper;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
@@ -10,7 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -18,15 +18,12 @@ import org.jetbrains.annotations.NotNull;
 
 public class SchematicStructure extends SchematicFormat {
 	@Override
-	public ISchematic readFromNBT(CompoundTag tagCompound, Level level) {
-		ItemStack icon = SchematicUtil.getIconFromNBT(tagCompound);
-		String name = tagCompound.getString(Names.NBT.TITLE);
+	public ISchematic readFromNbt(CompoundTag tagCompound, Level level) {
+		SchematicMetadata metadata = readMetaFromNbt(tagCompound);
 		StructureTemplate template = new StructureTemplate();
 		template.load(BuiltInRegistries.BLOCK, tagCompound);
 
-		Schematic schematic =
-				new Schematic(icon, name, template.getSize().getX(), template.getSize().getY(),
-						template.getSize().getZ(), template.getAuthor());
+		Schematic schematic = new Schematic(metadata);
 
 		for (StructureTemplate.Palette palette : template.palettes) {
 			for (StructureTemplate.StructureBlockInfo block : palette.blocks()) {
@@ -64,22 +61,24 @@ public class SchematicStructure extends SchematicFormat {
 	}
 
 	@Override
+	public String getNbtName() {
+		return Names.NBT.FORMAT_STRUCTURE;
+	}
+
+	@Override
 	public void writeToNBT(@NotNull CompoundTag tagCompoundIn, ISchematic schematic) {
 		StructureTemplate template = new StructureTemplate();
 
 		template.fillFromWorld(FakeLevel.of(schematic), BlockPos.ZERO,
-				new BlockPos(schematic.getSizeX(), schematic.getHeight(), schematic.getSizeZ()), true,
+				new BlockPos(schematic.getWidth(), schematic.getHeight(), schematic.getLength()), true,
 				null);
 
-		template.setAuthor(schematic.getAuthor());
+		template.setAuthor(schematic.getAuthor().toString());
 
 		CompoundTag writeTo = new CompoundTag();
 
 		template.save(writeTo);
-		writeTo.putString(Names.NBT.FORMAT, Names.NBT.FORMAT_STRUCTURE);
-		writeTo.putString(Names.NBT.AUTHOR, schematic.getAuthor());
-		writeTo.putString(Names.NBT.TITLE, schematic.getName());
-
+		writeMetadataToNBT(writeTo, schematic);
 		tagCompoundIn.put(Names.NBT.ROOT, writeTo);
 	}
 
@@ -89,12 +88,31 @@ public class SchematicStructure extends SchematicFormat {
 	}
 
 	@Override
-	public String getNbtName() {
-		return Names.NBT.FORMAT_STRUCTURE;
+	public String getExtension() {
+		return Names.Extensions.STRUCTURE;
 	}
 
 	@Override
-	public String getExtension() {
-		return Names.Extensions.STRUCTURE;
+	public SchematicMetadata readMetaFromNbt(@NotNull CompoundTag tagCompound) {
+		if (tagCompound.contains(Names.NBT.METADATA)) {
+			CompoundTag tag = tagCompound.getCompound(Names.NBT.METADATA);
+			return metaFromTag(tag);
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public void writeMetadataToNBT(@NotNull CompoundTag tagCompound, @NotNull ISchematic schematic) {
+		SchematicMetadata metadata = schematic.getMetadata();
+		tagCompound.put(Names.NBT.METADATA, metaAsTag(metadata));
+	}
+
+	public @NotNull SchematicMetadata metaFromTag(@NotNull CompoundTag tag) {
+		return SchematicFormat.defaultMetaFromTag(tag);
+	}
+
+	public @NotNull CompoundTag metaAsTag(@NotNull SchematicMetadata metadata) {
+		return SchematicFormat.defaultMetaAsTag(metadata);
 	}
 }

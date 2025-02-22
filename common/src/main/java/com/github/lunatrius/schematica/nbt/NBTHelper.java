@@ -6,6 +6,7 @@ import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
@@ -21,7 +22,7 @@ import java.util.List;
 public class NBTHelper {
 	public static void readBlockEntitiesFromCompound(@NotNull CompoundTag compound, Level level,
 	                                                 List<BlockEntity> blockEntities) {
-		ListTag tagList = compound.getList(Names.NBT.BLOCK_ENTITIES, Constants.NBT.TAG_COMPOUND);
+		ListTag tagList = compound.getList(Names.NBT.BLOCK_ENTITIES, Tag.TAG_COMPOUND);
 		for (int i = 0; i < tagList.size(); i++) {
 			CompoundTag BlockEntityCompound = tagList.getCompound(i);
 			BlockEntity BlockEntity = readBlockEntityFromCompound(BlockEntityCompound, level);
@@ -78,7 +79,7 @@ public class NBTHelper {
 	}
 
 	public static void readEntitiesFromCompound(@NotNull CompoundTag compound, Level level, List<Entity> entities) {
-		ListTag tagList = compound.getList(Names.NBT.ENTITIES, Constants.NBT.TAG_COMPOUND);
+		ListTag tagList = compound.getList(Names.NBT.ENTITIES, Tag.TAG_COMPOUND);
 		for (int i = 0; i < tagList.size(); i++) {
 			CompoundTag entityCompound = tagList.getCompound(i);
 			Entity entity = readEntityFromCompound(entityCompound, level);

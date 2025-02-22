@@ -2,7 +2,7 @@ package com.github.lunatrius.schematica.network.message.download;
 
 import com.github.lunatrius.schematica.accounting.SchematicAccounter;
 import com.github.lunatrius.schematica.accounting.SchematicHolder;
-import com.github.lunatrius.schematica.core.Codecs;
+import com.github.lunatrius.schematica.core.CommonCodecs;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.network.transfer.SchematicTransfer;
 import com.github.lunatrius.schematica.reference.Names;
@@ -28,7 +28,7 @@ public record MessageRequestDownload(UUID id)
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, MessageRequestDownload> STREAM_CODEC =
 			StreamCodec.composite(
-					Codecs.UUID, MessageRequestDownload::id,
+					CommonCodecs.UUID, MessageRequestDownload::id,
 					MessageRequestDownload::new);
 
 

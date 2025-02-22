@@ -1,7 +1,7 @@
 package com.github.lunatrius.schematica.network.message.accounting;
 
 import com.github.lunatrius.schematica.accounting.SchematicAccounter;
-import com.github.lunatrius.schematica.core.Codecs;
+import com.github.lunatrius.schematica.core.CommonCodecs;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import commonnetwork.networking.data.PacketContext;
@@ -22,7 +22,7 @@ public record MessageRemoveSchematic(@NotNull UUID id) implements CustomPacketPa
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, MessageRemoveSchematic> STREAM_CODEC =
 			StreamCodec.composite(
-					Codecs.UUID, MessageRemoveSchematic::id,
+					CommonCodecs.UUID, MessageRemoveSchematic::id,
 					MessageRemoveSchematic::new);
 
 	public static void handle(@NotNull PacketContext<MessageRemoveSchematic> ctx) {

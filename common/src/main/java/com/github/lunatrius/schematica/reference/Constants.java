@@ -1,10 +1,9 @@
 package com.github.lunatrius.schematica.reference;
 
-public class Constants {
-	public static class NBT {
-		public static final int TAG_COMPOUND = 10;
-	}
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 
+public class Constants {
 	public static class Inventory {
 		public static class Size {
 			public static final int CRAFTING_OUT = 1;
@@ -42,5 +41,9 @@ public class Constants {
 	public static class Level {
 		public static final int MINIMUM_COORD = -30000000;
 		public static final int MAXIMUM_COORD = 30000000;
+	}
+
+	public static class Schematic {
+		public static final ItemStack DEFAULT_ICON = new ItemStack(Blocks.GRASS_BLOCK);
 	}
 }

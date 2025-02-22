@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 
-public class FileNameUtils {
+public final class FileNameUtils {
 	public static @NotNull List<String> getQualifiedFileNames(@NotNull Collection<Path> files) {
 		return getUniqueReadableStringForFile(files).keySet().stream().sorted().toList();
 	}

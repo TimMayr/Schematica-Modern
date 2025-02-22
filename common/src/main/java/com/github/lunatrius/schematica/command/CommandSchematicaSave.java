@@ -3,7 +3,7 @@ package com.github.lunatrius.schematica.command;
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
-import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
+import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;

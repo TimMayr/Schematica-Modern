@@ -3,7 +3,7 @@ package com.github.lunatrius.schematica.network.message.download;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
-import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
+import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
 import commonnetwork.networking.data.PacketContext;
 import commonnetwork.networking.data.Side;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -43,7 +43,7 @@ public record MessageDownloadEnd(String name) implements CustomPacketPayload {
 					Files.createDirectories(path.getParent());
 				}
 
-				success = SchematicFormat.writeToFile(path, null, DownloadHandler.INSTANCE.schematic);
+				success = SchematicFormat.writeToFile(path,null, DownloadHandler.INSTANCE.schematic);
 				DownloadHandler.INSTANCE.schematic = null;
 			} catch (IOException e) {
 				Reference.logger.error("Unable to save schematic {} to directory [{}]", ctx.message().name(),

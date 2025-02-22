@@ -1,10 +1,10 @@
-package com.github.lunatrius.schematica.world.schematic;
+package com.github.lunatrius.schematica.world.schematic.format;
 
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.api.SchematicMetadata;
 import com.github.lunatrius.schematica.nbt.NBTHelper;
 import com.github.lunatrius.schematica.proxy.PlatformProxy;
-import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.storage.Schematic;
@@ -12,9 +12,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -26,19 +26,12 @@ import java.util.*;
 
 public class SchematicAlpha extends SchematicFormat {
 	@Override
-	public ISchematic readFromNBT(CompoundTag tagCompound, Level level) {
-		ItemStack icon = SchematicUtil.getIconFromNBT(tagCompound);
-		String name = tagCompound.getString(Names.NBT.TITLE);
+	public ISchematic readFromNbt(CompoundTag tagCompound, Level level) {
+		SchematicMetadata metadata = readMetaFromNbt(tagCompound);
 
 		List<BlockState> localBlockList =
 				Arrays.stream(tagCompound.getIntArray(Names.NBT.BLOCKS)).mapToObj(Block::stateById).toList();
 		BlockState[] localBlocks = localBlockList.toArray(new BlockState[]{});
-
-		int width = tagCompound.getInt(Names.NBT.WIDTH);
-		int length = tagCompound.getInt(Names.NBT.LENGTH);
-		int height = tagCompound.getInt(Names.NBT.HEIGHT);
-
-		String author = tagCompound.getString(Names.NBT.AUTHOR);
 
 		Map<BlockState, BlockState> oldToNew = new HashMap<>();
 		if (tagCompound.contains(Names.NBT.MAPPING_SCHEMATICA)) {
@@ -69,12 +62,12 @@ public class SchematicAlpha extends SchematicFormat {
 		}
 
 		MBlockPos pos = new MBlockPos();
-		ISchematic schematic = new Schematic(icon, name, width, height, length, author);
+		ISchematic schematic = new Schematic(metadata);
 
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				for (int z = 0; z < length; z++) {
-					int index = x + (y * length + z) * width;
+		for (int x = 0; x < schematic.getWidth(); x++) {
+			for (int y = 0; y < schematic.getHeight(); y++) {
+				for (int z = 0; z < schematic.getLength(); z++) {
+					int index = x + (y * schematic.getLength() + z) * schematic.getWidth();
 					BlockState blockstate = localBlocks[index];
 
 					if (oldToNew.containsKey(blockstate)) {
@@ -93,7 +86,7 @@ public class SchematicAlpha extends SchematicFormat {
 			}
 		}
 
-		ListTag blockEntitiesList = tagCompound.getList(Names.NBT.BLOCK_ENTITIES, Constants.NBT.TAG_COMPOUND);
+		ListTag blockEntitiesList = tagCompound.getList(Names.NBT.BLOCK_ENTITIES, Tag.TAG_COMPOUND);
 
 		for (int i = 0; i < blockEntitiesList.size(); i++) {
 			try {
@@ -107,7 +100,7 @@ public class SchematicAlpha extends SchematicFormat {
 			}
 		}
 
-		ListTag entitiesList = tagCompound.getList(Names.NBT.ENTITIES, Constants.NBT.TAG_COMPOUND);
+		ListTag entitiesList = tagCompound.getList(Names.NBT.ENTITIES, Tag.TAG_COMPOUND);
 
 		for (int i = 0; i < entitiesList.size(); i++) {
 			try {
@@ -125,27 +118,23 @@ public class SchematicAlpha extends SchematicFormat {
 	}
 
 	@Override
+	public String getNbtName() {
+		return Names.NBT.FORMAT_ALPHA;
+	}
+
+	@Override
 	public void writeToNBT(CompoundTag tagCompoundIn, @NotNull ISchematic schematic) {
 		CompoundTag tagCompound = new CompoundTag();
-		CompoundTag tagCompoundIcon = new CompoundTag();
-		ItemStack icon = schematic.getIcon();
-		icon.save(Reference.proxy.getRegistryAccess(), tagCompoundIcon);
-		tagCompound.put(Names.NBT.ICON, tagCompoundIcon);
-		tagCompound.putString(Names.NBT.TITLE, schematic.getName());
 
-		tagCompound.putInt(Names.NBT.WIDTH, schematic.getSizeX());
-		tagCompound.putInt(Names.NBT.LENGTH, schematic.getSizeZ());
-		tagCompound.putInt(Names.NBT.HEIGHT, schematic.getHeight());
-
-		int size = schematic.getSizeX() * schematic.getSizeZ() * schematic.getHeight();
+		int size = schematic.getWidth() * schematic.getLength() * schematic.getHeight();
 		BlockState[] localBlocks = new BlockState[size];
 
 		MBlockPos pos = new MBlockPos();
 		Map<BlockState, BlockState> mappings = new HashMap<>();
-		for (int x = 0; x < schematic.getSizeX(); x++) {
+		for (int x = 0; x < schematic.getWidth(); x++) {
 			for (int y = 0; y < schematic.getHeight(); y++) {
-				for (int z = 0; z < schematic.getSizeZ(); z++) {
-					int index = x + (y * schematic.getSizeZ() + z) * schematic.getSizeX();
+				for (int z = 0; z < schematic.getLength(); z++) {
+					int index = x + (y * schematic.getLength() + z) * schematic.getWidth();
 					BlockState blockState = schematic.getBlockState(pos.set(x, y, z));
 					localBlocks[index] = blockState;
 
@@ -164,7 +153,8 @@ public class SchematicAlpha extends SchematicFormat {
 				blockEntities.add(blockEntityCompoundTag);
 			} catch (Exception e) {
 				BlockPos bePos = blockEntity.getBlockPos();
-				int index = bePos.getX() + (bePos.getY() * schematic.getSizeZ() + bePos.getZ()) * schematic.getSizeX();
+				int index =
+						bePos.getX() + (bePos.getY() * schematic.getLength() + bePos.getZ()) * schematic.getWidth();
 				if (--count > 0) {
 					BlockState blockState = schematic.getBlockState(bePos);
 					Block block = blockState.getBlock();
@@ -199,12 +189,11 @@ public class SchematicAlpha extends SchematicFormat {
 			}
 		}
 
-		tagCompound.putString(Names.NBT.AUTHOR, schematic.getAuthor());
-		tagCompound.putString(Names.NBT.FORMAT, Names.NBT.FORMAT_ALPHA);
 		tagCompound.putIntArray(Names.NBT.BLOCKS, Arrays.stream(localBlocks).mapToInt(Block::getId).toArray());
 		tagCompound.put(Names.NBT.ENTITIES, entityList);
 		tagCompound.put(Names.NBT.BLOCK_ENTITIES, blockEntities);
 		tagCompound.put(Names.NBT.MAPPING_SCHEMATICA, nbtMapping);
+		this.writeMetadataToNBT(tagCompound, schematic);
 		tagCompoundIn.put(Names.NBT.ROOT, tagCompound);
 	}
 
@@ -214,12 +203,30 @@ public class SchematicAlpha extends SchematicFormat {
 	}
 
 	@Override
-	public String getNbtName() {
-		return Names.NBT.FORMAT_ALPHA;
+	public String getExtension() {
+		return Names.Extensions.SCHEMATIC;
+	}
+
+	public SchematicMetadata readMetaFromNbt(@NotNull CompoundTag tagCompound) {
+		if (tagCompound.contains(Names.NBT.METADATA)) {
+			CompoundTag tag = tagCompound.getCompound(Names.NBT.METADATA);
+			return metaFromTag(tag);
+		} else {
+			return null;
+		}
 	}
 
 	@Override
-	public String getExtension() {
-		return Names.Extensions.SCHEMATIC;
+	public void writeMetadataToNBT(@NotNull CompoundTag tagCompound, @NotNull ISchematic schematic) {
+		SchematicMetadata metadata = schematic.getMetadata();
+		tagCompound.put(Names.NBT.METADATA, metaAsTag(metadata));
+	}
+
+	public @NotNull SchematicMetadata metaFromTag(@NotNull CompoundTag tag) {
+		return SchematicFormat.defaultMetaFromTag(tag);
+	}
+
+	public @NotNull CompoundTag metaAsTag(@NotNull SchematicMetadata metadata) {
+		return SchematicFormat.defaultMetaAsTag(metadata);
 	}
 }

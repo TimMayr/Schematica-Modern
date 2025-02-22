@@ -3,6 +3,7 @@ package com.github.lunatrius.schematica.client.util;
 import com.github.lunatrius.core.util.math.BlockPosHelper;
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.api.SchematicMetadata;
 import com.github.lunatrius.schematica.block.state.BlockStateHelper;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
@@ -47,14 +48,18 @@ public class FlipHelper {
 	}
 
 	public Schematic flip(@NotNull ISchematic schematic, Direction.Axis axis, boolean forced) throws FlipException {
-		Vec3i dimensionsFlipped = new Vec3i(schematic.getSizeX(), schematic.getHeight(), schematic.getSizeZ());
-		Schematic schematicFlipped =
-				new Schematic(schematic.getIcon(), schematic.getName(), dimensionsFlipped.getX(),
-						dimensionsFlipped.getY(), dimensionsFlipped.getZ(), schematic.getAuthor());
+		Vec3i dimensionsFlipped = new Vec3i(schematic.getWidth(), schematic.getHeight(), schematic.getLength());
+
+		SchematicMetadata metadata = schematic.getMetadata()
+				.withDimensions(schematic.getMetadata().dimensions()
+						.withWidth(dimensionsFlipped.getX())
+						.withHeight(dimensionsFlipped.getY())
+						.withLength(dimensionsFlipped.getZ()));
+		Schematic schematicFlipped = new Schematic(metadata);
 		MBlockPos tmp = new MBlockPos();
 
-		for (MBlockPos pos : BlockPosHelper.getAllInBox(0, 0, 0, schematic.getSizeX() - 1, schematic.getHeight() - 1,
-				schematic.getSizeZ() - 1)) {
+		for (MBlockPos pos : BlockPosHelper.getAllInBox(0, 0, 0, schematic.getWidth() - 1, schematic.getHeight() - 1,
+				schematic.getLength() - 1)) {
 			BlockState blockState = schematic.getBlockState(pos);
 			BlockState blockStateFlipped = flipBlock(blockState, axis, forced);
 			schematicFlipped.setBlockState(flipPos(pos, axis, dimensionsFlipped, tmp), blockStateFlipped);

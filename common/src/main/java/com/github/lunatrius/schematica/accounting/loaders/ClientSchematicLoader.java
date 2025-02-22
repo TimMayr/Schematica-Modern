@@ -5,7 +5,7 @@ import com.github.lunatrius.schematica.accounting.SchematicLocation;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.network.message.download.MessageRequestDownload;
 import com.github.lunatrius.schematica.reference.Reference;
-import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
+import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
 import commonnetwork.api.Dispatcher;
 
 import java.util.concurrent.CompletableFuture;

@@ -3,6 +3,7 @@ package com.github.lunatrius.schematica.client.util;
 import com.github.lunatrius.core.util.math.BlockPosHelper;
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.api.SchematicMetadata;
 import com.github.lunatrius.schematica.block.state.BlockStateHelper;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
@@ -99,14 +100,17 @@ public class RotationHelper {
 
 	public Schematic rotate(@NotNull ISchematic schematic, Direction axis, boolean forced) throws RotationException {
 		Vec3i dimensionsRotated =
-				rotateDimensions(axis, schematic.getSizeX(), schematic.getHeight(), schematic.getSizeZ());
-		Schematic schematicRotated =
-				new Schematic(schematic.getIcon(), schematic.getName(), dimensionsRotated.getX(),
-						dimensionsRotated.getY(), dimensionsRotated.getZ(), schematic.getAuthor());
+				rotateDimensions(axis, schematic.getWidth(), schematic.getHeight(), schematic.getLength());
+		SchematicMetadata metadata = schematic.getMetadata()
+				.withDimensions(schematic.getMetadata().dimensions()
+						.withWidth(dimensionsRotated.getX())
+						.withHeight(dimensionsRotated.getY())
+						.withLength(dimensionsRotated.getZ()));
+		Schematic schematicRotated = new Schematic(metadata);
 		MBlockPos tmp = new MBlockPos();
 
-		for (MBlockPos pos : BlockPosHelper.getAllInBox(0, 0, 0, schematic.getSizeX() - 1, schematic.getHeight() - 1,
-				schematic.getSizeZ() - 1)) {
+		for (MBlockPos pos : BlockPosHelper.getAllInBox(0, 0, 0, schematic.getWidth() - 1, schematic.getHeight() - 1,
+				schematic.getLength() - 1)) {
 			BlockState blockState = schematic.getBlockState(pos);
 			BlockState blockStateRotated = rotateBlock(blockState, axis, forced);
 			schematicRotated.setBlockState(rotatePos(pos, axis, dimensionsRotated, tmp), blockStateRotated);

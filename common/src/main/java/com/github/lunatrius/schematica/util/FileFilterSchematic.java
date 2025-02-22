@@ -1,6 +1,6 @@
 package com.github.lunatrius.schematica.util;
 
-import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
+import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
 import org.apache.commons.io.FilenameUtils;
 
 import java.nio.file.DirectoryStream;

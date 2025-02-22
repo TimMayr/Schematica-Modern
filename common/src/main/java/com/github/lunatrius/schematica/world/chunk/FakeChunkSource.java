@@ -44,8 +44,8 @@ public class FakeChunkSource extends ChunkSource {
 
 	@Override
 	public int getLoadedChunksCount() {
-		final int xCount = (fakeLevel.getLevelSource().getSizeX() + 15) / 16, zCount =
-				(fakeLevel.getLevelSource().getSizeZ() + 15) / 16;
+		final int xCount = (fakeLevel.getLevelSource().getWidth() + 15) / 16, zCount =
+				(fakeLevel.getLevelSource().getLength() + 15) / 16;
 		return xCount * zCount;
 	}
 

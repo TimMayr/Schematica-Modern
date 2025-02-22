@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Function;
 
 @MethodsReturnNonnullByDefault
@@ -44,11 +45,18 @@ public interface ISchematic extends BlockGetter {
 	}
 
 	/**
-	 * The width of the schematic
-	 *
-	 * @return the schematic width
+	 * @param pos tested pos
+	 * @return true if inside aabb
+	 * @see #isOutsideBuildHeight(BlockPos) extension of
 	 */
-	int getSizeX();
+	default boolean isPosInside(@NotNull BlockPos pos) {
+		return getMinX() <= pos.getX()
+				&& pos.getX() < getMaxX()
+				&& getMinY() <= pos.getY()
+				&& pos.getY() <= getMaxY()
+				&& getMinZ() <= pos.getZ()
+				&& pos.getZ() < getMaxZ();
+	}
 
 	/**
 	 * @return min X coord inclusive
@@ -61,8 +69,54 @@ public interface ISchematic extends BlockGetter {
 	 * @return max X coord exclusive
 	 */
 	default int getMaxX() {
-		return getMinX() + getSizeX();
+		return getMinX() + getWidth();
 	}
+
+	/**
+	 * @return min Z coord inclusive
+	 */
+	default int getMinZ() {
+		return 0;
+	}
+
+	/**
+	 * @return max Z coord exclusive
+	 */
+	default int getMaxZ() {
+		return getMinZ() + getLength();
+	}
+
+	/**
+	 * The width of the schematic
+	 *
+	 * @return the schematic width
+	 */
+	int getWidth();
+
+	/**
+	 * The height of the schematic
+	 *
+	 * @return the schematic height
+	 */
+	int getHeight();
+
+	/**
+	 * The length of the schematic
+	 *
+	 * @return the schematic length
+	 */
+	int getLength();
+
+	default int getMinY() {
+		return 0;
+	}
+
+	@Override
+	default int getMaxY() {
+		return getMinY() + getHeight();
+	}
+
+	@NotNull SchematicMetadata getMetadata();
 
 	/**
 	 * Sets the block state at the given location. Attempting to set a block state outside of the schematic
@@ -73,13 +127,6 @@ public interface ISchematic extends BlockGetter {
 	 * @return true if the block state was successfully set.
 	 */
 	boolean setBlockState(BlockPos pos, BlockState blockState);
-
-	/**
-	 * @return max Z coord exclusive
-	 */
-	default int getMaxZ() {
-		return getMinZ() + getSizeZ();
-	}
 
 	/**
 	 * Adds an entity to the schematic if it's not a player.
@@ -94,27 +141,6 @@ public interface ISchematic extends BlockGetter {
 	 * @param entity the entity to remove.
 	 */
 	void removeEntity(Entity entity);
-
-	/**
-	 * Modifies the icon that will be used when saving the schematic.
-	 *
-	 * @param icon an ItemStack of the Item you wish you use as the icon.
-	 */
-	void setIcon(ItemStack icon);
-
-	/**
-	 * Sets the author of the schematic.
-	 *
-	 * @param author The new author of the schematic.
-	 */
-	void setAuthor(String author);
-
-	/**
-	 * The length of the schematic
-	 *
-	 * @return the schematic length
-	 */
-	int getSizeZ();
 
 	/**
 	 * Add or replace a block entity to a block at the requested location. Does nothing if the location is out of
@@ -156,32 +182,25 @@ public interface ISchematic extends BlockGetter {
 	ItemStack getIcon();
 
 	/**
-	 * @param pos tested pos
-	 * @return true if inside aabb
-	 * @see #isOutsideBuildHeight(BlockPos) extension of
+	 * Modifies the icon that will be used when saving the schematic.
+	 *
+	 * @param icon an ItemStack of the Item you wish you use as the icon.
 	 */
-	default boolean isPosInside(@NotNull BlockPos pos) {
-		return getMinX() <= pos.getX()
-				&& pos.getX() < getMaxX()
-				&& getMinY() <= pos.getY()
-				&& pos.getY() <= getMaxY()
-				&& getMinZ() <= pos.getZ()
-				&& pos.getZ() < getMaxZ();
-	}
+	void setIcon(ItemStack icon);
 
 	/**
-	 * Gets the author of the schematic, or an empty String if unknown.
+	 * Gets the author of the schematic, or null if unknown.
 	 *
 	 * @return The author of the schematic.
 	 */
-	String getAuthor();
+	UUID getAuthor();
 
 	/**
-	 * @return min Z coord inclusive
+	 * Sets the author of the schematic.
+	 *
+	 * @param author The new author of the schematic.
 	 */
-	default int getMinZ() {
-		return 0;
-	}
+	void setAuthor(UUID author);
 
 	/**
 	 * Returns a list of all block entities in the schematic.
@@ -189,22 +208,6 @@ public interface ISchematic extends BlockGetter {
 	 * @return all block entities.
 	 */
 	List<BlockEntity> getBlockEntities();
-
-	/**
-	 * The height of the schematic
-	 *
-	 * @return the schematic height
-	 */
-	int getHeight();
-
-	default int getMinY() {
-		return 0;
-	}
-
-	@Override
-	default int getMaxY() {
-		return getMinY() + getHeight();
-	}
 
 	/**
 	 * To show who is this fake level in level crashes
@@ -235,4 +238,6 @@ public interface ISchematic extends BlockGetter {
 	}
 
 	String getName();
+
+	void setMetadata(@NotNull SchematicMetadata schematicMetadata);
 }

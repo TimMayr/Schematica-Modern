@@ -1,6 +1,7 @@
 package com.github.lunatrius.schematica.network.message.download;
 
 import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.api.SchematicMetadata;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
@@ -10,15 +11,13 @@ import commonnetwork.networking.data.PacketContext;
 import commonnetwork.networking.data.Side;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 @MethodsReturnNonnullByDefault
-public record MessageDownloadBegin(ItemStack icon, String name, int width, int height, int length)
+public record MessageDownloadBegin(SchematicMetadata metadata)
 		implements CustomPacketPayload {
 
 	public static final CustomPacketPayload.Type<MessageDownloadBegin> TYPE = new CustomPacketPayload.Type<>(
@@ -26,23 +25,16 @@ public record MessageDownloadBegin(ItemStack icon, String name, int width, int h
 
 	public static final StreamCodec<RegistryFriendlyByteBuf, MessageDownloadBegin> STREAM_CODEC =
 			StreamCodec.composite(
-					ItemStack.STREAM_CODEC, MessageDownloadBegin::icon,
-					ByteBufCodecs.STRING_UTF8, MessageDownloadBegin::name,
-					ByteBufCodecs.INT, MessageDownloadBegin::width,
-					ByteBufCodecs.INT, MessageDownloadBegin::height,
-					ByteBufCodecs.INT, MessageDownloadBegin::length,
+					SchematicMetadata.STREAM_CODEC, MessageDownloadBegin::metadata,
 					MessageDownloadBegin::new);
 
 	public MessageDownloadBegin(@NotNull ISchematic schematic) {
-		this(schematic.getIcon(), schematic.getName(), schematic.getSizeX(), schematic.getHeight(),
-				schematic.getSizeZ());
+		this(schematic.getMetadata());
 	}
 
 	public static void handle(@NotNull PacketContext<MessageDownloadBegin> ctx) {
 		if (ctx.side() == Side.CLIENT) {
-			DownloadHandler.INSTANCE.schematic =
-					new Schematic(ctx.message().icon(), ctx.message().name(), ctx.message().width(),
-							ctx.message().height(), ctx.message().length());
+			DownloadHandler.INSTANCE.schematic = new Schematic(ctx.message().metadata());
 			Dispatcher.sendToServer(new MessageDownloadBeginAck(true));
 		}
 	}

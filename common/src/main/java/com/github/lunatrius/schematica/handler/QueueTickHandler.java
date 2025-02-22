@@ -2,7 +2,7 @@ package com.github.lunatrius.schematica.handler;
 
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.world.SchematicContainer;
-import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
+import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
 import dev.architectury.event.events.common.TickEvent;
 import net.minecraft.network.chat.Component;
 
@@ -15,10 +15,6 @@ public class QueueTickHandler {
 
 	private QueueTickHandler() {
 		TickEvent.SERVER_POST.register((server) -> processQueue());
-	}
-
-	public static void init() {
-		QueueTickHandler.INSTANCE = new QueueTickHandler();
 	}
 
 	private void processQueue() {
@@ -44,10 +40,13 @@ public class QueueTickHandler {
 			if (container.hasNextChunk()) {
 				this.queue.offer(container);
 			} else {
-				SchematicFormat.writeToFileAndNotify(container.file, container.format, container.schematic,
-						container.player);
+				SchematicFormat.writeToFileAndNotify(container.file, container.schematic, container.player);
 			}
 		}
+	}
+
+	public static void init() {
+		QueueTickHandler.INSTANCE = new QueueTickHandler();
 	}
 
 	public void queueSchematic(SchematicContainer container) {

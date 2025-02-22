@@ -1,14 +1,16 @@
 package com.github.lunatrius.schematica.proxy;
 
 import com.github.lunatrius.schematica.accounting.SchematicAccounter;
-import com.github.lunatrius.schematica.accounting.SchematicHolder;
 import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.api.SchematicDimensions;
+import com.github.lunatrius.schematica.api.SchematicMetadata;
 import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.core.FileUtils;
 import com.github.lunatrius.schematica.handler.QueueTickHandler;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.SchematicContainer;
 import com.github.lunatrius.schematica.world.schematic.SchematicUtil;
+import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
 import com.github.lunatrius.schematica.world.storage.Schematic;
 import dev.architectury.event.events.common.LifecycleEvent;
 import net.minecraft.core.BlockPos;
@@ -25,7 +27,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -51,7 +53,22 @@ public class ServerProxy extends CommonProxy {
 		return publicDirectories;
 	}
 
-	public static boolean saveServerSchematic(Player player, String filename, Level level, @Nullable String format,
+	@Override
+	public Path getDataDirectory() {
+		MinecraftServer server = ServerProxy.serverWeakReference != null ? ServerProxy.serverWeakReference.get() :
+				null;
+		Path file = server != null ? server.getFile(".") : Path.of(".");
+		return file.toAbsolutePath().normalize();
+	}
+
+	@Override
+	public boolean saveSchematic(Player player, @NotNull String filename, Level level, @NotNull String format,
+	                             @NotNull BlockPos from, @NotNull BlockPos to, boolean isPrivate,
+	                             @NotNull String iconName) {
+		return ServerProxy.saveServerSchematic(player, filename, level, format, from, to, isPrivate, iconName);
+	}
+
+	public static boolean saveServerSchematic(Player player, String filename, Level level, @NotNull String format,
 	                                          BlockPos from, BlockPos to, boolean isPrivate,
 	                                          @Nullable String iconName) {
 		try {
@@ -67,8 +84,10 @@ public class ServerProxy extends CommonProxy {
 			short height = (short) (Math.abs(maxY - minY) + 1);
 			short length = (short) (Math.abs(maxZ - minZ) + 1);
 
-			ISchematic schematic = new Schematic(SchematicUtil.getIconFromName(iconName), filename, width, height,
-					length, player.getScoreboardName());
+			SchematicMetadata metadata = new SchematicMetadata(filename, player.getUUID(), new HashMap<>(),
+					SchematicFormat.getFormatFromName(format), new SchematicDimensions(width, height, length),
+					SchematicUtil.getIconFromName(iconName), isPrivate, UUID.randomUUID());
+			ISchematic schematic = new Schematic(metadata);
 
 			PlatformProxy.createAndPostPreSchematicCaptureEvent(new AABB(minX, minY, minZ, maxX, maxY, maxZ));
 
@@ -83,21 +102,6 @@ public class ServerProxy extends CommonProxy {
 		}
 
 		return false;
-	}
-
-	@Override
-	public boolean saveSchematic(Player player, @NotNull String filename, Level level, @Nullable String format,
-	                             @NotNull BlockPos from, @NotNull BlockPos to, boolean isPrivate,
-	                             @NotNull String iconName) {
-		return ServerProxy.saveServerSchematic(player, filename, level, format, from, to, isPrivate, iconName);
-	}
-
-	@Override
-	public Path getDataDirectory() {
-		MinecraftServer server = ServerProxy.serverWeakReference != null ? ServerProxy.serverWeakReference.get() :
-				null;
-		Path file = server != null ? server.getFile(".") : Path.of(".");
-		return file.toAbsolutePath().normalize();
 	}
 
 	@Override
@@ -191,17 +195,6 @@ public class ServerProxy extends CommonProxy {
 	}
 
 	@Override
-	public @NotNull String getUsernameForUUID(@NotNull UUID uuid) {
-		Path file = getServerSchematicDirectory().resolve(uuid.toString()).resolve(".username");
-		try {
-			return Files.readString(file);
-		} catch (IOException e) {
-			Reference.logger.warn("Unable to get username for uuid \"{}\"", uuid);
-			return uuid.toString();
-		}
-	}
-
-	@Override
 	public List<Path> getAllAccessibleDirectories(Player player) {
 		List<Path> dirs = new LinkedList<>();
 		dirs.add(getPlayerSchematicDirectory(player, true));
@@ -248,8 +241,19 @@ public class ServerProxy extends CommonProxy {
 	public void addSchematic(@NotNull Path schematic) {
 		UUID owner = UUID.fromString(schematic.getParent().getParent().getFileName().toString());
 
-		SchematicAccounter.addSchematic(new SchematicHolder(schematic, owner, new HashSet<>(),
-				new HashSet<>()));
+//		SchematicAccounter.addSchematic(new SchematicHolder(schematic, owner, new HashSet<>(),
+//				new HashSet<>()));
+	}
+
+	@Override
+	public @NotNull String getUsernameForUUID(@NotNull UUID uuid) {
+		Path file = getServerSchematicDirectory().resolve(uuid.toString()).resolve(".username");
+		try {
+			return Files.readString(file);
+		} catch (IOException e) {
+			Reference.logger.warn("Unable to get username for uuid \"{}\"", uuid);
+			return uuid.toString();
+		}
 	}
 
 	public List<Path> getAllPublicDirs() {

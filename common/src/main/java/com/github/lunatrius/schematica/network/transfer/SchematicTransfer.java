@@ -34,9 +34,9 @@ public class SchematicTransfer {
 		this.schematic = schematic;
 		this.name = name;
 
-		this.width = schematic.getSizeX();
+		this.width = schematic.getWidth();
 		this.height = schematic.getHeight();
-		this.length = schematic.getSizeZ();
+		this.length = schematic.getLength();
 	}
 
 	@Contract("_ -> new")

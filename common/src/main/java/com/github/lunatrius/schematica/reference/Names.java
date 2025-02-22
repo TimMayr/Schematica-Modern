@@ -227,6 +227,11 @@ public class Names {
 		public static final String ENTITIES = "Entities";
 		public static final String AUTHOR = "Author";
 		public static final String TITLE = "Name";
+		public static final String PLAYER_PERMISSIONS = "PlayerPermissions";
+		public static final String METADATA = "Metadata";
+		public static final String VISIBILITY = "isPrivate";
+		public static final String ID = "id";
+		public static final String DIMENSIONS = "Dimensions";
 	}
 
 	public static class Formats {

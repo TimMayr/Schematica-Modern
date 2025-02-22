@@ -3,14 +3,13 @@ package com.github.lunatrius.schematica.proxy;
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.core.util.vector.Vector3d;
 import com.github.lunatrius.schematica.accounting.SchematicAccounter;
-import com.github.lunatrius.schematica.accounting.SchematicHolder;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
 import com.github.lunatrius.schematica.network.message.accounting.MessageSaveSchematic;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
-import com.github.lunatrius.schematica.world.schematic.SchematicFormat;
+import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
 import commonnetwork.api.Dispatcher;
 import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.event.events.client.ClientPlayerEvent;
@@ -27,7 +26,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -215,7 +213,7 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public Path getPlayerSchematicDirectory(Player player, boolean privateDirectory) {
-		return Path.of("D:/Mein Stuff/Dev/Schematica-Modern/neoforge/run/dev1/schematics");
+		return SchematicaClientConfig.schematicDirectory;
 	}
 
 	@Override
@@ -228,11 +226,6 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public List<Path> getAllSchematicDirectories() {
 		return getAllAccessibleDirectories(ClientProxy.MINECRAFT.player);
-	}
-
-	@Override
-	public @NotNull String getUsernameForUUID(@NotNull UUID uuid) {
-		return uuid.toString();
 	}
 
 	@Override
@@ -264,7 +257,12 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void addSchematic(Path schematic) {
 		UUID owner = Minecraft.getInstance().player.getUUID();
-		SchematicAccounter.addSchematic(new SchematicHolder(schematic, owner, new HashSet<>(),
-				new HashSet<>()));
+//		SchematicAccounter.addSchematic(new SchematicHolder(schematic, owner, new HashSet<>(),
+//				new HashSet<>()));
+	}
+
+	@Override
+	public @NotNull String getUsernameForUUID(@NotNull UUID uuid) {
+		return uuid.toString();
 	}
 }
