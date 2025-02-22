@@ -1,6 +1,5 @@
 package com.github.lunatrius.schematica.nbt;
 
-import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.core.BlockPos;

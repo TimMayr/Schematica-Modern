@@ -17,6 +17,10 @@ public class QueueTickHandler {
 		TickEvent.SERVER_POST.register((server) -> processQueue());
 	}
 
+	public static void init() {
+		QueueTickHandler.INSTANCE = new QueueTickHandler();
+	}
+
 	private void processQueue() {
 		if (this.queue.isEmpty()) {
 			return;
@@ -43,10 +47,6 @@ public class QueueTickHandler {
 				SchematicFormat.writeToFileAndNotify(container.file, container.schematic, container.player);
 			}
 		}
-	}
-
-	public static void init() {
-		QueueTickHandler.INSTANCE = new QueueTickHandler();
 	}
 
 	public void queueSchematic(SchematicContainer container) {

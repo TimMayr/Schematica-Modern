@@ -181,6 +181,8 @@ public interface ISchematic extends BlockGetter {
 	 */
 	ItemStack getIcon();
 
+	void setMetadata(@NotNull SchematicMetadata schematicMetadata);
+
 	/**
 	 * Modifies the icon that will be used when saving the schematic.
 	 *
@@ -194,13 +196,6 @@ public interface ISchematic extends BlockGetter {
 	 * @return The author of the schematic.
 	 */
 	UUID getAuthor();
-
-	/**
-	 * Sets the author of the schematic.
-	 *
-	 * @param author The new author of the schematic.
-	 */
-	void setAuthor(UUID author);
 
 	/**
 	 * Returns a list of all block entities in the schematic.
@@ -239,5 +234,10 @@ public interface ISchematic extends BlockGetter {
 
 	String getName();
 
-	void setMetadata(@NotNull SchematicMetadata schematicMetadata);
+	/**
+	 * Sets the author of the schematic.
+	 *
+	 * @param author The new author of the schematic.
+	 */
+	void setAuthor(UUID author);
 }
