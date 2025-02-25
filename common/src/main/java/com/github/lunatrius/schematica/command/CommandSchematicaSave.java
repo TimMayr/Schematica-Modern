@@ -73,7 +73,7 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 		} catch (IllegalArgumentException ignored) {
 		}
 
-		if (Reference.proxy.isPlayerQuotaExceeded(player)) {
+		if (Reference.proxy.isPlayerQuotaExceeded(player.getUUID())) {
 			source.sendFailure(Component.translatable(Names.Command.Save.Message.QUOTA_EXCEEDED));
 			return -1;
 		}
@@ -88,7 +88,7 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 
 		String filename = name + SchematicFormat.getExtension(format);
 
-		Path directory = Reference.proxy.getPlayerSchematicDirectory(player, isPrivate);
+		Path directory = Reference.proxy.getSchematicDirectory(player.getUUID());
 		Path file = directory.resolve(filename);
 
 		if (!confirm && Files.exists(file)) {
@@ -107,7 +107,7 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 		}
 
 		Reference.logger.debug("Saving schematic from {} to {} to {}", from, to, filename);
-		Path schematicDirectory = Reference.proxy.getPlayerSchematicDirectory(player, isPrivate);
+		Path schematicDirectory = Reference.proxy.getSchematicDirectory(player.getUUID());
 		if (schematicDirectory == null) {
 			Reference.logger.warn("Unable to determine the schematic directory for player {}", player);
 			source.sendFailure(Component.translatable(Names.Command.Save.Message.PLAYER_SCHEMATIC_DIR_UNAVAILABLE));

@@ -44,7 +44,7 @@ public class QueueTickHandler {
 			if (container.hasNextChunk()) {
 				this.queue.offer(container);
 			} else {
-				SchematicFormat.writeToFileAndNotify(container.file, container.schematic, container.player);
+				SchematicFormat.writeToFileAndNotify(container.schematic, container.player);
 			}
 		}
 	}

@@ -12,6 +12,8 @@ import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.schematic.SchematicUtil;
 import com.github.lunatrius.schematica.world.schematic.UnsupportedFormatException;
+import dev.architectury.platform.Platform;
+import net.fabricmc.api.EnvType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -23,8 +25,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,21 +44,18 @@ public abstract class SchematicFormat {
 					(buf) -> SchematicFormat.getFormatFromName(buf.readUtf()));
 	public static final String FORMAT_DEFAULT = Names.NBT.FORMAT_ALPHA;
 
-	public static ISchematic readFromFile(@NotNull Path directory, String filename, Level level) {
-		return readFromFile(directory.resolve(filename), level);
-	}
-
-	public static @Nullable ISchematic readFromFile(Path file, Level level) {
+	public static @Nullable ISchematic readSchematic(SchematicMetadata meta, Level level) {
 		try {
-			CompoundTag tagCompound = SchematicUtil.readTagCompoundFromFile(file);
-			String format = tagCompound.getString(Names.NBT.FORMAT);
-			SchematicFormat schematicFormat = FORMATS.get(format);
+			Path path = Reference.proxy.resolveSchematic(meta);
 
-			if (schematicFormat == null) {
-				throw new UnsupportedFormatException(format);
+			CompoundTag tag = SchematicUtil.readTagCompoundFromFile(path);
+			SchematicFormat format = SchematicFormat.getFormatFromNbt(tag);
+
+			if (format == null) {
+				throw new UnsupportedFormatException(format.getNbtName());
 			}
 
-			return schematicFormat.readFromNbt(tagCompound, level);
+			return format.readFromNbt(tag, level);
 		} catch (Exception ex) {
 			Reference.logger.error("Failed to read schematic!", ex);
 		}
@@ -62,7 +63,34 @@ public abstract class SchematicFormat {
 		return null;
 	}
 
+	public static SchematicFormat getFormatFromNbt(@NotNull CompoundTag tag) {
+		if (tag.contains(Names.NBT.METADATA)) {
+			if (tag.contains(Names.NBT.FORMAT)) {
+				return SchematicFormat.getFormatFromName(tag.getString(Names.NBT.FORMAT));
+			}
+		}
+
+		return SchematicFormat.getFormatFromName(SchematicFormat.FORMAT_DEFAULT);
+	}
+
+	/**
+	 * gets Format's proper name
+	 */
+	public abstract String getNbtName();
+
 	public abstract ISchematic readFromNbt(CompoundTag tagCompound, Level level);
+
+	/**
+	 * Gets a SchematicFormat from its proper name
+	 */
+	public static SchematicFormat getFormatFromName(String format) {
+		if (!FORMATS.containsKey(format)) {
+			Reference.logger.warn("No format with id {}; returning invalid for name", format,
+					new UnsupportedFormatException(format).fillInStackTrace());
+			throw new UnsupportedFormatException(format);
+		}
+		return FORMATS.get(format);
+	}
 
 	protected static @NotNull SchematicMetadata defaultMetaFromTag(@NotNull CompoundTag tag) {
 		String name = tag.getString(Names.NBT.TITLE);
@@ -76,21 +104,12 @@ public abstract class SchematicFormat {
 		boolean isPrivate = tag.getBoolean(Names.NBT.VISIBILITY);
 		UUID id = tag.getUUID(Names.NBT.ID);
 		ItemStack icon = CommonNbtUtils.deserializeItemStack(tag, Names.NBT.ICON);
+		long filesize = tag.getLong(Names.NBT.FILESIZE);
+		Instant lastEdited = CommonNbtUtils.deserializeInstant(tag);
 
-		return new SchematicMetadata(name, owner, permissions, format, new SchematicDimensions(width, height, length),
-				icon, isPrivate, id);
-	}
-
-	/**
-	 * Gets a SchematicFormat from its proper name
-	 */
-	public static SchematicFormat getFormatFromName(String format) {
-		if (!FORMATS.containsKey(format)) {
-			Reference.logger.warn("No format with id {}; returning invalid for name", format,
-					new UnsupportedFormatException(format).fillInStackTrace());
-			throw new UnsupportedFormatException(format);
-		}
-		return FORMATS.get(format);
+		return new SchematicMetadata(name, owner, permissions, format,
+				new SchematicDimensions(width, height, length),
+				icon, id, filesize, lastEdited, isPrivate);
 	}
 
 	protected static @NotNull CompoundTag defaultMetaAsTag(@NotNull SchematicMetadata metadata) {
@@ -113,39 +132,40 @@ public abstract class SchematicFormat {
 
 		tag.putBoolean(Names.NBT.VISIBILITY, metadata.isPrivate());
 		tag.putUUID(Names.NBT.ID, metadata.id());
+
+		tag.putLong(Names.NBT.FILESIZE, metadata.filesize());
+		tag.put(Names.NBT.LAST_EDITED, CommonNbtUtils.serializeInstant(metadata.lastEdited()));
 		return tag;
 	}
 
 	/**
-	 * gets Format's proper name
-	 */
-	public abstract String getNbtName();
-
-	/**
 	 * Writes the given schematic, notifying the player when finished.
 	 *
-	 * @param file      The file to write to
 	 * @param schematic The schematic to write
 	 * @param player    The player to notify
 	 */
-	public static void writeToFileAndNotify(Path file, ISchematic schematic, @NotNull Player player) {
-		boolean success = writeToFile(file, schematic);
+	public static void writeToFileAndNotify(ISchematic schematic, @NotNull Player player) {
+		boolean success = writeToFile(schematic);
 		String message = success ? Names.Command.Save.Message.SAVE_SUCCESSFUL : Names.Command.Save.Message.SAVE_FAILED;
-		player.displayClientMessage(Component.translatable(message, file.getFileName().toString()), false);
+		player.displayClientMessage(Component.translatable(message, schematic.getMetadata().name()), false);
 	}
 
 	/**
 	 * Writes the given schematic.
 	 *
-	 * @param rawPath   The file to write to
 	 * @param schematic The schematic to write
 	 * @return True if successful
 	 */
-	public static boolean writeToFile(Path rawPath, ISchematic schematic) {
+	public static boolean writeToFile(ISchematic schematic) {
 		try {
-			Path normalizedFile = rawPath.toAbsolutePath().normalize();
+			Path file = Reference.proxy.getSchematicDirectory();
 
-			CommonProxy.recentlyAdded.add(normalizedFile);
+			if (Platform.getEnv() == EnvType.SERVER) {
+				file = file.resolve(schematic.getMetadata().owner().toString());
+			}
+
+			file = file.resolve(schematic.getName());
+			CommonProxy.recentlyAdded.add(file);
 
 			if (schematic.getMetadata().schematicFormat() == null) {
 				schematic.setMetadata(schematic.getMetadata().withFormat(SchematicFormat.getFormatFromName(FORMAT_DEFAULT)));
@@ -164,13 +184,14 @@ public abstract class SchematicFormat {
 			FORMATS.get(format).writeToNBT(tagCompound, schematic);
 
 			try (DataOutputStream dataOutputStream = new DataOutputStream(
-					new GZIPOutputStream(Files.newOutputStream(normalizedFile)))) {
+					new GZIPOutputStream(Files.newOutputStream(file)))) {
 				tagCompound.write(dataOutputStream);
-				PlatformProxy.createAndPostPostSchematicSaveEvent(normalizedFile);
+				PlatformProxy.createAndPostPostSchematicSaveEvent(file);
 			}
 
-			Reference.proxy.addSchematic(normalizedFile);
-			CommonProxy.scheduler.schedule(() -> CommonProxy.recentlyAdded.remove(normalizedFile), 200,
+			Reference.proxy.addSchematic(file);
+			Path finalFile = file;
+			CommonProxy.scheduler.schedule(() -> CommonProxy.recentlyAdded.remove(finalFile), 200,
 					TimeUnit.MILLISECONDS);
 
 			return true;
@@ -182,18 +203,6 @@ public abstract class SchematicFormat {
 	}
 
 	public abstract void writeToNBT(CompoundTag tagCompound, ISchematic schematic);
-
-	/**
-	 * Writes the given schematic.
-	 *
-	 * @param directory The directory to write in
-	 * @param filename  The filename (including the extension) to write to
-	 * @param schematic The schematic to write
-	 * @return True if successful
-	 */
-	public static boolean writeToFile(@NotNull Path directory, String filename, ISchematic schematic) {
-		return writeToFile(directory.resolve(filename), schematic);
-	}
 
 	/**
 	 * Gets a schematic format name translation key for the given proper format name.
@@ -226,11 +235,13 @@ public abstract class SchematicFormat {
 		if (format == null) {
 			format = FORMAT_DEFAULT;
 		}
+
 		if (!FORMATS.containsKey(format)) {
 			Reference.logger.warn("No format with id {}; returning default extension", format,
 					new UnsupportedFormatException(format).fillInStackTrace());
 			format = FORMAT_DEFAULT;
 		}
+
 		return FORMATS.get(format).getExtension();
 	}
 
@@ -239,9 +250,35 @@ public abstract class SchematicFormat {
 	 */
 	public abstract String getExtension();
 
+	public static @Nullable SchematicMetadata readMetaFromFile(Path path) {
+		try {
+			CompoundTag tag = SchematicUtil.readTagCompoundFromFile(path);
+			SchematicFormat format = SchematicFormat.getFormatFromNbt(tag);
+			return format.readMetaFromNbt(tag);
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
 	public abstract SchematicMetadata readMetaFromNbt(CompoundTag tagCompound);
 
-	public abstract void writeMetadataToNBT(@NotNull CompoundTag tagCompound, @NotNull ISchematic schematic);
+	public static void writeMetaToFile(Path path, SchematicMetadata meta) {
+		try {
+			CompoundTag tag = SchematicUtil.readTagCompoundFromFile(path);
+			SchematicFormat format = SchematicFormat.getFormatFromNbt(tag);
+			format.writeMetadataToNBT(tag, meta);
+
+			try (DataOutputStream dataOutputStream = new DataOutputStream(
+					new GZIPOutputStream(Files.newOutputStream(path)))) {
+				tag.write(dataOutputStream);
+				PlatformProxy.createAndPostPostSchematicSaveEvent(path);
+			}
+		} catch (IOException e) {
+			Reference.logger.error("Error writing metadata to file");
+		}
+	}
+
+	public abstract void writeMetadataToNBT(@NotNull CompoundTag tagCompound, @NotNull SchematicMetadata metadata);
 
 	public abstract @NotNull SchematicMetadata metaFromTag(@NotNull CompoundTag tag);
 

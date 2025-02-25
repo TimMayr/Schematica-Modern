@@ -20,6 +20,7 @@
 	"schematica.gui.folderInfo": "(Place schematic files here)",
 	"schematica.gui.openFolder": "Open schematic folder",
 	"schematica.gui.noschematic": "-- No schematic --",
+	"schematica.gui.parent_dir": "Parent Directory",
 
 	"_comment": "gui - general - save",
 	"schematica.gui.point.red": "Red point",

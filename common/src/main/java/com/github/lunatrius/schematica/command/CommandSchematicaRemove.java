@@ -2,34 +2,31 @@ package com.github.lunatrius.schematica.command;
 
 import com.github.lunatrius.schematica.accounting.FilePermission;
 import com.github.lunatrius.schematica.accounting.SchematicAccounter;
-import com.github.lunatrius.schematica.core.FileNameUtils;
+import com.github.lunatrius.schematica.accounting.SchematicHolder;
+import com.github.lunatrius.schematica.accounting.SchematicLocation;
+import com.github.lunatrius.schematica.network.message.commands.MessageDeleteSchematic;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
-import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import commonnetwork.api.Dispatcher;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 
 public class CommandSchematicaRemove extends CommandSchematicaBase {
-	private static final DirectoryStream.Filter<Path> FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
-
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
 		return Commands.literal(Names.Command.Remove.NAME)
 				.then(Commands.argument("name", StringArgumentType.string())
@@ -46,15 +43,11 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 		CommandSourceStack source = commandContext.getSource();
 		ServerPlayer player = source.getPlayerOrException();
 		String name = StringArgumentType.getString(commandContext, "name");
-		Path file;
-		try {
-			file = getSchematicFile(player, name);
-		} catch (IllegalArgumentException e) {
-			source.sendFailure(Component.literal(e.getMessage()));
-			return -1;
-		}
 
-		if (Files.exists(file)) {
+		Map<String, SchematicHolder> schematics = SchematicAccounter.sortedSchematics(player, FilePermission.DELETE);
+		SchematicHolder holder = schematics.get(name);
+
+		if (holder != null) {
 			String confirmCommand =
 					String.format("/%s %s \"%s\" %b", Names.Command.BASE, Names.Command.Remove.NAME, name, true);
 			Component chatComponent = Component.translatable(Names.Command.Remove.Message.ARE_YOU_SURE, name)
@@ -76,52 +69,34 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 		boolean confirm = BoolArgumentType.getBool(context, "confirm");
 		CommandSourceStack source = context.getSource();
 		ServerPlayer player = source.getPlayerOrException();
-		Path file;
+		Map<String, SchematicHolder> schematics = SchematicAccounter.sortedSchematics(player, FilePermission.DELETE);
+		SchematicHolder holder = schematics.get(name);
 
-		try {
-			file = getSchematicFile(player, name);
-		} catch (IllegalArgumentException e) {
-			source.sendFailure(Component.literal(e.getMessage()));
+		if (holder == null) {
+			source.sendFailure(Component.translatable(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND, name));
 			return -1;
 		}
 
 		if (confirm) {
-			UUID id = SchematicAccounter.getIdForFile(file);
-			try {
-				Files.delete(file);
-				SchematicAccounter.removeSchematic(id);
-				source.sendSuccess(
-						() -> Component.translatable(Names.Command.Remove.Message.SCHEMATIC_REMOVED, name), true);
+			if (holder.location() == SchematicLocation.LOCAL) {
+				Path file = Reference.proxy.resolveSchematic(holder.metadata());
+				try {
+					Files.delete(file);
+					SchematicAccounter.removeSchematic(holder.metadata().id(), false);
+					source.sendSuccess(
+							() -> Component.translatable(Names.Command.Remove.Message.SCHEMATIC_REMOVED, name), true);
+					return 0;
+				} catch (IOException e) {
+					source.sendFailure(Component.translatable(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND, name));
+					return -1;
+				}
+			} else {
+				MessageDeleteSchematic message = new MessageDeleteSchematic(holder.metadata().id());
+				Dispatcher.sendToClient(message, player);
 				return 0;
-
-			} catch (IOException e) {
-				source.sendFailure(Component.translatable(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND, name));
-				return -1;
 			}
 		} else {
 			return showDeleteConfirmation(context);
 		}
-	}
-
-	private static @NotNull Path getSchematicFile(Player player, String name) {
-		List<Path> schematics = Reference.proxy.getAllAccessibleSchematics(player);
-		Path toReturn = FileNameUtils.getFileByName(schematics, name);
-
-		if (toReturn == null) {
-			Reference.logger.error("{} has tried to delete the file {}, but it does not exist", player.getName(),
-					name);
-			throw new IllegalArgumentException(Component.translatable(Names.Command.Remove.Message.SCHEMATIC_NOT_FOUND
-					, name).getString());
-		}
-
-		if (!toReturn.getParent().equals(Reference.proxy.getPlayerSchematicDirectory(player, true)) &&
-				!toReturn.getParent().equals(Reference.proxy.getPlayerSchematicDirectory(player, false))) {
-			Reference.logger.error("{} has tried to delete the file {}, but is not granted access", player.getName(),
-					name);
-			throw new IllegalArgumentException(Component.translatable(
-					Names.Command.Remove.Message.SCHEMATIC_NOT_ACCESSIBLE, name).getString());
-		}
-
-		return toReturn;
 	}
 }

@@ -1,6 +1,8 @@
 package com.github.lunatrius.schematica.client.gui.load;
 
+import com.github.lunatrius.schematica.api.SchematicMetadata;
 import com.github.lunatrius.schematica.core.GuiHelper;
+import com.github.lunatrius.schematica.reference.Names;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.MethodsReturnNonnullByDefault;
@@ -13,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Environment(EnvType.CLIENT)
 public class SchematicLoadList extends ObjectSelectionList<SchematicLoadList.Entry> {
@@ -53,7 +56,7 @@ public class SchematicLoadList extends ObjectSelectionList<SchematicLoadList.Ent
 		}
 
 		if (entry.isDirectory()) {
-			this.getParent().changeDirectory(entry.getName());
+			this.getParent().changeDirectory(entry.getMetadata().name());
 			this.setSelectedIndex(-1);
 		} else {
 			this.setSelected(entry);
@@ -71,26 +74,36 @@ public class SchematicLoadList extends ObjectSelectionList<SchematicLoadList.Ent
 
 	@MethodsReturnNonnullByDefault
 	public static class Entry extends ObjectSelectionList.Entry<Entry> {
-		private final String name;
-		private final ItemStack itemStack;
+		private final SchematicMetadata metadata;
 		private final boolean isDirectory;
 		private final SchematicLoadList parent;
+		private ItemStack itemStack;
+		private String name;
 
-		public Entry(String name, @NotNull ItemStack itemStack, boolean isDirectory,
-		             SchematicLoadList parent) {
-			this(name, itemStack.getItem(), isDirectory, parent);
+		//The Constructor param positions are all out of whack intentionally. Java doesn't know which to call if you
+		// pass to many nulls otherwise
+		public Entry(@Nullable SchematicMetadata metadata, boolean isDirectory, @Nullable String name,
+		             @Nullable ItemStack itemStack, SchematicLoadList parent) {
+			this(metadata, name, isDirectory, itemStack.getItem(), parent);
 		}
 
-		public Entry(String name, Item item, boolean isDirectory, SchematicLoadList parent) {
-			this.name = name;
+		public Entry(@Nullable SchematicMetadata metadata, @Nullable String name, boolean isDirectory,
+		             @Nullable Item item, SchematicLoadList parent) {
+			this.metadata = metadata;
 			this.isDirectory = isDirectory;
 			this.itemStack = new ItemStack(item, 1);
 			this.parent = parent;
+			this.name = name;
+
+			if (metadata != null) {
+				this.name = metadata.name();
+				this.itemStack = metadata.icon();
+			}
 		}
 
-		public Entry(String name, @NotNull Block block, boolean isDirectory,
-		             SchematicLoadList parent) {
-			this(name, block.asItem(), isDirectory, parent);
+		public Entry(@Nullable SchematicMetadata metadata, @Nullable String name,
+		             @Nullable Block block, SchematicLoadList parent, boolean isDirectory) {
+			this(metadata, name, isDirectory, block.asItem(), parent);
 		}
 
 		@Override
@@ -116,8 +129,8 @@ public class SchematicLoadList extends ObjectSelectionList<SchematicLoadList.Ent
 			return this.itemStack;
 		}
 
-		public String getName() {
-			return this.name;
+		public SchematicMetadata getMetadata() {
+			return this.metadata;
 		}
 
 		public Item getItem() {
@@ -126,7 +139,8 @@ public class SchematicLoadList extends ObjectSelectionList<SchematicLoadList.Ent
 
 		@Override
 		public Component getNarration() {
-			return Component.literal(name);
+			return this.name.equals("..") ? Component.translatable(Names.Gui.Load.PARENT_DIR) :
+					Component.literal(this.name);
 		}
 	}
 }

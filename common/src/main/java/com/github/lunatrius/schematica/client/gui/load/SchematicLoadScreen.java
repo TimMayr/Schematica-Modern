@@ -8,7 +8,7 @@ import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import com.github.lunatrius.schematica.world.FakeLevel;
-import com.github.lunatrius.schematica.world.schematic.SchematicUtil;
+import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -93,8 +93,7 @@ public class SchematicLoadScreen extends BaseScreen {
 		SchematicLoadList.Entry entry = this.schematicLoadList.getSelected();
 
 		try {
-			if (Reference.proxy.loadSchematic(Minecraft.getInstance().player, this.currentDirectory,
-					entry.getName())) {
+			if (Reference.proxy.loadSchematic(Minecraft.getInstance().player, entry.getMetadata())) {
 				FakeLevel level = ClientProxy.schematic;
 				if (level != null) {
 					ClientProxy.moveSchematicToPlayer(level);
@@ -114,10 +113,8 @@ public class SchematicLoadScreen extends BaseScreen {
 		try {
 			if (!this.currentDirectory.toRealPath().normalize()
 					.equals(SchematicaClientConfig.schematicDirectory.toRealPath().normalize())) {
-				this.getSchematicListSlots().add(new SchematicLoadList.Entry("..",
-						Items.LAVA_BUCKET,
-						true,
-						this.schematicLoadList));
+				this.getSchematicListSlots().add(new SchematicLoadList.Entry(null, "..",
+						true, Items.LAVA_BUCKET, this.schematicLoadList));
 			}
 		} catch (IOException e) {
 			Reference.logger.error("Failed to add GuiSchematicEntry!", e);
@@ -137,25 +134,23 @@ public class SchematicLoadScreen extends BaseScreen {
 			List<Path> files = FileUtils.getAllFilesInDirectory(file);
 			item = files.isEmpty() ? Items.BUCKET : Items.WATER_BUCKET;
 
-			this.getSchematicListSlots().add(new SchematicLoadList.Entry(name, item, Files.isDirectory(file),
-					this.schematicLoadList));
+			this.getSchematicListSlots().add(new SchematicLoadList.Entry(SchematicFormat.readMetaFromFile(file),
+					name, Files.isDirectory(file), item, this.schematicLoadList));
 
 		}
 
 		List<Path> filesSchematics = FileUtils.getAllFilesInDirectory(this.currentDirectory, FILE_FILTER_SCHEMATIC);
 		if (filesSchematics.isEmpty()) {
-			this.getSchematicListSlots().add(new SchematicLoadList.Entry(this.strNoSchematic.getString(),
-					Blocks.DIRT,
-					false,
-					this.schematicLoadList));
+			this.getSchematicListSlots().add(new SchematicLoadList.Entry(null, this.strNoSchematic.getString(),
+					Blocks.DIRT, this.schematicLoadList, false));
 		} else {
 			filesSchematics.sort((Path a, Path b) -> a.getFileName().toString()
 					.compareToIgnoreCase(b.getFileName().toString()));
 			for (Path file : filesSchematics) {
 				name = file.getFileName().toString();
 
-				this.getSchematicListSlots().add(new SchematicLoadList.Entry(name, SchematicUtil.getIconFromFile(file),
-						Files.isDirectory(file),
+				this.getSchematicListSlots().add(new SchematicLoadList.Entry(SchematicFormat.readMetaFromFile(file),
+						null, Files.isDirectory(file), null,
 						this.schematicLoadList));
 			}
 		}

@@ -1,12 +1,16 @@
 package com.github.lunatrius.schematica.proxy;
 
 import com.github.lunatrius.schematica.accounting.SchematicAccounter;
+import com.github.lunatrius.schematica.accounting.SchematicHolder;
+import com.github.lunatrius.schematica.accounting.SchematicLocation;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.api.SchematicDimensions;
 import com.github.lunatrius.schematica.api.SchematicMetadata;
 import com.github.lunatrius.schematica.config.SchematicaConfig;
+import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
 import com.github.lunatrius.schematica.core.FileUtils;
 import com.github.lunatrius.schematica.handler.QueueTickHandler;
+import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.SchematicContainer;
 import com.github.lunatrius.schematica.world.schematic.SchematicUtil;
@@ -15,42 +19,38 @@ import com.github.lunatrius.schematica.world.storage.Schematic;
 import dev.architectury.event.events.common.LifecycleEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.Instant;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
 public class ServerProxy extends CommonProxy {
 	public static WeakReference<MinecraftServer> serverWeakReference = null;
 
-	private static @NotNull List<Path> getAllPublicDirs(@NotNull Path directory) {
-		List<Path> publicDirectories = new LinkedList<>();
-
-		if (Files.isDirectory(directory)) {
-			List<Path> subFiles = FileUtils.getAllFilesInDirectory(directory);
-			for (Path file : subFiles) {
-				if (Files.isDirectory(file)) {
-					if (file.getFileName().toString().equals("public")) {
-						publicDirectories.add(file);
-					}
-					publicDirectories.addAll(getAllPublicDirs(file));
-				}
+	@Override
+	public void createFolders() {
+		if (!Files.exists(Reference.proxy.getSchematicDirectory().resolve("schematics"))) {
+			try {
+				Files.createDirectories(SchematicaClientConfig.schematicDirectory);
+			} catch (IOException e) {
+				Reference.logger.warn("Could not create schematic directory [{}]!",
+						SchematicaClientConfig.schematicDirectory.toAbsolutePath());
 			}
 		}
-
-		return publicDirectories;
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class ServerProxy extends CommonProxy {
 	                                          BlockPos from, BlockPos to, boolean isPrivate,
 	                                          @Nullable String iconName) {
 		try {
-			Path directory = Reference.proxy.getPlayerSchematicDirectory(player, isPrivate);
+			Path directory = Reference.proxy.getSchematicDirectory();
 			int minX = Math.min(from.getX(), to.getX());
 			int maxX = Math.max(from.getX(), to.getX());
 			int minY = Math.min(from.getY(), to.getY());
@@ -86,7 +86,7 @@ public class ServerProxy extends CommonProxy {
 
 			SchematicMetadata metadata = new SchematicMetadata(filename, player.getUUID(), new HashMap<>(),
 					SchematicFormat.getFormatFromName(format), new SchematicDimensions(width, height, length),
-					SchematicUtil.getIconFromName(iconName), isPrivate, UUID.randomUUID());
+					SchematicUtil.getIconFromName(iconName), UUID.randomUUID(), -1, Instant.now(), isPrivate);
 			ISchematic schematic = new Schematic(metadata);
 
 			PlatformProxy.createAndPostPreSchematicCaptureEvent(new AABB(minX, minY, minZ, maxX, maxY, maxZ));
@@ -110,21 +110,17 @@ public class ServerProxy extends CommonProxy {
 	}
 
 	@Override
-	public boolean loadSchematic(Player player, Path directory, String filename) {
+	public boolean loadSchematic(Player player, SchematicMetadata metadata) {
 		return false;
 	}
 
 	@Override
-	public boolean isPlayerQuotaExceeded(Player player) {
+	public boolean isPlayerQuotaExceeded(UUID id) {
 		int spaceUsed = 0;
 
-		//Space used by private directory
-		Path schematicDirectory = getPlayerSchematicDirectory(player, true);
+		Path schematicDirectory = getSchematicDirectory(id);
 		spaceUsed += getSpaceUsedByDirectory(schematicDirectory);
 
-		//Space used by public directory
-		schematicDirectory = getPlayerSchematicDirectory(player, false);
-		spaceUsed += getSpaceUsedByDirectory(schematicDirectory);
 		return ((spaceUsed / 1024) > SchematicaConfig.SERVER.playerQuotaKilobytes.get());
 	}
 
@@ -146,70 +142,6 @@ public class ServerProxy extends CommonProxy {
 
 	public Path getServerSchematicDirectory() {
 		return getDirectory("schematics");
-	}
-
-	@Override
-	public Path getPlayerSchematicDirectory(@NotNull Player player, boolean privateDirectory) {
-		UUID playerId = player.getUUID();
-		Path playerDir = getServerSchematicDirectory().resolve(playerId.toString());
-
-		if (privateDirectory) {
-			playerDir = playerDir.resolve("private");
-		} else {
-			playerDir = playerDir.resolve("public");
-		}
-
-		if (!Files.exists(playerDir)) {
-			try {
-				Files.createDirectories(playerDir);
-			} catch (IOException e) {
-				Reference.logger.error("Could not create directory [{}]!", playerDir.toAbsolutePath());
-			}
-		}
-
-		Path usernameFile = playerDir.resolve(".username");
-		if (!Files.exists(usernameFile)) {
-			try (DataOutputStream dataOutputStream = new DataOutputStream(
-					new DataOutputStream(Files.newOutputStream(usernameFile)))) {
-				dataOutputStream.writeChars(player.getScoreboardName());
-			} catch (IOException e) {
-				Reference.logger.warn("Unable to save username");
-			}
-		} else {
-			try {
-				String username = Files.readString(usernameFile);
-				if (!username.equals(player.getScoreboardName())) {
-					try (DataOutputStream dataOutputStream = new DataOutputStream(
-							new DataOutputStream(Files.newOutputStream(usernameFile)))) {
-						dataOutputStream.writeChars(player.getScoreboardName());
-					} catch (IOException e) {
-						Reference.logger.warn("Unable to update username");
-					}
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-
-		return playerDir;
-	}
-
-	@Override
-	public List<Path> getAllAccessibleDirectories(Player player) {
-		List<Path> dirs = new LinkedList<>();
-		dirs.add(getPlayerSchematicDirectory(player, true));
-		dirs.addAll(getAllPublicDirs());
-		return dirs;
-	}
-
-	@Override
-	public List<Path> getAllSchematicDirectories() {
-		List<Path> dirs = new LinkedList<>();
-		for (Path playerDir : FileUtils.getAllFilesInDirectory(getServerSchematicDirectory())) {
-			dirs.addAll(FileUtils.getAllFilesInDirectory(playerDir));
-		}
-
-		return dirs;
 	}
 
 	@Override
@@ -239,15 +171,13 @@ public class ServerProxy extends CommonProxy {
 
 	@Override
 	public void addSchematic(@NotNull Path schematic) {
-		UUID owner = UUID.fromString(schematic.getParent().getParent().getFileName().toString());
-
-//		SchematicAccounter.addSchematic(new SchematicHolder(schematic, owner, new HashSet<>(),
-//				new HashSet<>()));
+		SchematicAccounter.addSchematic(new SchematicHolder(SchematicFormat.readMetaFromFile(schematic),
+				SchematicLocation.LOCAL), false);
 	}
 
 	@Override
 	public @NotNull String getUsernameForUUID(@NotNull UUID uuid) {
-		Path file = getServerSchematicDirectory().resolve(uuid.toString()).resolve(".username");
+		Path file = getServerSchematicDirectory().resolve(uuid.toString()).resolve(Names.NBT.USERNAME_FILE);
 		try {
 			return Files.readString(file);
 		} catch (IOException e) {
@@ -256,8 +186,44 @@ public class ServerProxy extends CommonProxy {
 		}
 	}
 
-	public List<Path> getAllPublicDirs() {
-		Path directory = getServerSchematicDirectory();
-		return getAllPublicDirs(directory);
+	@Override
+	public Path getSchematicDirectory() {
+		return null;
+	}
+
+	@Override
+	public Path getSchematicDirectory(@NotNull UUID id) {
+		Path playerDir = getServerSchematicDirectory().resolve(id.toString());
+		if (!Files.exists(playerDir)) {
+			try {
+				Files.createDirectories(playerDir);
+			} catch (IOException e) {
+				Reference.logger.error("Could not create directory [{}]!", playerDir.toAbsolutePath());
+			}
+		}
+
+		return playerDir;
+	}
+
+	@Override
+	public void updatePlayerUsername(@NotNull ServerPlayer player) {
+		Path usernameFile =
+				getSchematicDirectory().resolve(player.getUUID().toString()).resolve(Names.NBT.USERNAME_FILE);
+		try {
+			if (!Files.exists(usernameFile)) {
+				Files.createDirectories(usernameFile);
+			}
+			Files.writeString(usernameFile, player.getScoreboardName(), StandardOpenOption.WRITE,
+					StandardOpenOption.TRUNCATE_EXISTING);
+		} catch (IOException e) {
+			Reference.logger.warn("Unable to update username for player [{}]", player.getScoreboardName());
+		}
+	}
+
+	@Override
+	public void sendMessage(@Nullable Player player, Component component) {
+		if (player != null) {
+			player.displayClientMessage(component, false);
+		}
 	}
 }

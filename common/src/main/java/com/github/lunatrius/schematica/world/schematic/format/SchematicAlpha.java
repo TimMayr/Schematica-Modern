@@ -26,12 +26,17 @@ import java.util.*;
 
 public class SchematicAlpha extends SchematicFormat {
 	@Override
+	public String getNbtName() {
+		return Names.NBT.FORMAT_ALPHA;
+	}
+
+	@Override
 	public ISchematic readFromNbt(CompoundTag tagCompound, Level level) {
 		SchematicMetadata metadata = readMetaFromNbt(tagCompound);
 
 		List<BlockState> localBlockList =
 				Arrays.stream(tagCompound.getIntArray(Names.NBT.BLOCKS)).mapToObj(Block::stateById).toList();
-		BlockState[] localBlocks = localBlockList.toArray(new BlockState[]{});
+		BlockState[] localBlocks = localBlockList.toArray(new BlockState[0]);
 
 		Map<BlockState, BlockState> oldToNew = new HashMap<>();
 		if (tagCompound.contains(Names.NBT.MAPPING_SCHEMATICA)) {
@@ -118,11 +123,6 @@ public class SchematicAlpha extends SchematicFormat {
 	}
 
 	@Override
-	public String getNbtName() {
-		return Names.NBT.FORMAT_ALPHA;
-	}
-
-	@Override
 	public void writeToNBT(CompoundTag tagCompoundIn, @NotNull ISchematic schematic) {
 		CompoundTag tagCompound = new CompoundTag();
 
@@ -193,7 +193,7 @@ public class SchematicAlpha extends SchematicFormat {
 		tagCompound.put(Names.NBT.ENTITIES, entityList);
 		tagCompound.put(Names.NBT.BLOCK_ENTITIES, blockEntities);
 		tagCompound.put(Names.NBT.MAPPING_SCHEMATICA, nbtMapping);
-		this.writeMetadataToNBT(tagCompound, schematic);
+		this.writeMetadataToNBT(tagCompound, schematic.getMetadata());
 		tagCompoundIn.put(Names.NBT.ROOT, tagCompound);
 	}
 
@@ -217,8 +217,7 @@ public class SchematicAlpha extends SchematicFormat {
 	}
 
 	@Override
-	public void writeMetadataToNBT(@NotNull CompoundTag tagCompound, @NotNull ISchematic schematic) {
-		SchematicMetadata metadata = schematic.getMetadata();
+	public void writeMetadataToNBT(@NotNull CompoundTag tagCompound, @NotNull SchematicMetadata metadata) {
 		tagCompound.put(Names.NBT.METADATA, metaAsTag(metadata));
 	}
 

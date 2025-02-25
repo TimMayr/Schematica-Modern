@@ -153,6 +153,7 @@ public class Names {
 			public static final String FOLDER_INFO = "schematica.gui.folderInfo";
 			public static final String OPEN_FOLDER = "schematica.gui.openFolder";
 			public static final String NO_SCHEMATIC = "schematica.gui.noschematic";
+			public static final String PARENT_DIR = "schematica.gui.parent_dir";
 		}
 
 		public static class Save {
@@ -232,6 +233,9 @@ public class Names {
 		public static final String VISIBILITY = "isPrivate";
 		public static final String ID = "id";
 		public static final String DIMENSIONS = "Dimensions";
+		public static final String FILESIZE = "Filesize";
+		public static final String LAST_EDITED = "Last_edited";
+		public static final String USERNAME_FILE = ".username";
 	}
 
 	public static class Formats {
@@ -256,5 +260,6 @@ public class Names {
 		public static final String DOWNLOAD_REQUEST_LOCATION = "request_download";
 		public static final String ADD_SCHEMATIC = "add_schematic";
 		public static final String REMOVE_SCHEMATIC = "remove_schematic";
+		public static final String DELETE_SCHEMATIC = "delete_schematic";
 	}
 }

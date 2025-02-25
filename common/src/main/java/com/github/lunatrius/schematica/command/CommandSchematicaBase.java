@@ -2,6 +2,7 @@ package com.github.lunatrius.schematica.command;
 
 import com.github.lunatrius.schematica.accounting.FilePermission;
 import com.github.lunatrius.schematica.accounting.SchematicAccounter;
+import com.github.lunatrius.schematica.command.client.CommandSchematicaList;
 import com.github.lunatrius.schematica.reference.Names;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -23,8 +24,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public abstract class CommandSchematicaBase {
-	protected static @NotNull MutableComponent withStyle(MutableComponent component, ChatFormatting formatting,
-	                                                     @Nullable String command) {
+	public static @NotNull MutableComponent withStyle(MutableComponent component, ChatFormatting formatting,
+	                                                  @Nullable String command) {
 		Style style = Style.EMPTY.applyFormat(formatting);
 
 		if (command != null) {
@@ -37,7 +38,6 @@ public abstract class CommandSchematicaBase {
 	public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal(Names.Command.BASE)
 				.then(CommandSchematicaDownload.register())
-				.then(CommandSchematicaList.register())
 				.then(CommandSchematicaSave.register())
 				.then(CommandSchematicaRemove.register()));
 	}

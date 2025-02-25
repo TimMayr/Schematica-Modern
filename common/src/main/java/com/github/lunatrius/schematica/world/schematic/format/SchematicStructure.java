@@ -18,6 +18,11 @@ import org.jetbrains.annotations.NotNull;
 
 public class SchematicStructure extends SchematicFormat {
 	@Override
+	public String getNbtName() {
+		return Names.NBT.FORMAT_STRUCTURE;
+	}
+
+	@Override
 	public ISchematic readFromNbt(CompoundTag tagCompound, Level level) {
 		SchematicMetadata metadata = readMetaFromNbt(tagCompound);
 		StructureTemplate template = new StructureTemplate();
@@ -61,11 +66,6 @@ public class SchematicStructure extends SchematicFormat {
 	}
 
 	@Override
-	public String getNbtName() {
-		return Names.NBT.FORMAT_STRUCTURE;
-	}
-
-	@Override
 	public void writeToNBT(@NotNull CompoundTag tagCompoundIn, ISchematic schematic) {
 		StructureTemplate template = new StructureTemplate();
 
@@ -78,7 +78,7 @@ public class SchematicStructure extends SchematicFormat {
 		CompoundTag writeTo = new CompoundTag();
 
 		template.save(writeTo);
-		writeMetadataToNBT(writeTo, schematic);
+		writeMetadataToNBT(writeTo, schematic.getMetadata());
 		tagCompoundIn.put(Names.NBT.ROOT, writeTo);
 	}
 
@@ -103,8 +103,7 @@ public class SchematicStructure extends SchematicFormat {
 	}
 
 	@Override
-	public void writeMetadataToNBT(@NotNull CompoundTag tagCompound, @NotNull ISchematic schematic) {
-		SchematicMetadata metadata = schematic.getMetadata();
+	public void writeMetadataToNBT(@NotNull CompoundTag tagCompound, @NotNull SchematicMetadata metadata) {
 		tagCompound.put(Names.NBT.METADATA, metaAsTag(metadata));
 	}
 

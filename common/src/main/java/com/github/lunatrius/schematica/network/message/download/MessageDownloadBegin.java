@@ -2,6 +2,7 @@ package com.github.lunatrius.schematica.network.message.download;
 
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.api.SchematicMetadata;
+import com.github.lunatrius.schematica.core.CommonCodecs;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;

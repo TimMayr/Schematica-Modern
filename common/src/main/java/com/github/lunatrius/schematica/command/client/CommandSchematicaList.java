@@ -1,4 +1,4 @@
-package com.github.lunatrius.schematica.command;
+package com.github.lunatrius.schematica.command.client;
 
 import com.github.lunatrius.core.util.FileUtils;
 import com.github.lunatrius.schematica.accounting.SchematicAccounter;
@@ -6,32 +6,34 @@ import com.github.lunatrius.schematica.accounting.SchematicHolder;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.architectury.event.events.client.ClientCommandRegistrationEvent;
 import net.minecraft.ChatFormatting;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
 import java.util.Map;
 
-public class CommandSchematicaList extends CommandSchematicaBase {
-	public static ArgumentBuilder<CommandSourceStack, ?> register() {
-		return Commands.literal(Names.Command.List.NAME)
-				.executes(CommandSchematicaList::printList)
-				.then(Commands.argument("page", IntegerArgumentType.integer(1))
-						.executes(CommandSchematicaList::printList));
+import static com.github.lunatrius.schematica.command.CommandSchematicaBase.withStyle;
+
+public class CommandSchematicaList extends ClientCommandSchematicaBase {
+	public static LiteralArgumentBuilder<ClientCommandRegistrationEvent.ClientCommandSourceStack> register() {
+		return ClientCommandRegistrationEvent.literal(Names.Command.BASE).then(
+				ClientCommandRegistrationEvent.literal(Names.Command.List.NAME)
+						.executes(CommandSchematicaList::printList)
+						.then(ClientCommandRegistrationEvent.argument("page", IntegerArgumentType.integer(1))
+								.executes(CommandSchematicaList::printList)));
 	}
 
-	private static int printList(@NotNull CommandContext<CommandSourceStack> commandContext)
+	private static int printList(@NotNull CommandContext<ClientCommandRegistrationEvent.ClientCommandSourceStack> commandContext)
 			throws CommandSyntaxException {
-		CommandSourceStack source = commandContext.getSource();
-		ServerPlayer player = source.getPlayerOrException();
+		ClientCommandRegistrationEvent.ClientCommandSourceStack source = commandContext.getSource();
+		LocalPlayer player = source.arch$getPlayer();
 		int page = 0;
 
 		try {
@@ -52,7 +54,7 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 				String fileName = entry.getKey();
 
 				Component chatComponent = Component.literal(String.format("%2d (%s): %s [", currentFile + 1,
-						FileUtils.humanReadableByteCount(entry.getValue().getFileSize()),
+						FileUtils.humanReadableByteCount(entry.getValue().metadata().filesize()),
 						FilenameUtils.removeExtension(fileName)));
 
 				String removeCommand = String.format("/%s %s \"%s\"", Reference.MOD_ID, Names.Command.Remove.NAME,
@@ -77,21 +79,23 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 		}
 
 		if (currentFile == 0) {
-			source.sendFailure(Component.translatable(Names.Command.List.Message.NO_SCHEMATICS));
+			source.arch$sendFailure(Component.translatable(Names.Command.List.Message.NO_SCHEMATICS));
 			return -1;
 		}
 
 		int totalPages = (currentFile - 1) / pageSize;
 		if (page > totalPages) {
-			source.sendFailure(Component.translatable(Names.Command.List.Message.NO_SUCH_PAGE));
+			source.arch$sendFailure(Component.translatable(Names.Command.List.Message.NO_SUCH_PAGE));
 			return 1;
 		}
 
-		source.sendSystemMessage(
-				withStyle(Component.translatable(Names.Command.List.Message.PAGE_HEADER, page + 1, totalPages + 1),
-						ChatFormatting.DARK_GREEN, null));
+		int finalPage = page;
+		source.arch$sendSuccess(() ->
+				withStyle(Component.translatable(Names.Command.List.Message.PAGE_HEADER, finalPage + 1,
+								totalPages + 1),
+						ChatFormatting.DARK_GREEN, null), false);
 		for (Component chatComponent : componentsToSend) {
-			source.sendSystemMessage(chatComponent);
+			player.displayClientMessage(chatComponent, false);
 		}
 
 		return page;

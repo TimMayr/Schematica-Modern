@@ -2,6 +2,7 @@ package com.github.lunatrius.schematica.network.transfer;
 
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.nbt.NBTHelper;
+import com.github.lunatrius.schematica.network.message.download.DownloadType;
 import com.github.lunatrius.schematica.network.message.download.MessageDownloadChunk;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Reference;
@@ -19,10 +20,7 @@ import java.util.List;
 
 public class SchematicTransfer {
 	public final ISchematic schematic;
-	public final String name;
-	public final int width;
-	public final int height;
-	public final int length;
+	public final DownloadType type;
 	public State state = State.BEGIN_WAIT;
 	public int timeout = 0;
 	public int retries = 0;
@@ -30,13 +28,9 @@ public class SchematicTransfer {
 	public int baseY = 0;
 	public int baseZ = 0;
 
-	public SchematicTransfer(@NotNull ISchematic schematic, String name) {
+	public SchematicTransfer(@NotNull ISchematic schematic, String name, DownloadType type) {
 		this.schematic = schematic;
-		this.name = name;
-
-		this.width = schematic.getWidth();
-		this.height = schematic.getHeight();
-		this.length = schematic.getLength();
+		this.type = type;
 	}
 
 	@Contract("_ -> new")
@@ -78,15 +72,15 @@ public class SchematicTransfer {
 			setState(State.CHUNK_WAIT);
 			this.baseX += Constants.SchematicChunk.WIDTH;
 
-			if (this.baseX >= this.width) {
+			if (this.baseX >= this.schematic.getWidth()) {
 				this.baseX = 0;
 				this.baseY += Constants.SchematicChunk.HEIGHT;
 
-				if (this.baseY >= this.height) {
+				if (this.baseY >= this.schematic.getHeight()) {
 					this.baseY = 0;
 					this.baseZ += Constants.SchematicChunk.LENGTH;
 
-					if (this.baseZ >= this.length) {
+					if (this.baseZ >= this.schematic.getLength()) {
 						setState(State.END_WAIT);
 					}
 				}

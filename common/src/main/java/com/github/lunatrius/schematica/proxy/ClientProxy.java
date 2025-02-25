@@ -3,7 +3,10 @@ package com.github.lunatrius.schematica.proxy;
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.core.util.vector.Vector3d;
 import com.github.lunatrius.schematica.accounting.SchematicAccounter;
+import com.github.lunatrius.schematica.accounting.SchematicHolder;
+import com.github.lunatrius.schematica.accounting.SchematicLocation;
 import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.api.SchematicMetadata;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
 import com.github.lunatrius.schematica.network.message.accounting.MessageSaveSchematic;
@@ -19,14 +22,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.UUID;
 
 @Environment(EnvType.CLIENT)
@@ -45,6 +50,7 @@ public class ClientProxy extends CommonProxy {
 	public static Direction.Axis axisFlip = Direction.Axis.Z;
 	public static Direction axisRotation = Direction.UP;
 	public static HitResult objectMouseOver = null;
+	public static ISchematic tempSchematic;
 
 	public static void setPlayerData(@NotNull Player player, float partialTicks) {
 		playerPosition.set(new Vector3d(player.getPosition(partialTicks)));
@@ -127,6 +133,18 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
+	public void createFolders() {
+		if (!Files.exists(SchematicaClientConfig.schematicDirectory)) {
+			try {
+				Files.createDirectories(SchematicaClientConfig.schematicDirectory);
+			} catch (IOException e) {
+				Reference.logger.warn("Could not create schematic directory [{}]!",
+						SchematicaClientConfig.schematicDirectory.toAbsolutePath());
+			}
+		}
+	}
+
+	@Override
 	public Path getDataDirectory() {
 		Path file = MINECRAFT.gameDirectory.toPath();
 		try {
@@ -187,15 +205,15 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public boolean loadSchematic(Player player, Path directory, String filename) {
-		ISchematic schematic = SchematicFormat.readFromFile(directory, filename, Reference.proxy.getLevel(player));
+	public boolean loadSchematic(Player player, @NotNull SchematicMetadata meta) {
+		ISchematic schematic = SchematicFormat.readSchematic(meta, Reference.proxy.getLevel(player));
 		if (schematic == null) {
 			return false;
 		}
 
 		FakeLevel world = FakeLevel.of(schematic);
 
-		Reference.logger.debug("Loaded {} [w:{},h:{},l:{}]", filename, world.getLevelSource().getMaxX(),
+		Reference.logger.debug("Loaded {} [w:{},h:{},l:{}]", meta.name(), world.getLevelSource().getMaxX(),
 				world.getHeight(),
 				world.getLevelSource().getMaxZ());
 
@@ -207,25 +225,8 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public boolean isPlayerQuotaExceeded(Player player) {
+	public boolean isPlayerQuotaExceeded(UUID id) {
 		return false;
-	}
-
-	@Override
-	public Path getPlayerSchematicDirectory(Player player, boolean privateDirectory) {
-		return SchematicaClientConfig.schematicDirectory;
-	}
-
-	@Override
-	public List<Path> getAllAccessibleDirectories(Player player) {
-		Path playerDir = getPlayerSchematicDirectory(player, true);
-		Path downloadDir = playerDir.resolve("downloaded");
-		return List.of(playerDir, downloadDir);
-	}
-
-	@Override
-	public List<Path> getAllSchematicDirectories() {
-		return getAllAccessibleDirectories(ClientProxy.MINECRAFT.player);
 	}
 
 	@Override
@@ -255,14 +256,31 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public void addSchematic(Path schematic) {
-		UUID owner = Minecraft.getInstance().player.getUUID();
-//		SchematicAccounter.addSchematic(new SchematicHolder(schematic, owner, new HashSet<>(),
-//				new HashSet<>()));
+	public void addSchematic(Path path) {
+		SchematicAccounter.addSchematic(new SchematicHolder(SchematicFormat.readMetaFromFile(path),
+				SchematicLocation.LOCAL), false);
 	}
 
 	@Override
 	public @NotNull String getUsernameForUUID(@NotNull UUID uuid) {
 		return uuid.toString();
+	}
+
+	@Override
+	public Path getSchematicDirectory() {
+		return SchematicaClientConfig.schematicDirectory;
+	}
+
+	@Override
+	public Path getSchematicDirectory(UUID id) {
+		return SchematicaClientConfig.schematicDirectory;
+	}
+
+	@Override
+	public void updatePlayerUsername(ServerPlayer player) {}
+
+	@Override
+	public void sendMessage(Player player, Component component) {
+		Minecraft.getInstance().player.displayClientMessage(component, false);
 	}
 }

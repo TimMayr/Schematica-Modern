@@ -13,29 +13,21 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
 
 public class DownloadHandler {
 	public static DownloadHandler INSTANCE;
 	public final Map<String, SchematicTransfer> transferMap = new LinkedHashMap<>();
+	private final Set<Consumer<ISchematic>> downloadCompleteListener = new HashSet<>();
 	public ISchematic schematic = null;
+
 
 	private DownloadHandler() {
 		TickEvent.SERVER_POST.register(this::processQueue);
-	}
-
-	public static void init() {
-		DownloadHandler.INSTANCE = new DownloadHandler();
-	}
-
-	private void sendChunk(ServerPlayer player, @NotNull SchematicTransfer transfer) {
-		transfer.setState(SchematicTransfer.State.CHUNK);
-
-		Reference.logger.trace("Sending chunk {},{},{}", transfer.baseX, transfer.baseY, transfer.baseZ);
-		MessageDownloadChunk message =
-				new MessageDownloadChunk(transfer.schematic, transfer.baseX, transfer.baseY, transfer.baseZ);
-		Dispatcher.sendToClient(message, player);
 	}
 
 	private void processQueue(MinecraftServer server) {
@@ -77,8 +69,12 @@ public class DownloadHandler {
 		this.transferMap.put(player.getScoreboardName(), transfer);
 	}
 
-	private void sendEnd(ServerPlayer player, @NotNull SchematicTransfer transfer) {
-		MessageDownloadEnd message = new MessageDownloadEnd(transfer.name);
+	private void sendChunk(ServerPlayer player, @NotNull SchematicTransfer transfer) {
+		transfer.setState(SchematicTransfer.State.CHUNK);
+
+		Reference.logger.trace("Sending chunk {},{},{}", transfer.baseX, transfer.baseY, transfer.baseZ);
+		MessageDownloadChunk message =
+				new MessageDownloadChunk(transfer.schematic, transfer.baseX, transfer.baseY, transfer.baseZ);
 		Dispatcher.sendToClient(message, player);
 	}
 
@@ -87,5 +83,24 @@ public class DownloadHandler {
 
 		MessageDownloadBegin message = new MessageDownloadBegin(transfer.schematic);
 		Dispatcher.sendToClient(message, player);
+	}
+
+	private void sendEnd(ServerPlayer player, @NotNull SchematicTransfer transfer) {
+		MessageDownloadEnd message = new MessageDownloadEnd(transfer.schematic.getMetadata().id());
+		Dispatcher.sendToClient(message, player);
+	}
+
+	public static void init() {
+		DownloadHandler.INSTANCE = new DownloadHandler();
+	}
+
+	public void registerDownloadCompleteListener(Consumer<ISchematic> listener) {
+		this.downloadCompleteListener.add(listener);
+	}
+
+	public void onDownloadComplete() {
+		for (Consumer<ISchematic> listener : this.downloadCompleteListener) {
+			listener.accept(DownloadHandler.INSTANCE.schematic);
+		}
 	}
 }

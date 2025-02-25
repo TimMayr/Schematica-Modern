@@ -11,5 +11,6 @@ import org.jetbrains.annotations.NotNull;
 public class ClientCommandSchematicaBase {
 	public static void registerClient(@NotNull CommandDispatcher<ClientCommandRegistrationEvent.ClientCommandSourceStack> dispatcher, CommandBuildContext context) {
 		dispatcher.register(CommandSchematicaReplace.register(context));
+		dispatcher.register(CommandSchematicaList.register());
 	}
 }

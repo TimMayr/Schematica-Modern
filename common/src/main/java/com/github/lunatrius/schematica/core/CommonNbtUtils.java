@@ -10,6 +10,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,5 +54,28 @@ public final class CommonNbtUtils {
 		}
 
 		return icon;
+	}
+
+	public static @NotNull CompoundTag serializeInstant(Instant instant) {
+		FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+		buf.writeInstant(instant);
+
+		byte[] data = new byte[buf.readableBytes()];
+		buf.readBytes(data);
+
+		CompoundTag compound = new CompoundTag();
+		compound.putByteArray("timestamp", data);
+		return compound;
+	}
+
+	public static @NotNull Instant deserializeInstant(@NotNull CompoundTag tag) {
+		if (!tag.contains("timestamp", Tag.TAG_BYTE_ARRAY)) {
+			return Instant.ofEpochMilli(Long.MIN_VALUE);
+		}
+
+		byte[] data = tag.getByteArray("timestamp"); // Retrieve stored byte array
+		FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.wrappedBuffer(data));
+
+		return buf.readInstant();
 	}
 }

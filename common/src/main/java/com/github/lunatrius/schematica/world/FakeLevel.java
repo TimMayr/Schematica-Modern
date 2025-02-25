@@ -14,7 +14,6 @@ import net.minecraft.CrashReportCategory;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.*;
-import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.sounds.SoundEvent;
@@ -115,6 +114,7 @@ public class FakeLevel extends Level {
 	 * @see #setEntities(Collection) only way to add entities into fake level
 	 * @see #setRealLevel(Level) if you want to reuse this instance
 	 */
+	@SuppressWarnings("resource")
 	public FakeLevel(final ISchematic levelSource, final IFakeLevelLightProvider lightProvider,
 	                 @Nullable final Scoreboard scoreboard, final boolean overrideBeLevel) {
 		super(new FakeLevelData(level()::getLevelData, lightProvider), level().dimension(),
@@ -268,7 +268,7 @@ public class FakeLevel extends Level {
 
 	@Override
 	public int getHeight(@NotNull Types heightmapType, int x, int z) {
-		final MutableBlockPos pos = new MutableBlockPos(x, getLevelSource().getMinY(), z);
+		final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(x, getLevelSource().getMinY(), z);
 
 		if (getLevelSource().isPosInside(pos)) {
 			for (int y = getLevelSource().getMaxY() - 1; y >= getLevelSource().getMinY(); y--) {

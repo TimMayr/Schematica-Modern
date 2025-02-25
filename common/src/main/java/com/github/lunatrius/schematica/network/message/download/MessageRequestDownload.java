@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.UUID;
 
 @MethodsReturnNonnullByDefault
-public record MessageRequestDownload(UUID id)
+public record MessageRequestDownload(UUID id, DownloadType downloadType)
 		implements CustomPacketPayload {
 
 	public static final CustomPacketPayload.Type<MessageRequestDownload> TYPE = new CustomPacketPayload.Type<>(
@@ -29,6 +29,7 @@ public record MessageRequestDownload(UUID id)
 	public static final StreamCodec<RegistryFriendlyByteBuf, MessageRequestDownload> STREAM_CODEC =
 			StreamCodec.composite(
 					CommonCodecs.UUID, MessageRequestDownload::id,
+					CommonCodecs.ENUM(DownloadType.class), MessageRequestDownload::downloadType,
 					MessageRequestDownload::new);
 
 
@@ -36,9 +37,10 @@ public record MessageRequestDownload(UUID id)
 		if (ctx.side() == Side.SERVER) {
 			Player player = ctx.sender();
 			SchematicHolder holder = SchematicAccounter.get(ctx.message().id());
-			holder.getSchematic().thenAccept((iSchematic) ->
+			holder.getSchematic().thenAccept((schematic) ->
 					DownloadHandler.INSTANCE.transferMap.put(player.getScoreboardName(),
-							new SchematicTransfer(iSchematic, ctx.message().id().toString())));
+							new SchematicTransfer(schematic, ctx.message().id().toString(),
+									ctx.message().downloadType())));
 		}
 	}
 

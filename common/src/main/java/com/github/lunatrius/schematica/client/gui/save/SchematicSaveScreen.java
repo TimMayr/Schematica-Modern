@@ -162,7 +162,7 @@ public class SchematicSaveScreen extends BaseScreen {
 			this.filename = this.editBoxFilename.getValue();
 			String filename = this.editBoxFilename.getValue() + SchematicFormat.getExtension(this.getFormatName());
 
-			Path directory = Reference.proxy.getPlayerSchematicDirectory(this.minecraft.player, this.isSavePrivate);
+			Path directory = Reference.proxy.getSchematicDirectory();
 			Path file = directory.resolve(filename);
 
 			if (!Files.exists(file)) {
