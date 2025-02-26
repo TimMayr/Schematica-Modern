@@ -37,6 +37,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class ServerProxy extends CommonProxy {
 	public static WeakReference<MinecraftServer> serverWeakReference = null;
@@ -110,8 +111,8 @@ public class ServerProxy extends CommonProxy {
 	}
 
 	@Override
-	public boolean loadSchematic(Player player, SchematicMetadata metadata) {
-		return false;
+	public CompletableFuture<Boolean> loadSchematic(Player player, SchematicMetadata metadata) {
+		return CompletableFuture.completedFuture(false);
 	}
 
 	@Override

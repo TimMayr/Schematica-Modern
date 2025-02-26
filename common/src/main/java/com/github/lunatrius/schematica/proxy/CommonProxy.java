@@ -8,7 +8,6 @@ import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -30,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -41,6 +41,7 @@ public abstract class CommonProxy {
 	 */
 	public static final Set<Path> recentlyAdded = ConcurrentHashMap.newKeySet();
 	public static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+	public static Set<Path> recentlyRemoved = ConcurrentHashMap.newKeySet();
 	public boolean isSaveEnabled = true;
 	public boolean isLoadEnabled = true;
 
@@ -128,7 +129,7 @@ public abstract class CommonProxy {
 
 	public abstract RegistryAccess getRegistryAccess();
 
-	public abstract boolean loadSchematic(Player player, SchematicMetadata metadata);
+	public abstract CompletableFuture<Boolean> loadSchematic(Player player, SchematicMetadata metadata);
 
 	public abstract boolean isPlayerQuotaExceeded(UUID id);
 
@@ -153,7 +154,7 @@ public abstract class CommonProxy {
 					Reference.proxy.getSchematicDirectory()));
 		}
 
-		return fileList.stream().filter(p -> SchematicFormat.readMetaFromFile(p).id() == metadata.id())
+		return fileList.stream().filter(p -> SchematicFormat.readMetaFromFile(p).id().equals(metadata.id()))
 				.findFirst()
 				.orElseThrow(() -> new IllegalArgumentException(
 						String.format("Schematic not found in directory [%s]",

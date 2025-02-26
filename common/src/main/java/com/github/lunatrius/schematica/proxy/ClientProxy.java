@@ -9,7 +9,7 @@ import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.api.SchematicMetadata;
 import com.github.lunatrius.schematica.client.printer.SchematicPrinter;
 import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
-import com.github.lunatrius.schematica.network.message.accounting.MessageSaveSchematic;
+import com.github.lunatrius.schematica.network.message.commands.MessageSaveSchematic;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
 import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Environment(EnvType.CLIENT)
 public class ClientProxy extends CommonProxy {
@@ -205,23 +206,25 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public boolean loadSchematic(Player player, @NotNull SchematicMetadata meta) {
-		ISchematic schematic = SchematicFormat.readSchematic(meta, Reference.proxy.getLevel(player));
-		if (schematic == null) {
-			return false;
-		}
+	public CompletableFuture<Boolean> loadSchematic(Player player, @NotNull SchematicMetadata meta) {
+		Reference.logger.info("Loading schematic {}", meta.name());
 
-		FakeLevel world = FakeLevel.of(schematic);
+		return SchematicAccounter.get(meta.id()).getSchematic().thenApply(schematic -> {
+			if (schematic == null) {
+				return false;
+			}
 
-		Reference.logger.debug("Loaded {} [w:{},h:{},l:{}]", meta.name(), world.getLevelSource().getMaxX(),
-				world.getHeight(),
-				world.getLevelSource().getMaxZ());
+			FakeLevel world = FakeLevel.of(schematic);
 
-		ClientProxy.schematic = world;
-		SchematicPrinter.INSTANCE.setSchematic(world);
-		world.setRendering(true);
+			Reference.logger.debug("Loaded {} [w:{},h:{},l:{}]", meta.name(), world.getLevelSource().getMaxX(),
+					world.getHeight(), world.getLevelSource().getMaxZ());
 
-		return true;
+			ClientProxy.schematic = world;
+			SchematicPrinter.INSTANCE.setSchematic(world);
+			world.setRendering(true);
+
+			return true;
+		});
 	}
 
 	@Override

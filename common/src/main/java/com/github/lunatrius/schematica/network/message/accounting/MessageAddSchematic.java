@@ -29,7 +29,10 @@ public record MessageAddSchematic(SchematicMetadata metadata, boolean synced) im
 
 	public static void handle(@NotNull PacketContext<MessageAddSchematic> ctx) {
 		SchematicHolder holder = new SchematicHolder(ctx.message().metadata(), SchematicLocation.REMOTE);
-		SchematicAccounter.addSchematic(holder, true);
+
+		if (!SchematicAccounter.hasLocal(holder)) {
+			SchematicAccounter.addSchematic(holder, true);
+		}
 	}
 
 	@Override

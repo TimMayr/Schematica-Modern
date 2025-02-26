@@ -5,6 +5,7 @@ import com.github.lunatrius.schematica.accounting.SchematicAccounter;
 import com.github.lunatrius.schematica.accounting.SchematicHolder;
 import com.github.lunatrius.schematica.accounting.SchematicLocation;
 import com.github.lunatrius.schematica.network.message.commands.MessageDeleteSchematic;
+import com.github.lunatrius.schematica.proxy.CommonProxy;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.mojang.brigadier.arguments.BoolArgumentType;
@@ -25,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class CommandSchematicaRemove extends CommandSchematicaBase {
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
@@ -81,8 +83,11 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 			if (holder.location() == SchematicLocation.LOCAL) {
 				Path file = Reference.proxy.resolveSchematic(holder.metadata());
 				try {
-					Files.delete(file);
+					CommonProxy.recentlyRemoved.add(file);
 					SchematicAccounter.removeSchematic(holder.metadata().id(), false);
+					Files.delete(file);
+					CommonProxy.scheduler.schedule(() -> CommonProxy.recentlyRemoved.remove(file), 200,
+							TimeUnit.MILLISECONDS);
 					source.sendSuccess(
 							() -> Component.translatable(Names.Command.Remove.Message.SCHEMATIC_REMOVED, name), true);
 					return 0;

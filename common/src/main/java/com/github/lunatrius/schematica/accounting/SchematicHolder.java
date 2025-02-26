@@ -5,8 +5,7 @@ import com.github.lunatrius.schematica.accounting.loader.ServerSchematicLoader;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.api.SchematicMetadata;
 import com.github.lunatrius.schematica.core.CommonCodecs;
-import dev.architectury.platform.Platform;
-import net.fabricmc.api.EnvType;
+import com.github.lunatrius.schematica.core.PlatformUtils;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import org.jetbrains.annotations.NotNull;
@@ -62,7 +61,7 @@ public record SchematicHolder(SchematicMetadata metadata, SchematicLocation loca
 	}
 
 	public @NotNull CompletableFuture<ISchematic> getSchematic() {
-		if (Platform.getEnv() == EnvType.CLIENT) {
+		if (PlatformUtils.isPlatformClient()) {
 			return ClientSchematicLoader.get(this);
 		} else {
 			return ServerSchematicLoader.get(this);

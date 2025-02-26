@@ -1,4 +1,4 @@
-package com.github.lunatrius.schematica.network.message.accounting;
+package com.github.lunatrius.schematica.network.message.commands;
 
 import com.github.lunatrius.schematica.proxy.ServerProxy;
 import com.github.lunatrius.schematica.reference.Names;

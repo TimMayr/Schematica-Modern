@@ -2,7 +2,6 @@ package com.github.lunatrius.schematica.command;
 
 import com.github.lunatrius.schematica.accounting.FilePermission;
 import com.github.lunatrius.schematica.accounting.SchematicAccounter;
-import com.github.lunatrius.schematica.command.client.CommandSchematicaList;
 import com.github.lunatrius.schematica.reference.Names;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;

@@ -55,11 +55,8 @@ public class SchematicLoadScreen extends BaseScreen {
 		if (!schematicListSlots.isEmpty()) {
 			super.render(guiGraphics, mouseX, mouseY, partialTicks);
 			guiGraphics.drawCenteredString(this.minecraft.font, this.strTitle, this.width / 2, 4, 0x00FFFFFF);
-			guiGraphics.drawCenteredString(this.minecraft.font,
-					this.strFolderInfo,
-					this.width / 2 - 79,
-					this.height - 12,
-					0x00A0A0A0);
+			guiGraphics.drawCenteredString(this.minecraft.font, this.strFolderInfo, this.width / 2 - 79,
+					this.height - 12, 0x00A0A0A0);
 		}
 	}
 
@@ -93,12 +90,14 @@ public class SchematicLoadScreen extends BaseScreen {
 		SchematicLoadList.Entry entry = this.schematicLoadList.getSelected();
 
 		try {
-			if (Reference.proxy.loadSchematic(Minecraft.getInstance().player, entry.getMetadata())) {
-				FakeLevel level = ClientProxy.schematic;
-				if (level != null) {
-					ClientProxy.moveSchematicToPlayer(level);
+			Reference.proxy.loadSchematic(Minecraft.getInstance().player, entry.getMetadata()).thenAccept(result -> {
+				if (result) {
+					FakeLevel level = ClientProxy.schematic;
+					if (level != null) {
+						ClientProxy.moveSchematicToPlayer(level);
+					}
 				}
-			}
+			});
 		} catch (Exception e) {
 			Reference.logger.error("Failed to load schematic!", e);
 		}
@@ -136,7 +135,6 @@ public class SchematicLoadScreen extends BaseScreen {
 
 			this.getSchematicListSlots().add(new SchematicLoadList.Entry(SchematicFormat.readMetaFromFile(file),
 					name, Files.isDirectory(file), item, this.schematicLoadList));
-
 		}
 
 		List<Path> filesSchematics = FileUtils.getAllFilesInDirectory(this.currentDirectory, FILE_FILTER_SCHEMATIC);
@@ -147,8 +145,6 @@ public class SchematicLoadScreen extends BaseScreen {
 			filesSchematics.sort((Path a, Path b) -> a.getFileName().toString()
 					.compareToIgnoreCase(b.getFileName().toString()));
 			for (Path file : filesSchematics) {
-				name = file.getFileName().toString();
-
 				this.getSchematicListSlots().add(new SchematicLoadList.Entry(SchematicFormat.readMetaFromFile(file),
 						null, Files.isDirectory(file), null,
 						this.schematicLoadList));

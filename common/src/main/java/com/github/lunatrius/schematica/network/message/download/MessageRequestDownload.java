@@ -9,6 +9,7 @@ import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import commonnetwork.networking.data.PacketContext;
 import commonnetwork.networking.data.Side;
+import dev.architectury.platform.Platform;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -31,7 +32,6 @@ public record MessageRequestDownload(UUID id, DownloadType downloadType)
 					CommonCodecs.UUID, MessageRequestDownload::id,
 					CommonCodecs.ENUM(DownloadType.class), MessageRequestDownload::downloadType,
 					MessageRequestDownload::new);
-
 
 	public static void handle(@NotNull PacketContext<MessageRequestDownload> ctx) {
 		if (ctx.side() == Side.SERVER) {

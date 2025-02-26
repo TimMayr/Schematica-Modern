@@ -1,6 +1,7 @@
 package com.github.lunatrius.schematica.accounting;
 
 import com.github.lunatrius.schematica.api.SchematicMetadata;
+import com.github.lunatrius.schematica.core.PlatformUtils;
 import com.github.lunatrius.schematica.core.PlayerUtils;
 import com.github.lunatrius.schematica.network.message.accounting.MessageAddSchematic;
 import com.github.lunatrius.schematica.network.message.accounting.MessageRemoveSchematic;
@@ -12,8 +13,6 @@ import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
 import commonnetwork.api.Dispatcher;
 import dev.architectury.event.events.common.TickEvent;
-import dev.architectury.platform.Platform;
-import net.fabricmc.api.EnvType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -27,6 +26,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * This class is responsible for keeping the client and the server synced when it comes to Schematic Metadata.
@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class SchematicAccounter {
 	private static final Map<UUID, SchematicHolder> schematics = new HashMap<>();
+	private static final Map<Path, SchematicHolder> localSchematics = new HashMap<>();
 	private static final FileFilterSchematic FILTER_SCHEMATIC = new FileFilterSchematic(false);
 	private static final Map<WatchKey, Path> keyToPathMap = new HashMap<>();
 	private static WatchService watchService;
@@ -62,17 +63,34 @@ public class SchematicAccounter {
 								//This check makes sure that the discovered schematic isn't actively getting saved by
 								//some other method, as that would duplicate the entry
 								if (!CommonProxy.recentlyAdded.contains(fullPath)) {
-									SchematicMetadata metadata = SchematicFormat.readMetaFromFile(fullPath);
-									Reference.logger.info("Schematic [{}] was discovered by watchService",
-											metadata.name());
-									SchematicAccounter.addSchematic(new SchematicHolder(metadata,
-											SchematicLocation.LOCAL), false);
+									try {
+										SchematicMetadata metadata = SchematicFormat.readMetaFromFile(fullPath);
+										Reference.logger.info("Schematic [{}] was discovered by watchService",
+												metadata.name());
+										SchematicAccounter.addSchematic(new SchematicHolder(metadata,
+												SchematicLocation.LOCAL), false);
+									} catch (Exception e) {
+										Reference.logger.error("A file was created in the schematic directory, but " +
+												"something went wrong");
+									}
 								}
 							}
 						}
 					} else if (event.kind().equals(StandardWatchEventKinds.ENTRY_DELETE)) {
-						if (event.context() instanceof Path modifiedPath) {
-							SchematicAccounter.removeSchematic(SchematicAccounter.getIdForFile(modifiedPath), false);
+						if (event.context() instanceof Path relativePath) {
+							Path fullPath = schematicDir.resolve(relativePath).toAbsolutePath().normalize();
+
+							//This check makes sure that the discovered schematic isn't actively getting removed by
+							//some other method, as that would remove the entry twice
+							if (!CommonProxy.recentlyRemoved.contains(fullPath)) {
+								try {
+									SchematicAccounter.removeSchematic(localSchematics.get(fullPath).metadata().id(),
+											false);
+								} catch (Exception e) {
+									Reference.logger.error("A file was deleted in the schematic directory, but " +
+											"something went wrong");
+								}
+							}
 						}
 					}
 				}
@@ -99,14 +117,14 @@ public class SchematicAccounter {
 			TickEvent.SERVER_POST.register(listener);
 		} catch (IOException e) {
 			Reference.logger.warn("Error creating schematic watchdog");
-			if (Platform.getEnv() == EnvType.CLIENT) {
+			if (PlatformUtils.isPlatformClient()) {
 				PlayerUtils.getClientPlayer().displayClientMessage(
 						Component.translatable(Names.Messages.WATCHDOG_ERROR), false);
 			}
 		}
 	}
 
-	private static void registerAll(final Path start) throws IOException {
+	private static void registerAll(Path start) throws IOException {
 		Files.walkFileTree(start, new SimpleFileVisitor<>() {
 			@Override
 			public @NotNull FileVisitResult preVisitDirectory(Path dir, @NotNull BasicFileAttributes attrs) throws IOException {
@@ -140,16 +158,36 @@ public class SchematicAccounter {
 	public static void addSchematic(@NotNull SchematicHolder holder, boolean synced) {
 		Reference.logger.info("Schematic [{}] was added", holder.metadata().name());
 		schematics.put(holder.metadata().id(), holder);
+		localSchematics.put(getPathForSchematic(holder), holder);
 
 		if (!synced) {
 			MessageAddSchematic message = new MessageAddSchematic(holder.metadata(), true);
 
-			if (Platform.getEnv() == EnvType.CLIENT) {
+			if (PlatformUtils.isPlatformClient()) {
 				Dispatcher.sendToServer(message);
 			} else {
 				Dispatcher.sendToAllClients(message, ServerProxy.serverWeakReference.get());
 			}
 		}
+	}
+
+	private static @Nullable Path getPathForSchematic(@NotNull SchematicHolder holder) {
+		if (holder.location() == SchematicLocation.LOCAL) {
+			List<Path> localPaths = Reference.proxy.getAllLocalSchematics();
+			Map<SchematicHolder, Path> localHolderPaths = localPaths.stream()
+					.collect(Collectors.toMap(
+							path -> SchematicAccounter.get(SchematicFormat.readMetaFromFile(path).id()),
+							p -> p, (x, y) -> y,
+							LinkedHashMap::new));
+
+			return localHolderPaths.get(holder);
+		} else {
+			return null;
+		}
+	}
+
+	public static SchematicHolder get(UUID id) {
+		return schematics.get(id);
 	}
 
 	public static void removeSchematic(@NotNull UUID id, boolean synced) {
@@ -158,7 +196,7 @@ public class SchematicAccounter {
 		if (!synced) {
 			MessageRemoveSchematic message = new MessageRemoveSchematic(id, true);
 
-			if (Platform.getEnv() == EnvType.CLIENT) {
+			if (PlatformUtils.isPlatformClient()) {
 				Dispatcher.sendToServer(message);
 			} else {
 				Dispatcher.sendToAllClients(message, ServerProxy.serverWeakReference.get());
@@ -173,10 +211,6 @@ public class SchematicAccounter {
 	@Contract(value = " -> new", pure = true)
 	public static @NotNull @Unmodifiable Map<UUID, SchematicHolder> getSchematics() {
 		return Map.copyOf(schematics);
-	}
-
-	public static SchematicHolder get(UUID id) {
-		return schematics.get(id);
 	}
 
 	public static List<SchematicHolder> sorted(Player player) {
@@ -223,5 +257,15 @@ public class SchematicAccounter {
 
 			Dispatcher.sendToClient(message, player);
 		}
+	}
+
+	public static boolean hasLocal(SchematicHolder holder) {
+		for (SchematicHolder value : schematics.values()) {
+			if (value.location() == SchematicLocation.LOCAL && value.metadata().id().equals(holder.metadata().id())) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

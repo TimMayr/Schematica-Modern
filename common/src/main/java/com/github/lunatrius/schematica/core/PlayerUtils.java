@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class PlayerUtils {
 	public static @Nullable Player getClientPlayer() {
-		if (Platform.getEnv() == EnvType.CLIENT) {
+		if (PlatformUtils.isPlatformClient()) {
 			try {
 				return Minecraft.getInstance().player;
 			} catch (Exception e) {

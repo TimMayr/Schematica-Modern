@@ -1,6 +1,7 @@
 package com.github.lunatrius.schematica;
 
 import com.github.lunatrius.schematica.command.CommandSchematicaBase;
+import com.github.lunatrius.schematica.core.PlatformUtils;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.handler.PlayerHandler;
 import com.github.lunatrius.schematica.handler.QueueTickHandler;
@@ -12,15 +13,13 @@ import com.github.lunatrius.schematica.world.schematic.format.SchematicAlpha;
 import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
 import com.github.lunatrius.schematica.world.schematic.format.SchematicStructure;
 import dev.architectury.event.events.common.CommandRegistrationEvent;
-import dev.architectury.platform.Platform;
-import net.fabricmc.api.EnvType;
 
 public class Schematica {
 	public static void init() {
 		CommandRegistrationEvent.EVENT.register(
 				(dispatcher, context, selection) -> CommandSchematicaBase.register(dispatcher));
 
-		if (Platform.getEnv() == EnvType.SERVER) {
+		if (PlatformUtils.isPlatformServer()) {
 			serverInit();
 		}
 

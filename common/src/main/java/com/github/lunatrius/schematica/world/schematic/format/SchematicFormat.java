@@ -6,14 +6,13 @@ import com.github.lunatrius.schematica.api.SchematicDimensions;
 import com.github.lunatrius.schematica.api.SchematicMetadata;
 import com.github.lunatrius.schematica.core.CommonCodecs;
 import com.github.lunatrius.schematica.core.CommonNbtUtils;
+import com.github.lunatrius.schematica.core.PlatformUtils;
 import com.github.lunatrius.schematica.proxy.CommonProxy;
 import com.github.lunatrius.schematica.proxy.PlatformProxy;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.schematic.SchematicUtil;
 import com.github.lunatrius.schematica.world.schematic.UnsupportedFormatException;
-import dev.architectury.platform.Platform;
-import net.fabricmc.api.EnvType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -98,9 +97,12 @@ public abstract class SchematicFormat {
 		UUID owner = tag.getUUID(Names.NBT.AUTHOR);
 		Map<UUID, List<FilePermission>> permissions = CommonNbtUtils.deserializeMap(tag, CommonCodecs.UUID,
 				CommonCodecs.LIST(CommonCodecs.ENUM(FilePermission.class)));
-		int width = tag.getInt(Names.NBT.WIDTH);
-		int height = tag.getInt(Names.NBT.HEIGHT);
-		int length = tag.getInt(Names.NBT.LENGTH);
+
+		CompoundTag dimensions = tag.getCompound(Names.NBT.DIMENSIONS);
+		int width = dimensions.getInt(Names.NBT.WIDTH);
+		int height = dimensions.getInt(Names.NBT.HEIGHT);
+		int length = dimensions.getInt(Names.NBT.LENGTH);
+
 		boolean isPrivate = tag.getBoolean(Names.NBT.VISIBILITY);
 		UUID id = tag.getUUID(Names.NBT.ID);
 		ItemStack icon = CommonNbtUtils.deserializeItemStack(tag, Names.NBT.ICON);
@@ -160,7 +162,7 @@ public abstract class SchematicFormat {
 		try {
 			Path file = Reference.proxy.getSchematicDirectory();
 
-			if (Platform.getEnv() == EnvType.SERVER) {
+			if (PlatformUtils.isPlatformServer()) {
 				file = file.resolve(schematic.getMetadata().owner().toString());
 			}
 
@@ -189,6 +191,7 @@ public abstract class SchematicFormat {
 				PlatformProxy.createAndPostPostSchematicSaveEvent(file);
 			}
 
+			SchematicFormat.writeMetaToFile(file, schematic.getMetadata().withFilesize(Files.size(file)));
 			Reference.proxy.addSchematic(file);
 			Path finalFile = file;
 			CommonProxy.scheduler.schedule(() -> CommonProxy.recentlyAdded.remove(finalFile), 200,
@@ -203,6 +206,25 @@ public abstract class SchematicFormat {
 	}
 
 	public abstract void writeToNBT(CompoundTag tagCompound, ISchematic schematic);
+
+	public static void writeMetaToFile(Path path, SchematicMetadata meta) {
+		try {
+			CompoundTag tag = SchematicUtil.readTagCompoundFromFile(path);
+			SchematicFormat format = SchematicFormat.getFormatFromNbt(tag);
+			format.writeMetadataToNBT(tag, meta);
+			CompoundTag wrapper = new CompoundTag();
+			wrapper.put(Names.NBT.ROOT, tag);
+
+			try (DataOutputStream dataOutputStream = new DataOutputStream(
+					new GZIPOutputStream(Files.newOutputStream(path)))) {
+				wrapper.write(dataOutputStream);
+			}
+		} catch (IOException e) {
+			Reference.logger.error("Error writing metadata to file");
+		}
+	}
+
+	public abstract void writeMetadataToNBT(@NotNull CompoundTag tagCompound, @NotNull SchematicMetadata metadata);
 
 	/**
 	 * Gets a schematic format name translation key for the given proper format name.
@@ -261,24 +283,6 @@ public abstract class SchematicFormat {
 	}
 
 	public abstract SchematicMetadata readMetaFromNbt(CompoundTag tagCompound);
-
-	public static void writeMetaToFile(Path path, SchematicMetadata meta) {
-		try {
-			CompoundTag tag = SchematicUtil.readTagCompoundFromFile(path);
-			SchematicFormat format = SchematicFormat.getFormatFromNbt(tag);
-			format.writeMetadataToNBT(tag, meta);
-
-			try (DataOutputStream dataOutputStream = new DataOutputStream(
-					new GZIPOutputStream(Files.newOutputStream(path)))) {
-				tag.write(dataOutputStream);
-				PlatformProxy.createAndPostPostSchematicSaveEvent(path);
-			}
-		} catch (IOException e) {
-			Reference.logger.error("Error writing metadata to file");
-		}
-	}
-
-	public abstract void writeMetadataToNBT(@NotNull CompoundTag tagCompound, @NotNull SchematicMetadata metadata);
 
 	public abstract @NotNull SchematicMetadata metaFromTag(@NotNull CompoundTag tag);
 

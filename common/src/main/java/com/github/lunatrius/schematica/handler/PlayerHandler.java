@@ -3,7 +3,6 @@ package com.github.lunatrius.schematica.handler;
 import com.github.lunatrius.schematica.accounting.SchematicAccounter;
 import com.github.lunatrius.schematica.config.SchematicaConfig;
 import com.github.lunatrius.schematica.network.message.MessageCapabilities;
-import com.github.lunatrius.schematica.proxy.ServerProxy;
 import com.github.lunatrius.schematica.reference.Reference;
 import commonnetwork.api.Dispatcher;
 import dev.architectury.event.events.common.PlayerEvent;

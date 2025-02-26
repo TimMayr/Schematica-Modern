@@ -1,9 +1,7 @@
 package com.github.lunatrius.schematica.handler;
 
 import com.github.lunatrius.schematica.api.ISchematic;
-import com.github.lunatrius.schematica.network.message.download.MessageDownloadBegin;
-import com.github.lunatrius.schematica.network.message.download.MessageDownloadChunk;
-import com.github.lunatrius.schematica.network.message.download.MessageDownloadEnd;
+import com.github.lunatrius.schematica.network.message.download.*;
 import com.github.lunatrius.schematica.network.transfer.SchematicTransfer;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Reference;
@@ -63,10 +61,20 @@ public class DownloadHandler {
 			sendChunk(player, transfer);
 		} else if (transfer.state == SchematicTransfer.State.END_WAIT) {
 			sendEnd(player, transfer);
-			return;
 		}
 
 		this.transferMap.put(player.getScoreboardName(), transfer);
+	}
+
+	public static void init() {
+		DownloadHandler.INSTANCE = new DownloadHandler();
+	}
+
+	private void sendBegin(ServerPlayer player, @NotNull SchematicTransfer transfer) {
+		transfer.setState(SchematicTransfer.State.BEGIN);
+
+		MessageDownloadBegin message = new MessageDownloadBegin(transfer.schematic);
+		Dispatcher.sendToClient(message, player);
 	}
 
 	private void sendChunk(ServerPlayer player, @NotNull SchematicTransfer transfer) {
@@ -78,20 +86,9 @@ public class DownloadHandler {
 		Dispatcher.sendToClient(message, player);
 	}
 
-	private void sendBegin(ServerPlayer player, @NotNull SchematicTransfer transfer) {
-		transfer.setState(SchematicTransfer.State.BEGIN);
-
-		MessageDownloadBegin message = new MessageDownloadBegin(transfer.schematic);
-		Dispatcher.sendToClient(message, player);
-	}
-
 	private void sendEnd(ServerPlayer player, @NotNull SchematicTransfer transfer) {
 		MessageDownloadEnd message = new MessageDownloadEnd(transfer.schematic.getMetadata().id());
 		Dispatcher.sendToClient(message, player);
-	}
-
-	public static void init() {
-		DownloadHandler.INSTANCE = new DownloadHandler();
 	}
 
 	public void registerDownloadCompleteListener(Consumer<ISchematic> listener) {
@@ -99,6 +96,8 @@ public class DownloadHandler {
 	}
 
 	public void onDownloadComplete() {
+		Dispatcher.sendToServer(new MessageDownloadEndAck(true));
+
 		for (Consumer<ISchematic> listener : this.downloadCompleteListener) {
 			listener.accept(DownloadHandler.INSTANCE.schematic);
 		}

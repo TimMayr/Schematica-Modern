@@ -1,6 +1,8 @@
 package com.github.lunatrius.schematica.network.message.download;
 
+import com.github.lunatrius.schematica.accounting.SchematicAccounter;
 import com.github.lunatrius.schematica.core.CommonCodecs;
+import com.github.lunatrius.schematica.core.PlayerUtils;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.network.transfer.SchematicTransfer;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
@@ -39,12 +41,18 @@ public record MessageDownloadEnd(UUID id) implements CustomPacketPayload {
 		if (ctx.side() == Side.CLIENT) {
 			boolean success = false;
 			Path path = null;
-			Player player = ctx.sender();
+			Player player = PlayerUtils.getClientPlayer();
 			SchematicTransfer transfer = DownloadHandler.INSTANCE.transferMap.get(player.getScoreboardName());
 
 			switch (transfer.type) {
-				case LOAD -> ClientProxy.schematic = FakeLevel.of(DownloadHandler.INSTANCE.schematic);
-				case SAVE_TEMP -> ClientProxy.tempSchematic = DownloadHandler.INSTANCE.schematic;
+				case LOAD -> {
+					ClientProxy.schematic = FakeLevel.of(DownloadHandler.INSTANCE.schematic);
+					DownloadHandler.INSTANCE.schematic = null;
+				}
+				case SAVE_TEMP -> {
+					ClientProxy.tempSchematic = DownloadHandler.INSTANCE.schematic;
+					DownloadHandler.INSTANCE.schematic = null;
+				}
 				case SAVE -> {
 					try {
 						path = Reference.proxy.getSchematicDirectory();
@@ -58,7 +66,7 @@ public record MessageDownloadEnd(UUID id) implements CustomPacketPayload {
 						DownloadHandler.INSTANCE.schematic = null;
 					} catch (IOException e) {
 						Reference.logger.error("Unable to save schematic {} to directory [{}]",
-								DownloadHandler.INSTANCE.schematic.getMetadata().name(),
+								SchematicAccounter.get(ctx.message().id()).metadata().name(),
 								path.toAbsolutePath().normalize().toString());
 					} catch (NullPointerException e) {
 						Reference.logger.error("Unable to save schematic to invalid directory");
@@ -66,11 +74,11 @@ public record MessageDownloadEnd(UUID id) implements CustomPacketPayload {
 						if (success) {
 							Minecraft.getInstance().player.displayClientMessage(
 									Component.translatable(Names.Command.Download.Message.DOWNLOAD_SUCCEEDED,
-											DownloadHandler.INSTANCE.schematic.getMetadata().name()), false);
+											SchematicAccounter.get(ctx.message().id()).metadata().name()), false);
 						} else {
 							Minecraft.getInstance().player.displayClientMessage(
 									Component.translatable(Names.Command.Download.Message.DOWNLOAD_FAILED,
-											DownloadHandler.INSTANCE.schematic.getMetadata().name()), false);
+											SchematicAccounter.get(ctx.message().id()).metadata().name()), false);
 						}
 
 						DownloadHandler.INSTANCE.schematic = null;

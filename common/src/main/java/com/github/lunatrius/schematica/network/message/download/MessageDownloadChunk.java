@@ -2,6 +2,7 @@ package com.github.lunatrius.schematica.network.message.download;
 
 import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.core.PlatformUtils;
 import com.github.lunatrius.schematica.handler.DownloadHandler;
 import com.github.lunatrius.schematica.nbt.NBTHelper;
 import com.github.lunatrius.schematica.network.message.MessageCapabilities;
@@ -38,7 +39,7 @@ public class MessageDownloadChunk implements CustomPacketPayload {
 	public static final StreamCodec<RegistryFriendlyByteBuf, MessageDownloadChunk> STREAM_CODEC = new StreamCodec<>() {
 		@Contract("_ -> new")
 		public @NotNull MessageDownloadChunk decode(@NotNull RegistryFriendlyByteBuf buf) {
-			if (Platform.getEnv() == EnvType.CLIENT) {
+			if (PlatformUtils.isPlatformClient()) {
 				return SchematicTransfer.readFromBuff(buf);
 			}
 

@@ -3,6 +3,7 @@ package com.github.lunatrius.schematica.network.message.commands;
 import com.github.lunatrius.schematica.accounting.SchematicAccounter;
 import com.github.lunatrius.schematica.api.SchematicMetadata;
 import com.github.lunatrius.schematica.core.CommonCodecs;
+import com.github.lunatrius.schematica.proxy.CommonProxy;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import commonnetwork.networking.data.PacketContext;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @MethodsReturnNonnullByDefault
 public record MessageDeleteSchematic(UUID id)
@@ -38,8 +40,11 @@ public record MessageDeleteSchematic(UUID id)
 			Path file = Reference.proxy.resolveSchematic(meta);
 			UUID id = SchematicAccounter.getIdForFile(file);
 			try {
-				Files.delete(file);
+				CommonProxy.recentlyRemoved.add(file);
 				SchematicAccounter.removeSchematic(id, false);
+				Files.delete(file);
+				CommonProxy.scheduler.schedule(() -> CommonProxy.recentlyRemoved.remove(file), 200,
+						TimeUnit.MILLISECONDS);
 				Reference.proxy.sendMessage(null,
 						Component.translatable(Names.Command.Remove.Message.SCHEMATIC_REMOVED, meta.name()));
 			} catch (IOException e) {

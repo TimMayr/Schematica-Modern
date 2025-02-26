@@ -77,8 +77,8 @@ public class SchematicLoadList extends ObjectSelectionList<SchematicLoadList.Ent
 		private final SchematicMetadata metadata;
 		private final boolean isDirectory;
 		private final SchematicLoadList parent;
-		private ItemStack itemStack;
-		private String name;
+		private final ItemStack itemStack;
+		private final String name;
 
 		//The Constructor param positions are all out of whack intentionally. Java doesn't know which to call if you
 		// pass to many nulls otherwise
@@ -91,13 +91,14 @@ public class SchematicLoadList extends ObjectSelectionList<SchematicLoadList.Ent
 		             @Nullable Item item, SchematicLoadList parent) {
 			this.metadata = metadata;
 			this.isDirectory = isDirectory;
-			this.itemStack = new ItemStack(item, 1);
 			this.parent = parent;
-			this.name = name;
 
 			if (metadata != null) {
 				this.name = metadata.name();
 				this.itemStack = metadata.icon();
+			} else {
+				this.itemStack = new ItemStack(item, 1);
+				this.name = name;
 			}
 		}
 

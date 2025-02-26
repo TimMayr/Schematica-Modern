@@ -219,13 +219,13 @@ public class Names {
 
 		public static final String ROOT = "Schematic";
 		public static final String ICON = "Icon";
-		public static final String BLOCKS = "Blocks";
+		public static final String BLOCKS = "blocks";
 		public static final String WIDTH = "Width";
 		public static final String LENGTH = "Length";
 		public static final String HEIGHT = "Height";
 		public static final String MAPPING_SCHEMATICA = "SchematicaMapping";
 		public static final String BLOCK_ENTITIES = "TileEntities";
-		public static final String ENTITIES = "Entities";
+		public static final String ENTITIES = "entities";
 		public static final String AUTHOR = "Author";
 		public static final String TITLE = "Name";
 		public static final String PLAYER_PERMISSIONS = "PlayerPermissions";
@@ -251,15 +251,16 @@ public class Names {
 
 	public static class Network {
 		public static final String CAPABILITIES_LOCATION = "capabilities";
-		public static final String SAVE_LOCATION = "save";
+		public static final String DOWNLOAD_REQUEST_LOCATION = "request_download";
 		public static final String DOWNLOAD_BEGIN_LOCATION = "download_begin";
 		public static final String DOWNLOAD_BEGIN_ACK_LOCATION = "download_begin_ack";
 		public static final String DOWNLOAD_CHUNK_LOCATION = "download_chunk";
 		public static final String DOWNLOAD_CHUNK_ACK_LOCATION = "download_chunk_ack";
 		public static final String DOWNLOAD_END_LOCATION = "download_end";
-		public static final String DOWNLOAD_REQUEST_LOCATION = "request_download";
+		public static final String DOWNLOAD_END_ACK_LOCATION = "download_end_ack";
 		public static final String ADD_SCHEMATIC = "add_schematic";
 		public static final String REMOVE_SCHEMATIC = "remove_schematic";
+		public static final String SAVE_LOCATION = "save_schematic";
 		public static final String DELETE_SCHEMATIC = "delete_schematic";
 	}
 }
