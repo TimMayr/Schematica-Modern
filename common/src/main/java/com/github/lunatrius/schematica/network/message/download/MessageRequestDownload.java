@@ -9,7 +9,6 @@ import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import commonnetwork.networking.data.PacketContext;
 import commonnetwork.networking.data.Side;
-import dev.architectury.platform.Platform;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;

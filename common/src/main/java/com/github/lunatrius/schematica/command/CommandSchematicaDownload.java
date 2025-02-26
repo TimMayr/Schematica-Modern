@@ -39,7 +39,7 @@ public class CommandSchematicaDownload extends CommandSchematicaBase {
 
 							if (schematics.get(filename) == null) {
 								Reference.logger.error("Schematic [{}] does not exist, or is not accessible by " +
-										"player [{}], and can therefore not be downloaded", filename,
+												"player [{}], and can therefore not be downloaded", filename,
 										player.getScoreboardName());
 
 								source.sendFailure(Component.translatable(
