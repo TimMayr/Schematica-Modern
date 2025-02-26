@@ -42,7 +42,7 @@ public record MessageDownloadEnd(UUID id) implements CustomPacketPayload {
 			boolean success = false;
 			Path path = null;
 			Player player = PlayerUtils.getClientPlayer();
-			SchematicTransfer transfer = DownloadHandler.INSTANCE.transferMap.get(player.getScoreboardName());
+			SchematicTransfer transfer = DownloadHandler.INSTANCE.transferMap.get(player.getUUID());
 
 			switch (transfer.type) {
 				case LOAD -> {

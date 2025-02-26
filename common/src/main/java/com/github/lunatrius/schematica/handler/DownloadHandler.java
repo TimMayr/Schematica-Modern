@@ -1,6 +1,7 @@
 package com.github.lunatrius.schematica.handler;
 
 import com.github.lunatrius.schematica.api.ISchematic;
+import com.github.lunatrius.schematica.core.PlatformUtils;
 import com.github.lunatrius.schematica.network.message.download.MessageDownloadBegin;
 import com.github.lunatrius.schematica.network.message.download.MessageDownloadChunk;
 import com.github.lunatrius.schematica.network.message.download.MessageDownloadEnd;
@@ -14,15 +15,12 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class DownloadHandler {
 	public static DownloadHandler INSTANCE;
-	public final Map<String, SchematicTransfer> transferMap = new LinkedHashMap<>();
+	public final Map<UUID, SchematicTransfer> transferMap = new LinkedHashMap<>();
 	private final Set<Consumer<ISchematic>> downloadCompleteListener = new HashSet<>();
 	public ISchematic schematic = null;
 
@@ -36,8 +34,8 @@ public class DownloadHandler {
 			return;
 		}
 
-		ServerPlayer player = server.getPlayerList().getPlayerByName(this.transferMap.keySet().iterator().next());
-		SchematicTransfer transfer = this.transferMap.remove(player.getScoreboardName());
+		ServerPlayer player = server.getPlayerList().getPlayer(this.transferMap.keySet().iterator().next());
+		SchematicTransfer transfer = this.transferMap.remove(player.getUUID());
 
 		if (transfer == null) {
 			return;
@@ -64,9 +62,13 @@ public class DownloadHandler {
 			sendChunk(player, transfer);
 		} else if (transfer.state == SchematicTransfer.State.END_WAIT) {
 			sendEnd(player, transfer);
+
+			if (PlatformUtils.isPlatformServer()) {
+				transferMap.remove(player.getUUID());
+			}
 		}
 
-		this.transferMap.put(player.getScoreboardName(), transfer);
+		this.transferMap.put(player.getUUID(), transfer);
 	}
 
 	public static void init() {
@@ -90,6 +92,8 @@ public class DownloadHandler {
 	}
 
 	private void sendEnd(ServerPlayer player, @NotNull SchematicTransfer transfer) {
+		transfer.setState(SchematicTransfer.State.END);
+
 		MessageDownloadEnd message = new MessageDownloadEnd(transfer.schematic.getMetadata().id());
 		Dispatcher.sendToClient(message, player);
 	}

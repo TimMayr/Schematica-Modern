@@ -189,7 +189,7 @@ public class ServerProxy extends CommonProxy {
 
 	@Override
 	public Path getSchematicDirectory() {
-		return null;
+		return getDirectory("schematics");
 	}
 
 	@Override
@@ -212,7 +212,7 @@ public class ServerProxy extends CommonProxy {
 				getSchematicDirectory().resolve(player.getUUID().toString()).resolve(Names.NBT.USERNAME_FILE);
 		try {
 			if (!Files.exists(usernameFile)) {
-				Files.createDirectories(usernameFile);
+				Files.createFile(usernameFile);
 			}
 			Files.writeString(usernameFile, player.getScoreboardName(), StandardOpenOption.WRITE,
 					StandardOpenOption.TRUNCATE_EXISTING);

@@ -33,7 +33,7 @@ public record MessageDownloadChunkAck(boolean ack, int baseX, int baseY, int bas
 		if (ctx.side() == Side.SERVER) {
 			if (ctx.message().ack()) {
 				Player player = ctx.sender();
-				SchematicTransfer transfer = DownloadHandler.INSTANCE.transferMap.get(player.getScoreboardName());
+				SchematicTransfer transfer = DownloadHandler.INSTANCE.transferMap.get(player.getUUID());
 
 				if (transfer != null) {
 					transfer.confirmChunk(ctx.message().baseX(), ctx.message().baseY(), ctx.message().baseZ());

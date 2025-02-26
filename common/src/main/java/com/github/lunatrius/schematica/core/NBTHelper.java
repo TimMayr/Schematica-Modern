@@ -1,4 +1,4 @@
-package com.github.lunatrius.schematica.nbt;
+package com.github.lunatrius.schematica.core;
 
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
@@ -38,10 +38,18 @@ public class NBTHelper {
 
 	public static BlockEntity readBlockEntityFromCompound(BlockPos pos, CompoundTag blockEntityCompound,
 	                                                      BlockState state) {
+		if (blockEntityCompound == null) {
+			return null;
+		}
+
 		return BlockEntity.loadStatic(pos, state, blockEntityCompound, Reference.proxy.getRegistryAccess());
 	}
 
-	public static BlockEntity readBlockEntityFromCompound(@NotNull CompoundTag blockEntityCompound, BlockState state) {
+	public static BlockEntity readBlockEntityFromCompound(CompoundTag blockEntityCompound, BlockState state) {
+		if (blockEntityCompound == null) {
+			return null;
+		}
+
 		BlockPos pos = new BlockPos(blockEntityCompound.getShort("x"), blockEntityCompound.getShort("y"),
 				blockEntityCompound.getShort("z"));
 		return BlockEntity.loadStatic(pos, state, blockEntityCompound, Reference.proxy.getRegistryAccess());

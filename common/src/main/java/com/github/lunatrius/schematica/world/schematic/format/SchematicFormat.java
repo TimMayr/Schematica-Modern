@@ -62,14 +62,15 @@ public abstract class SchematicFormat {
 		return null;
 	}
 
-	public static SchematicFormat getFormatFromNbt(@NotNull CompoundTag tag) {
+	public static @Nullable SchematicFormat getFormatFromNbt(@NotNull CompoundTag tag) {
 		if (tag.contains(Names.NBT.METADATA)) {
-			if (tag.contains(Names.NBT.FORMAT)) {
-				return SchematicFormat.getFormatFromName(tag.getString(Names.NBT.FORMAT));
+			CompoundTag meta = tag.getCompound(Names.NBT.METADATA);
+			if (meta.contains(Names.NBT.FORMAT)) {
+				return SchematicFormat.getFormatFromName(meta.getString(Names.NBT.FORMAT));
 			}
 		}
 
-		return SchematicFormat.getFormatFromName(SchematicFormat.FORMAT_DEFAULT);
+		return null;
 	}
 
 	/**

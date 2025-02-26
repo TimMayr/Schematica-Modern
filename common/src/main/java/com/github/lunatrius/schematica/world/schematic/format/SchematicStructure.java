@@ -2,7 +2,7 @@ package com.github.lunatrius.schematica.world.schematic.format;
 
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.api.SchematicMetadata;
-import com.github.lunatrius.schematica.nbt.NBTHelper;
+import com.github.lunatrius.schematica.core.NBTHelper;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.world.FakeLevel;
@@ -34,10 +34,12 @@ public class SchematicStructure extends SchematicFormat {
 			for (StructureTemplate.StructureBlockInfo block : palette.blocks()) {
 				schematic.setBlockState(block.pos(), block.state());
 				try {
-					// This position isn't included by default
-					block.nbt().putInt("x", block.pos().getX());
-					block.nbt().putInt("y", block.pos().getY());
-					block.nbt().putInt("z", block.pos().getZ());
+					if (block.nbt() != null) {
+						// This position isn't included by default
+						block.nbt().putInt("x", block.pos().getX());
+						block.nbt().putInt("y", block.pos().getY());
+						block.nbt().putInt("z", block.pos().getZ());
+					}
 
 					BlockEntity blockEntity = NBTHelper.readBlockEntityFromCompound(block.nbt(), block.state());
 					if (blockEntity != null) {

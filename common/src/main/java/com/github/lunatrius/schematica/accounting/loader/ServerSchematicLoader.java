@@ -15,7 +15,7 @@ public class ServerSchematicLoader {
 			return CompletableFuture.completedFuture(SchematicFormat.readSchematic(holder.metadata(),
 					Reference.proxy.getLevel()));
 		} else {
-			return new CompletableFuture<>();
+			return CompletableFuture.completedFuture(null);
 		}
 	}
 }

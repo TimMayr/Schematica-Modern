@@ -1,7 +1,7 @@
 package com.github.lunatrius.schematica.network.transfer;
 
 import com.github.lunatrius.schematica.api.ISchematic;
-import com.github.lunatrius.schematica.nbt.NBTHelper;
+import com.github.lunatrius.schematica.core.NBTHelper;
 import com.github.lunatrius.schematica.network.message.download.DownloadType;
 import com.github.lunatrius.schematica.network.message.download.MessageDownloadChunk;
 import com.github.lunatrius.schematica.reference.Constants;
@@ -28,7 +28,7 @@ public class SchematicTransfer {
 	public int baseY = 0;
 	public int baseZ = 0;
 
-	public SchematicTransfer(@NotNull ISchematic schematic, String name, DownloadType type) {
+	public SchematicTransfer(@NotNull ISchematic schematic, DownloadType type) {
 		this.schematic = schematic;
 		this.type = type;
 	}

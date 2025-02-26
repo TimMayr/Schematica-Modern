@@ -4,6 +4,7 @@ import com.github.lunatrius.core.util.math.MBlockPos;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.api.SchematicMetadata;
 import com.github.lunatrius.schematica.reference.Reference;
+import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
@@ -167,13 +168,10 @@ public abstract class CommonProxy {
 			List<Path> fileList = new ArrayList<>();
 			Files.walkFileTree(Reference.proxy.getSchematicDirectory(), new SimpleFileVisitor<>() {
 				@Override
-				public @NotNull FileVisitResult preVisitDirectory(Path dir, @NotNull BasicFileAttributes attrs) {
-					return FileVisitResult.CONTINUE;
-				}
-
-				@Override
 				public @NotNull FileVisitResult visitFile(Path file, @NotNull BasicFileAttributes attrs) {
-					fileList.add(file);
+					if (new FileFilterSchematic(false).accept(file)) {
+						fileList.add(file);
+					}
 					return FileVisitResult.CONTINUE;
 				}
 			});

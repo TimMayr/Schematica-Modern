@@ -31,7 +31,7 @@ public record MessageDownloadBeginAck(boolean ack) implements CustomPacketPayloa
 		if (ctx.side() == Side.SERVER) {
 			if (ctx.message().ack()) {
 				Player player = ctx.sender();
-				SchematicTransfer transfer = DownloadHandler.INSTANCE.transferMap.get(player.getScoreboardName());
+				SchematicTransfer transfer = DownloadHandler.INSTANCE.transferMap.get(player.getUUID());
 
 				if (transfer != null) {
 					transfer.setState(SchematicTransfer.State.CHUNK_WAIT);

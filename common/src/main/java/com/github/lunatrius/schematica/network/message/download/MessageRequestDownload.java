@@ -37,8 +37,8 @@ public record MessageRequestDownload(UUID id, DownloadType downloadType)
 			Player player = ctx.sender();
 			SchematicHolder holder = SchematicAccounter.get(ctx.message().id());
 			holder.getSchematic().thenAccept((schematic) ->
-					DownloadHandler.INSTANCE.transferMap.put(player.getScoreboardName(),
-							new SchematicTransfer(schematic, ctx.message().id().toString(),
+					DownloadHandler.INSTANCE.transferMap.put(player.getUUID(),
+							new SchematicTransfer(schematic,
 									ctx.message().downloadType())));
 		}
 	}
