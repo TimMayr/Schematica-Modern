@@ -95,6 +95,8 @@ public class SchematicTransfer {
 	}
 
 	public enum State {
+		REQUEST_WAIT(true),
+		REQUEST,
 		BEGIN_WAIT(true),
 		BEGIN,
 		CHUNK_WAIT(true),

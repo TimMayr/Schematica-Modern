@@ -19,7 +19,7 @@ public class SchematicaClient {
 		SchematicaClientConfig.schematicDirectory =
 				Reference.proxy.getDataDirectory().resolve(SCHEMATIC_DEFAULT_FOLDER);
 
-		ClientCommandRegistrationEvent.EVENT.register(ClientCommandSchematicaBase::registerClient);
+		ClientCommandRegistrationEvent.EVENT.register(ClientCommandSchematicaBase::register);
 		Reference.proxy.init();
 
 		GuiHandler.init();

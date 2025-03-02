@@ -9,8 +9,10 @@ import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
 public class ClientCommandSchematicaBase {
-	public static void registerClient(@NotNull CommandDispatcher<ClientCommandRegistrationEvent.ClientCommandSourceStack> dispatcher, CommandBuildContext context) {
+	public static void register(
+			@NotNull CommandDispatcher<ClientCommandRegistrationEvent.ClientCommandSourceStack> dispatcher,
+			CommandBuildContext context) {
 		dispatcher.register(CommandSchematicaReplace.register(context));
-		dispatcher.register(CommandSchematicaList.register());
+		dispatcher.register(CommandSchematicaDownload.register());
 	}
 }

@@ -4,9 +4,6 @@ import com.github.lunatrius.schematica.accounting.FilePermission;
 import com.github.lunatrius.schematica.accounting.SchematicAccounter;
 import com.github.lunatrius.schematica.reference.Names;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.ChatFormatting;
@@ -36,26 +33,16 @@ public abstract class CommandSchematicaBase {
 
 	public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal(Names.Command.BASE)
-				.then(CommandSchematicaDownload.register())
 				.then(CommandSchematicaSave.register())
+				.then(CommandSchematicaList.register())
 				.then(CommandSchematicaRemove.register()));
 	}
 
 	public static CompletableFuture<Suggestions> getSchematicNamesSuggestions(
-			@NotNull CommandContext<CommandSourceStack> context, SuggestionsBuilder builder,
+			@NotNull Player player, @Nullable String name, SuggestionsBuilder builder,
 			FilePermission permission) {
-		CommandSourceStack source = context.getSource();
-		Player player;
-		String name = "";
-		try {
-			name = StringArgumentType.getString(context, "name");
-		} catch (IllegalArgumentException ignored) {
-		}
-
-		try {
-			player = source.getPlayerOrException();
-		} catch (CommandSyntaxException e) {
-			return builder.buildFuture();
+		if (name == null) {
+			name = "";
 		}
 
 		List<String> filenames = SchematicAccounter.sortedNames(player, permission);

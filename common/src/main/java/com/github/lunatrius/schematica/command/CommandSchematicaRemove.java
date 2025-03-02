@@ -33,8 +33,12 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 		return Commands.literal(Names.Command.Remove.NAME)
 				.then(Commands.argument("name", StringArgumentType.string())
 						.suggests(
-								((context, builder) -> CommandSchematicaBase.getSchematicNamesSuggestions(context,
-										builder, FilePermission.DELETE)))
+								((context, builder) ->
+										CommandSchematicaBase.getSchematicNamesSuggestions(
+												context.getSource().getPlayer(),
+												StringArgumentType.getString(context, "name"),
+												builder,
+												FilePermission.DELETE)))
 						.executes(CommandSchematicaRemove::showDeleteConfirmation)
 						.then(Commands.argument("confirm", BoolArgumentType.bool())
 								.executes(CommandSchematicaRemove::delete)));

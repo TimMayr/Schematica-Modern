@@ -2,10 +2,7 @@ package com.github.lunatrius.schematica.handler;
 
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.core.PlatformUtils;
-import com.github.lunatrius.schematica.network.message.download.MessageDownloadBegin;
-import com.github.lunatrius.schematica.network.message.download.MessageDownloadChunk;
-import com.github.lunatrius.schematica.network.message.download.MessageDownloadEnd;
-import com.github.lunatrius.schematica.network.message.download.MessageDownloadEndAck;
+import com.github.lunatrius.schematica.network.message.download.*;
 import com.github.lunatrius.schematica.network.transfer.SchematicTransfer;
 import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Reference;
@@ -24,9 +21,21 @@ public class DownloadHandler {
 	private final Set<Consumer<ISchematic>> downloadCompleteListener = new HashSet<>();
 	public ISchematic schematic = null;
 
-
 	private DownloadHandler() {
 		TickEvent.SERVER_POST.register(this::processQueue);
+	}
+
+	public static void init() {
+		DownloadHandler.INSTANCE = new DownloadHandler();
+	}
+
+	private void sendChunk(ServerPlayer player, @NotNull SchematicTransfer transfer) {
+		transfer.setState(SchematicTransfer.State.CHUNK);
+
+		Reference.logger.trace("Sending chunk {},{},{}", transfer.baseX, transfer.baseY, transfer.baseZ);
+		MessageDownloadChunk message =
+				new MessageDownloadChunk(transfer.schematic, transfer.baseX, transfer.baseY, transfer.baseZ);
+		Dispatcher.sendToClient(message, player);
 	}
 
 	private void processQueue(MinecraftServer server) {
@@ -56,6 +65,8 @@ public class DownloadHandler {
 				sendChunk(player, transfer);
 				transfer.timeout = 0;
 			}
+		} else if (transfer.state == SchematicTransfer.State.REQUEST_WAIT) {
+			sendRequest(transfer);
 		} else if (transfer.state == SchematicTransfer.State.BEGIN_WAIT) {
 			sendBegin(player, transfer);
 		} else if (transfer.state == SchematicTransfer.State.CHUNK_WAIT) {
@@ -71,23 +82,17 @@ public class DownloadHandler {
 		this.transferMap.put(player.getUUID(), transfer);
 	}
 
-	public static void init() {
-		DownloadHandler.INSTANCE = new DownloadHandler();
+	private void sendRequest(@NotNull SchematicTransfer transfer) {
+		transfer.setState(SchematicTransfer.State.REQUEST);
+		MessageRequestDownload message = new MessageRequestDownload(transfer.schematic.getMetadata().id(),
+				transfer.type);
+		Dispatcher.sendToServer(message);
 	}
 
 	private void sendBegin(ServerPlayer player, @NotNull SchematicTransfer transfer) {
 		transfer.setState(SchematicTransfer.State.BEGIN);
 
 		MessageDownloadBegin message = new MessageDownloadBegin(transfer.schematic);
-		Dispatcher.sendToClient(message, player);
-	}
-
-	private void sendChunk(ServerPlayer player, @NotNull SchematicTransfer transfer) {
-		transfer.setState(SchematicTransfer.State.CHUNK);
-
-		Reference.logger.trace("Sending chunk {},{},{}", transfer.baseX, transfer.baseY, transfer.baseZ);
-		MessageDownloadChunk message =
-				new MessageDownloadChunk(transfer.schematic, transfer.baseX, transfer.baseY, transfer.baseZ);
 		Dispatcher.sendToClient(message, player);
 	}
 
