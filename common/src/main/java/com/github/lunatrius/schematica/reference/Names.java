@@ -1,6 +1,5 @@
 package com.github.lunatrius.schematica.reference;
 
-@SuppressWarnings("HardCodedStringLiteral")
 public class Names {
 	public static class Config {
 		public static final String DUMP_BLOCK_LIST = "dumpBlockList";
@@ -136,6 +135,7 @@ public class Names {
 	public static class Messages {
 		public static final String TOGGLE_PRINTER = "schematica.message.togglePrinter";
 		public static final String WATCHDOG_ERROR = "schematic.message.watchdogError";
+		public static final String OPEN_DIRECTORY_ERROR = "schematic.message.directoryError";
 	}
 
 	public static class Gui {

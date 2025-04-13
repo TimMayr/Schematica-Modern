@@ -30,7 +30,7 @@ public record MessageDownloadEndAck(boolean ack) implements CustomPacketPayload 
 		if (ctx.side() == Side.SERVER) {
 			if (ctx.message().ack()) {
 				Player player = ctx.sender();
-				DownloadHandler.INSTANCE.transferMap.remove(player.getUUID());
+				DownloadHandler.INSTANCE.getTransferMap().remove(player.getUUID());
 			}
 		}
 	}

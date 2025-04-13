@@ -11,6 +11,8 @@ import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import commonnetwork.api.Dispatcher;
 import dev.architectury.event.events.common.TickEvent;
 import net.minecraft.network.chat.Component;
@@ -35,7 +37,7 @@ import java.util.stream.Collectors;
  */
 public class SchematicAccounter {
 	private static final Map<UUID, SchematicHolder> schematics = new HashMap<>();
-	private static final Map<Path, SchematicHolder> localSchematics = new HashMap<>();
+	private static final HashBiMap<Path, SchematicHolder> localSchematics = HashBiMap.create();
 	private static final FileFilterSchematic FILTER_SCHEMATIC = new FileFilterSchematic(false);
 	private static final Map<WatchKey, Path> keyToPathMap = new HashMap<>();
 	private static WatchService watchService;
@@ -101,6 +103,11 @@ public class SchematicAccounter {
 			Reference.logger.error("Error polling watchService", e);
 		}
 	};
+
+	public static Path getPathForLocalSchematic(SchematicHolder holder) {
+		return localSchematics.inverse().get(holder);
+	}
+
 
 	public static void init() {
 		initWatchService();

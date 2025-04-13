@@ -55,12 +55,7 @@ public class SchematicLoadList extends ObjectSelectionList<SchematicLoadList.Ent
 			return true;
 		}
 
-		if (entry.isDirectory()) {
-			this.getParent().changeDirectory(entry.getMetadata().name());
-			this.setSelectedIndex(-1);
-		} else {
-			this.setSelected(entry);
-		}
+		this.setSelected(entry);
 
 		return true;
 	}
@@ -75,22 +70,20 @@ public class SchematicLoadList extends ObjectSelectionList<SchematicLoadList.Ent
 	@MethodsReturnNonnullByDefault
 	public static class Entry extends ObjectSelectionList.Entry<Entry> {
 		private final SchematicMetadata metadata;
-		private final boolean isDirectory;
 		private final SchematicLoadList parent;
 		private final ItemStack itemStack;
 		private final String name;
 
 		//The Constructor param positions are all out of whack intentionally. Java doesn't know which to call if you
 		// pass to many nulls otherwise
-		public Entry(@Nullable SchematicMetadata metadata, boolean isDirectory, @Nullable String name,
-		             @Nullable ItemStack itemStack, SchematicLoadList parent) {
-			this(metadata, name, isDirectory, itemStack.getItem(), parent);
+		public Entry(SchematicLoadList parent, @Nullable SchematicMetadata metadata, @Nullable String name,
+		             @Nullable ItemStack itemStack) {
+			this(parent, metadata, name, itemStack.getItem());
 		}
 
-		public Entry(@Nullable SchematicMetadata metadata, @Nullable String name, boolean isDirectory,
-		             @Nullable Item item, SchematicLoadList parent) {
+		public Entry(SchematicLoadList parent, @Nullable SchematicMetadata metadata, @Nullable String name,
+		             @Nullable Item item) {
 			this.metadata = metadata;
-			this.isDirectory = isDirectory;
 			this.parent = parent;
 
 			if (metadata != null) {
@@ -102,28 +95,17 @@ public class SchematicLoadList extends ObjectSelectionList<SchematicLoadList.Ent
 			}
 		}
 
-		public Entry(@Nullable SchematicMetadata metadata, @Nullable String name,
-		             @Nullable Block block, SchematicLoadList parent, boolean isDirectory) {
-			this(metadata, name, isDirectory, block.asItem(), parent);
+		public Entry(SchematicLoadList parent, @Nullable SchematicMetadata metadata, @Nullable String name,
+		             @Nullable Block block) {
+			this(parent, metadata, name, block.asItem());
 		}
 
 		@Override
 		public void render(@NotNull GuiGraphics guiGraphics, int index, int left, int top, int width, int height,
 		                   int mouseX, int mouseY, boolean isHovered, float partialTicks) {
-			String schematicName = name;
-
-			if (isDirectory()) {
-				schematicName += "/";
-			} else {
-				schematicName = FilenameUtils.getBaseName(schematicName);
-			}
-
+			String schematicName = FilenameUtils.getBaseName(name);
 			GuiHelper.drawItemStackWithSlot(guiGraphics, getItemStack(), top, left);
 			guiGraphics.drawString(parent.getMinecraft().font, schematicName, top + 24, left + 6, 0x00FFFFFF);
-		}
-
-		public boolean isDirectory() {
-			return this.isDirectory;
 		}
 
 		public ItemStack getItemStack() {

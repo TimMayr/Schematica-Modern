@@ -84,4 +84,21 @@ public record SchematicMetadata(String name, UUID owner, Map<UUID, List<FilePerm
 		return new SchematicMetadata(this.name, this.owner, this.permissions, this.schematicFormat,
 				this.dimensions, this.icon, this.id, this.filesize, newLastEdited, this.isPrivate);
 	}
-}
+
+	@Contract("_ -> new")
+	public @NotNull SchematicMetadata withId(UUID newId) {
+		return new SchematicMetadata(this.name, this.owner, this.permissions, this.schematicFormat,
+				this.dimensions, this.icon, newId, this.filesize, this.lastEdited, this.isPrivate);
+	}
+
+	@Contract("_ -> new")
+	public @NotNull SchematicMetadata isPrivate(boolean isPrivate) {
+		return new SchematicMetadata(this.name, this.owner, this.permissions, this.schematicFormat,
+				this.dimensions, this.icon, this.id, this.filesize, this.lastEdited, isPrivate);
+	}
+
+	@Contract("_ -> new")
+	public @NotNull SchematicMetadata withName(String newName) {
+		return new SchematicMetadata(newName, this.owner, this.permissions, this.schematicFormat,
+				this.dimensions, this.icon, this.id, this.filesize, this.lastEdited, this.isPrivate);
+	}}

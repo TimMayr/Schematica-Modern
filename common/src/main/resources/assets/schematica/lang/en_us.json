@@ -178,6 +178,7 @@
 	"_comment": "messages",
 	"schematica.message.togglePrinter": "Printer: %s",
 	"schematic.message.watchdogError": "[Schematica] Watchdog creation failed. Manually adding schematic files to the schematic directory might not work properly. Either quit and reenter the world, or create a schematic with the same name in-game, and then overwrite it with the proper one",
+	"schematica.message.directoryError": "Opening directory not supported on this Platform",
 	"schematica.message.invalidBlock": "\"%s\" does not exist.",
 	"schematica.message.invalidProperty": "\"%s\" is not a valid property.",
 	"schematica.message.invalidPropertyForBlock": "\"%s\" is not a valid property for \"%s\".",

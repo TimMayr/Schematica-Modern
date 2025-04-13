@@ -20,24 +20,24 @@ import org.jetbrains.annotations.NotNull;
 import java.util.UUID;
 
 @MethodsReturnNonnullByDefault
-public record MessageRequestDownload(UUID id, DownloadType downloadType)
+public record MessageDownloadRequest(UUID id, DownloadType downloadType)
 		implements CustomPacketPayload {
 
-	public static final CustomPacketPayload.Type<MessageRequestDownload> TYPE = new CustomPacketPayload.Type<>(
+	public static final CustomPacketPayload.Type<MessageDownloadRequest> TYPE = new CustomPacketPayload.Type<>(
 			ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, Names.Network.DOWNLOAD_REQUEST_LOCATION));
 
-	public static final StreamCodec<RegistryFriendlyByteBuf, MessageRequestDownload> STREAM_CODEC =
+	public static final StreamCodec<RegistryFriendlyByteBuf, MessageDownloadRequest> STREAM_CODEC =
 			StreamCodec.composite(
-					CommonCodecs.UUID, MessageRequestDownload::id,
-					CommonCodecs.ENUM(DownloadType.class), MessageRequestDownload::downloadType,
-					MessageRequestDownload::new);
+					CommonCodecs.UUID, MessageDownloadRequest::id,
+					CommonCodecs.ENUM(DownloadType.class), MessageDownloadRequest::downloadType,
+					MessageDownloadRequest::new);
 
-	public static void handle(@NotNull PacketContext<MessageRequestDownload> ctx) {
+	public static void handle(@NotNull PacketContext<MessageDownloadRequest> ctx) {
 		if (ctx.side() == Side.SERVER) {
 			Player player = ctx.sender();
 			SchematicHolder holder = SchematicAccounter.get(ctx.message().id());
 			holder.getSchematic().thenAccept((schematic) ->
-					DownloadHandler.INSTANCE.transferMap.put(player.getUUID(),
+					DownloadHandler.INSTANCE.getTransferMap().put(player.getUUID(),
 							new SchematicTransfer(schematic,
 									ctx.message().downloadType())));
 		}

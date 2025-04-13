@@ -1,5 +1,7 @@
 package com.github.lunatrius.schematica.client.gui.load;
 
+import com.github.lunatrius.schematica.accounting.SchematicAccounter;
+import com.github.lunatrius.schematica.accounting.SchematicHolder;
 import com.github.lunatrius.schematica.config.client.SchematicaClientConfig;
 import com.github.lunatrius.schematica.core.BaseScreen;
 import com.github.lunatrius.schematica.core.FileUtils;
@@ -8,7 +10,6 @@ import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import com.github.lunatrius.schematica.world.FakeLevel;
-import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.Util;
@@ -17,22 +18,21 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Environment(EnvType.CLIENT)
 public class SchematicLoadScreen extends BaseScreen {
 	private static final DirectoryStream.Filter<Path> FILE_FILTER_FOLDER = new FileFilterSchematic(true);
-	private static final DirectoryStream.Filter<Path> FILE_FILTER_SCHEMATIC = new FileFilterSchematic(false);
 	private final List<SchematicLoadList.Entry> schematicListSlots = new ArrayList<>();
 	private final Component strTitle = Component.translatable(Names.Gui.Load.TITLE);
 	private final Component strFolderInfo = Component.translatable(Names.Gui.Load.FOLDER_INFO);
@@ -69,7 +69,9 @@ public class SchematicLoadScreen extends BaseScreen {
 			try {
 				Util.getPlatform().openPath(SchematicaClientConfig.schematicDirectory);
 			} catch (Throwable e) {
-				System.out.println("Desktop actions are not supported on this platform.");
+				Minecraft.getInstance().player.displayClientMessage(
+						Component.translatable(Names.Messages.OPEN_DIRECTORY_ERROR), false);
+				Reference.logger.warn("Desktop actions are not supported on this platform.");
 			}
 		}).size(150, 20).pos(this.width / 2 - 154, this.height - 36).build();
 		this.addRenderableWidget(buttonOpenDir);
@@ -104,50 +106,21 @@ public class SchematicLoadScreen extends BaseScreen {
 	}
 
 	protected void reloadSchematics() {
-		String name;
-		Item item;
-
 		this.getSchematicListSlots().clear();
 
-		try {
-			if (!this.currentDirectory.toRealPath().normalize()
-					.equals(SchematicaClientConfig.schematicDirectory.toRealPath().normalize())) {
-				this.getSchematicListSlots().add(new SchematicLoadList.Entry(null, "..",
-						true, Items.LAVA_BUCKET, this.schematicLoadList));
-			}
-		} catch (IOException e) {
-			Reference.logger.error("Failed to add GuiSchematicEntry!", e);
-		}
-
+		@NotNull @Unmodifiable Map<UUID, SchematicHolder> holders = SchematicAccounter.getSchematics();
 		List<Path> filesFolders = FileUtils.getAllFilesInDirectory(this.currentDirectory, FILE_FILTER_FOLDER);
 
 		filesFolders.sort((Path a, Path b) -> a.getFileName().toString()
 				.compareToIgnoreCase(b.getFileName().toString()));
-		for (Path file : filesFolders) {
-			if (file == null) {
-				continue;
-			}
 
-			name = file.getFileName().toString();
-
-			List<Path> files = FileUtils.getAllFilesInDirectory(file);
-			item = files.isEmpty() ? Items.BUCKET : Items.WATER_BUCKET;
-
-			this.getSchematicListSlots().add(new SchematicLoadList.Entry(SchematicFormat.readMetaFromFile(file),
-					name, Files.isDirectory(file), item, this.schematicLoadList));
-		}
-
-		List<Path> filesSchematics = FileUtils.getAllFilesInDirectory(this.currentDirectory, FILE_FILTER_SCHEMATIC);
-		if (filesSchematics.isEmpty()) {
-			this.getSchematicListSlots().add(new SchematicLoadList.Entry(null, this.strNoSchematic.getString(),
-					Blocks.DIRT, this.schematicLoadList, false));
+		if (holders.isEmpty()) {
+			this.getSchematicListSlots().add(new SchematicLoadList.Entry(this.schematicLoadList, null,
+					this.strNoSchematic.getString(), Blocks.DIRT));
 		} else {
-			filesSchematics.sort((Path a, Path b) -> a.getFileName().toString()
-					.compareToIgnoreCase(b.getFileName().toString()));
-			for (Path file : filesSchematics) {
-				this.getSchematicListSlots().add(new SchematicLoadList.Entry(SchematicFormat.readMetaFromFile(file),
-						null, Files.isDirectory(file), null,
-						this.schematicLoadList));
+			for (SchematicHolder holder : holders.values()) {
+				this.getSchematicListSlots().add(new SchematicLoadList.Entry(this.schematicLoadList,
+						holder.metadata(), holder.metadata().name(), holder.metadata().icon()));
 			}
 		}
 
@@ -156,17 +129,5 @@ public class SchematicLoadScreen extends BaseScreen {
 
 	public List<SchematicLoadList.Entry> getSchematicListSlots() {
 		return schematicListSlots;
-	}
-
-	protected void changeDirectory(String directory) {
-		this.currentDirectory = this.currentDirectory.resolve(directory);
-
-		try {
-			this.currentDirectory = this.currentDirectory.toRealPath().normalize();
-		} catch (IOException ioe) {
-			Reference.logger.error("Failed to canonize directory!", ioe);
-		}
-
-		reloadSchematics();
 	}
 }

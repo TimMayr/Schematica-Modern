@@ -1,11 +1,11 @@
 package com.github.lunatrius.schematica.proxy;
 
 import com.github.lunatrius.core.util.math.MBlockPos;
+import com.github.lunatrius.schematica.accounting.SchematicAccounter;
 import com.github.lunatrius.schematica.api.ISchematic;
 import com.github.lunatrius.schematica.api.SchematicMetadata;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.util.FileFilterSchematic;
-import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
@@ -145,22 +145,7 @@ public abstract class CommonProxy {
 	public abstract String getUsernameForUUID(UUID uuid);
 
 	public Path resolveSchematic(@NotNull SchematicMetadata metadata) {
-		List<Path> fileList = getAllLocalSchematics();
-
-		if (!fileList.stream().map(p -> p.getFileName().toString()).toList().contains(metadata.name())) {
-			Reference.logger.error("Schematic not found in directory [{}]",
-					Reference.proxy.getSchematicDirectory());
-
-			throw new IllegalArgumentException(String.format("Schematic not found in directory [%s]",
-					Reference.proxy.getSchematicDirectory()));
-		}
-
-		return fileList.stream().filter(p -> SchematicFormat.readMetaFromFile(p).id().equals(metadata.id()))
-				.findFirst()
-				.orElseThrow(() -> new IllegalArgumentException(
-						String.format("Schematic not found in directory [%s]",
-								Reference.proxy.getSchematicDirectory())));
-
+		return SchematicAccounter.getPathForLocalSchematic(SchematicAccounter.get(metadata.id()));
 	}
 
 	public List<Path> getAllLocalSchematics() {

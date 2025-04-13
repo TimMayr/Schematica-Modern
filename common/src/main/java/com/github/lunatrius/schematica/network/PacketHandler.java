@@ -13,8 +13,8 @@ public class PacketHandler {
 		Network.registerPacket(MessageCapabilities.TYPE, MessageCapabilities.class, MessageCapabilities.STREAM_CODEC,
 				MessageCapabilities::handle);
 
-		Network.registerPacket(MessageRequestDownload.TYPE, MessageRequestDownload.class,
-				MessageRequestDownload.STREAM_CODEC, MessageRequestDownload::handle);
+		Network.registerPacket(MessageDownloadRequest.TYPE, MessageDownloadRequest.class,
+				MessageDownloadRequest.STREAM_CODEC, MessageDownloadRequest::handle);
 		Network.registerPacket(MessageDownloadBegin.TYPE, MessageDownloadBegin.class,
 				MessageDownloadBegin.STREAM_CODEC, MessageDownloadBegin::handle);
 		Network.registerPacket(MessageDownloadBeginAck.TYPE, MessageDownloadBeginAck.class,

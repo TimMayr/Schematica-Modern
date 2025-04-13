@@ -42,7 +42,7 @@ public record MessageDownloadEnd(UUID id) implements CustomPacketPayload {
 			boolean success = false;
 			Path path = null;
 			Player player = PlayerUtils.getClientPlayer();
-			SchematicTransfer transfer = DownloadHandler.INSTANCE.transferMap.get(player.getUUID());
+			SchematicTransfer transfer = DownloadHandler.INSTANCE.getTransferMap().get(player.getUUID());
 
 			switch (transfer.type) {
 				case LOAD -> {
@@ -55,8 +55,12 @@ public record MessageDownloadEnd(UUID id) implements CustomPacketPayload {
 				}
 				case SAVE -> {
 					try {
+						String name = DownloadHandler.INSTANCE.schematic.getName();
+						DownloadHandler.INSTANCE.schematic.setMetadata(DownloadHandler.INSTANCE.schematic.getMetadata()
+								.withId(UUID.randomUUID()).withOwner(PlayerUtils.getClientPlayer().getUUID())
+								.isPrivate(true).withName(name.split("\\.")[0] + " (Local)." + name.split("\\.")[1]));
 						path = Reference.proxy.getSchematicDirectory();
-						path = path.resolve(DownloadHandler.INSTANCE.schematic.getName());
+						path = path.resolve(name);
 
 						if (!Files.exists(path)) {
 							Files.createDirectories(path.getParent());

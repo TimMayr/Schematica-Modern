@@ -24,38 +24,41 @@ public class CommandSchematicaDownload extends ClientCommandSchematicaBase {
 	public static LiteralArgumentBuilder<ClientCommandRegistrationEvent.ClientCommandSourceStack> register() {
 		return ClientCommandRegistrationEvent.literal(Names.Command.BASE).then(
 				ClientCommandRegistrationEvent.literal(Names.Command.Download.NAME)
-						.then(ClientCommandRegistrationEvent.argument("filename", StringArgumentType.string())
+						.then(ClientCommandRegistrationEvent.argument("name", StringArgumentType.string())
 								.suggests((context, builder) ->
-										CommandSchematicaBase.getSchematicNamesSuggestions(context.getSource()
-														.arch$getPlayer(),
-												context.getArgument("name", String.class), builder,
-												FilePermission.READ))
+										CommandSchematicaBase.getSchematicNamesSuggestions(
+												context.getSource().arch$getPlayer(),
+												ClientCommandSchematicaBase.getArgumentAsString(context, "name"),
+												builder, FilePermission.READ))
 								.executes((commandContext) -> {
 									ClientCommandRegistrationEvent.ClientCommandSourceStack source =
 											commandContext.getSource();
 									LocalPlayer player = source.arch$getPlayer();
 
-									String filename = StringArgumentType.getString(commandContext, "filename");
+									String name = StringArgumentType.getString(commandContext, "name");
 									Map<String, SchematicHolder> schematics =
 											SchematicAccounter.sortedSchematics(player,
 													FilePermission.READ);
 
-									if (schematics.get(filename) == null) {
+									if (schematics.get(name) == null) {
 										Reference.logger.error("Schematic [{}] does not exist, or is not accessible " +
 														"by player [{}], and can therefore not be downloaded",
-												filename, player.getScoreboardName());
+												name, player.getScoreboardName());
 
 										source.arch$sendFailure(
 												Component.translatable(Names.Command.Download.Message.DOWNLOAD_FAILED));
 										return -1;
 									}
 
-									return schematics.get(filename).getSchematic().thenApply(schematic -> {
+									//TODO: Figure out how to fix this. Doesn't work cause if you want to download a
+									// remote schematic (the usual use case) it first needs too download it into the
+									// temp slot in order to download it property which obviously doesn't make sense
+									return schematics.get(name).getSchematic().thenApply(schematic -> {
 										if (schematic != null) {
-											DownloadHandler.INSTANCE.transferMap.put(player.getUUID(),
+											DownloadHandler.INSTANCE.getTransferMap().put(player.getUUID(),
 													new SchematicTransfer(schematic, DownloadType.SAVE));
 											source.arch$sendSuccess(() -> Component.translatable(
-													Names.Command.Download.Message.DOWNLOAD_STARTED, filename), true);
+													Names.Command.Download.Message.DOWNLOAD_STARTED, name), true);
 											return 0;
 										} else {
 											source.arch$sendFailure(Component.translatable(

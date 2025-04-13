@@ -22,7 +22,7 @@ public class PlayerHandler {
 		});
 
 		PlayerEvent.PLAYER_QUIT.register(
-				player -> DownloadHandler.INSTANCE.transferMap.remove(player.getUUID()));
+				player -> DownloadHandler.INSTANCE.getTransferMap().remove(player.getUUID()));
 	}
 
 	public static void init() {
