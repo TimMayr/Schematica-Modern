@@ -18,7 +18,7 @@ import static net.minecraft.world.entity.ai.attributes.Attributes.ENTITY_INTERAC
 @OnlyIn(Dist.CLIENT)
 public class RenderTickHandlerNeo {
 	public static final RenderTickHandlerNeo INSTANCE = new RenderTickHandlerNeo();
-	private final Minecraft minecraft = Minecraft.getInstance();
+	private Minecraft minecraft = null;
 
 	private RenderTickHandlerNeo() {}
 
@@ -30,13 +30,13 @@ public class RenderTickHandlerNeo {
 
 	@SuppressWarnings("SameParameterValue")
 	private @Nullable HitResult rayTrace(FakeLevel schematic, float partialTicks) {
-		Entity renderViewEntity = this.minecraft.getCameraEntity();
+		Entity renderViewEntity = this.getMinecraft().getCameraEntity();
 		if (renderViewEntity == null) {
 			return null;
 		}
 
-		if (this.minecraft.gameMode != null) {
-			double blockReachDistance = this.minecraft.player.getAttributeValue(ENTITY_INTERACTION_RANGE);
+		if (this.getMinecraft().gameMode != null) {
+			double blockReachDistance = this.getMinecraft().player.getAttributeValue(ENTITY_INTERACTION_RANGE);
 
 			double posX = renderViewEntity.getX();
 			double posY = renderViewEntity.getY();
@@ -58,5 +58,13 @@ public class RenderTickHandlerNeo {
 		}
 
 		throw new IllegalStateException("Error rendering Schematic");
+	}
+
+	public Minecraft getMinecraft() {
+		if (this.minecraft == null) {
+			this.minecraft = Minecraft.getInstance();
+		}
+
+		return this.minecraft;
 	}
 }
