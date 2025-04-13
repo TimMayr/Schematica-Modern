@@ -6,9 +6,7 @@ import dev.architectury.event.events.client.ClientCommandRegistrationEvent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.CommandSourceStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @Environment(EnvType.CLIENT)
 public class ClientCommandSchematicaBase {
@@ -20,7 +18,8 @@ public class ClientCommandSchematicaBase {
 	}
 
 	protected static @NotNull String getArgumentAsString(
-			@NotNull CommandContext<ClientCommandRegistrationEvent.ClientCommandSourceStack> context, String argumentName) {
+			@NotNull CommandContext<ClientCommandRegistrationEvent.ClientCommandSourceStack> context,
+			String argumentName) {
 		if (context.getInput().endsWith(" ")) {
 			return "";
 		}

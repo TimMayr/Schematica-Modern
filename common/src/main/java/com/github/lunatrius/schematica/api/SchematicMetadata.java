@@ -101,4 +101,5 @@ public record SchematicMetadata(String name, UUID owner, Map<UUID, List<FilePerm
 	public @NotNull SchematicMetadata withName(String newName) {
 		return new SchematicMetadata(newName, this.owner, this.permissions, this.schematicFormat,
 				this.dimensions, this.icon, this.id, this.filesize, this.lastEdited, this.isPrivate);
-	}}
+	}
+}

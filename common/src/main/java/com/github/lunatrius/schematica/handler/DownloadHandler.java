@@ -25,6 +25,10 @@ public class DownloadHandler {
 		TickEvent.SERVER_POST.register(this::processQueue);
 	}
 
+	public static void init() {
+		DownloadHandler.INSTANCE = new DownloadHandler();
+	}
+
 	private void processQueue(MinecraftServer server) {
 		if (this.getTransferMap().isEmpty()) {
 			return;
@@ -89,13 +93,6 @@ public class DownloadHandler {
 		Dispatcher.sendToServer(message);
 	}
 
-	private void sendBegin(ServerPlayer player, @NotNull SchematicTransfer transfer) {
-		transfer.setState(SchematicTransfer.State.BEGIN);
-
-		MessageDownloadBegin message = new MessageDownloadBegin(transfer.schematic, transfer.type);
-		Dispatcher.sendToClient(message, player);
-	}
-
 	private void sendEnd(ServerPlayer player, @NotNull SchematicTransfer transfer) {
 		transfer.setState(SchematicTransfer.State.END);
 
@@ -103,8 +100,11 @@ public class DownloadHandler {
 		Dispatcher.sendToClient(message, player);
 	}
 
-	public static void init() {
-		DownloadHandler.INSTANCE = new DownloadHandler();
+	private void sendBegin(ServerPlayer player, @NotNull SchematicTransfer transfer) {
+		transfer.setState(SchematicTransfer.State.BEGIN);
+
+		MessageDownloadBegin message = new MessageDownloadBegin(transfer.schematic, transfer.type);
+		Dispatcher.sendToClient(message, player);
 	}
 
 	public void registerDownloadCompleteListener(Consumer<ISchematic> listener) {

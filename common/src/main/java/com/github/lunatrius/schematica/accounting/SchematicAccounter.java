@@ -11,7 +11,6 @@ import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.github.lunatrius.schematica.util.FileFilterSchematic;
 import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
-import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import commonnetwork.api.Dispatcher;
 import dev.architectury.event.events.common.TickEvent;
