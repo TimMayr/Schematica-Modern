@@ -19,12 +19,12 @@ public class GuiHelper {
 		}
 	}
 
-	public static void drawItemStack(@NotNull GuiGraphics guiGraphics, ItemStack itemStack, int x, int y) {
-		guiGraphics.renderItem(itemStack, x, y);
-	}
-
 	public static void drawItemStackSlot(@NotNull GuiGraphics guiGraphics, int x, int y) {
 		guiGraphics.blitSprite(RenderType::guiTextured, SLOT_SPRITE, x, y, 18, 18);
+	}
+
+	public static void drawItemStack(@NotNull GuiGraphics guiGraphics, ItemStack itemStack, int x, int y) {
+		guiGraphics.renderItem(itemStack, x, y);
 	}
 
 	public static void drawTexturedRectangle(@NotNull BufferBuilder buffer, float x0, float y0, float x1, float y1,
@@ -93,19 +93,19 @@ public class GuiHelper {
 		ColorComponents components = getColorComponents(startColor, endColor);
 
 		drawVerticalGradientRectangle(buffer,
-		                              x0,
-		                              y0,
-		                              x1,
-		                              y1,
-		                              z,
-		                              components.sr(),
-		                              components.sg(),
-		                              components.sb(),
-		                              components.sa(),
-		                              components.er(),
-		                              components.eg(),
-		                              components.eb(),
-		                              components.ea());
+				x0,
+				y0,
+				x1,
+				y1,
+				z,
+				components.sr(),
+				components.sg(),
+				components.sb(),
+				components.sa(),
+				components.er(),
+				components.eg(),
+				components.eb(),
+				components.ea());
 	}
 
 	private static @NotNull ColorComponents getColorComponents(int startColor, int endColor) {
@@ -125,19 +125,19 @@ public class GuiHelper {
 		ColorComponents components = getColorComponents(startColor, endColor);
 
 		drawHorizontalGradientRectangle(buffer,
-		                                x0,
-		                                y0,
-		                                x1,
-		                                y1,
-		                                z,
-		                                components.sr(),
-		                                components.sg(),
-		                                components.sb(),
-		                                components.sa(),
-		                                components.er(),
-		                                components.eg(),
-		                                components.eb(),
-		                                components.ea());
+				x0,
+				y0,
+				x1,
+				y1,
+				z,
+				components.sr(),
+				components.sg(),
+				components.sb(),
+				components.sa(),
+				components.er(),
+				components.eg(),
+				components.eb(),
+				components.ea());
 	}
 
 	public static void drawHorizontalGradientRectangle(@NotNull BufferBuilder buffer, float x0, float y0, float x1,

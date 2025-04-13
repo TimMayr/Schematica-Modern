@@ -4,7 +4,6 @@ import com.github.lunatrius.schematica.reference.Constants;
 import com.github.lunatrius.schematica.reference.Reference;
 import io.netty.buffer.Unpooled;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
@@ -31,11 +30,11 @@ public final class CommonNbtUtils {
 	public static <K, V> @NotNull Map<K, V> deserializeMap(@NotNull CompoundTag tag,
 	                                                       StreamCodec<FriendlyByteBuf, K> keyCodec,
 	                                                       StreamCodec<FriendlyByteBuf, V> valueCodec) {
-		if (!tag.contains("data", Tag.TAG_BYTE_ARRAY)) {
+		if (!tag.contains("data")) {
 			return new HashMap<>(); // Return empty map if missing
 		}
 
-		byte[] data = tag.getByteArray("data"); // Retrieve stored byte array
+		byte[] data = tag.getByteArray("data").orElse(new byte[]{}); // Retrieve stored byte array
 		FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.wrappedBuffer(data));
 
 		return CommonCodecs.MAP(keyCodec, valueCodec).decode(buf);
@@ -45,8 +44,8 @@ public final class CommonNbtUtils {
 		ItemStack icon = Constants.Schematic.DEFAULT_ICON.copy();
 
 		if (tagCompound != null && tagCompound.contains(location)) {
-			icon = ItemStack.parseOptional(Reference.proxy.getRegistryAccess(),
-					tagCompound.getCompound(location));
+			icon = ItemStack.parse(Reference.proxy.getRegistryAccess(),
+					tagCompound.getCompound(location).orElse(new CompoundTag())).orElse(ItemStack.EMPTY);
 
 			if (icon.isEmpty()) {
 				icon = Constants.Schematic.DEFAULT_ICON.copy();
@@ -69,11 +68,11 @@ public final class CommonNbtUtils {
 	}
 
 	public static @NotNull Instant deserializeInstant(@NotNull CompoundTag tag) {
-		if (!tag.contains("timestamp", Tag.TAG_BYTE_ARRAY)) {
+		if (!tag.contains("timestamp")) {
 			return Instant.ofEpochMilli(Long.MIN_VALUE);
 		}
 
-		byte[] data = tag.getByteArray("timestamp"); // Retrieve stored byte array
+		byte[] data = tag.getByteArray("timestamp").orElse(new byte[]{}); // Retrieve stored byte array
 		FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.wrappedBuffer(data));
 
 		return buf.readInstant();

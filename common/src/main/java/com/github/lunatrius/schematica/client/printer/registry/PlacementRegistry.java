@@ -51,17 +51,17 @@ public class PlacementRegistry {
 		IValidPlayerFacing playerFacingPiston = (BlockState blockState, Player player, BlockPos pos, Level world) -> {
 			Direction facing = blockState.getValue(BlockStateProperties.FACING);
 			return facing == Direction.getApproximateNearest((float) player.getX() - pos.getX(),
-			                                                 (float) player.getY() - pos.getY(),
-			                                                 (float) player.getZ() - pos.getZ());
+					(float) player.getY() - pos.getY(),
+					(float) player.getZ() - pos.getZ());
 		};
 
 		IValidPlayerFacing playerFacingObserver =
 				(BlockState blockState, Player player, BlockPos pos, Level world) -> {
-			Direction facing = blockState.getValue(BlockStateProperties.FACING);
-			return facing == Direction.getApproximateNearest((float) player.getX() - pos.getX(),
-			                                                 (float) player.getY() - pos.getY(),
-			                                                 (float) player.getZ() - pos.getZ()).getOpposite();
-		};
+					Direction facing = blockState.getValue(BlockStateProperties.FACING);
+					return facing == Direction.getApproximateNearest((float) player.getX() - pos.getX(),
+							(float) player.getY() - pos.getY(),
+							(float) player.getZ() - pos.getZ()).getOpposite();
+				};
 
 		IValidPlayerFacing playerFacingRotateY = (BlockState blockState, Player player, BlockPos pos, Level world) -> {
 			Direction facing = blockState.getValue(BlockStateProperties.FACING);
@@ -146,8 +146,8 @@ public class PlacementRegistry {
 
 		IExtraClick extraClickDoubleSlab =
 				(BlockState blockState) -> (blockState.getValue(BlockStateProperties.SLAB_TYPE) == SlabType.DOUBLE)
-				                           ? 1
-				                           : 0;
+						? 1
+						: 0;
 
 
 		addPlacementMapping(FaceAttachedHorizontalDirectionalBlock.class, new PlacementData(blockFacingOpposite));
@@ -164,7 +164,7 @@ public class PlacementRegistry {
 		addPlacementMapping(CarvedPumpkinBlock.class, new PlacementData(playerFacingEntityOpposite));
 		addPlacementMapping(RotatedPillarBlock.class, new PlacementData(blockFacingAxis));
 		addPlacementMapping(SlabBlock.class,
-		                    new PlacementData().setOffsetY(offsetSlab).setExtraClick(extraClickDoubleSlab));
+				new PlacementData().setOffsetY(offsetSlab).setExtraClick(extraClickDoubleSlab));
 		addPlacementMapping(StairBlock.class, new PlacementData(playerFacingEntity).setOffsetY(offsetHalfBlock));
 		addPlacementMapping(BaseTorchBlock.class, new PlacementData(blockFacingOpposite));
 		addPlacementMapping(TrapDoorBlock.class, new PlacementData(blockFacingOpposite).setOffsetY(offsetHalfBlock));

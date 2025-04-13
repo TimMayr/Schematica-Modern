@@ -6,6 +6,7 @@ import com.github.lunatrius.schematica.handler.client.*;
 import com.github.lunatrius.schematica.proxy.ClientProxy;
 import com.github.lunatrius.schematica.reference.Reference;
 import dev.architectury.event.events.client.ClientCommandRegistrationEvent;
+import dev.architectury.event.events.client.ClientLifecycleEvent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
@@ -15,12 +16,11 @@ import static com.github.lunatrius.schematica.config.client.SchematicaClientConf
 public class SchematicaClient {
 	public static void clientInit() {
 		Reference.proxy = new ClientProxy();
-
-		SchematicaClientConfig.schematicDirectory =
-				Reference.proxy.getDataDirectory().resolve(SCHEMATIC_DEFAULT_FOLDER);
-
-		ClientCommandRegistrationEvent.EVENT.register(ClientCommandSchematicaBase::register);
 		Reference.proxy.init();
+
+		ClientLifecycleEvent.CLIENT_STARTED.register(instance -> SchematicaClientConfig.schematicDirectory =
+				Reference.proxy.getDataDirectory().resolve(SCHEMATIC_DEFAULT_FOLDER));
+		ClientCommandRegistrationEvent.EVENT.register(ClientCommandSchematicaBase::register);
 
 		GuiHandler.init();
 		InputHandler.init();

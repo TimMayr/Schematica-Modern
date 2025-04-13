@@ -43,18 +43,18 @@ public class RenderTickHandlerNeo {
 			double posZ = renderViewEntity.getZ();
 
 			renderViewEntity.setPos(posX - schematic.getWorldPos().x, posY - schematic.getWorldPos().y,
-			                        posZ - schematic.getWorldPos().z);
+					posZ - schematic.getWorldPos().z);
 
 			Vec3 vecPosition = renderViewEntity.getEyePosition(partialTicks);
 			Vec3 vecLook = renderViewEntity.getLookAngle();
 			Vec3 vecExtendedLook = vecPosition.add(vecLook.x * blockReachDistance, vecLook.y * blockReachDistance,
-			                                       vecLook.z * blockReachDistance);
+					vecLook.z * blockReachDistance);
 
 			renderViewEntity.setPos(posX, posY, posZ);
 
 			return schematic.clip(
 					new ClipContext(vecPosition, vecExtendedLook, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE,
-					                renderViewEntity));
+							renderViewEntity));
 		}
 
 		throw new IllegalStateException("Error rendering Schematic");

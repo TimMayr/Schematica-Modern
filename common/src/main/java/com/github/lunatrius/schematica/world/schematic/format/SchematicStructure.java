@@ -85,6 +85,11 @@ public class SchematicStructure extends SchematicFormat {
 	}
 
 	@Override
+	public void writeMetadataToNBT(@NotNull CompoundTag tagCompound, @NotNull SchematicMetadata metadata) {
+		tagCompound.put(Names.NBT.METADATA, metaAsTag(metadata));
+	}
+
+	@Override
 	public String getName() {
 		return Names.Formats.STRUCTURE;
 	}
@@ -97,16 +102,11 @@ public class SchematicStructure extends SchematicFormat {
 	@Override
 	public SchematicMetadata readMetaFromNbt(@NotNull CompoundTag tagCompound) {
 		if (tagCompound.contains(Names.NBT.METADATA)) {
-			CompoundTag tag = tagCompound.getCompound(Names.NBT.METADATA);
+			CompoundTag tag = tagCompound.getCompound(Names.NBT.METADATA).orElseThrow();
 			return metaFromTag(tag);
 		} else {
 			return null;
 		}
-	}
-
-	@Override
-	public void writeMetadataToNBT(@NotNull CompoundTag tagCompound, @NotNull SchematicMetadata metadata) {
-		tagCompound.put(Names.NBT.METADATA, metaAsTag(metadata));
 	}
 
 	public @NotNull SchematicMetadata metaFromTag(@NotNull CompoundTag tag) {

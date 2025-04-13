@@ -25,7 +25,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.EnderDragonPart;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.crafting.RecipeAccess;
@@ -67,21 +66,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.*;
 
-/**
- * As much as general fake level. Features:
- * <ul>
- * <li>static access to given data</li>
- * <li>immutability - disables all external changes (but levelSource can be mutable)</li>
- * <li>most of the dimensions related things is delegated to current client level (class instances can travel across
- * dimensions)</li>
- * <li>biome info is also delegated from client level</li>
- * <li>light control - manual or delegated from client level</li>
- * <li>primitive chunk and entity management</li>
- * <li>basic heightmap support (not fully working yet)</li>
- * <li><b>Few unsafe NPEs methods :)</b></li>
- * <p>
- * TODO: extend from client level
- */
 @MethodsReturnNonnullByDefault
 public class FakeLevel extends Level {
 	protected final IFakeLevelLightProvider lightProvider;
@@ -114,7 +98,6 @@ public class FakeLevel extends Level {
 	 * @see #setEntities(Collection) only way to add entities into fake level
 	 * @see #setRealLevel(Level) if you want to reuse this instance
 	 */
-	@SuppressWarnings("resource")
 	public FakeLevel(final ISchematic levelSource, final IFakeLevelLightProvider lightProvider,
 	                 @Nullable final Scoreboard scoreboard, final boolean overrideBeLevel) {
 		super(new FakeLevelData(level()::getLevelData, lightProvider), level().dimension(),
@@ -251,20 +234,15 @@ public class FakeLevel extends Level {
 	}
 
 	@Override
-	public void updateNeighborsAt(@Nullable BlockPos ignored_2, @Nullable Block ignored_1) {
+	public void neighborShapeChanged(@Nullable Direction ignored_1, @Nullable BlockPos ignored_2,
+	                                 @Nullable BlockPos ignored_3, @Nullable BlockState ignored_4, int flags,
+	                                 int recursionLeft) {
 		// Noop
 	}
 
 	// ========================================
 	// ========== REDIRECTED METHODS ==========
 	// ========================================
-
-	@Override
-	public void neighborShapeChanged(@Nullable Direction ignored_1, @Nullable BlockPos ignored_2,
-	                                 @Nullable BlockPos ignored_3, @Nullable BlockState ignored_4, int flags,
-	                                 int recursionLeft) {
-		// Noop
-	}
 
 	@Override
 	public int getHeight(@NotNull Types heightmapType, int x, int z) {
@@ -299,22 +277,16 @@ public class FakeLevel extends Level {
 	}
 
 	@Override
-	public boolean isDay() {
-		return !this.dimensionType().hasFixedTime() && this.getSkyDarken() < 4;
+	public void playSeededSound(@Nullable Entity entity, double d, double e, double f,
+	                            @NotNull Holder<SoundEvent> holder,
+	                            @NotNull SoundSource soundSource, float g, float h, long l) {
+		//NOOP
 	}
 
 	@Override
-	public void playSeededSound(@Nullable Player ignored_1, double ignored_2, double ignored_3, double ignored_4,
-	                            @Nullable Holder<SoundEvent> ignored_5, @Nullable SoundSource ignored_6,
-	                            float ignored_7, float ignored_8, long ignored_9) {
-		// Noop
-	}
-
-	@Override
-	public void playSeededSound(@Nullable Player ignored_1, @Nullable Entity ignored_2,
-	                            @Nullable Holder<SoundEvent> ignored_3, @Nullable SoundSource ignored_4,
-	                            float ignored_5, float ignored_6, long ignored_7) {
-		// Noop
+	public void playSeededSound(@Nullable Entity entity, @NotNull Entity entity2, @NotNull Holder<SoundEvent> holder,
+	                            @NotNull SoundSource soundSource, float f, float g, long l) {
+		//NOOP
 	}
 
 	@Override
@@ -396,11 +368,6 @@ public class FakeLevel extends Level {
 	}
 
 	@Override
-	public boolean mayInteract(@Nullable Player ignored_1, @Nullable BlockPos ignored_2) {
-		return false;
-	}
-
-	@Override
 	public void blockEvent(@Nullable BlockPos ignored_1, @Nullable Block ignored_2, int ignored_3, int ignored_4) {
 		// Noop
 	}
@@ -438,24 +405,6 @@ public class FakeLevel extends Level {
 	@Override
 	public @Nullable MapItemSavedData getMapData(@Nullable MapId mapId) {
 		return null;
-	}
-
-	// ========================================
-	// ======= NOOP UNSAFE NULL METHODS =======
-	// ========================================
-
-	@Override
-	public void setMapData(@Nullable MapId ignored_1, @Nullable MapItemSavedData ignored_2) {
-		// Noop
-	}
-
-	// ========================================
-	// ========== PERMANENT SETTINGS ==========
-	// ========================================
-
-	@Override
-	public MapId getFreeMapId() {
-		return new MapId(0);
 	}
 
 	@Override
@@ -497,10 +446,6 @@ public class FakeLevel extends Level {
 		}
 	}
 
-	// ========================================
-	// ============ NOOP OVERRIDES ============
-	// ========================================
-
 	@Override
 	public DimensionType dimensionType() {
 		try (Level realLevel = realLevel()) {
@@ -518,6 +463,10 @@ public class FakeLevel extends Level {
 			throw new RuntimeException(e);
 		}
 	}
+
+	// ========================================
+	// ============ NOOP OVERRIDES ============
+	// ========================================
 
 	@Override
 	public ResourceKey<Level> dimension() {
@@ -603,10 +552,6 @@ public class FakeLevel extends Level {
 		return result;
 	}
 
-	// ========================================
-	// ============= NOOP METHODS =============
-	// ========================================
-
 	@Override
 	public ChunkSource getChunkSource() {
 		return chunkSource;
@@ -622,8 +567,17 @@ public class FakeLevel extends Level {
 				&& posZ < getLevelSource().getMaxZ();
 	}
 
+	// ========================================
+	// ============= NOOP METHODS =============
+	// ========================================
+
 	@Override
-	public void levelEvent(@Nullable Player ignored_1, int ignored_2, @Nullable BlockPos ignored_3, int ignored_4) {
+	public void updateNeighborsAt(@Nullable BlockPos ignored_2, @Nullable Block ignored_1) {
+		// Noop
+	}
+
+	@Override
+	public void levelEvent(@Nullable Entity entity, int i, @NotNull BlockPos blockPos, int j) {
 		// Noop
 	}
 

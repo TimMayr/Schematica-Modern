@@ -5,7 +5,6 @@ import com.github.lunatrius.schematica.reference.Reference;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
@@ -21,9 +20,9 @@ import java.util.List;
 public class NBTHelper {
 	public static void readBlockEntitiesFromCompound(@NotNull CompoundTag compound, Level level,
 	                                                 List<BlockEntity> blockEntities) {
-		ListTag tagList = compound.getList(Names.NBT.BLOCK_ENTITIES, Tag.TAG_COMPOUND);
+		ListTag tagList = compound.getList(Names.NBT.BLOCK_ENTITIES).orElse(new ListTag());
 		for (int i = 0; i < tagList.size(); i++) {
-			CompoundTag BlockEntityCompound = tagList.getCompound(i);
+			CompoundTag BlockEntityCompound = tagList.getCompound(i).orElseThrow();
 			BlockEntity BlockEntity = readBlockEntityFromCompound(BlockEntityCompound, level);
 			blockEntities.add(BlockEntity);
 		}
@@ -31,8 +30,10 @@ public class NBTHelper {
 
 	public static BlockEntity readBlockEntityFromCompound(@NotNull CompoundTag blockEntityCompound,
 	                                                      @NotNull Level level) {
-		BlockPos pos = new BlockPos(blockEntityCompound.getShort("x"), blockEntityCompound.getShort("y"),
-				blockEntityCompound.getShort("z"));
+		BlockPos pos = new BlockPos(
+				blockEntityCompound.getShort("x").orElseThrow(),
+				blockEntityCompound.getShort("y").orElseThrow(),
+				blockEntityCompound.getShort("z").orElseThrow());
 		return readBlockEntityFromCompound(pos, blockEntityCompound, level.getBlockState(pos));
 	}
 
@@ -50,8 +51,10 @@ public class NBTHelper {
 			return null;
 		}
 
-		BlockPos pos = new BlockPos(blockEntityCompound.getShort("x"), blockEntityCompound.getShort("y"),
-				blockEntityCompound.getShort("z"));
+		BlockPos pos = new BlockPos(
+				blockEntityCompound.getShort("x").orElseThrow(),
+				blockEntityCompound.getShort("y").orElseThrow(),
+				blockEntityCompound.getShort("z").orElseThrow());
 		return BlockEntity.loadStatic(pos, state, blockEntityCompound, Reference.proxy.getRegistryAccess());
 	}
 
@@ -86,9 +89,9 @@ public class NBTHelper {
 	}
 
 	public static void readEntitiesFromCompound(@NotNull CompoundTag compound, Level level, List<Entity> entities) {
-		ListTag tagList = compound.getList(Names.NBT.ENTITIES, Tag.TAG_COMPOUND);
+		ListTag tagList = compound.getList(Names.NBT.ENTITIES).orElse(new ListTag());
 		for (int i = 0; i < tagList.size(); i++) {
-			CompoundTag entityCompound = tagList.getCompound(i);
+			CompoundTag entityCompound = tagList.getCompound(i).orElseThrow();
 			Entity entity = readEntityFromCompound(entityCompound, level);
 			if (entity != null) {
 				entities.add(entity);

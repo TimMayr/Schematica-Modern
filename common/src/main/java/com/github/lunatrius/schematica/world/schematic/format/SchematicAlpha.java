@@ -12,7 +12,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -35,13 +34,14 @@ public class SchematicAlpha extends SchematicFormat {
 		SchematicMetadata metadata = readMetaFromNbt(tagCompound);
 
 		List<BlockState> localBlockList =
-				Arrays.stream(tagCompound.getIntArray(Names.NBT.BLOCKS)).mapToObj(Block::stateById).toList();
+				Arrays.stream(tagCompound.getIntArray(Names.NBT.BLOCKS).orElse(new int[]{}))
+						.mapToObj(Block::stateById).toList();
 		BlockState[] localBlocks = localBlockList.toArray(new BlockState[0]);
 
 		Map<BlockState, BlockState> oldToNew = new HashMap<>();
 		if (tagCompound.contains(Names.NBT.MAPPING_SCHEMATICA)) {
-			CompoundTag mapping = tagCompound.getCompound(Names.NBT.MAPPING_SCHEMATICA);
-			Set<String> names = mapping.getAllKeys();
+			CompoundTag mapping = tagCompound.getCompound(Names.NBT.MAPPING_SCHEMATICA).orElse(new CompoundTag());
+			Set<String> names = mapping.keySet();
 			for (String id : names) {
 				BlockState toReplace;
 
@@ -53,12 +53,12 @@ public class SchematicAlpha extends SchematicFormat {
 
 				BlockState replaceWith;
 
-				String value = mapping.getString(id);
+				String value = mapping.getString(id).orElseThrow();
 
 				if (value.isEmpty()) {
-					replaceWith = Block.stateById(mapping.getInt(id));
+					replaceWith = Block.stateById(mapping.getInt(id).orElseThrow());
 				} else {
-					ResourceLocation location = ResourceLocation.tryParse(mapping.getString(id));
+					ResourceLocation location = ResourceLocation.tryParse(mapping.getString(id).orElseThrow());
 					replaceWith = BuiltInRegistries.BLOCK.getValue(location).defaultBlockState();
 				}
 
@@ -91,12 +91,12 @@ public class SchematicAlpha extends SchematicFormat {
 			}
 		}
 
-		ListTag blockEntitiesList = tagCompound.getList(Names.NBT.BLOCK_ENTITIES, Tag.TAG_COMPOUND);
+		ListTag blockEntitiesList = tagCompound.getList(Names.NBT.BLOCK_ENTITIES).orElse(new ListTag());
 
 		for (int i = 0; i < blockEntitiesList.size(); i++) {
 			try {
 				BlockEntity blockEntity =
-						NBTHelper.readBlockEntityFromCompound(blockEntitiesList.getCompound(i), level);
+						NBTHelper.readBlockEntityFromCompound(blockEntitiesList.getCompound(i).orElseThrow(), level);
 				if (blockEntity != null) {
 					schematic.setBlockEntity(blockEntity.getBlockPos(), blockEntity);
 				}
@@ -105,11 +105,11 @@ public class SchematicAlpha extends SchematicFormat {
 			}
 		}
 
-		ListTag entitiesList = tagCompound.getList(Names.NBT.ENTITIES, Tag.TAG_COMPOUND);
+		ListTag entitiesList = tagCompound.getList(Names.NBT.ENTITIES).orElse(new ListTag());
 
 		for (int i = 0; i < entitiesList.size(); i++) {
 			try {
-				Entity entity = NBTHelper.readEntityFromCompound(entitiesList.getCompound(i), level);
+				Entity entity = NBTHelper.readEntityFromCompound(entitiesList.getCompound(i).orElseThrow(), level);
 
 				if (entity != null) {
 					schematic.addEntity(entity);
@@ -198,6 +198,11 @@ public class SchematicAlpha extends SchematicFormat {
 	}
 
 	@Override
+	public void writeMetadataToNBT(@NotNull CompoundTag tagCompound, @NotNull SchematicMetadata metadata) {
+		tagCompound.put(Names.NBT.METADATA, metaAsTag(metadata));
+	}
+
+	@Override
 	public String getName() {
 		return Names.Formats.ALPHA;
 	}
@@ -209,16 +214,11 @@ public class SchematicAlpha extends SchematicFormat {
 
 	public SchematicMetadata readMetaFromNbt(@NotNull CompoundTag tagCompound) {
 		if (tagCompound.contains(Names.NBT.METADATA)) {
-			CompoundTag tag = tagCompound.getCompound(Names.NBT.METADATA);
+			CompoundTag tag = tagCompound.getCompound(Names.NBT.METADATA).orElseThrow();
 			return metaFromTag(tag);
 		} else {
 			return null;
 		}
-	}
-
-	@Override
-	public void writeMetadataToNBT(@NotNull CompoundTag tagCompound, @NotNull SchematicMetadata metadata) {
-		tagCompound.put(Names.NBT.METADATA, metaAsTag(metadata));
 	}
 
 	public @NotNull SchematicMetadata metaFromTag(@NotNull CompoundTag tag) {

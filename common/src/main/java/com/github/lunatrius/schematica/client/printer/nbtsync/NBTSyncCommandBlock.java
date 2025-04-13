@@ -26,9 +26,9 @@ public class NBTSyncCommandBlock extends NBTSync {
 
 			if (!commandBlockLogic.getCommand().equals(mcCommandBlockLogic.getCommand())) {
 				return sendPacket(new ServerboundSetCommandBlockPacket(pos, commandBlockLogic.getCommand(),
-				                                                       ((CommandBlockEntity) blockEntity).getMode(),
-				                                                       commandBlockLogic.isTrackOutput(), false,
-				                                                       false));
+						((CommandBlockEntity) blockEntity).getMode(),
+						commandBlockLogic.isTrackOutput(), false,
+						false));
 			}
 		}
 

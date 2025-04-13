@@ -10,7 +10,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData.BlockEntityTagOutput;
 import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -38,7 +37,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -186,12 +184,12 @@ public class FakeChunk extends LevelChunk {
 	@Override
 	public void findBlocks(@NotNull Predicate<BlockState> predicate, @NotNull BiConsumer<BlockPos, BlockState> sink) {
 		for (BlockPos mutablePos : BlockPos.betweenClosed(chunkPos.getBlockX(0), fakeLevel.getLevelSource().getMinY(),
-		                                                  chunkPos.getBlockZ(0), Math.min(chunkPos.getBlockX(15),
-		                                                                                  fakeLevel.getLevelSource()
-		                                                                                           .getMaxX() - 1),
-		                                                  fakeLevel.getLevelSource().getMaxY() - 1,
-		                                                  Math.min(chunkPos.getBlockZ(15),
-		                                                           fakeLevel.getLevelSource().getMaxZ() - 1))) {
+				chunkPos.getBlockZ(0), Math.min(chunkPos.getBlockX(15),
+						fakeLevel.getLevelSource()
+								.getMaxX() - 1),
+				fakeLevel.getLevelSource().getMaxY() - 1,
+				Math.min(chunkPos.getBlockZ(15),
+						fakeLevel.getLevelSource().getMaxZ() - 1))) {
 			BlockState blockState = getBlockState(mutablePos);
 			if (predicate.test(blockState)) {
 				sink.accept(mutablePos, blockState);
@@ -260,13 +258,6 @@ public class FakeChunk extends LevelChunk {
 		return getFluidState(new BlockPos(bx, by, bz));
 	}
 
-	@Override
-	@Nullable
-	public BlockState setBlockState(@Nullable BlockPos ignored_1, @Nullable BlockState ignored_2, boolean ignored_3) {
-		// Noop
-		return null;
-	}
-
 	@Nullable
 	@Override
 	public BlockEntity getBlockEntity(@NotNull BlockPos pos, @Nullable EntityCreationType ignored) {
@@ -295,12 +286,6 @@ public class FakeChunk extends LevelChunk {
 	}
 
 	@Override
-	public void replaceWithPacketData(@Nullable FriendlyByteBuf ignored_1, @Nullable CompoundTag ignored_2,
-	                                  @Nullable Consumer<BlockEntityTagOutput> ignored_3) {
-		// Noop
-	}
-
-	@Override
 	public void replaceBiomes(@Nullable FriendlyByteBuf ignored) {
 		// Noop
 	}
@@ -308,14 +293,14 @@ public class FakeChunk extends LevelChunk {
 	@Override
 	public Map<BlockPos, BlockEntity> getBlockEntities() {
 		AABB aabb = new AABB((this.chunkPos.x - 1) * 16, this.fakeLevel.getLevelSource().getMinY(),
-		                     (this.chunkPos.z - 1) * 16, this.chunkPos.x * 16,
-		                     this.fakeLevel.getLevelSource().getMaxY(), this.chunkPos.z * 16);
+				(this.chunkPos.z - 1) * 16, this.chunkPos.x * 16,
+				this.fakeLevel.getLevelSource().getMaxY(), this.chunkPos.z * 16);
 		return fakeLevel.blockEntities.entrySet()
-		                              .stream()
-		                              .filter(blockPosBlockEntityEntry -> aabb.contains(
-				                              Vec3.atLowerCornerOf(blockPosBlockEntityEntry.getKey())))
-		                              .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> y,
-		                                                        LinkedHashMap::new));
+				.stream()
+				.filter(blockPosBlockEntityEntry -> aabb.contains(
+						Vec3.atLowerCornerOf(blockPosBlockEntityEntry.getKey())))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (x, y) -> y,
+						LinkedHashMap::new));
 	}
 
 	@Override

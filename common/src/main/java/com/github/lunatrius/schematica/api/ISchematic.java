@@ -118,6 +118,8 @@ public interface ISchematic extends BlockGetter {
 
 	@NotNull SchematicMetadata getMetadata();
 
+	void setMetadata(@NotNull SchematicMetadata schematicMetadata);
+
 	/**
 	 * Sets the block state at the given location. Attempting to set a block state outside of the schematic
 	 * boundaries or with an invalid block state will result in no change being made and this method will return false.
@@ -181,8 +183,6 @@ public interface ISchematic extends BlockGetter {
 	 */
 	ItemStack getIcon();
 
-	void setMetadata(@NotNull SchematicMetadata schematicMetadata);
-
 	/**
 	 * Modifies the icon that will be used when saving the schematic.
 	 *
@@ -196,6 +196,13 @@ public interface ISchematic extends BlockGetter {
 	 * @return The author of the schematic.
 	 */
 	UUID getAuthor();
+
+	/**
+	 * Sets the author of the schematic.
+	 *
+	 * @param author The new author of the schematic.
+	 */
+	void setAuthor(UUID author);
 
 	/**
 	 * Returns a list of all block entities in the schematic.
@@ -233,11 +240,4 @@ public interface ISchematic extends BlockGetter {
 	}
 
 	String getName();
-
-	/**
-	 * Sets the author of the schematic.
-	 *
-	 * @param author The new author of the schematic.
-	 */
-	void setAuthor(UUID author);
 }

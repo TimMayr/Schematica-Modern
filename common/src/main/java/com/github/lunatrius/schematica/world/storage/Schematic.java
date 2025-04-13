@@ -78,6 +78,11 @@ public class Schematic implements ISchematic {
 	}
 
 	@Override
+	public void setMetadata(@NotNull SchematicMetadata schematicMetadata) {
+		this.metadata = schematicMetadata;
+	}
+
+	@Override
 	public boolean setBlockState(BlockPos pos, BlockState blockState) {
 		if (isInvalid(pos)) {
 			return false;
@@ -165,11 +170,6 @@ public class Schematic implements ISchematic {
 	@Override
 	public String getName() {
 		return this.metadata.name();
-	}
-
-	@Override
-	public void setMetadata(@NotNull SchematicMetadata schematicMetadata) {
-		this.metadata = schematicMetadata;
 	}
 
 	private boolean isInvalid(@NotNull BlockPos pos) {

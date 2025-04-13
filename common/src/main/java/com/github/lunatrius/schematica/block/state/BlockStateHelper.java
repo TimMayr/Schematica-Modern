@@ -39,8 +39,8 @@ public class BlockStateHelper {
 		Map<Property, T> properties = new HashMap<>();
 
 		blockState.getProperties()
-		          .forEach(property -> properties.put(property, BlockStateHelper.getPropertyValue(blockState,
-		                                                                                          property.getName())));
+				.forEach(property -> properties.put(property, BlockStateHelper.getPropertyValue(blockState,
+						property.getName())));
 
 		return properties;
 	}

@@ -95,8 +95,8 @@ public class SchematicPrinter {
 	public void refresh() {
 		if (this.schematic != null) {
 			this.timeout = new byte[this.schematic.getLevelSource()
-			                                      .getMaxX()][this.schematic.getHeight()][this.schematic.getLevelSource()
-			                                                                                            .getMaxZ()];
+					.getMaxX()][this.schematic.getHeight()][this.schematic.getLevelSource()
+					.getMaxZ()];
 		} else {
 			this.timeout = null;
 		}
@@ -123,7 +123,7 @@ public class SchematicPrinter {
 			return;
 		}
 
-		int slot = player.getInventory().selected;
+		int slot = player.getInventory().getSelectedSlot();
 		boolean isSneaking = player.isCrouching();
 
 		switch (schematic.layerMode) {
@@ -164,11 +164,6 @@ public class SchematicPrinter {
 		}
 
 		syncSlotAndSneaking(player, slot, isSneaking, true);
-	}
-
-	private void syncSlotAndSneaking(@NotNull LocalPlayer player, int slot, boolean isSneaking, boolean success) {
-		player.getInventory().selected = slot;
-		syncSneaking(player, isSneaking);
 	}
 
 	private boolean placeBlock(ClientLevel level, LocalPlayer player, @NotNull BlockPos pos) {
@@ -216,7 +211,6 @@ public class SchematicPrinter {
 		if (SchematicaClientConfig.CLIENT.destroyBlocks.get()
 				&& !level.getBlockState(realPos).isAir()
 				&& player.isCreative()) {
-			//TODO: Probably also discord
 			this.minecraft.gameMode.startDestroyBlock(realPos, Direction.DOWN);
 
 			this.timeout[x][y][z] = SchematicaClientConfig.CLIENT.timeout.get().byteValue();
@@ -229,10 +223,10 @@ public class SchematicPrinter {
 		}
 
 		if (!realBlockState.canBeReplaced(new BlockPlaceContext(new UseOnContext(player, InteractionHand.MAIN_HAND,
-		                                                                         new BlockHitResult(Vec3.ZERO,
-		                                                                                            Direction.UP,
-		                                                                                            realPos,
-		                                                                                            false))))) {
+				new BlockHitResult(Vec3.ZERO,
+						Direction.UP,
+						realPos,
+						false))))) {
 			return false;
 		}
 
@@ -251,6 +245,11 @@ public class SchematicPrinter {
 		return false;
 	}
 
+	private void syncSlotAndSneaking(@NotNull LocalPlayer player, int slot, boolean isSneaking, boolean success) {
+		player.getInventory().setSelectedSlot(slot);
+		syncSneaking(player, isSneaking);
+	}
+
 	private @NotNull List<Direction> getSolidSides(Level level, BlockPos pos, Player player) {
 		if (!SchematicaClientConfig.CLIENT.placeAdjacent.get()) {
 			return Arrays.asList(Direction.values());
@@ -265,27 +264,6 @@ public class SchematicPrinter {
 		}
 
 		return list;
-	}
-
-	private boolean isSolid(@NotNull Level level, @NotNull BlockPos pos, @NotNull Direction side, Player player) {
-		BlockPos offset = pos.offset(side.getUnitVec3i());
-
-		BlockState blockState = level.getBlockState(offset);
-		Block block = blockState.getBlock();
-
-		if (blockState.isAir()) {
-			return false;
-		}
-
-		if (block instanceof LiquidBlock) {
-			return false;
-		}
-
-		return !blockState.canBeReplaced(new BlockPlaceContext(new UseOnContext(player, InteractionHand.MAIN_HAND,
-		                                                                        new BlockHitResult(Vec3.ZERO,
-		                                                                                           Direction.UP,
-		                                                                                           offset,
-		                                                                                           false))));
 	}
 
 	private boolean placeBlock(ClientLevel level, LocalPlayer player, BlockPos pos, BlockState blockState,
@@ -334,10 +312,10 @@ public class SchematicPrinter {
 			return false;
 		}
 
-		return placeBlock(level, player, pos, direction, offsetX, offsetY, offsetZ, extraClicks);
+		return placeBlock(player, pos, direction, offsetX, offsetY, offsetZ, extraClicks);
 	}
 
-	private boolean placeBlock(ClientLevel level, LocalPlayer player, BlockPos pos, Direction direction, float offsetX,
+	private boolean placeBlock(LocalPlayer player, BlockPos pos, Direction direction, float offsetX,
 	                           float offsetY, float offsetZ, int extraClicks) {
 		InteractionHand hand = InteractionHand.MAIN_HAND;
 		ItemStack itemStack = player.getItemInHand(hand);
@@ -351,19 +329,19 @@ public class SchematicPrinter {
 		Direction side = direction.getOpposite();
 		Vec3 hitVec = new Vec3(offset.getX() + offsetX, offset.getY() + offsetY, offset.getZ() + offsetZ);
 
-		success = placeBlock(level, player, itemStack, offset, side, hitVec, hand);
+		success = placeBlock(player, itemStack, offset, side, hitVec, hand);
 		for (int i = 0; success && i < extraClicks; i++) {
-			success = placeBlock(level, player, itemStack, offset, side, hitVec, hand);
+			success = placeBlock(player, itemStack, offset, side, hitVec, hand);
 		}
 
 		if (itemStack.getCount() == 0 && success) {
-			player.getInventory().items.set(player.getInventory().selected, ItemStack.EMPTY);
+			player.getInventory().setItem(player.getInventory().getSelectedSlot(), ItemStack.EMPTY);
 		}
 
 		return success;
 	}
 
-	private boolean placeBlock(ClientLevel level, Player player, ItemStack itemStack, BlockPos pos, Direction side,
+	private boolean placeBlock(Player player, ItemStack itemStack, BlockPos pos, Direction side,
 	                           Vec3 hitVec, InteractionHand hand) {
 		if (itemStack.getItem() instanceof BlockItem blockItem) {
 			BlockHitResult hitResult = new BlockHitResult(hitVec, side, pos, false);
@@ -386,6 +364,27 @@ public class SchematicPrinter {
 		return false;
 	}
 
+	private boolean isSolid(@NotNull Level level, @NotNull BlockPos pos, @NotNull Direction side, Player player) {
+		BlockPos offset = pos.offset(side.getUnitVec3i());
+
+		BlockState blockState = level.getBlockState(offset);
+		Block block = blockState.getBlock();
+
+		if (blockState.isAir()) {
+			return false;
+		}
+
+		if (block instanceof LiquidBlock) {
+			return false;
+		}
+
+		return !blockState.canBeReplaced(new BlockPlaceContext(new UseOnContext(player, InteractionHand.MAIN_HAND,
+				new BlockHitResult(Vec3.ZERO,
+						Direction.UP,
+						offset,
+						false))));
+	}
+
 	private void syncSneaking(@NotNull LocalPlayer player, boolean isSneaking) {
 		player.setShiftKeyDown(isSneaking);
 		player.connection.send(
@@ -401,20 +400,21 @@ public class SchematicPrinter {
 
 		if (this.minecraft.player.isCreative()
 				&& (slot < Constants.Inventory.InventoryOffset.HOTBAR
-						    || slot
+				|| slot
 				>= Constants.Inventory.InventoryOffset.HOTBAR + Constants.Inventory.Size.HOTBAR)
 				&& !SchematicaClientConfig.swapSlotsQueue.isEmpty()) {
-			inventory.selected = getNextSlot();
-			inventory.setItem(inventory.selected, itemStack.copy());
+			inventory.setSelectedSlot(getNextSlot());
+			inventory.setItem(inventory.getSelectedSlot(), itemStack.copy());
 			this.minecraft.player.connection.send(
-					new ServerboundSetCreativeModeSlotPacket(Constants.Inventory.SlotOffset.HOTBAR + inventory.selected,
-					                                         inventory.getItem(inventory.selected)));
+					new ServerboundSetCreativeModeSlotPacket(
+							Constants.Inventory.SlotOffset.HOTBAR + inventory.getSelectedSlot(),
+							inventory.getItem(inventory.getSelectedSlot())));
 			return true;
 		}
 
 		if (slot >= Constants.Inventory.InventoryOffset.HOTBAR
 				&& slot < Constants.Inventory.InventoryOffset.HOTBAR + Constants.Inventory.Size.HOTBAR) {
-			inventory.selected = slot;
+			inventory.setSelectedSlot(slot);
 			return true;
 		} else if (swapSlots
 				&& slot >= Constants.Inventory.InventoryOffset.INVENTORY
@@ -428,12 +428,7 @@ public class SchematicPrinter {
 	}
 
 	private int getInventorySlotWithItem(@NotNull Inventory inventory, ItemStack itemStack) {
-		for (int i = 0; i < inventory.items.size(); i++) {
-			if (inventory.items.get(i).is(itemStack.getItem())) {
-				return i;
-			}
-		}
-		return -1;
+		return inventory.getSlotWithRemainingSpace(itemStack);
 	}
 
 	private boolean swapSlots(int from) {

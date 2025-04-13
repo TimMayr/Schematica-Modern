@@ -31,13 +31,13 @@ public class NBTSyncSign extends NBTSync {
 			if (!Arrays.equals(backText, mcBackText)) {
 				return sendPacket(
 						new ServerboundSignUpdatePacket(mcPos, false, backText[0].getString(), backText[1].getString(),
-						                                backText[2].getString(), backText[3].getString()));
+								backText[2].getString(), backText[3].getString()));
 			}
 
 			if (!Arrays.equals(frontText, mcFrontText)) {
 				return sendPacket(
 						new ServerboundSignUpdatePacket(mcPos, true, backText[0].getString(), backText[1].getString(),
-						                                backText[2].getString(), backText[3].getString()));
+								backText[2].getString(), backText[3].getString()));
 			}
 		}
 

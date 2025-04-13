@@ -14,21 +14,21 @@ Import and export Minecraft schematic files in Minecraft!
 '''
 logoFile = "logo.png"
 
-[[dependencies.${mod_id}]]
+[[dependencies.${ mod_id }]]
 modId = "neoforge"
 type = "required"
 versionRange = "[${neoforge_version},)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.${mod_id}]]
+[[dependencies.${ mod_id }]]
 modId = "minecraft"
 type = "required"
 versionRange = "[${minecraft_version},)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.${mod_id}]]
+[[dependencies.${ mod_id }]]
 modId = "architectury"
 type = "required"
 versionRange = "[${architectury_api_version},)"

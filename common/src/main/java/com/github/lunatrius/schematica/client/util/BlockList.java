@@ -93,8 +93,8 @@ public class BlockList {
 				count = blockState.getValue(BlockStateProperties.EGGS);
 			}
 
-			if (block instanceof PinkPetalsBlock) {
-				count = blockState.getValue(BlockStateProperties.FLOWER_AMOUNT);
+			if (block instanceof SegmentableBlock) {
+				count = blockState.getValue(BlockStateProperties.SEGMENT_AMOUNT);
 			}
 
 			WrappedItemStack wrappedItemStack = findOrCreateWrappedItemStackFor(blockList, stack);

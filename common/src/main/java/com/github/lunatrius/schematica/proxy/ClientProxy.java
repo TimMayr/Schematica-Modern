@@ -42,7 +42,6 @@ public class ClientProxy extends CommonProxy {
 	public static final MBlockPos pointB = new MBlockPos();
 	public static final MBlockPos pointMin = new MBlockPos();
 	public static final MBlockPos pointMax = new MBlockPos();
-	private static final Minecraft MINECRAFT = Minecraft.getInstance();
 	public static boolean isRenderingGuide = false;
 	public static boolean isPendingReset = false;
 	public static Direction orientation = null;
@@ -147,7 +146,7 @@ public class ClientProxy extends CommonProxy {
 
 	@Override
 	public Path getDataDirectory() {
-		Path file = MINECRAFT.gameDirectory.toPath();
+		Path file = Minecraft.getInstance().gameDirectory.toPath();
 		try {
 			return file.toRealPath().normalize();
 		} catch (IOException e) {
@@ -240,7 +239,6 @@ public class ClientProxy extends CommonProxy {
 			Reference.proxy.createFolders();
 			SchematicaClientConfig.populateExtraAirBlocks();
 			SchematicaClientConfig.normalizeSchematicPath();
-//		NeoForge.EVENT_BUS.register(new WorldHandler());
 			Reference.proxy.resetSettings();
 		});
 

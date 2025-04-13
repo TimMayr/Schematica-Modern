@@ -25,19 +25,6 @@ public class DownloadHandler {
 		TickEvent.SERVER_POST.register(this::processQueue);
 	}
 
-	public static void init() {
-		DownloadHandler.INSTANCE = new DownloadHandler();
-	}
-
-	private void sendChunk(ServerPlayer player, @NotNull SchematicTransfer transfer) {
-		transfer.setState(SchematicTransfer.State.CHUNK);
-
-		Reference.logger.trace("Sending chunk {},{},{}", transfer.baseX, transfer.baseY, transfer.baseZ);
-		MessageDownloadChunk message =
-				new MessageDownloadChunk(transfer.schematic, transfer.baseX, transfer.baseY, transfer.baseZ);
-		Dispatcher.sendToClient(message, player);
-	}
-
 	private void processQueue(MinecraftServer server) {
 		if (this.transferMap.isEmpty()) {
 			return;
@@ -82,6 +69,10 @@ public class DownloadHandler {
 		this.transferMap.put(player.getUUID(), transfer);
 	}
 
+	public static void init() {
+		DownloadHandler.INSTANCE = new DownloadHandler();
+	}
+
 	private void sendRequest(@NotNull SchematicTransfer transfer) {
 		transfer.setState(SchematicTransfer.State.REQUEST);
 		MessageRequestDownload message = new MessageRequestDownload(transfer.schematic.getMetadata().id(),
@@ -100,6 +91,15 @@ public class DownloadHandler {
 		transfer.setState(SchematicTransfer.State.END);
 
 		MessageDownloadEnd message = new MessageDownloadEnd(transfer.schematic.getMetadata().id());
+		Dispatcher.sendToClient(message, player);
+	}
+
+	private void sendChunk(ServerPlayer player, @NotNull SchematicTransfer transfer) {
+		transfer.setState(SchematicTransfer.State.CHUNK);
+
+		Reference.logger.trace("Sending chunk {},{},{}", transfer.baseX, transfer.baseY, transfer.baseZ);
+		MessageDownloadChunk message =
+				new MessageDownloadChunk(transfer.schematic, transfer.baseX, transfer.baseY, transfer.baseZ);
 		Dispatcher.sendToClient(message, player);
 	}
 

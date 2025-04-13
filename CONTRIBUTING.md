@@ -7,8 +7,8 @@ So you found a bug in the code? Think you can make it more efficient? Want to he
 1. If you haven't already, create a [GitHub account](https://github.com/signup/free).
 2. Click the `Fork` icon located at the top-right of this page (below your username).
 3. Make the changes that you want to and commit them.
-    * If you're making changes locally, you'll have to do `git add -A`, `git commit` and `git push` in your command
-      line.
+	* If you're making changes locally, you'll have to do `git add -A`, `git commit` and `git push` in your command
+	  line.
 4. Click `Pull Request` at the right-hand side of the gray bar directly below your fork's name.
 5. Click `Click to create a pull request for this comparison`, enter your pull request title, and create a detailed
    description explaining what you changed.
@@ -50,9 +50,9 @@ Crashing? Have a suggestion? Found a bug? Create an issue now!
 2. Click `New Issue` right below `Star` and `Fork`.
 3. Enter your issue title (something that summarizes your issue), and then add a detailed description ("Hey, could you
    add/change stuff?" or "Hey, found an exploit: stuff").
-    * If you are reporting a bug, make sure you include the following:
-        * The log file `fml-client-latest.log` (or `fml-server-latest.log`) uploaded
-          to [gist](https://gist.github.com/).
-        * Detailed description of the bug.
-            * Include steps on how to reproduce the bug (if possible).
+	* If you are reporting a bug, make sure you include the following:
+		* The log file `fml-client-latest.log` (or `fml-server-latest.log`) uploaded
+		  to [gist](https://gist.github.com/).
+		* Detailed description of the bug.
+			* Include steps on how to reproduce the bug (if possible).
 4. Click `Submit new issue`, and wait for feedback!

@@ -27,10 +27,8 @@ public class FakeLevelChunkSection extends LevelChunkSection {
 	private final int yIdx;
 
 	/**
-	 * @param fakeChunk
-	 * 		parent chunk
-	 * @param yIdx
-	 * 		yLevel in chunk, multiply by section height
+	 * @param fakeChunk parent chunk
+	 * @param yIdx      yLevel in chunk, multiply by section height
 	 */
 	public FakeLevelChunkSection(final @NotNull FakeChunk fakeChunk, final int yIdx) {
 		super(null, null);
@@ -44,7 +42,7 @@ public class FakeLevelChunkSection extends LevelChunkSection {
 
 	private BlockPos formGlobalPos(int x, int y, int z) {
 		return new BlockPos(x + fakeChunk.getPos().x * SECTION_WIDTH, y + yIdx * SECTION_HEIGHT,
-		                    z + fakeChunk.getPos().z * SECTION_WIDTH);
+				z + fakeChunk.getPos().z * SECTION_WIDTH);
 	}
 
 	@Override
@@ -70,13 +68,11 @@ public class FakeLevelChunkSection extends LevelChunkSection {
 
 	@Override
 	public PalettedContainerRO<Holder<Biome>> getBiomes() {
-		// TODO: need our own? use clientLevel?
 		return null;
 	}
 
 	@Override
 	public PalettedContainer<BlockState> getStates() {
-		// TODO: need our own
 		return null;
 	}
 

@@ -28,10 +28,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
@@ -64,9 +61,9 @@ public abstract class SchematicFormat {
 
 	public static @Nullable SchematicFormat getFormatFromNbt(@NotNull CompoundTag tag) {
 		if (tag.contains(Names.NBT.METADATA)) {
-			CompoundTag meta = tag.getCompound(Names.NBT.METADATA);
+			CompoundTag meta = tag.getCompound(Names.NBT.METADATA).orElse(new CompoundTag());
 			if (meta.contains(Names.NBT.FORMAT)) {
-				return SchematicFormat.getFormatFromName(meta.getString(Names.NBT.FORMAT));
+				return SchematicFormat.getFormatFromName(meta.getString(Names.NBT.FORMAT).orElseThrow());
 			}
 		}
 
@@ -93,33 +90,36 @@ public abstract class SchematicFormat {
 	}
 
 	protected static @NotNull SchematicMetadata defaultMetaFromTag(@NotNull CompoundTag tag) {
-		String name = tag.getString(Names.NBT.TITLE);
-		SchematicFormat format = SchematicFormat.getFormatFromName(tag.getString(Names.NBT.FORMAT));
-		UUID owner = tag.getUUID(Names.NBT.AUTHOR);
-		Map<UUID, List<FilePermission>> permissions = CommonNbtUtils.deserializeMap(tag, CommonCodecs.UUID,
-				CommonCodecs.LIST(CommonCodecs.ENUM(FilePermission.class)));
+		try {
+			String name = tag.getString(Names.NBT.TITLE).orElseThrow();
+			SchematicFormat format = SchematicFormat.getFormatFromName(tag.getString(Names.NBT.FORMAT).orElseThrow());
+			UUID owner = UUID.fromString(tag.getString(Names.NBT.AUTHOR).orElseThrow());
+			Map<UUID, List<FilePermission>> permissions = CommonNbtUtils.deserializeMap(tag, CommonCodecs.UUID,
+					CommonCodecs.LIST(CommonCodecs.ENUM(FilePermission.class)));
 
-		CompoundTag dimensions = tag.getCompound(Names.NBT.DIMENSIONS);
-		int width = dimensions.getInt(Names.NBT.WIDTH);
-		int height = dimensions.getInt(Names.NBT.HEIGHT);
-		int length = dimensions.getInt(Names.NBT.LENGTH);
+			CompoundTag dimensions = tag.getCompound(Names.NBT.DIMENSIONS).orElseThrow();
+			int width = dimensions.getInt(Names.NBT.WIDTH).orElseThrow();
+			int height = dimensions.getInt(Names.NBT.HEIGHT).orElseThrow();
+			int length = dimensions.getInt(Names.NBT.LENGTH).orElseThrow();
 
-		boolean isPrivate = tag.getBoolean(Names.NBT.VISIBILITY);
-		UUID id = tag.getUUID(Names.NBT.ID);
-		ItemStack icon = CommonNbtUtils.deserializeItemStack(tag, Names.NBT.ICON);
-		long filesize = tag.getLong(Names.NBT.FILESIZE);
-		Instant lastEdited = CommonNbtUtils.deserializeInstant(tag);
-
-		return new SchematicMetadata(name, owner, permissions, format,
-				new SchematicDimensions(width, height, length),
-				icon, id, filesize, lastEdited, isPrivate);
+			boolean isPrivate = tag.getBoolean(Names.NBT.VISIBILITY).orElseThrow();
+			UUID id = UUID.fromString(tag.getString(Names.NBT.ID).orElseThrow());
+			ItemStack icon = CommonNbtUtils.deserializeItemStack(tag, Names.NBT.ICON);
+			long filesize = tag.getLong(Names.NBT.FILESIZE).orElseThrow();
+			Instant lastEdited = CommonNbtUtils.deserializeInstant(tag);
+			return new SchematicMetadata(name, owner, permissions, format,
+					new SchematicDimensions(width, height, length),
+					icon, id, filesize, lastEdited, isPrivate);
+		} catch (NoSuchElementException e) {
+			throw new IllegalArgumentException("Metadata missing tags");
+		}
 	}
 
 	protected static @NotNull CompoundTag defaultMetaAsTag(@NotNull SchematicMetadata metadata) {
 		CompoundTag tag = new CompoundTag();
 		tag.putString(Names.NBT.TITLE, metadata.name());
 		tag.putString(Names.NBT.FORMAT, metadata.schematicFormat().getNbtName());
-		tag.putUUID(Names.NBT.AUTHOR, metadata.owner());
+		tag.putString(Names.NBT.AUTHOR, metadata.owner().toString());
 		tag.put(Names.NBT.PLAYER_PERMISSIONS, CommonNbtUtils.serializeMap(metadata.permissions(),
 				CommonCodecs.UUID, CommonCodecs.LIST(CommonCodecs.ENUM(FilePermission.class))));
 
@@ -134,7 +134,7 @@ public abstract class SchematicFormat {
 		tag.put(Names.NBT.ICON, icon);
 
 		tag.putBoolean(Names.NBT.VISIBILITY, metadata.isPrivate());
-		tag.putUUID(Names.NBT.ID, metadata.id());
+		tag.putString(Names.NBT.ID, metadata.id().toString());
 
 		tag.putLong(Names.NBT.FILESIZE, metadata.filesize());
 		tag.put(Names.NBT.LAST_EDITED, CommonNbtUtils.serializeInstant(metadata.lastEdited()));
@@ -171,7 +171,8 @@ public abstract class SchematicFormat {
 			CommonProxy.recentlyAdded.add(file);
 
 			if (schematic.getMetadata().schematicFormat() == null) {
-				schematic.setMetadata(schematic.getMetadata().withFormat(SchematicFormat.getFormatFromName(FORMAT_DEFAULT)));
+				schematic.setMetadata(schematic.getMetadata()
+						.withFormat(SchematicFormat.getFormatFromName(FORMAT_DEFAULT)));
 			}
 
 			String format = schematic.getMetadata().schematicFormat().getNbtName();

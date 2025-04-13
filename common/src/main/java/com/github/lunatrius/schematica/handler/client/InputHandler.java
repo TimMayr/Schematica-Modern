@@ -131,13 +131,6 @@ public class InputHandler {
 		});
 	}
 
-	public static void init() {
-		InputHandler.INSTANCE = new InputHandler();
-		for (KeyMapping keyBinding : InputHandler.KEY_BINDINGS) {
-			KeyMappingRegistry.register(keyBinding);
-		}
-	}
-
 	private void pickBlock(FakeLevel schematic, HitResult objectMouseOver, Minecraft instance) {
 		if (objectMouseOver == null) {
 			return;
@@ -154,6 +147,13 @@ public class InputHandler {
 				instance.gameMode.handlePickItemFromBlock(new MBlockPos(objectMouseOver.getLocation()),
 						player.input.keyPresses.sprint());
 			}
+		}
+	}
+
+	public static void init() {
+		InputHandler.INSTANCE = new InputHandler();
+		for (KeyMapping keyBinding : InputHandler.KEY_BINDINGS) {
+			KeyMappingRegistry.register(keyBinding);
 		}
 	}
 }

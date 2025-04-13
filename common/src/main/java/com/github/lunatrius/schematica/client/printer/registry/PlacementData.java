@@ -100,8 +100,8 @@ public class PlacementData {
 
 	public List<Direction> getValidBlockFacings(List<Direction> solidSides, BlockState blockState) {
 		List<Direction> list = this.validBlockFacing != null
-		                       ? this.validBlockFacing.getValidBlockFacings(solidSides, blockState)
-		                       : new ArrayList<>(solidSides);
+				? this.validBlockFacing.getValidBlockFacings(solidSides, blockState)
+				: new ArrayList<>(solidSides);
 
 		for (Iterator<Direction> iterator = list.iterator(); iterator.hasNext(); ) {
 			Direction facing = iterator.next();

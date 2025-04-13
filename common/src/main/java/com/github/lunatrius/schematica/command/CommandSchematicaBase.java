@@ -25,7 +25,7 @@ public abstract class CommandSchematicaBase {
 		Style style = Style.EMPTY.applyFormat(formatting);
 
 		if (command != null) {
-			style = style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
+			style = style.withClickEvent(new ClickEvent.RunCommand(command));
 		}
 
 		return component.copy().withStyle(style);
