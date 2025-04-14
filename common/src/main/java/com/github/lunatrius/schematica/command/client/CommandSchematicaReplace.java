@@ -19,21 +19,26 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.BlockStateMat
 
 @Environment(EnvType.CLIENT)
 public class CommandSchematicaReplace extends CommandSchematicaBase {
-	public static LiteralArgumentBuilder<ClientCommandRegistrationEvent.ClientCommandSourceStack>
-	register(CommandBuildContext context) {
-		return ClientCommandRegistrationEvent.literal(Names.Command.BASE).then(
-				ClientCommandRegistrationEvent.literal(Names.Command.Replace.NAME)
-						.then(ClientCommandRegistrationEvent.argument("toReplace", BlockStateArgument.block(context))
-								.then(ClientCommandRegistrationEvent.argument("with",
-												BlockStateArgument.block(context))
+	public static LiteralArgumentBuilder<ClientCommandRegistrationEvent.ClientCommandSourceStack> register(
+			CommandBuildContext context) {
+		//@formatter:off
+		return ClientCommandRegistrationEvent
+				.literal(Names.Command.BASE)
+				.then(ClientCommandRegistrationEvent
+						.literal(Names.Command.Replace.NAME)
+						.then(ClientCommandRegistrationEvent
+								.argument("toReplace", BlockStateArgument.block(context))
+								.then(ClientCommandRegistrationEvent
+										.argument("with", BlockStateArgument.block(context))
 										.executes((commandContext) -> {
+											//@formatter:on
 											ClientCommandRegistrationEvent.ClientCommandSourceStack source =
 													commandContext.getSource();
 
 											BlockState toReplace = commandContext.getArgument("toReplace",
 													BlockInput.class).getState();
-											BlockState with =
-													commandContext.getArgument("with", BlockInput.class).getState();
+											BlockState with = commandContext.getArgument("with", BlockInput.class)
+													.getState();
 
 											FakeLevel schematic = ClientProxy.schematic;
 
@@ -48,9 +53,8 @@ public class CommandSchematicaReplace extends CommandSchematicaBase {
 												BlockStateReplacer replacer = BlockStateReplacer.forBlockState(with);
 												int count = schematic.replaceBlock(matcher, replacer);
 
-												source.arch$sendSuccess(
-														() -> Component.translatable(
-																Names.Command.Replace.Message.SUCCESS, count), true);
+												source.arch$sendSuccess(() -> Component.translatable(
+														Names.Command.Replace.Message.SUCCESS, count), true);
 											} catch (Exception e) {
 												Reference.logger.error("Something went wrong!", e);
 												source.arch$sendFailure(Component.literal(e.getMessage()));

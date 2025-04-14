@@ -10,7 +10,6 @@ import com.github.lunatrius.schematica.world.schematic.format.SchematicFormat;
 import commonnetwork.api.Dispatcher;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -19,22 +18,20 @@ public class ClientSchematicLoader {
 
 	public static @NotNull CompletableFuture<ISchematic> get(@NotNull SchematicHolder holder) {
 		if (holder.location() == SchematicLocation.LOCAL) {
-			return CompletableFuture.completedFuture(SchematicFormat.readSchematic(holder.metadata(),
-					Minecraft.getInstance().level));
+			return CompletableFuture.completedFuture(
+					SchematicFormat.readSchematic(holder.metadata(), Minecraft.getInstance().level));
 		} else {
 			CompletableFuture<ISchematic> future = new CompletableFuture<>();
 			MessageDownloadRequest message = new MessageDownloadRequest(holder.metadata().id(),
-					DownloadType.SAVE_TEMP);
+					DownloadType.LOAD);
 
 			ClientSchematicLoader.listener = schematic -> {
 				if (schematic.getMetadata().id().equals(holder.metadata().id())) {
 					future.complete(schematic);
 				}
-
-				DownloadHandler.INSTANCE.unregisterDownloadCompleteListener(listener);
 			};
 
-			DownloadHandler.INSTANCE.registerDownloadCompleteListener(listener);
+			DownloadHandler.INSTANCE.registerDownloadCompleteListener(listener, true);
 
 			Dispatcher.sendToServer(message);
 			return future;

@@ -12,6 +12,7 @@
 	"schematica.gui.south": "South",
 	"schematica.gui.west": "West",
 	"schematica.gui.east": "East",
+	"schematica.gui.east": "East",
 	"schematica.gui.continue": "Continue",
 	"schematica.gui.back": "Back",
 
@@ -138,7 +139,6 @@
 	"schematica.key.pickBlock": "Pick Block",
 
 	"_comment": "commands - save",
-	"schematica.command.save.usage": "/schematica save <startX> <startY> <startZ> <endX> <endY> <endZ> <name> [format]",
 	"schematica.command.save.playersOnly": "This command can only be used by players.",
 	"schematica.command.save.started": "Started saving %d chunks into %s.",
 	"schematica.command.save.saveSucceeded": "Successfully saved %s.",
@@ -149,29 +149,26 @@
 	"schematica.command.save.confirm": "Saving will override existing schematic. Continue?",
 
 	"_comment": "commands - list",
-	"schematica.command.list.usage": "/schematica list [page]",
 	"schematica.command.list.notAvailable": "There was a problem retrieving your list of schematics.",
 	"schematica.command.list.remove": "Remove",
 	"schematica.command.list.download": "Download",
+	"schematica.command.list.copy": "Create Copy",
 	"schematica.command.list.header": "--- Showing schematics page %d of %d ---",
 	"schematica.command.list.noSuchPage": "No such page",
 	"schematica.command.list.noSchematics": "You have no schematics available.",
 
 	"_comment": "commands - remove",
-	"schematica.command.remove.usage": "/schematica remove <name>",
 	"schematica.command.remove.schematicRemoved": "Schematic \"%s\" removed.",
 	"schematica.command.remove.schematicNotFound": "Schematic \"%s\" could not be found.",
 	"schematica.command.remove.schematicNotAccessible": "Schematic \"%s\" is not your own, and cannot be deleted.",
 	"schematica.command.remove.areYouSure": "Are you sure?",
 
 	"_comment": "commands - download",
-	"schematica.command.download.usage": "/schematica download <name>",
 	"schematica.command.download.started": "Started downloading %s...",
 	"schematica.command.download.downloadSucceeded": "Successfully downloaded %s.",
 	"schematica.command.download.downloadFail": "Download failed.",
 
 	"_comment": "commands - replace",
-	"schematica.command.replace.usage": "/schematica replace <original> <replacement>",
 	"schematica.command.replace.noSchematic": "You don't have a schematic loaded.",
 	"schematica.command.replace.success": "Replaced %s blocks.",
 

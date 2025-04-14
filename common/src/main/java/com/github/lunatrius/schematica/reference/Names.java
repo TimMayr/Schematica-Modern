@@ -10,8 +10,8 @@ public class Names {
 		public static final String ALPHA_ENABLED_DESC = "Enable transparent textures.";
 		public static final String ALPHA = "alpha";
 		public static final String ALPHA_DESC =
-				"Alpha value used when rendering the schematic (1.0 = opaque, 0.5 = half transparent, 0.0 = "
-						+ "transparent).";
+				"Alpha value used when rendering the schematic (1.0 = opaque, 0.5 = half transparent, 0.0 = " +
+				"transparent).";
 		public static final String HIGHLIGHT = "highlight";
 		public static final String HIGHLIGHT_DESC = "Highlight invalid placed blocks and to be placed blocks.";
 		public static final String HIGHLIGHT_AIR = "highlightAir";
@@ -93,6 +93,7 @@ public class Names {
 				public static final String PAGE_HEADER = "schematica.command.list.header";
 				public static final String NO_SUCH_PAGE = "schematica.command.list.noSuchPage";
 				public static final String NO_SCHEMATICS = "schematica.command.list.noSchematics";
+				public static final String COPY = "schematica.command.list.copy";
 			}
 		}
 
@@ -103,8 +104,8 @@ public class Names {
 				public static final String USAGE = "schematica.command.remove.usage";
 				public static final String SCHEMATIC_REMOVED = "schematica.command.remove.schematicRemoved";
 				public static final String SCHEMATIC_NOT_FOUND = "schematica.command.remove.schematicNotFound";
-				public static final String SCHEMATIC_NOT_ACCESSIBLE = "schematica.command.remove" +
-						".schematicNotAccessible";
+				public static final String SCHEMATIC_NOT_ACCESSIBLE =
+						"schematica.command.remove" + ".schematicNotAccessible";
 				public static final String ARE_YOU_SURE = "schematica.command.remove.areYouSure";
 				public static final String YES = "gui.yes";
 			}

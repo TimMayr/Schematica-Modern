@@ -49,10 +49,6 @@ public record MessageDownloadEnd(UUID id) implements CustomPacketPayload {
 					ClientProxy.schematic = FakeLevel.of(DownloadHandler.INSTANCE.schematic);
 					DownloadHandler.INSTANCE.schematic = null;
 				}
-				case SAVE_TEMP -> {
-					ClientProxy.tempSchematic = DownloadHandler.INSTANCE.schematic;
-					DownloadHandler.INSTANCE.schematic = null;
-				}
 				case SAVE -> {
 					try {
 						String name = DownloadHandler.INSTANCE.schematic.getName();

@@ -46,4 +46,9 @@ public class Constants {
 	public static class Schematic {
 		public static final ItemStack DEFAULT_ICON = new ItemStack(Blocks.GRASS_BLOCK);
 	}
+
+	public static class Log {
+		public static final String SCHEMATIC_NOT_ACCESSIBLE_DOWNLOAD_ERROR =
+				"Schematic [{}] does not exist, or is not accessible by player [{}], and can therefore not be downloaded";
+	}
 }

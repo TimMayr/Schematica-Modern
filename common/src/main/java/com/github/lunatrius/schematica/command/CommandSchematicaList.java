@@ -3,6 +3,7 @@ package com.github.lunatrius.schematica.command;
 import com.github.lunatrius.core.util.FileUtils;
 import com.github.lunatrius.schematica.accounting.SchematicAccounter;
 import com.github.lunatrius.schematica.accounting.SchematicHolder;
+import com.github.lunatrius.schematica.core.PlatformUtils;
 import com.github.lunatrius.schematica.reference.Names;
 import com.github.lunatrius.schematica.reference.Reference;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -13,19 +14,22 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.LinkedList;
 import java.util.Map;
 
 public class CommandSchematicaList extends CommandSchematicaBase {
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
-		return Commands.literal(Names.Command.List.NAME)
+		//@formatter:off
+		return Commands
+				.literal(Names.Command.List.NAME)
 				.executes(CommandSchematicaList::printList)
 				.then(Commands.argument("page", IntegerArgumentType.integer(1))
 						.executes(CommandSchematicaList::printList));
+		//@formatter:on
 	}
 
 	private static int printList(@NotNull CommandContext<CommandSourceStack> commandContext)
@@ -42,46 +46,48 @@ public class CommandSchematicaList extends CommandSchematicaBase {
 		int pageSize = 9; //maximum number of lines available without opening chat.
 		int pageStart = page * pageSize;
 		int pageEnd = pageStart + pageSize;
-		int currentFile = 0;
+		int currentSchematic = 0;
 		LinkedList<Component> componentsToSend = new LinkedList<>();
 
 		Map<String, SchematicHolder> schematics = SchematicAccounter.sortedSchematics(player);
 
 		for (Map.Entry<String, SchematicHolder> entry : schematics.entrySet()) {
-			if (currentFile >= pageStart && currentFile < pageEnd) {
+			if (currentSchematic >= pageStart && currentSchematic < pageEnd) {
 				String fileName = entry.getKey();
 
-				Component chatComponent = Component.literal(String.format("%2d (%s): %s [", currentFile + 1,
+				MutableComponent chatComponent = Component.literal(String.format("%2d (%s): %s [",
+						currentSchematic + 1,
 						FileUtils.humanReadableByteCount(entry.getValue().metadata().filesize()),
 						FilenameUtils.removeExtension(fileName)));
 
 				String removeCommand = String.format("/%s %s \"%s\"", Reference.MOD_ID, Names.Command.Remove.NAME,
 						fileName);
-				Component removeLink = withStyle(
-						Component.translatable(Names.Command.List.Message.REMOVE),
-						ChatFormatting.RED,
-						removeCommand);
-				chatComponent = chatComponent.copy().append(removeLink).append("][");
+				Component removeLink = withStyle(Component.translatable(Names.Command.List.Message.REMOVE),
+						ChatFormatting.RED, removeCommand);
+
+				chatComponent = chatComponent.append(removeLink).append("][");
 
 				String downloadCommand = String.format("/%s %s \"%s\"", Reference.MOD_ID, Names.Command.Download.NAME,
 						fileName);
-				Component downloadLink = withStyle(
-						Component.translatable(Names.Command.List.Message.DOWNLOAD),
-						ChatFormatting.GREEN,
-						downloadCommand);
-				chatComponent = chatComponent.copy().append(downloadLink).append("]");
+
+				Component downloadLink = withStyle(PlatformUtils.isPlatformServer() ?
+				                                   Component.translatable(Names.Command.List.Message.DOWNLOAD) :
+				                                   Component.translatable(Names.Command.List.Message.COPY),
+						ChatFormatting.GREEN, downloadCommand);
+				chatComponent = chatComponent.append(downloadLink).append("]");
 
 				componentsToSend.add(chatComponent);
 			}
-			++currentFile;
+
+			++currentSchematic;
 		}
 
-		if (currentFile == 0) {
+		if (currentSchematic == 0) {
 			source.sendFailure(Component.translatable(Names.Command.List.Message.NO_SCHEMATICS));
 			return -1;
 		}
 
-		int totalPages = (currentFile - 1) / pageSize;
+		int totalPages = (currentSchematic - 1) / pageSize;
 		if (page > totalPages) {
 			source.sendFailure(Component.translatable(Names.Command.List.Message.NO_SUCH_PAGE));
 			return 1;

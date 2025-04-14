@@ -21,7 +21,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,18 +29,19 @@ import java.util.concurrent.TimeUnit;
 
 public class CommandSchematicaRemove extends CommandSchematicaBase {
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
-		return Commands.literal(Names.Command.Remove.NAME)
-				.then(Commands.argument("name", StringArgumentType.string())
-						.suggests(
-								((context, builder) ->
-										CommandSchematicaBase.getSchematicNamesSuggestions(
-												context.getSource().getPlayer(),
-												StringArgumentType.getString(context, "name"),
-												builder,
-												FilePermission.DELETE)))
+		//@formatter:off
+		return Commands
+				.literal(Names.Command.Remove.NAME)
+				.then(Commands
+						.argument("name", StringArgumentType.string())
+						.suggests((context, builder) ->
+								CommandSchematicaBase.getSchematicNamesSuggestions(context.getSource().getPlayer(),
+										StringArgumentType.getString(context, "name"), builder, FilePermission.DELETE))
 						.executes(CommandSchematicaRemove::showDeleteConfirmation)
-						.then(Commands.argument("confirm", BoolArgumentType.bool())
+						.then(Commands
+								.argument("confirm", BoolArgumentType.bool())
 								.executes(CommandSchematicaRemove::delete)));
+		//@formatter:on
 	}
 
 	private static int showDeleteConfirmation(@NotNull CommandContext<CommandSourceStack> commandContext)
@@ -54,13 +54,12 @@ public class CommandSchematicaRemove extends CommandSchematicaBase {
 		SchematicHolder holder = schematics.get(name);
 
 		if (holder != null) {
-			String confirmCommand =
-					String.format("/%s %s \"%s\" %b", Names.Command.BASE, Names.Command.Remove.NAME, name, true);
-			Component chatComponent = Component.translatable(Names.Command.Remove.Message.ARE_YOU_SURE, name)
-					.append(Component.literal(" "))
-					.append(withStyle(ComponentUtils.wrapInSquareBrackets(
-									Component.translatable(Names.Command.Remove.Message.YES)),
-							ChatFormatting.RED, confirmCommand));
+			String confirmCommand = String.format("/%s %s \"%s\" %b", Names.Command.BASE, Names.Command.Remove.NAME,
+					name, true);
+			Component chatComponent = Component.translatable(Names.Command.Remove.Message.ARE_YOU_SURE, name).append(
+					Component.literal(" ")).append(withStyle(
+					ComponentUtils.wrapInSquareBrackets(Component.translatable(Names.Command.Remove.Message.YES)),
+					ChatFormatting.RED, confirmCommand));
 
 			source.sendSystemMessage(chatComponent);
 			return 0;

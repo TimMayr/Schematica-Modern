@@ -11,22 +11,20 @@ import dev.architectury.event.events.common.TickEvent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class DownloadHandler {
 	public static DownloadHandler INSTANCE;
-	private final Set<Consumer<ISchematic>> downloadCompleteListener = new HashSet<>();
+	private final Map<Consumer<ISchematic>, Boolean> downloadCompleteListener = new HashMap<>();
 	private final Map<UUID, SchematicTransfer> transferMap = new LinkedHashMap<>();
 	public ISchematic schematic = null;
 
 	private DownloadHandler() {
 		TickEvent.SERVER_POST.register(this::processQueue);
-	}
-
-	public static void init() {
-		DownloadHandler.INSTANCE = new DownloadHandler();
 	}
 
 	private void processQueue(MinecraftServer server) {
@@ -35,6 +33,11 @@ public class DownloadHandler {
 		}
 
 		ServerPlayer player = server.getPlayerList().getPlayer(this.getTransferMap().keySet().iterator().next());
+
+		if (player == null) {
+			return;
+		}
+
 		SchematicTransfer transfer = this.getTransferMap().remove(player.getUUID());
 
 		if (transfer == null) {
@@ -81,8 +84,8 @@ public class DownloadHandler {
 		transfer.setState(SchematicTransfer.State.CHUNK);
 
 		Reference.logger.trace("Sending chunk {},{},{}", transfer.baseX, transfer.baseY, transfer.baseZ);
-		MessageDownloadChunk message =
-				new MessageDownloadChunk(transfer.schematic, transfer.baseX, transfer.baseY, transfer.baseZ);
+		MessageDownloadChunk message = new MessageDownloadChunk(transfer.schematic, transfer.baseX, transfer.baseY,
+				transfer.baseZ);
 		Dispatcher.sendToClient(message, player);
 	}
 
@@ -93,13 +96,6 @@ public class DownloadHandler {
 		Dispatcher.sendToServer(message);
 	}
 
-	private void sendEnd(ServerPlayer player, @NotNull SchematicTransfer transfer) {
-		transfer.setState(SchematicTransfer.State.END);
-
-		MessageDownloadEnd message = new MessageDownloadEnd(transfer.schematic.getMetadata().id());
-		Dispatcher.sendToClient(message, player);
-	}
-
 	private void sendBegin(ServerPlayer player, @NotNull SchematicTransfer transfer) {
 		transfer.setState(SchematicTransfer.State.BEGIN);
 
@@ -107,15 +103,29 @@ public class DownloadHandler {
 		Dispatcher.sendToClient(message, player);
 	}
 
-	public void registerDownloadCompleteListener(Consumer<ISchematic> listener) {
-		this.downloadCompleteListener.add(listener);
+	private void sendEnd(ServerPlayer player, @NotNull SchematicTransfer transfer) {
+		transfer.setState(SchematicTransfer.State.END);
+
+		MessageDownloadEnd message = new MessageDownloadEnd(transfer.schematic.getMetadata().id());
+		Dispatcher.sendToClient(message, player);
+	}
+
+	public static void init() {
+		DownloadHandler.INSTANCE = new DownloadHandler();
+	}
+
+	public void registerDownloadCompleteListener(Consumer<ISchematic> listener, boolean removeWhenDone) {
+		this.downloadCompleteListener.put(listener, removeWhenDone);
 	}
 
 	public void onDownloadComplete() {
 		Dispatcher.sendToServer(new MessageDownloadEndAck(true));
 
-		for (Consumer<ISchematic> listener : this.downloadCompleteListener) {
+		for (Consumer<ISchematic> listener : this.downloadCompleteListener.keySet()) {
 			listener.accept(DownloadHandler.INSTANCE.schematic);
+			if (this.downloadCompleteListener.get(listener)) {
+				unregisterDownloadCompleteListener(listener);
+			}
 		}
 	}
 

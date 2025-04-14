@@ -50,7 +50,6 @@ public class ClientProxy extends CommonProxy {
 	public static Direction.Axis axisFlip = Direction.Axis.Z;
 	public static Direction axisRotation = Direction.UP;
 	public static HitResult objectMouseOver = null;
-	public static ISchematic tempSchematic;
 
 	public static void setPlayerData(@NotNull Player player, float partialTicks) {
 		playerPosition.set(new Vector3d(player.getPosition(partialTicks)));

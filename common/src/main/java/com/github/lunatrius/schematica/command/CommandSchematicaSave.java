@@ -18,33 +18,37 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class CommandSchematicaSave extends CommandSchematicaBase {
 	public static ArgumentBuilder<CommandSourceStack, ?> register() {
-		return Commands.literal(Names.Command.Save.NAME)
-				.then(Commands.argument("from", BlockPosArgument.blockPos())
-						.then(Commands.argument("to", BlockPosArgument.blockPos())
-								.then(Commands.argument("name", StringArgumentType.string())
+		//@formatter:off
+		return Commands
+				.literal(Names.Command.Save.NAME)
+				.then(Commands
+						.argument("from", BlockPosArgument.blockPos())
+						.then(Commands
+								.argument("to", BlockPosArgument.blockPos())
+								.then(Commands
+										.argument("name", StringArgumentType.string())
 										.executes(CommandSchematicaSave::execute)
-										.then(Commands.argument("format",
-														StringArgumentType.string())
+										.then(Commands
+												.argument("format", StringArgumentType.string())
 												.suggests(((context, builder) -> {
-													for (String s :
-															SchematicFormat.FORMATS.keySet()) {
+													for (String s : SchematicFormat.FORMATS.keySet()) {
 														builder.suggest(s);
 													}
+
 													return builder.buildFuture();
 												}))
 												.executes(CommandSchematicaSave::execute)
-												.then(Commands.argument("isPrivate",
-																BoolArgumentType.bool())
+												.then(Commands
+														.argument("isPrivate", BoolArgumentType.bool())
 														.executes(CommandSchematicaSave::execute)
-														.then(Commands.argument("override",
-																		BoolArgumentType.bool())
+														.then(Commands.argument("override", BoolArgumentType.bool())
 																.executes(CommandSchematicaSave::execute)))))));
+		//@formatter:on
 	}
 
 	private static int execute(@NotNull CommandContext<CommandSourceStack> commandContext)
@@ -92,15 +96,12 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 		Path file = directory.resolve(filename);
 
 		if (!confirm && Files.exists(file)) {
-			String confirmCommand =
-					String.format("/%s %s %s %s %s %s %b %b", Names.Command.BASE, Names.Command.Save.NAME, from, to,
-							name, format, isPrivate, true);
-			Component chatComponent =
-					Component.translatable(Names.Command.Save.Message.CONFIRM_MESSAGE, name)
-							.append(Component.literal(" "))
-							.append(withStyle(ComponentUtils.wrapInSquareBrackets(
-											Component.translatable(Names.Command.Remove.Message.YES)),
-									ChatFormatting.RED, confirmCommand));
+			String confirmCommand = String.format("/%s %s %s %s %s %s %b %b", Names.Command.BASE,
+					Names.Command.Save.NAME, from, to, name, format, isPrivate, true);
+			Component chatComponent = Component.translatable(Names.Command.Save.Message.CONFIRM_MESSAGE, name).append(
+					Component.literal(" ")).append(withStyle(
+					ComponentUtils.wrapInSquareBrackets(Component.translatable(Names.Command.Remove.Message.YES)),
+					ChatFormatting.RED, confirmCommand));
 
 			source.sendSystemMessage(chatComponent);
 			return 0;
@@ -115,8 +116,9 @@ public class CommandSchematicaSave extends CommandSchematicaBase {
 		}
 
 		try {
-			Reference.proxy.saveSchematic(player, filename, player.getCommandSenderWorld(), format,
-					from, to, isPrivate, "");
+			Reference.proxy.saveSchematic(player, filename, player.getCommandSenderWorld(), format, from, to,
+					isPrivate,
+					"");
 		} catch (Exception e) {
 			source.sendFailure(Component.translatable(Names.Command.Save.Message.SAVE_FAILED));
 			return -1;
